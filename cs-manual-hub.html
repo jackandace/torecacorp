@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ネットオリパ CSマニュアルハブ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+  :root {
+    --bg: #f0f2f7;
+    --surface: #ffffff;
+    --surface2: #f5f6fa;
+    --border: #dde1ec;
+    --navy: #1a2d5a;
+    --navy-dark: #111e3d;
+    --navy-light: #2c4484;
+    --accent: #1a2d5a;
+    --accent2: #3059c4;
+    --accent3: #c0392b;
+    --text: #1a2040;
+    --text-muted: #7a849e;
+    --text-dim: #4a546e;
+    --success: #1a7a4a;
+    --warning: #8a5a00;
+    --success-bg: #eaf6f0;
+    --warning-bg: #fef9ec;
+    --danger-bg: #fdf0ef;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── SUBTLE GRID ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(26,45,90,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26,45,90,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--navy-dark);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .logo-text {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #ffffff;
+  }
+  .logo-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.15em;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .ver-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+  }
+
+  .search-wrap {
+    position: relative;
+  }
+  .search-input {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    padding: 8px 14px 8px 36px;
+    color: #ffffff;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    width: 220px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input::placeholder { color: rgba(255,255,255,0.4); }
+  .search-input:focus { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.15); }
+  .search-icon {
+    position: absolute;
+    left: 11px; top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255,255,255,0.5);
+    font-size: 14px;
+  }
+
+  /* ── LAYOUT ── */
+  .app-layout {
+    display: grid;
+    grid-template-columns: 256px 1fr;
+    min-height: calc(100vh - 64px);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── SIDEBAR ── */
+  aside {
+    background: var(--navy);
+    border-right: none;
+    padding: 24px 0;
+    position: sticky;
+    top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+
+  .sidebar-section {
+    margin-bottom: 8px;
+  }
+  .sidebar-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 12px 20px 6px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    user-select: none;
+  }
+  .nav-item:hover {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.9);
+  }
+  .nav-item.active {
+    border-left-color: #ffffff;
+    background: rgba(255,255,255,0.1);
+    color: #ffffff;
+    font-weight: 600;
+  }
+  .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+  .nav-count {
+    margin-left: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    background: rgba(255,255,255,0.1);
+    padding: 2px 7px;
+    border-radius: 10px;
+    color: rgba(255,255,255,0.45);
+  }
+  .nav-item.active .nav-count {
+    background: rgba(255,255,255,0.2);
+    color: #ffffff;
+  }
+
+  .sidebar-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.1);
+    margin: 12px 20px;
+  }
+
+  /* ── MAIN ── */
+  main {
+    padding: 32px 40px;
+    max-width: 1100px;
+  }
+
+  /* ── PAGE TITLE ── */
+  .page-header {
+    margin-bottom: 32px;
+  }
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: var(--navy-dark);
+  }
+  .page-header p {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+  .accent-line {
+    width: 48px;
+    height: 3px;
+    background: var(--navy);
+    border-radius: 2px;
+    margin-bottom: 12px;
+  }
+
+  /* ── DASHBOARD STATS ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .stat-card {
+    background: var(--navy);
+    border: none;
+    border-radius: 12px;
+    padding: 20px;
+    transition: transform 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); }
+  .stat-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 32px;
+    font-weight: 600;
+    color: #ffffff;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* ── CATEGORY CARDS ── */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+
+  .category-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .category-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--navy);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .category-card:hover { border-color: var(--navy-light); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(26,45,90,0.1); }
+  .category-card:hover::before { opacity: 1; }
+  .cat-1::before { background: #3059c4; }
+  .cat-2::before { background: #1a7a4a; }
+  .cat-3::before { background: #c0392b; }
+  .cat-4::before { background: #1a2d5a; }
+
+  .cat-emoji { font-size: 28px; margin-bottom: 12px; }
+  .cat-name {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--navy-dark);
+  }
+  .cat-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .cat-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+  }
+  .cat-count { color: var(--text-muted); }
+  .cat-arrow {
+    color: var(--navy);
+    font-size: 14px;
+    transition: transform 0.2s;
+  }
+  .category-card:hover .cat-arrow { transform: translateX(4px); }
+
+  /* ── MANUAL LIST TABLE ── */
+  .manual-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 32px;
+  }
+  .table-header {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 100px 80px;
+    padding: 12px 20px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .manual-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 100px 80px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-size: 13px;
+  }
+  .manual-row:last-child { border-bottom: none; }
+  .manual-row:hover { background: #f5f7ff; }
+
+  .manual-title {
+    font-weight: 500;
+    color: var(--navy-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .manual-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .tag-inquiry { background: #e8eef9; color: #2c4484; }
+  .tag-refund  { background: #e8f5ee; color: #1a6040; }
+  .tag-fraud   { background: #faeaea; color: #a02020; }
+  .tag-spec    { background: #eee8f5; color: #5c3a8a; }
+  .tag-dev     { background: #e8f0fa; color: #1a2d5a; }
+
+  .manual-cat { color: var(--text-muted); font-size: 12px; }
+  .manual-ver {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .manual-date { font-size: 12px; color: var(--text-muted); }
+  .btn-view {
+    background: var(--navy);
+    border: none;
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'Noto Sans JP', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .btn-view:hover { background: var(--navy-light); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17,30,61,0.5);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 780px;
+    padding: 40px;
+    position: relative;
+    animation: slideUp 0.25s ease;
+    box-shadow: 0 20px 60px rgba(26,45,90,0.15);
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 18px;
+    transition: all 0.15s;
+  }
+  .modal-close:hover { color: var(--navy); border-color: var(--navy); }
+
+  .modal-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .modal-title {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    color: var(--navy-dark);
+  }
+  .modal-info {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .modal-info span { display: flex; align-items: center; gap: 6px; }
+
+  .manual-content h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 24px 0 10px;
+    color: var(--navy-dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .manual-content h3::before {
+    content: '';
+    width: 4px; height: 16px;
+    background: var(--navy);
+    border-radius: 2px;
+  }
+  .manual-content p {
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .step-list {
+    list-style: none;
+    counter-reset: steps;
+    margin-bottom: 16px;
+  }
+  .step-list li {
+    counter-increment: steps;
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+  .step-list li::before {
+    content: counter(steps);
+    min-width: 24px; height: 24px;
+    background: var(--navy);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #ffffff;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .alert-box {
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 16px 0;
+    font-size: 13px;
+    line-height: 1.6;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .alert-warn {
+    background: var(--warning-bg);
+    border: 1px solid #f0d080;
+    color: var(--warning);
+  }
+  .alert-danger {
+    background: var(--danger-bg);
+    border: 1px solid #e8aaaa;
+    color: var(--accent3);
+  }
+  .alert-ok {
+    background: var(--success-bg);
+    border: 1px solid #80c8a0;
+    color: var(--success);
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .btn-primary {
+    background: var(--navy);
+    color: #ffffff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-primary:hover { background: var(--navy-light); }
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-secondary:hover { border-color: var(--navy); color: var(--navy); }
+
+  /* ── VERSION LOG ── */
+  .ver-timeline { margin-bottom: 32px; }
+  .ver-entry {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 16px;
+    margin-bottom: 0;
+  }
+  .ver-entry + .ver-entry { margin-top: 0; }
+  .ver-entry:not(:last-child) .ver-right { border-left: 2px solid var(--border); margin-left: -1px; }
+
+  .ver-left {
+    text-align: right;
+    padding-top: 4px;
+    padding-bottom: 20px;
+  }
+  .ver-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--navy);
+    font-weight: 600;
+  }
+  .ver-date-sm { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  .ver-right {
+    padding-left: 20px;
+    padding-bottom: 20px;
+    position: relative;
+  }
+  .ver-right::before {
+    content: '';
+    position: absolute;
+    left: -5px; top: 6px;
+    width: 8px; height: 8px;
+    background: var(--navy);
+    border-radius: 50%;
+  }
+  .ver-desc { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .app-layout { grid-template-columns: 1fr; }
+    aside { display: none; }
+    main { padding: 20px; }
+    .stats-row { grid-template-columns: repeat(2,1fr); }
+    .category-grid { grid-template-columns: 1fr; }
+    .table-header, .manual-row { grid-template-columns: 1fr auto; }
+    .table-header > *:nth-child(n+2), .manual-row > *:nth-child(n+3) { display: none; }
+  }
+
+  /* ── VIEWS MANAGEMENT ── */
+  .view { display: none; }
+  .view.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🎴</div>
+    <div>
+      <div class="logo-text">NET ORIPA CS MANUAL HUB</div>
+      <div class="logo-sub">CUSTOMER SUPPORT KNOWLEDGE BASE</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" placeholder="マニュアルを検索..." id="searchInput" oninput="filterManuals()">
+    </div>
+    <div class="ver-badge">v1.3.0</div>
+  </div>
+</header>
+
+<div class="app-layout">
+
+<!-- SIDEBAR -->
+<aside>
+  <div class="sidebar-section">
+    <div class="sidebar-label">メインメニュー</div>
+    <div class="nav-item active" onclick="showView('dashboard', this)">
+      <span class="nav-icon">📊</span> ダッシュボード
+    </div>
+    <div class="nav-item" onclick="showView('all', this)">
+      <span class="nav-icon">📚</span> すべてのマニュアル
+      <span class="nav-count">9</span>
+    </div>
+  </div>
+
+  <div class="sidebar-divider"></div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">カテゴリ別</div>
+    <div class="nav-item" onclick="filterByTag('inquiry', this)">
+      <span class="nav-icon">💬</span> 問い合わせ対応
+      <span class="nav-count">3</span>
+    </div>
+    <div class="nav-item" onclick="filterByTag('refund', this)">
+      <span class="nav-icon">💳</span> 返金・交換対応
+      <span class="nav-count">2</span>
+    </div>
+    <div class="nav-item" onclick="filterByTag('fraud', this)">
+      <span class="nav-icon">🚨</span> 不正・不具合対応
+      <span class="nav-count">2</span>
+    </div>
+    <div class="nav-item" onclick="filterByTag('spec', this)">
+      <span class="nav-icon">📋</span> 仕様・ルール説明
+      <span class="nav-count">2</span>
+    </div>
+    <div class="nav-item" onclick="filterByTag('dev', this)">
+      <span class="nav-icon">⚙️</span> 開発・実装
+      <span class="nav-count">11</span>
+    </div>
+  </div>
+
+  <div class="sidebar-divider"></div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-label">管理</div>
+    <div class="nav-item" onclick="showView('versions', this)">
+      <span class="nav-icon">🔖</span> バージョン履歴
+    </div>
+    <div class="nav-item" onclick="showView('guide', this)">
+      <span class="nav-icon">ℹ️</span> 追加ガイド
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main>
+
+  <!-- DASHBOARD VIEW -->
+  <div class="view active" id="view-dashboard">
+    <div class="page-header">
+      <div class="accent-line"></div>
+      <h1>CSマニュアルハブ</h1>
+      <p>ネットオリパ カスタマーサポート ナレッジベース — v1.3.0</p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num">20</div>
+        <div class="stat-label">総マニュアル数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">5</div>
+        <div class="stat-label">カテゴリ数</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="verDisplay">v1.0</div>
+        <div class="stat-label">現在のバージョン</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">2025</div>
+        <div class="stat-label">最終更新年</div>
+      </div>
+    </div>
+
+    <div class="section-title">カテゴリから探す</div>
+    <div class="category-grid">
+      <div class="category-card cat-1" onclick="filterByTag('inquiry', null)">
+        <div class="cat-emoji">💬</div>
+        <div class="cat-name">問い合わせ対応</div>
+        <div class="cat-desc">初回お問い合わせの受付方法、よくある質問への回答テンプレート、エスカレーションフローなど</div>
+        <div class="cat-footer">
+          <span class="cat-count">3 マニュアル</span>
+          <span class="cat-arrow">→</span>
+        </div>
+      </div>
+      <div class="category-card cat-2" onclick="filterByTag('refund', null)">
+        <div class="cat-emoji">💳</div>
+        <div class="cat-name">返金・交換対応</div>
+        <div class="cat-desc">返金申請の判断基準、交換対応のフロー、決済会社との連携方法など</div>
+        <div class="cat-footer">
+          <span class="cat-count">2 マニュアル</span>
+          <span class="cat-arrow">→</span>
+        </div>
+      </div>
+      <div class="category-card cat-3" onclick="filterByTag('fraud', null)">
+        <div class="cat-emoji">🚨</div>
+        <div class="cat-name">不正・不具合対応</div>
+        <div class="cat-desc">不正利用の検知・対応フロー、システム不具合時のユーザー対応、アカウント停止処理など</div>
+        <div class="cat-footer">
+          <span class="cat-count">2 マニュアル</span>
+          <span class="cat-arrow">→</span>
+        </div>
+      </div>
+      <div class="category-card cat-4" onclick="filterByTag('spec', null)">
+        <div class="cat-emoji">📋</div>
+        <div class="cat-name">仕様・ルール説明</div>
+        <div class="cat-desc">ガチャ・オリパの確率表示ルール、景品表示法対応、利用規約の解釈ガイドなど</div>
+        <div class="cat-footer">
+          <span class="cat-count">2 マニュアル</span>
+          <span class="cat-arrow">→</span>
+        </div>
+      </div>
+      <div class="category-card" style="border-color:rgba(180,120,255,0.2)" onclick="filterByTag('dev', null)">
+        <div class="cat-emoji">⚙️</div>
+        <div class="cat-name">開発・実装</div>
+        <div class="cat-desc">環境構築・アカウント設定・デプロイ・決済審査など、プロジェクト立ち上げに必要な実装手順</div>
+        <div class="cat-footer">
+          <span class="cat-count">11 マニュアル</span>
+          <span class="cat-arrow" style="color:#b47aff">→</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">最近追加されたマニュアル</div>
+    <div class="manual-table" id="recentTable">
+      <!-- filled by JS -->
+    </div>
+  </div>
+
+  <!-- ALL MANUALS VIEW -->
+  <div class="view" id="view-all">
+    <div class="page-header">
+      <div class="accent-line"></div>
+      <h1 id="allTitle">すべてのマニュアル</h1>
+      <p id="allDesc">全カテゴリのマニュアル一覧</p>
+    </div>
+    <div class="manual-table">
+      <div class="table-header">
+        <div>マニュアル名</div>
+        <div>カテゴリ</div>
+        <div>バージョン</div>
+        <div>更新日</div>
+        <div></div>
+      </div>
+      <div id="manualList"></div>
+    </div>
+  </div>
+
+  <!-- VERSION HISTORY VIEW -->
+  <div class="view" id="view-versions">
+    <div class="page-header">
+      <div class="accent-line"></div>
+      <h1>バージョン履歴</h1>
+      <p>マニュアルハブ全体のリリース・更新ログ</p>
+    </div>
+    <div class="ver-timeline">
+      <div class="ver-entry">
+        <div class="ver-left">
+          <div class="ver-tag">v1.0.0</div>
+          <div class="ver-date-sm">2025-07-01</div>
+        </div>
+        <div class="ver-right">
+          <div class="ver-desc">
+            <strong>🎉 初版リリース（Base Version）</strong><br>
+            4カテゴリ・9マニュアルでCSマニュアルハブを新規公開。<br>
+            問い合わせ対応 / 返金・交換 / 不正・不具合 / 仕様説明の基本マニュアルを収録。
+          </div>
+        </div>
+      </div>
+      <div class="ver-entry">
+        <div class="ver-left">
+          <div class="ver-tag">予定</div>
+          <div class="ver-date-sm">次回更新</div>
+        </div>
+        <div class="ver-right">
+          <div class="ver-desc" style="color:var(--text-muted)">
+            v1.1.0 予定：新マニュアル追加・既存マニュアルの改訂<br>
+            ※マニュアル追加の際は「追加ガイド」を参照してください。
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">バージョン管理ルール</div>
+    <div class="manual-table">
+      <div class="table-header">
+        <div>バージョン種別</div>
+        <div>書式</div>
+        <div>変更内容</div>
+        <div colspan="2">例</div>
+      </div>
+      <div class="manual-row" style="cursor:default">
+        <div class="manual-title">メジャーアップデート</div>
+        <div class="manual-cat"><span class="ver-tag">vX.0.0</span></div>
+        <div class="manual-cat">カテゴリ追加・大幅な構造変更</div>
+        <div class="manual-date">v1.0.0 → v2.0.0</div>
+        <div></div>
+      </div>
+      <div class="manual-row" style="cursor:default">
+        <div class="manual-title">マイナーアップデート</div>
+        <div class="manual-cat"><span class="ver-tag">vX.Y.0</span></div>
+        <div class="manual-cat">マニュアルの追加・カテゴリ変更</div>
+        <div class="manual-date">v1.0.0 → v1.1.0</div>
+        <div></div>
+      </div>
+      <div class="manual-row" style="cursor:default">
+        <div class="manual-title">パッチアップデート</div>
+        <div class="manual-cat"><span class="ver-tag">vX.Y.Z</span></div>
+        <div class="manual-cat">誤記修正・文言調整</div>
+        <div class="manual-date">v1.0.0 → v1.0.1</div>
+        <div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADDITION GUIDE VIEW -->
+  <div class="view" id="view-guide">
+    <div class="page-header">
+      <div class="accent-line"></div>
+      <h1>マニュアル追加ガイド</h1>
+      <p>新しいマニュアルを追加する際の手順と設計方針</p>
+    </div>
+
+    <div class="manual-table" style="margin-bottom:24px">
+      <div style="padding:28px">
+        <h3 style="color:var(--accent);font-size:15px;margin-bottom:16px">📌 マニュアル追加フロー</h3>
+        <ol class="step-list">
+          <li>このHTMLファイルの <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-size:12px">const manuals = [...]</code> 配列に新エントリを追加する</li>
+          <li>id（連番）、title、category、tag、ver、date、content を記入する</li>
+          <li>contentの中にh3・step-list・alert-boxを使ってマニュアル本文を記述する</li>
+          <li>バージョン番号のルールに従ってverを設定する（例：v1.1.0）</li>
+          <li>バージョン履歴ビューにリリースノートを追記する</li>
+          <li>ファイルを保存してチームに共有する</li>
+        </ol>
+        <div class="alert-box alert-ok">
+          ✅ HTMLは単一ファイルなので、Slackやメールで共有するだけで全員が最新版を使えます
+        </div>
+        <div class="alert-box alert-warn">
+          ⚠️ 更新前に必ず旧バージョンのファイルをバックアップとして保存してください
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">マニュアルデータの書き方（テンプレート）</div>
+    <div class="manual-table">
+      <div style="padding:24px">
+        <pre style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:20px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--text-dim);overflow-x:auto;line-height:1.7">{
+  id: 10,                          // 連番ID
+  title: "マニュアルのタイトル",
+  category: "問い合わせ対応",       // カテゴリ名
+  tag: "inquiry",                  // inquiry / refund / fraud / spec
+  ver: "v1.1.0",
+  date: "2025-08-01",
+  content: `
+    &lt;h3&gt;セクションタイトル&lt;/h3&gt;
+    &lt;p&gt;説明文...&lt;/p&gt;
+    &lt;ol class="step-list"&gt;
+      &lt;li&gt;手順1&lt;/li&gt;
+      &lt;li&gt;手順2&lt;/li&gt;
+    &lt;/ol&gt;
+    &lt;div class="alert-box alert-warn"&gt;⚠️ 注意事項&lt;/div&gt;
+  `
+}</pre>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modalContent">
+    <div class="modal-close" onclick="closeModalDirect()">✕</div>
+    <div class="modal-meta" id="modalMeta"></div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-info" id="modalInfo"></div>
+    <div class="manual-content" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModalDirect()">閉じる</button>
+      <button class="btn-primary" onclick="printManual()">🖨️ 印刷 / PDF保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  MANUAL DATA — ここにマニュアルを追加していく
+// ═══════════════════════════════════════════════
+const manuals = [
+  {
+    id: 1,
+    title: "初回問い合わせ受付マニュアル",
+    category: "問い合わせ対応",
+    tag: "inquiry",
+    ver: "v1.0.0",
+    date: "2025-07-01",
+    content: `
+      <h3>概要</h3>
+      <p>お客様からの初回お問い合わせを受け付ける際の基本手順です。問い合わせ内容を正確に把握し、適切なカテゴリへ振り分けます。</p>
+      <h3>受付手順</h3>
+      <ol class="step-list">
+        <li>お問い合わせフォームまたはメールにて受信確認。受信後30分以内に自動返信メールが送信されることを確認する。</li>
+        <li>問い合わせ内容を読み、以下のカテゴリに分類する：注文・発送 / 返金・交換 / 不具合・バグ / その他</li>
+        <li>お客様情報（会員ID、購入履歴）を管理画面で確認する。</li>
+        <li>分類に応じて担当チームへ振り分け、チケットにタグを付ける。</li>
+        <li>24時間以内に担当者から一次返答を送信する。</li>
+      </ol>
+      <div class="alert-box alert-warn">⚠️ 24時間以内に返答できない場合は、必ず「確認中の旨」を伝える中間返信を送ること。</div>
+      <h3>よくある問い合わせパターン</h3>
+      <p>・「当たりが出ない」→ 確率仕様説明マニュアルへ<br>・「カードが届かない」→ 発送状況確認フローへ<br>・「決済エラー」→ 決済トラブル対応マニュアルへ</p>
+    `
+  },
+  {
+    id: 2,
+    title: "問い合わせ返信テンプレート集",
+    category: "問い合わせ対応",
+    tag: "inquiry",
+    ver: "v1.0.0",
+    date: "2025-07-01",
+    content: `
+      <h3>使い方</h3>
+      <p>以下のテンプレートをベースに、お客様の状況に合わせて文言を調整して使用してください。太字部分は必ず書き換えること。</p>
+      <h3>テンプレート①：初回返信（確認中）</h3>
+      <p style="background:var(--surface2);padding:16px;border-radius:8px;border-left:3px solid var(--accent2);line-height:1.9;font-size:13px">
+        【会員名】様<br><br>
+        この度はお問い合わせいただきありがとうございます。<br>
+        ご不便をおかけして大変申し訳ございません。<br><br>
+        ご連絡いただいた内容について、現在確認を進めております。<br>
+        <strong>【期限：〇〇月〇〇日】</strong>までに改めてご連絡差し上げますので、今しばらくお待ちください。<br><br>
+        引き続きよろしくお願いいたします。<br>
+        ネットオリパ カスタマーサポート
+      </p>
+      <h3>テンプレート②：解決済み返信</h3>
+      <p style="background:var(--surface2);padding:16px;border-radius:8px;border-left:3px solid var(--success);line-height:1.9;font-size:13px">
+        【会員名】様<br><br>
+        お問い合わせの件についてご回答申し上げます。<br><br>
+        <strong>【解決内容を記入】</strong><br><br>
+        ご不便をおかけして誠に申し訳ございませんでした。<br>
+        他にご不明な点がございましたら、いつでもお申し付けください。<br><br>
+        ネットオリパ カスタマーサポート
+      </p>
+      <div class="alert-box alert-ok">✅ 返信前に必ず誤字・会員名の確認を行うこと。</div>
+    `
+  },
+  {
+    id: 3,
+    title: "エスカレーションフロー",
+    category: "問い合わせ対応",
+    tag: "inquiry",
+    ver: "v1.0.0",
+    date: "2025-07-01",
+    content: `
+      <h3>エスカレーションとは</h3>
+      <p>一次対応のCSスタッフでは解決できない問題や、クレームが激化した場合に上位者・専門チームへ引き継ぐプロセスです。</p>
+      <h3>エスカレーション判断基準</h3>
+      <ol class="step-list">
+        <li>3回以上の往復でも解決しない問題</li>
+        <li>返金額が1万円を超えるケース</li>
+        <li>法的措置・消費者センターへの連絡を示唆するケース</li>
+        <li>SNSへの投稿・炎上リスクが感じられるケース</li>
+        <li>システム障害・全体バグが疑われるケース</li>
+      </ol>
+      <div class="alert-box alert-danger">🚨 脅迫・暴言が含まれる場合は即座にマネージャーへ報告し、対応を中断すること。</div>
+      <h3>引き継ぎ手順</h3>
+      <ol class="step-list">
+        <li>チケットに「エスカレーション」タグを付与する</li>
+        <li>経緯・対応履歴をSlack #cs-escalation チャンネルに投稿する</li>
+        <li>上位担当者が引き継ぎ確認後、お客様へ担当変更を通知する</li>
+      </ol>
+    `
+  },
+  {
+    id: 4,
+    title: "返金対応マニュアル",
+    category: "返金・交換対応",
+    tag: "refund",
+    ver: "v1.0.0",
+    date: "2025-07-01",
+    content: `
+      <h3>返金対応の基本方針</h3>
+      <p>お客様都合による返金は原則対応不可ですが、下記の条件を満たす場合は返金対応を行います。</p>
+      <h3>返金対応ケース</h3>
+      <ol class="step-list">
+        <li><strong>二重決済</strong>：同一注文で複数回課金が発生した場合</li>
+        <li><strong>システムエラー</strong>：ガチャ実行後にアイテムが付与されなかった場合</li>
+        <li><strong>未成年の無断課金</strong>：保護者から申告があり、証明書類が提出された場合</li>
+        <li><strong>サービス終了・メンテ補填</strong>：長時間メンテにより利用不可だった場合</li>
+      </ol>
+      <div class="alert-box alert-warn">⚠️ 「引きが悪い」「欲しいカードが出なかった」という理由の返金は対応不可。確率仕様を丁寧に説明すること。</div>
+      <h3>返金処理フロー</h3>
+      <ol class="step-list">
+        <li>購入履歴・課金ログを管理画面で確認する</li>
+        <li>返金対象ケースに該当するか判断する（判断できない場合はマネージャーへ確認）</li>
+        <li>返金申請フォームを記入し、経理チームへ提出する</li>
+        <li>処理完了後（通常3〜5営業日）お客様へ完了メールを送信する</li>
+      </ol>
+    `
+  },
+  {
+    id: 5,
+    title: "景品交換・発送トラブル対応",
+    category: "返金・交換対応",
+    tag: "refund",
+    ver: "v1.0.0",
+    date: "2025-07-01",
+    content: `
+      <h3>景品交換の基本ルール</h3>
+      <p>当選した景品の交換・変更は、原則として発送前のみ受け付けます。発送済みの景品変更は不可です。</p>
+      <h3>発送トラブルの種類と対応</h3>
+      <ol class="step-list">
+        <li><strong>未着（追跡番号あり）</strong>：追跡番号をお客様に提示し、配送会社への問い合わせを依頼。10日経過で再送対応を検討。</li>
+        <li><strong>破損・汚損</strong>：写真を送付してもらい確認。代替品発送または返金を判断。</li>
+        <li><strong>誤発送</strong>：即座に謝罪し、正しい商品を発送。誤送商品は着払いで返送を依頼。</li>
+        <li><strong>住所不備による返送</strong>：お客様に住所を再確認し、確認完了後に再発送。</li>
+      </ol>
+      <div class="alert-box alert-ok">✅ 再発送の際は「お詫びのポイント付与（500pt）」を申請することを推奨します。</div>
+    `
+  },
+  {
+    id: 6,
+    title: "不正利用検知・対応フロー",
+    category: "不正・不具合対応",
+    tag: "fraud",
+    ver: "v1.0.0",
+    date: "2025-07-01",
+    content: `
+      <h3>不正利用の主なパターン</h3>
+      <p>下記のパターンを検知した場合は、即座に対応フローを開始すること。</p>
+      <ol class="step-list">
+        <li>チャージバック申請（クレカ不正利用後の返金申請）</li>
+        <li>複数アカウントを使った当選操作（多重アカウント）</li>
+        <li>ボットによる大量購入</li>
+        <li>当選商品の不正転売（転売禁止規約違反）</li>
+      </ol>
+      <div class="alert-box alert-danger">🚨 チャージバック案件は決済会社への報告期限があります。検知後24時間以内にマネージャーへ報告。</div>
+      <h3>対応フロー</h3>
+      <ol class="step-list">
+        <li>管理画面でアカウント・ログを確認し、証拠をスクリーンショットで保存する</li>
+        <li>対象アカウントを「利用停止（一時）」状態にする</li>
+        <li>マネージャーへ報告し、永久停止か調査継続かを決定する</li>
+        <li>チャージバック案件は決済会社へ証拠を提出する</li>
+        <li>対象ユーザーへ停止通知メールを送信する（テンプレート使用）</li>
+      </ol>
+    `
+  },
+  {
+    id: 7,
+    title: "システム不具合時の対応マニュアル",
+    category: "不正・不具合対応",
+    tag: "fraud",
+    ver: "v1.0.0",
+    date: "2025-07-01",
+    content: `
+      <h3>不具合発生時の初動対応</h3>
+      <ol class="step-list">
+        <li>複数のユーザーから同一症状の報告が来ていないか確認する（個別障害 vs 全体障害の切り分け）</li>
+        <li>Slack #incident チャンネルにアラートを投稿する</li>
+        <li>エンジニアチームへ緊急連絡する（担当者が不在の場合はマネージャーへ）</li>
+        <li>影響を受けているユーザー数・範囲を特定する</li>
+        <li>サービスサイトのお知らせ欄にメンテナンス情報を掲示する（エンジニア確認後）</li>
+      </ol>
+      <h3>ユーザーへの告知文テンプレート</h3>
+      <p style="background:var(--surface2);padding:16px;border-radius:8px;border-left:3px solid var(--accent3);line-height:1.9;font-size:13px">
+        【障害のお知らせ】<br>
+        現在、<strong>【機能名】</strong>において障害が発生しております。<br>
+        ご不便をおかけして誠に申し訳ございません。<br>
+        現在、原因を調査しております。復旧の見込みは<strong>【時刻】</strong>を予定しております。<br>
+        影響を受けたお客様には、別途補填を予定しております。
+      </p>
+      <div class="alert-box alert-warn">⚠️ 復旧時刻の告知は必ずエンジニアに確認してから行うこと。根拠のない時刻を伝えないこと。</div>
+    `
+  },
+  {
+    id: 8,
+    title: "ガチャ確率・オリパ仕様説明マニュアル",
+    category: "仕様・ルール説明",
+    tag: "spec",
+    ver: "v1.0.0",
+    date: "2025-07-01",
+    content: `
+      <h3>確率に関する質問への回答方針</h3>
+      <p>「当たりが出ない」「確率がおかしい」というお問い合わせは非常に多いです。以下の方針で丁寧に対応します。</p>
+      <h3>重要：確率の正しい説明</h3>
+      <ol class="step-list">
+        <li>各レアリティの出現確率はサービスサイトの確率表示ページに明記されていることを伝える</li>
+        <li>「確率は各回独立」であり、前回の結果が次回に影響しないことを説明する</li>
+        <li>「期待値」と「実際の結果」の違いを例を使って分かりやすく説明する（例：表の出る確率50%でも10回投げて全部裏が出ることはある）</li>
+        <li>確率操作・管理者による当選コントロールは行っていないことを明言する</li>
+      </ol>
+      <div class="alert-box alert-warn">⚠️ 「引きが悪いだけ」「そういうものです」という突き放した言い方はNGです。お客様の感情に寄り添った表現を使うこと。</div>
+      <h3>ピックアップ・天井仕様の説明</h3>
+      <p>天井システムがある場合は、「〇〇回以内に必ず1枚以上封入されている」という仕様を明確に伝えてください。オリパの仕様はオリパの種類によって異なるため、必ず対象オリパのページを確認してから回答すること。</p>
+    `
+  },
+  {
+    id: 9,
+    title: "景品表示法・利用規約 対応ガイド",
+    category: "仕様・ルール説明",
+    tag: "spec",
+    ver: "v1.0.0",
+    date: "2025-07-01",
+    content: `
+      <h3>CSスタッフが知っておくべき法的ポイント</h3>
+      <p>ネットオリパは景品表示法（景表法）の規制対象となる場合があります。お客様対応の際に誤った情報を伝えないよう、以下の基本を理解してください。</p>
+      <h3>景表法上の注意点</h3>
+      <ol class="step-list">
+        <li>商品の価値・内容について虚偽・誇大な説明を行わないこと</li>
+        <li>確率・排出率は必ずサイト上に明記されている数値のみを使用すること</li>
+        <li>「必ず当たる」「絶対に得」など断定的な表現を使わないこと</li>
+        <li>景品の最高額・最低額はガイドラインに沿って設定されていることを理解する</li>
+      </ol>
+      <div class="alert-box alert-danger">🚨 お客様から「違法ではないか」「消費者庁に報告する」という発言があった場合は、即座にマネージャーへエスカレーションすること。CSスタッフが法的見解を述べてはいけません。</div>
+      <h3>利用規約の確認方法</h3>
+      <p>最新の利用規約は管理画面の「規約管理」タブから確認できます。改訂履歴も記録されているため、問い合わせ時点での規約内容を確認の上、お客様に伝えてください。</p>
+    `
+  },
+  // ── フェーズ2：環境構築マニュアル ──────────────────────
+  {
+    id: 10,
+    title: "【フェーズ2】環境構築 全体チェックリスト",
+    category: "開発・実装",
+    tag: "dev",
+    ver: "v1.1.0",
+    date: "2025-07-10",
+    content: `
+      <h3>このマニュアルの使い方</h3>
+      <p>プロジェクト立ち上げ時に必要な4つの外部サービスの準備状況を管理するチェックリストです。各サービスの詳細手順は個別マニュアルまたはNotionリンクを参照してください。</p>
+      <div class="alert-box alert-warn">⚠️ standard-consoleでプロジェクト登録（箱の用意）を先に行ってから、各サービスのアカウント設定に進むこと。順番を間違えると設定が無効になる場合があります。</div>
+      <h3>準備するアカウント一覧</h3>
+      <ol class="step-list">
+        <li><strong>standard-console</strong>：プロジェクト名を登録し、新規プロジェクトの箱を用意する ← <strong>最初に必ず実施</strong></li>
+        <li><strong>Supabase</strong>：DBホスティング。Proプランへの引き上げ＋弊社アカウント招待が必要 → 詳細マニュアル #11 参照</li>
+        <li><strong>お名前.com</strong>：サブドメイン登録。DNS設定の反映に最大24〜72時間かかる点に注意 → 詳細マニュアル #12 参照</li>
+        <li><strong>Firebase</strong>：SMS認証（電話番号認証）用。Authentication設定が必要 → 詳細マニュアル #12 参照</li>
+        <li><strong>fincode</strong>：決済サービス。アカウント作成後に審査情報の登録が必要（フェーズ5） → 詳細マニュアル #13 参照</li>
+      </ol>
+      <h3>完了確認</h3>
+      <p>全アカウントの準備が完了したら、Notionの設定マニュアルに従って各種登録設定を実施してください。</p>
+      <p style="margin-top:12px">
+        📖 <a href="https://chemical-iris-40e.notion.site/_20240730-b8b2b52af4564f8089a1de9e4f5e6509?pvs=74" target="_blank" style="color:var(--accent2)">Notion：各種登録設定マニュアル →</a>
+      </p>
+      <div class="alert-box alert-ok">✅ 全設定完了後：standard-console ＞ プロジェクト名 ＞ 各種設定登録 ＞ 新規デプロイ　の順で進む</div>
+    `
+  },
+  {
+    id: 11,
+    title: "【フェーズ2】Supabase セットアップ手順",
+    category: "開発・実装",
+    tag: "dev",
+    ver: "v1.1.0",
+    date: "2025-07-10",
+    content: `
+      <h3>Supabaseとは</h3>
+      <p>ネットオリパのDBホスティングに使用するサービスです。無料プランでは機能制限があるため、必ずProプランへ引き上げてから弊社を招待する必要があります。</p>
+      <div class="alert-box alert-danger">🚨 Proプランへの引き上げを忘れた状態で設定を進めると、本番環境でDB接続が制限されます。招待前に必ず確認すること。</div>
+      <h3>セットアップ手順</h3>
+      <ol class="step-list">
+        <li>Supabase（supabase.com）にてアカウントを新規作成する（クライアントのメールアドレスで登録推奨）</li>
+        <li>ログイン後、左メニューの「Settings」→「Billing」からProプランへアップグレードする</li>
+        <li>プラン変更が完了したことを画面で確認する（Proバッジが表示されればOK）</li>
+        <li>「Organization Settings」→「Members」から弊社アカウントを招待する<br>
+          招待先：<strong style="color:var(--accent)">oripa+admin@torecacorp.jp</strong></li>
+        <li>招待メールが届いたことを弊社側で確認後、設定作業を引き継ぐ</li>
+      </ol>
+      <h3>よくある詰まりポイント</h3>
+      <p>・<strong>Proプランに変更したのに制限が続く</strong>：ブラウザキャッシュをクリアして再ログインを試す<br>
+      ・<strong>招待メールが届かない</strong>：迷惑メールフォルダを確認。それでも届かない場合はOrganization名を確認して再送<br>
+      ・<strong>どのOrganizationに招待すればいい？</strong>：該当プロジェクトが紐づくOrganizationに招待すること（複数ある場合は注意）</p>
+    `
+  },
+  {
+    id: 12,
+    title: "【フェーズ2】お名前.com サブドメイン＋Firebase SMS認証 設定",
+    category: "開発・実装",
+    tag: "dev",
+    ver: "v1.1.1",
+    date: "2025-07-10",
+    content: `
+      <h3>お名前.com：サブドメイン設定</h3>
+      <p>クライアントのサービスURLとなるサブドメインを登録します。DNS反映に最大72時間かかるため、<strong>環境構築の中で最初に着手</strong>してください。他の作業と並行して進められます。</p>
+      <div class="alert-box alert-warn">⚠️ DNS反映前にデプロイしてもサイトは表示されません。必ず反映確認を先に済ませること。</div>
+      <h3>手順①：お名前.com ログイン〜DNS設定画面へ</h3>
+      <ol class="step-list">
+        <li>お名前.com（onamae.com）にログインする。ログイン情報はクライアントから受領するか、弊社で取得する</li>
+        <li>上部メニュー「ドメイン」→「利用ドメイン一覧」から対象ドメインをクリック</li>
+        <li>「DNS設定」タブ →「DNSレコード設定を利用する」ボタンをクリック</li>
+      </ol>
+      <h3>手順②：CNAMEレコードの追加</h3>
+      <ol class="step-list">
+        <li>「レコード追加」ボタンをクリックし、以下の値を入力する<br>
+          <div style="background:var(--surface2);border-radius:8px;padding:14px;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:2">
+            タイプ：<strong style="color:var(--accent)">CNAME</strong><br>
+            ホスト名（サブドメイン）：<strong style="color:var(--accent)">例）shop.example.com の「shop」部分</strong><br>
+            VALUE（向き先）：<strong style="color:var(--accent)">弊社インフラ担当から受領した値を入力</strong><br>
+            TTL：<strong style="color:var(--accent)">3600（デフォルトのままでOK）</strong>
+          </div>
+        </li>
+        <li>「確認画面へ進む」→「設定する」で保存する</li>
+      </ol>
+      <div class="alert-box alert-danger">🚨 よくある間違い：ホスト名にドメイン全体（example.com）を入れてしまうケース。入力するのはサブドメイン部分（shop など）だけ。</div>
+      <h3>手順③：DNS反映の確認方法</h3>
+      <ol class="step-list">
+        <li>設定後15分〜数時間待つ（最大72時間）</li>
+        <li>確認サイト <a href="https://www.whatsmydns.net/" target="_blank" style="color:var(--accent2)">whatsmydns.net →</a> でサブドメインを入力し、CNAMEが正しく反映されているかチェック</li>
+        <li>緑チェックが世界各地で表示されれば反映完了</li>
+      </ol>
+      <h3>Firebase：SMS認証設定</h3>
+      <ol class="step-list">
+        <li>Firebase Console（console.firebase.google.com）でGoogleアカウントにログインし、「プロジェクトを作成」をクリック</li>
+        <li>プロジェクト名を入力（例：クライアント名-oripa）→ Googleアナリティクスは任意でOK</li>
+        <li>左メニュー「Authentication」→「始める」→「Sign-in method」タブ →「電話番号」を有効にする</li>
+        <li>「プロジェクトの設定（歯車アイコン）」→「全般」→ 下部「マイアプリ」→「Webアプリを追加（&lt;/&gt;）」をクリック</li>
+        <li>アプリ名を入力して登録し、表示されるSDK設定情報（apiKey・authDomain・projectIdなど）をコピーして控える</li>
+        <li>控えた情報をstandard-consoleの該当プロジェクト設定欄「Firebase設定」に貼り付ける</li>
+      </ol>
+      <div class="alert-box alert-ok">✅ 設定後は自分の電話番号でSMS認証を試してコードが届くことを必ず確認すること</div>
+      <p style="margin-top:16px;font-size:12px;color:var(--text-muted)">📖 補足：<a href="https://chemical-iris-40e.notion.site/_20240730-b8b2b52af4564f8089a1de9e4f5e6509?pvs=74" target="_blank" style="color:var(--text-muted)">Notion詳細マニュアル（参考）</a></p>
+    `
+  },
+  {
+    id: 13,
+    title: "【フェーズ2】fincode アカウント作成・初期設定",
+    category: "開発・実装",
+    tag: "dev",
+    ver: "v1.1.1",
+    date: "2025-07-10",
+    content: `
+      <h3>fincodeとは</h3>
+      <p>ネットオリパの決済処理に使用する決済代行サービスです。この段階ではアカウント作成とテスト環境の設定のみ行います。本番決済は<strong>フェーズ5の審査完了後</strong>に有効になります。</p>
+      <div class="alert-box alert-warn">⚠️ テスト用APIキーと本番用APIキーは別物です。フェーズ5まで本番キーは絶対に使用しないこと。切り替え忘れは重大な障害につながります。</div>
+      <h3>手順①：アカウント作成</h3>
+      <ol class="step-list">
+        <li>fincode（fincode.jp）にアクセスし、「無料で始める」をクリック</li>
+        <li>メールアドレス・パスワードを入力して仮登録 → 受信メールのURLをクリックして本登録完了</li>
+        <li>管理画面にログインし、「ショップ設定」→「基本情報」からショップ名・サービスURLを入力して保存する</li>
+      </ol>
+      <h3>手順②：テスト用APIキーの取得</h3>
+      <ol class="step-list">
+        <li>管理画面左メニュー「開発者向け」→「APIキー」をクリック</li>
+        <li><strong>「テスト環境」タブであることを確認する</strong>（本番環境タブと間違えないよう注意）</li>
+        <li>「シークレットキー」をコピーする（このキーは再表示できないため、必ずメモしておく）</li>
+        <li>コピーしたキーをstandard-consoleの「fincode APIキー（テスト）」設定欄に貼り付ける</li>
+      </ol>
+      <div class="alert-box alert-danger">🚨 シークレットキーは他人に見せない・チャット/メールに貼らない。流出した場合は即座に再発行し、マネージャーに報告すること。</div>
+      <h3>手順③：決済審査フォームをクライアントに送付</h3>
+      <ol class="step-list">
+        <li>以下のフォームURLをクライアントにメールまたはチャットで送付する</li>
+        <li>回答期限を明示する（例：「〇月〇日までにご回答ください」）<br>審査期間4〜7営業日を逆算して、<strong>キックオフMTG直後に送付するのがベスト</strong></li>
+        <li>回答が届いたらフェーズ5のマニュアルに従って審査情報を入力する</li>
+      </ol>
+      <p style="margin-top:8px">
+        📋 <a href="https://forms.gle/FsoDnLcW24sDfyrJA" target="_blank" style="color:var(--accent2)">決済審査情報 入力フォーム（クライアント送付用） →</a>
+      </p>
+      <h3>手順④：テスト決済で動作確認</h3>
+      <ol class="step-list">
+        <li>管理画面「開発者向け」→「テストカード」に記載されているテスト用カード番号を使って決済テストを実施する</li>
+        <li>管理画面「取引一覧」にテスト決済の履歴が表示されれば接続成功</li>
+        <li>コイン付与も正常に行われることをサービス画面で確認する</li>
+      </ol>
+      <div class="alert-box alert-ok">✅ テスト決済が通ったら環境構築フェーズ完了。standard-consoleでデプロイ作業に進む。</div>
+      <p style="margin-top:16px;font-size:12px;color:var(--text-muted)">📖 補足：<a href="https://chemical-iris-40e.notion.site/_20240730-b8b2b52af4564f8089a1de9e4f5e6509?pvs=74" target="_blank" style="color:var(--text-muted)">Notion詳細マニュアル（参考）</a></p>
+    `
+  },
+
+  // ── フェーズ5：決済審査マニュアル ──────────────────────
+  {
+    id: 14,
+    title: "【フェーズ5】決済審査 全体チェックリスト",
+    category: "開発・実装",
+    tag: "dev",
+    ver: "v1.2.0",
+    date: "2025-07-10",
+    content: `
+      <h3>このフェーズの目的</h3>
+      <p>fincodeの本番決済を有効にするための審査を通過することです。審査には<strong>4〜7営業日</strong>かかるため、デプロイと並行して早めに動くことが重要です。</p>
+      <div class="alert-box alert-warn">⚠️ 審査中はテスト環境のみ使用可能です。本番APIキーへの切り替えは審査完了通知を受け取ってから行うこと。</div>
+      <h3>フェーズ5 作業チェックリスト</h3>
+      <ol class="step-list">
+        <li>クライアントの審査フォーム回答を受領済みであることを確認する（未回答の場合は催促）</li>
+        <li>fincodeの審査情報を入力する → 詳細マニュアル <strong>#15</strong> を参照</li>
+        <li>本人確認書類をアップロードする → 詳細マニュアル <strong>#15</strong> を参照</li>
+        <li>WEBHOOK設定を行う → 詳細マニュアル <strong>#16</strong> を参照</li>
+        <li>審査完了通知（メール）を受け取る（4〜7営業日）</li>
+        <li>本番APIキーに切り替える → 詳細マニュアル <strong>#15</strong> を参照</li>
+        <li>本番環境で実際に課金してコイン付与を確認する</li>
+      </ol>
+      <div class="alert-box alert-ok">✅ 全項目完了後、クライアントにサイトをお渡しして検収チェックへ移行する</div>
+    `
+  },
+  {
+    id: 15,
+    title: "【フェーズ5】fincode 審査情報入力・本人確認書類アップロード",
+    category: "開発・実装",
+    tag: "dev",
+    ver: "v1.2.0",
+    date: "2025-07-10",
+    content: `
+      <h3>事前準備：クライアントからの情報を手元に揃える</h3>
+      <p>審査フォームの回答内容を開きながら作業してください。以下の情報が必要です。</p>
+      <div style="background:var(--surface2);border-radius:8px;padding:16px;margin:12px 0;font-size:13px;line-height:2.2">
+        ✦ 法人名 / 屋号<br>
+        ✦ 代表者名・生年月日<br>
+        ✦ 所在地（登記住所）<br>
+        ✦ 電話番号・メールアドレス<br>
+        ✦ サービスURL・サービス概要<br>
+        ✦ 月間売上見込み<br>
+        ✦ 本人確認書類（画像ファイル）
+      </div>
+      <h3>手順①：審査情報の入力</h3>
+      <ol class="step-list">
+        <li>fincodeの管理画面にログインし、左メニュー「審査申請」→「加盟店情報登録」をクリック</li>
+        <li>「基本情報」タブ：法人名・代表者名・所在地・連絡先を入力する</li>
+        <li>「サービス情報」タブ：サービスURL・サービス概要・月間売上見込みを入力する<br>
+          <div class="alert-box alert-warn" style="margin-top:8px">⚠️ サービス概要は「トレーディングカードのネットオリパサービス」など具体的に記載。曖昧な記述は差し戻しの原因になる。</div>
+        </li>
+        <li>「決済情報」タブ：取り扱い商品・平均単価・最高単価を入力する</li>
+        <li>入力内容を確認し、「申請する」ボタンをクリック</li>
+      </ol>
+      <h3>手順②：本人確認書類のアップロード</h3>
+      <ol class="step-list">
+        <li>管理画面「ダッシュボード設定」→「本人確認書類」をクリック（申請後に表示されるメニュー）</li>
+        <li>書類の種別を選択し、該当ファイルをアップロードする<br>
+          <div style="background:var(--surface2);border-radius:8px;padding:14px;margin-top:8px;font-size:13px;line-height:2.2">
+            📄 <strong>運転免許証</strong>：表面・裏面の<strong>2枚とも</strong>必須<br>
+            📄 <strong>マイナンバーカード</strong>：表面のみでOK（裏面は不要）<br>
+            📄 <strong>パスポート</strong>：顔写真ページのみ<br>
+            ※ 画像は鮮明なもの（文字がはっきり読めること）。スマホ撮影OK
+          </div>
+        </li>
+        <li>アップロード完了後、ステータスが「確認中」になっていることを確認する</li>
+      </ol>
+      <div class="alert-box alert-danger">🚨 書類アップロードを忘れると審査が止まります。申請直後に必ず実施すること。</div>
+      <h3>手順③：審査完了後 → 本番APIキーへ切り替え</h3>
+      <ol class="step-list">
+        <li>fincode からの審査完了メールを確認する（4〜7営業日）</li>
+        <li>管理画面「開発者向け」→「APIキー」→<strong>「本番環境」タブ</strong>に切り替える</li>
+        <li>本番用シークレットキーをコピーし、standard-consoleの「fincode APIキー（本番）」設定欄に貼り付ける</li>
+        <li>テスト用キーが残っていないことを確認する</li>
+      </ol>
+      <div class="alert-box alert-ok">✅ 切り替え後は必ず実際のクレジットカードで少額（最小コイン）決済テストを実施し、コインが付与されることを確認する</div>
+    `
+  },
+  {
+    id: 16,
+    title: "【フェーズ5】WEBHOOK設定（決済承認後の自動処理）",
+    category: "開発・実装",
+    tag: "dev",
+    ver: "v1.2.1",
+    date: "2025-07-10",
+    content: `
+      <h3>WEBHOOKとは</h3>
+      <p>fincodeでの決済承認が完了した瞬間に、自動でサービス側へ「決済完了」を通知する仕組みです。これが正しく設定されていないと、<strong>お客様が決済完了してもコインが付与されない</strong>という致命的な問題が発生します。</p>
+      <div class="alert-box alert-danger">🚨 WEBHOOKはデプロイ完了後・審査申請前までに必ず設定すること。設定漏れは本番での未付与クレームに直結します。</div>
+
+      <h3>手順①：署名（fincode_signature）をスターターコンソールから取得</h3>
+      <ol class="step-list">
+        <li>スターターコンソールにログインし、対象プロジェクトのページを開く</li>
+        <li>設定項目の中に <strong style="color:var(--accent)">fincode_signature</strong> という値があるのでコピーしておく</li>
+      </ol>
+      <div class="alert-box alert-warn">⚠️ fincode_signatureは各プロジェクト固有の値です。別プロジェクトの値を流用しないこと。</div>
+
+      <h3>手順②：fincodeでWEBHOOKを追加</h3>
+      <ol class="step-list">
+        <li>fincodeの管理画面にログインし、左メニュー「テナント」のページを開く</li>
+        <li>左ナビゲーションの <strong>「API・Webhook」</strong> をクリック</li>
+        <li><strong>「Webhookを追加」</strong> ボタンをクリックするとダイアログが表示される</li>
+        <li>ダイアログの <strong>① エンドポイント</strong> に以下のURLを入力する（PROJECT_IDは各プロジェクトのIDに置き換え）<br>
+          <div style="background:var(--surface2);border-radius:8px;padding:12px;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent);word-break:break-all">
+            https://[PROJECT_ID].net-oripa.com/api/webhook/fincode
+          </div>
+        </li>
+        <li><strong>② トリガーイベント</strong> で <strong style="color:var(--accent)">「カード決済認証後決済実行」</strong> を選択する</li>
+        <li><strong>③ 署名</strong> の欄に、手順①でコピーした <strong>fincode_signature</strong> の値を貼り付ける</li>
+        <li>「保存」をクリックし、ステータスが「有効」になっていることを確認する</li>
+      </ol>
+      <div class="alert-box alert-warn">⚠️ トリガーイベントは必ず「カード決済認証後決済実行」を選ぶこと。他のイベントを選ぶと未承認でも通知が飛んだり、コイン付与が二重になる可能性があります。</div>
+
+      <h3>手順③：WEBHOOK動作確認</h3>
+      <ol class="step-list">
+        <li>fincodeの「API・Webhook」画面で、追加したWEBHOOKのステータスが「有効」であることを確認</li>
+        <li>本番APIキーへ切り替え後（#15参照）、実際のクレジットカードで少額決済テストを実施する</li>
+        <li>決済完了後にコインが正常に付与されていることをサービス画面で確認する</li>
+      </ol>
+      <div class="alert-box alert-ok">✅ コイン付与が確認できれば WEBHOOK設定完了。そのままクライアントへの検収依頼に進む。</div>
+    `
+  },
+
+  // ── フェーズ3：法的ページ作成 ──────────────────────
+  {
+    id: 17,
+    title: "【フェーズ3】利用規約・プラポリ・特商法ページ作成",
+    category: "開発・実装",
+    tag: "dev",
+    ver: "v1.3.0",
+    date: "2025-07-10",
+    content: `
+      <h3>このフェーズの目的</h3>
+      <p>サービス公開に必須の3つの法的ページを、弊社の雛形をベースにクライアント情報へカスタマイズして作成します。内容に不備があると景表法・特商法違反につながるため、<strong>必ず雛形から変更してはいけない箇所と変更が必要な箇所を区別して作業すること</strong>。</p>
+      <div class="alert-box alert-warn">⚠️ 法的ページの内容についてCSスタッフが法的判断を行わないこと。不明点はマネージャーまたは顧問弁護士に確認する。</div>
+
+      <h3>作成する3ページ</h3>
+      <ol class="step-list">
+        <li><strong>利用規約</strong>：サービス利用に関する権利・義務・禁止事項を定めるページ</li>
+        <li><strong>プライバシーポリシー（プラポリ）</strong>：個人情報の取得・利用・管理方針を定めるページ</li>
+        <li><strong>特定商取引法に基づく表記（特商法）</strong>：販売事業者情報・返金条件などの法定記載事項</li>
+      </ol>
+
+      <h3>手順①：雛形をコピーする</h3>
+      <ol class="step-list">
+        <li>以下のNotionページから各雛形をコピーする</li>
+        <li>新規ドキュメントに貼り付け、プロジェクト名でファイル名をつけて管理する（例：〇〇様_利用規約_v1）</li>
+      </ol>
+      <p style="margin-top:8px">
+        📖 <a href="https://chemical-iris-40e.notion.site/_-320b4847e93f80c18f89e8404dc35334" target="_blank" style="color:var(--accent2)">法的ページ雛形（Notion） →</a>
+      </p>
+
+      <h3>手順②：クライアント毎に変更が必要な箇所</h3>
+      <div style="background:var(--surface2);border-radius:8px;padding:16px;margin:12px 0;font-size:13px;line-height:2.4">
+        <strong style="color:var(--accent)">【利用規約】</strong><br>
+        ✦ サービス名・運営会社名<br>
+        ✦ 禁止事項（クライアント固有のルールがあれば追記）<br>
+        ✦ 退会・アカウント停止の条件<br><br>
+        <strong style="color:var(--accent)">【プライバシーポリシー】</strong><br>
+        ✦ 運営会社名・所在地・お問い合わせ先<br>
+        ✦ 利用する外部サービス（Google Analytics等の有無）<br><br>
+        <strong style="color:var(--accent)">【特商法】</strong><br>
+        ✦ 販売業者名・代表者名<br>
+        ✦ 所在地・電話番号・メールアドレス<br>
+        ✦ 販売価格・支払い方法<br>
+        ✦ 返品・キャンセルポリシー（原則不可の旨）<br>
+        ✦ サービス提供時期
+      </div>
+
+      <h3>手順③：standard-consoleへ反映</h3>
+      <ol class="step-list">
+        <li>作成した内容をstandard-consoleの「法的ページ設定」に貼り付ける</li>
+        <li>プレビューで表示崩れがないか確認する</li>
+        <li>デプロイ後、実際のサービスURLでページが正しく表示されることを確認する</li>
+      </ol>
+      <div class="alert-box alert-ok">✅ 3ページ全てが公開URLで表示されることを確認してからリリース工程に進む</div>
+    `
+  },
+
+  // ── フェーズ4：デプロイ〜動作テスト ──────────────────────
+  {
+    id: 18,
+    title: "【フェーズ4】デプロイ〜動作テスト チェックリスト",
+    category: "開発・実装",
+    tag: "dev",
+    ver: "v1.3.0",
+    date: "2025-07-10",
+    content: `
+      <h3>このフェーズの目的</h3>
+      <p>環境構築・法的ページ作成が完了したらサイトをデプロイし、クライアントに渡す前に全機能が正常に動作することを確認します。<strong>このフェーズで見落とした不具合はそのままクライアントへの信頼損失につながります。</strong>必ず全項目を実施してください。</p>
+
+      <h3>手順①：デプロイ</h3>
+      <ol class="step-list">
+        <li>standard-console ＞ 対象プロジェクト ＞「各種設定登録」が全て完了していることを確認する</li>
+        <li>「新規デプロイ」ボタンをクリックしてデプロイを実行する</li>
+        <li>デプロイ完了後、サービスURL（例：[PROJECT_ID].net-oripa.com）にアクセスしてサイトが表示されることを確認する</li>
+      </ol>
+
+      <h3>手順②：管理画面ログイン発番</h3>
+      <ol class="step-list">
+        <li>standard-consoleでサイト公開後、管理画面ログインIDとPASSを発番する</li>
+        <li>発番したID/PASSを安全な方法でクライアントへ共有する（チャットへの平文貼り付けは避ける）</li>
+      </ol>
+
+      <h3>手順③：ガチャ・カテゴリ作成（審査用）</h3>
+      <ol class="step-list">
+        <li>管理画面にログインし、「カテゴリ」を1つ以上作成する</li>
+        <li>「ガチャ」を1つ以上作成する（決済審査用のため、実際に販売する内容でなくても可）</li>
+        <li>作成したガチャがサービス画面に表示されることを確認する</li>
+      </ol>
+
+      <h3>手順④：ユーザー登録〜ガチャ動作テスト</h3>
+      <ol class="step-list">
+        <li>サービスサイトで自分のアカウントを新規ユーザー登録する（SMS認証まで完了させる）</li>
+        <li>管理画面 ＞「ユーザー」＞ 登録したユーザーを選択 ＞「ユーザー詳細」＞「手動でコイン付与」から任意のコインを付与する</li>
+        <li>サービスサイトでコインが反映されていることを確認する</li>
+        <li>作成したガチャをプレイし、正常に結果が表示されることを確認する</li>
+      </ol>
+      <div class="alert-box alert-warn">⚠️ SMS認証のコードが届かない場合はFirebase設定（#12）を再確認すること。</div>
+      <div class="alert-box alert-ok">✅ ガチャプレイが成功したら決済審査（フェーズ5）へ進む</div>
+    `
+  },
+
+  // ── フェーズ1：契約〜キックオフ ──────────────────────
+  {
+    id: 19,
+    title: "【フェーズ1】契約〜キックオフMTG 進行マニュアル",
+    category: "開発・実装",
+    tag: "dev",
+    ver: "v1.3.0",
+    date: "2025-07-10",
+    content: `
+      <h3>フェーズ1の全体像</h3>
+      <p>プラン確定から情報収集まで、プロジェクトのスタートを確実に切るフェーズです。ここでの情報収集の漏れが後工程の手戻りに直結するため、<strong>キックオフMTG内で決めるべき項目を事前に整理して臨むこと</strong>。</p>
+
+      <h3>手順①：プラン確定・決済確認</h3>
+      <ol class="step-list">
+        <li>クライアントのプランを確認する（スターターPlus / スタンダード / ベーシック）</li>
+        <li>決済完了を管理画面で確認する</li>
+        <li>担当者をアサインし、プロジェクト管理ツールにタスクを登録する</li>
+      </ol>
+
+      <h3>手順②：キックオフMTG</h3>
+      <ol class="step-list">
+        <li>MTG前に以下のアジェンダを共有しておく（当日スムーズに進めるため）</li>
+        <li>申込プランの最終確認を行う</li>
+        <li>利用規約同意フォームをその場で回答してもらう</li>
+        <li>デザイン情報を収集する（当日決まらない場合は期限を設けて別途共有を依頼）</li>
+      </ol>
+
+      <h3>MTG内で確定させる情報</h3>
+      <div style="background:var(--surface2);border-radius:8px;padding:16px;margin:12px 0;font-size:13px;line-height:2.4">
+        <strong style="color:var(--accent)">【必須・全プラン共通】</strong><br>
+        ✦ メインカラー（HEXコード推奨）<br>
+        ✦ サブカラー（HEXコード推奨）<br>
+        ✦ ロゴデータ（PNG透過 or SVG）<br>
+        ✦ サービスURL・サブドメイン希望名<br><br>
+        <strong style="color:var(--accent)">【スタンダード・ベーシックの場合は追加で】</strong><br>
+        ✦ デザインカンプ or 参考サイトURL<br>
+        ✦ デザインデータの納品期限
+      </div>
+      <div class="alert-box alert-warn">⚠️ サービスURLは後から変更が困難です。クライアントが希望するサブドメインを必ずMTG内で確定させること。</div>
+      <div class="alert-box alert-ok">✅ 情報が全て揃ったらstandard-consoleでプロジェクト登録（フェーズ2）へ進む</div>
+    `
+  },
+
+  // ── フェーズ6：リリース・サーバー調整 ──────────────────────
+  {
+    id: 20,
+    title: "【フェーズ6】リリース・サーバー調整マニュアル",
+    category: "開発・実装",
+    tag: "dev",
+    ver: "v1.3.0",
+    date: "2025-07-10",
+    content: `
+      <h3>リリースまでのバッファ期間</h3>
+      <p>検収完了からリリースまでは<strong>最低2週間のバッファ</strong>を設けることを推奨します。この期間に登録開始告知・サーバー強化・最終動作確認を行います。</p>
+
+      <h3>リリース前に確定させる重要事項</h3>
+      <div style="background:var(--surface2);border-radius:8px;padding:16px;margin:12px 0;font-size:13px;line-height:2.4">
+        ✦ 登録開始日時（ユーザー登録をいつから受け付けるか）<br>
+        ✦ プレオープン日時（ガチャをいつ公開するか）<br>
+        ✦ 正式オープン日時<br>
+        ✦ 友達招待報酬の設定内容（推奨：SMS認証地点でポイント付与）<br>
+        ✦ 課金アイテム設定（コイン単価の確認）<br>
+        ✦ 会員ランク設定（初期はなしで開始するか要検討）
+      </div>
+
+      <h3>手順①：サーバースペックの調整スケジュール</h3>
+      <ol class="step-list">
+        <li><strong>登録開始前</strong>：サーバーを <strong style="color:var(--accent)">XL</strong> に強化する（登録集中に備えて）</li>
+        <li><strong>ガチャ公開（プレオープン）前</strong>：サーバーを <strong style="color:var(--accent)">16XL</strong> に強化する（同接集中に備えて）</li>
+        <li><strong>ピーク落ち着き後</strong>：サーバーを <strong style="color:var(--accent)">XL〜2XL</strong> 程度に戻す（コスト最適化）</li>
+      </ol>
+      <div class="alert-box alert-danger">🚨 サーバー強化のタイミングを忘れるとオープン直後に落ちる可能性があります。カレンダーにリマインダーを必ず設定すること。</div>
+
+      <h3>手順②：リリース直前の最終チェック</h3>
+      <ol class="step-list">
+        <li>実際に出すガチャの内容でテストプレイを実施する</li>
+        <li>ユーザー登録→コイン購入→ガチャプレイの一連の流れをエンドツーエンドで確認する</li>
+        <li>友達招待機能・SMS認証が正常に動作することを確認する</li>
+        <li>ヘッダーバナー・カテゴリ画像など表示素材が全て設定されていることを確認する</li>
+      </ol>
+
+      <h3>手順③：オープン告知</h3>
+      <ol class="step-list">
+        <li>クライアントと告知方法・タイミングを事前に合意する</li>
+        <li>登録開始リンクを告知チャネル（オプチャ・SNS等）に投下する</li>
+        <li>オープン後30分〜1時間はサービスの動作状況を監視する</li>
+      </ol>
+      <div class="alert-box alert-ok">✅ 正常稼働を確認したらプロジェクト完了。お疲れ様でした！</div>
+    `
+  }
+];
+
+// ═══════════════════════════════════════════
+//  STATE & UTILS
+// ═══════════════════════════════════════════
+let activeTag = null;
+
+// 表示順を定義（フェーズ順 → カテゴリ内連番）
+const sortOrder = {
+  19: 1,   // F1: キックオフ
+  10: 2,   // F2: 環境構築チェックリスト
+  11: 3,   // F2: Supabase
+  12: 4,   // F2: お名前.com + Firebase
+  13: 5,   // F2: fincode初期設定
+  17: 6,   // F3: 法的ページ
+  18: 7,   // F4: デプロイ〜テスト
+  14: 8,   // F5: 決済審査チェックリスト
+  15: 9,   // F5: 審査情報入力
+  16: 10,  // F5: WEBHOOK
+  20: 11,  // F6: リリース
+  1:  12,  // CS: 初回問い合わせ
+  2:  13,  // CS: 返信テンプレート
+  3:  14,  // CS: エスカレーション
+  4:  15,  // CS: 返金対応
+  5:  16,  // CS: 景品交換
+  6:  17,  // CS: 不正利用
+  7:  18,  // CS: 不具合対応
+  8:  19,  // CS: ガチャ仕様
+  9:  20,  // CS: 景表法
+};
+
+function sorted(list) {
+  return [...list].sort((a, b) => (sortOrder[a.id] ?? 99) - (sortOrder[b.id] ?? 99));
+}
+
+const tagLabel = { inquiry:'問い合わせ対応', refund:'返金・交換対応', fraud:'不正・不具合対応', spec:'仕様・ルール説明', dev:'開発・実装' };
+const tagClass = { inquiry:'tag-inquiry', refund:'tag-refund', fraud:'tag-fraud', spec:'tag-spec', dev:'tag-dev' };
+
+function tagBadge(tag) {
+  return `<span class="manual-tag ${tagClass[tag]}">${tagLabel[tag]}</span>`;
+}
+
+function renderRows(list, containerId) {
+  const el = document.getElementById(containerId);
+  if (!list.length) { el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted)">該当するマニュアルがありません</div>'; return; }
+  el.innerHTML = list.map(m => `
+    <div class="manual-row" onclick="openManual(${m.id})">
+      <div class="manual-title">${m.title} ${tagBadge(m.tag)}</div>
+      <div class="manual-cat">${m.category}</div>
+      <div class="manual-ver">${m.ver}</div>
+      <div class="manual-date">${m.date}</div>
+      <div><button class="btn-view" onclick="event.stopPropagation();openManual(${m.id})">閲覧</button></div>
+    </div>
+  `).join('');
+}
+
+function renderTable() {
+  let list = sorted(manuals);
+  if (activeTag) list = sorted(manuals.filter(m => m.tag === activeTag));
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (q) list = list.filter(m => m.title.toLowerCase().includes(q) || m.category.toLowerCase().includes(q));
+  renderRows(list, 'manualList');
+}
+
+// ═══════════════════════════════════════════
+//  VIEWS
+// ═══════════════════════════════════════════
+function setActiveNav(navEl) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+}
+
+function showView(name, navEl) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  setActiveNav(navEl);
+
+  if (name === 'all') {
+    activeTag = null;
+    document.getElementById('allTitle').textContent = 'すべてのマニュアル';
+    document.getElementById('allDesc').textContent = '全カテゴリのマニュアル一覧';
+    renderTable();
+  }
+
+  // ダッシュボードに戻ったらactiveTagもリセット
+  if (name === 'dashboard') {
+    activeTag = null;
+  }
+}
+
+function filterByTag(tag, navEl) {
+  activeTag = tag;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-all').classList.add('active');
+  document.getElementById('allTitle').textContent = tagLabel[tag];
+  document.getElementById('allDesc').textContent = tagLabel[tag] + ' カテゴリのマニュアル一覧';
+  setActiveNav(navEl);
+  renderTable();
+}
+
+function filterManuals() {
+  const currentView = document.querySelector('.view.active').id;
+  if (currentView !== 'view-all') {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-all').classList.add('active');
+  }
+  renderTable();
+}
+
+// ═══════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════
+function openManual(id) {
+  const m = manuals.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('modalMeta').innerHTML = tagBadge(m.tag);
+  document.getElementById('modalTitle').textContent = m.title;
+  document.getElementById('modalInfo').innerHTML = `
+    <span>📁 ${m.category}</span>
+    <span>🔖 ${m.ver}</span>
+    <span>📅 更新日：${m.date}</span>
+    <span>🆔 ID：#${String(m.id).padStart(3,'0')}</span>
+  `;
+  document.getElementById('modalBody').innerHTML = m.content;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+function printManual() {
+  const title = document.getElementById('modalTitle').textContent;
+  const body = document.getElementById('modalBody').innerHTML;
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>
+    <style>body{font-family:'Noto Sans JP',sans-serif;padding:40px;max-width:700px;margin:auto;color:#111}
+    h3{color:#333;border-left:4px solid #e8c84a;padding-left:12px;margin:24px 0 10px}
+    p{line-height:1.8;font-size:14px}ol{padding-left:20px}li{margin-bottom:8px;line-height:1.7;font-size:14px}
+    .alert-box{padding:12px;border-radius:6px;margin:12px 0;font-size:13px}
+    .alert-warn{background:#fff8e6;border:1px solid #e8a44a}.alert-danger{background:#fff0f3;border:1px solid #e84a6f}
+    .alert-ok{background:#f0fff8;border:1px solid #4ae8a0}
+    </style></head><body><h1>${title}</h1>${body}</body></html>`);
+  w.document.close();
+  setTimeout(() => w.print(), 500);
+}
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // 最近追加されたマニュアル：バージョンが新しい順に5件
+  const recentList = [...manuals]
+    .sort((a, b) => b.ver.localeCompare(a.ver) || b.date.localeCompare(a.date))
+    .slice(0, 5);
+  const table = document.getElementById('recentTable');
+  table.innerHTML = `<div class="table-header">
+    <div>マニュアル名</div><div>カテゴリ</div><div>バージョン</div><div>更新日</div><div></div>
+  </div>` + recentList.map(m => `
+    <div class="manual-row" onclick="openManual(${m.id})">
+      <div class="manual-title">${m.title} ${tagBadge(m.tag)}</div>
+      <div class="manual-cat">${m.category}</div>
+      <div class="manual-ver">${m.ver}</div>
+      <div class="manual-date">${m.date}</div>
+      <div><button class="btn-view" onclick="event.stopPropagation();openManual(${m.id})">閲覧</button></div>
+    </div>
+  `).join('');
+
+  // 全マニュアルリストはフェーズ順で表示
+  renderRows(sorted(manuals), 'manualList');
+});
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
+</script>
+</body>
+</html>
