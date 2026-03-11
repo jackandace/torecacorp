@@ -15,6 +15,20 @@ var SENDER = {
 };
 
 var docType = 'invoice';
+var clientSuffix = '御中';
+
+function setSuffix(s) {
+  clientSuffix = s;
+  document.getElementById('suffix-keichuu').style.background = s === '御中' ? '#333' : '#fff';
+  document.getElementById('suffix-keichuu').style.color = s === '御中' ? '#fff' : '#333';
+  document.getElementById('suffix-sama').style.background = s === '様' ? '#333' : '#fff';
+  document.getElementById('suffix-sama').style.color = s === '様' ? '#fff' : '#333';
+}
+
+function getClientName() {
+  var name = v('client-name');
+  return name ? name + '　' + clientSuffix : '（宛先未入力）';
+}
 var rows = [];
 var rowId = 0;
 
@@ -105,13 +119,13 @@ function buildAmountBar(total, validVal, forPrint) {
   if (forPrint) {
     return '<div style="display:flex;align-items:stretch;margin-bottom:12pt;border:1.5pt solid #333;">'
       + '<div style="background:#333;color:#fff;padding:6pt 14pt;display:flex;align-items:center;">'
-      + '<span style="font-size:9.5pt;font-weight:700;letter-spacing:0.05em;">合計金額</span></div>'
+      + '<span style="font-size:10pt;font-weight:700;letter-spacing:0.05em;">合計金額</span></div>'
       + '<div style="flex:1;padding:6pt 12pt;display:flex;align-items:center;gap:8pt;border-right:1.5pt solid #333;">'
-      + '<span style="font-size:17pt;font-weight:700;color:#222;">¥' + total.toLocaleString() + '</span>'
+      + '<span style="font-size:18pt;font-weight:700;color:#222;">¥' + total.toLocaleString() + '</span>'
       + '<span style="font-size:8pt;color:#555;">（税込）</span></div>'
       + '<div style="padding:6pt 16pt;display:flex;flex-direction:column;justify-content:center;">'
-      + '<span style="font-size:11pt;font-weight:700;color:#555;">支払い期限：</span>'
-      + '<span style="font-size:11pt;font-weight:700;color:#222;white-space:nowrap;">' + validVal + '</span>'
+      + '<span style="font-size:10pt;font-weight:700;color:#555;">支払い期限：</span>'
+      + '<span style="font-size:12pt;font-weight:700;color:#222;white-space:nowrap;">' + validVal + '</span>'
       + '</div></div>';
   }
   return '<div style="display:flex;align-items:stretch;margin-bottom:16px;border:1.5px solid #333;">'
@@ -156,12 +170,12 @@ function buildPreviewHTML(forPrint) {
   var email = SENDER_EMAIL;
 
   if (forPrint) {
-    return '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8">'
+    return '<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><title></title>'
       + '<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">'
-      + '<style>@page{size:A4;margin:14mm 14mm 14mm 14mm;}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Noto Sans JP",sans-serif;font-size:10pt;color:#222;}'
+      + '<style>@page{size:A4;margin:0;}body{margin:14mm;}*{box-sizing:border-box;margin:0;padding:0;}body{font-family:"Noto Sans JP",sans-serif;font-size:10pt;color:#222;}'
       + '.title{text-align:center;font-size:20pt;font-weight:700;letter-spacing:0.5em;margin-bottom:16pt;padding-bottom:8pt;border-bottom:2pt solid #333;}'
       + '.meta{display:grid;grid-template-columns:1fr 1fr;gap:14pt;margin-bottom:12pt;overflow:hidden;}'
-      + '.to-name{font-size:13pt;font-weight:700;}.to-sub{font-size:8.5pt;color:#555;margin-top:3pt;}.subject{font-size:9.5pt;margin-top:6pt;}'
+      + '.to-name{font-size:13pt;font-weight:700;}.to-sub{font-size:8.5pt;color:#555;margin-top:3pt;}.subject{font-size:11.5pt;font-weight:500;margin-top:6pt;}'
       + '.from{font-size:8.5pt;color:#444;line-height:1.8;text-align:left;position:relative;padding-left:25%;}'
       + '.from strong{font-size:10.5pt;color:#222;}'
       + '.nos{font-size:8.5pt;color:#444;margin-bottom:12pt;}'
@@ -178,7 +192,7 @@ function buildPreviewHTML(forPrint) {
       + '</style></head><body>'
       + '<div class="title">' + titleText + '</div>'
       + '<div class="meta"><div>'
-      + '<div class="to-name">' + esc(v('client-name')||'（宛先）') + '</div>'
+      + '<div class="to-name">' + esc(getClientName()) + '</div>'
       + '<div class="to-sub">' + bodyText + '</div>'
       + '<div class="subject">件名：' + esc(v('subject')||'—') + '</div>'
       + '</div><div class="from">'
@@ -206,7 +220,7 @@ function buildPreviewHTML(forPrint) {
 
   return '<div class="pv-title">' + titleText + '</div>'
     + '<div class="pv-meta"><div>'
-    + '<div class="pv-to-name">' + esc(v('client-name')||'（宛先未入力）') + '</div>'
+    + '<div class="pv-to-name">' + esc(getClientName()) + '</div>'
     + '<div class="pv-to-sub">' + bodyText + '</div>'
     + '<div class="pv-subject">件名：' + esc(v('subject')||'—') + '</div>'
     + '</div><div class="pv-from">'
