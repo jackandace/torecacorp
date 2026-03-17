@@ -1,0 +1,371 @@
+
+<style>
+.tab-btn { background: transparent; border: 0.5px solid var(--color-border-tertiary); border-radius: 20px; padding: 5px 14px; font-size: 12px; cursor: pointer; color: var(--color-text-secondary); white-space: nowrap; transition: all 0.15s; }
+.tab-btn.active { background: var(--color-text-primary); color: var(--color-background-primary); border-color: var(--color-text-primary); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.sec-title { font-size: 13px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 8px; padding-bottom: 6px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 2px 10px; border-radius: 20px; }
+.card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; margin-bottom: 10px; }
+.card-title { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin: 0 0 6px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.item { font-size: 12px; color: var(--color-text-primary); line-height: 1.7; }
+.sub { font-size: 11px; color: var(--color-text-secondary); line-height: 1.6; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.warn { background: var(--color-background-warning); border: 0.5px solid var(--color-border-warning); border-radius: var(--border-radius-md); padding: 8px 12px; font-size: 12px; color: var(--color-text-warning); margin-bottom: 10px; }
+.cut-card { border-radius: var(--border-radius-md); padding: 10px 12px; margin-bottom: 8px; border: 0.5px solid; }
+</style>
+
+<div style="padding: 1rem 0;">
+
+<div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px;">
+  <button class="tab-btn active" onclick="switchTab('grammar')">演出文法</button>
+  <button class="tab-btn" onclick="switchTab('cuts')">カット仕様</button>
+  <button class="tab-btn" onclick="switchTab('sound')">サウンド設計</button>
+  <button class="tab-btn" onclick="switchTab('delivery')">納品仕様</button>
+  <button class="tab-btn" onclick="switchTab('core')">封印コア設計</button>
+  <button class="tab-btn" onclick="switchTab('rights')">著作権</button>
+</div>
+
+<!-- 演出文法 -->
+<div id="tab-grammar" class="tab-content active">
+
+  <div class="grid2">
+    <div>
+      <p class="sec-title">A. 色示唆（等賞の示唆）</p>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:50%;background:#e0e0e0;border:1px solid #aaa;"></span><span class="item">白 → <span class="sub">ハズレ</span></span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:50%;background:#1D9E75;"></span><span class="item">緑 → <span class="sub">アド確定。まれにD賞</span></span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:50%;background:#D85A30;"></span><span class="item">赤 → <span class="sub">C〜D賞確定。まれにB賞</span></span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:50%;background:#BA7517;"></span><span class="item">金 → <span class="sub">A〜B賞確定</span></span></div>
+        <div style="display:flex;align-items:center;gap:8px;"><span style="width:12px;height:12px;border-radius:50%;background:#7F77DD;"></span><span class="item">虹 → <span class="sub">S〜A賞確定</span></span></div>
+      </div>
+    </div>
+    <div>
+      <p class="sec-title">B. 封印状態（熱さの示唆）</p>
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <div class="card" style="padding: 7px 10px; margin-bottom: 0;">
+          <span class="item">無傷 / 光なし</span><br><span class="sub">熱さ最低、デフォルト状態</span>
+        </div>
+        <div class="card" style="padding: 7px 10px; margin-bottom: 0;">
+          <span class="item">微細ヒビ / 光が弱く漏れる</span><br><span class="sub">兆候あり</span>
+        </div>
+        <div class="card" style="padding: 7px 10px; margin-bottom: 0;">
+          <span class="item">複数ヒビ / 光が少し強く漏れる</span><br><span class="sub">期待上昇</span>
+        </div>
+        <div class="card" style="padding: 7px 10px; margin-bottom: 0; background: var(--color-background-warning);">
+          <span class="item">破断直前 / 光が強く漏れる</span><br><span class="sub">激熱サイン</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="sec-title" style="margin-top:14px;">C. チャンスアップ部品（熱さ別）</p>
+  <div class="grid3">
+    <div class="cut-card" style="background:#E1F5EE;border-color:#1D9E75;">
+      <p style="font-size:11px;font-weight:500;color:#04342C;margin:0 0 5px;">熱さ弱（緑〜赤）</p>
+      <p class="item" style="color:#085041;">カットイン</p>
+      <p class="sub" style="color:#0F6E56;">アケルの画像がカットイン<br>素材は制作済み・共有可</p>
+    </div>
+    <div class="cut-card" style="background:#FAEEDA;border-color:#BA7517;">
+      <p style="font-size:11px;font-weight:500;color:#412402;margin:0 0 5px;">熱さ強（赤〜金）</p>
+      <p class="item" style="color:#633806;">① 告知演出強</p>
+      <p class="sub" style="color:#854F0B;">暗転→テキスト表示<br>「チャンスじゃない？」<br>アケルの声（未制作）</p>
+      <p class="item" style="color:#633806;margin-top:4px;">② シャッター</p>
+      <p class="sub" style="color:#854F0B;">シャッター閉→印がぶつかる<br>参考：吉宗ふすま演出</p>
+    </div>
+    <div class="cut-card" style="background:#EEEDFE;border-color:#7F77DD;">
+      <p style="font-size:11px;font-weight:500;color:#26215C;margin:0 0 5px;">激熱（金〜虹）</p>
+      <p class="item" style="color:#3C3489;">① アケル登場</p>
+      <p class="sub" style="color:#534AB7;">歩き入り→ベルを鳴らす</p>
+      <p class="item" style="color:#3C3489;margin-top:4px;">② 逆転演出</p>
+      <p class="sub" style="color:#534AB7;">カットM延長+違和感<br>→ブラックアウト→大当たり<br>虹確定</p>
+    </div>
+  </div>
+
+  <p class="sec-title" style="margin-top:14px;">D. 文法の軸ルール</p>
+  <div class="grid2">
+    <div class="card">
+      <p class="card-title">音文法</p>
+      <p class="item">ミュートでも成立する設計を優先</p>
+      <p class="sub">視覚の確定合図を主軸に置く</p>
+    </div>
+    <div class="card">
+      <p class="card-title">カメラ文法</p>
+      <p class="item">音に合わせてズーム / スロー / 振動</p>
+      <p class="sub">熱量を視覚で作る</p>
+    </div>
+  </div>
+</div>
+
+<!-- カット仕様 -->
+<div id="tab-cuts" class="tab-content">
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+
+    <div class="cut-card" style="background:var(--color-background-secondary);border-color:var(--color-border-tertiary);">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:500;">カットS　Hook / 導入</span>
+        <span class="badge" style="background:#D3D1C7;color:#2C2C2A;">〜3秒</span>
+      </div>
+      <div class="grid2">
+        <div><p class="sub">優先順位</p><p class="item">テンポ ＞ 最小ブランド</p></div>
+        <div><p class="sub">目的</p><p class="item">離脱・スキップされない掴み</p></div>
+      </div>
+      <p class="sub" style="margin-top:6px;">やること：祭壇出現 → 封印核（署名）浮遊・静止<br>やらないこと：署名提示以外すべて禁止</p>
+    </div>
+
+    <div class="cut-card" style="background:var(--color-background-secondary);border-color:var(--color-border-tertiary);">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:500;">カットM　示唆</span>
+        <span class="badge" style="background:#D3D1C7;color:#2C2C2A;">6〜8秒（+3〜5秒）</span>
+      </div>
+      <div class="grid2">
+        <div><p class="sub">優先順位</p><p class="item">期待 ＞ テンポ ＞ ブランド ＞ 脳汁</p></div>
+        <div><p class="sub">目的</p><p class="item">期待・熱さを上げる</p></div>
+      </div>
+      <p class="sub" style="margin-top:6px;">やること：ベル合図 → 円環+ルーン出現 → 回転+ヒビ示唆 → カットL or XLへ<br>やらないこと：長い前兆・フェイント・キャラ本体登場・「強そうに見える要素」・逆転多用・最上位別表現（虹核/二重刻印）</p>
+    </div>
+
+    <div class="cut-card" style="background:var(--color-background-secondary);border-color:#888780;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:500;">カットL　発展なし確定 / ハズレ</span>
+        <span class="badge" style="background:#888780;color:#F1EFE8;">8〜12秒（+2〜4秒）</span>
+      </div>
+      <div class="grid2">
+        <div><p class="sub">優先順位</p><p class="item">テンポ最優先</p></div>
+        <div><p class="sub">目的</p><p class="item">発展なしで気持ちよく確定</p></div>
+      </div>
+      <p class="sub" style="margin-top:6px;">演出：封印核破断 → 白確定表示 → 結果UIへ<br>やらないこと：確定前の長い溜め禁止</p>
+    </div>
+
+    <div class="cut-card" style="background:var(--color-background-secondary);border-color:#BA7517;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:500;">カットXL　チャンスアップ</span>
+        <span class="badge" style="background:#FAC775;color:#412402;">11〜15秒（+5〜7秒）</span>
+      </div>
+      <div class="grid2">
+        <div><p class="sub">優先順位</p><p class="item">脳汁 ＞ 期待 ＞ ブランド ＞ テンポ</p></div>
+        <div><p class="sub">目的</p><p class="item">脳汁スイッチ。終了 or 発展</p></div>
+      </div>
+      <p class="sub" style="margin-top:6px;">演出：破断直前まで + チャンスアップ部品<br>記念カット（スクショしたくなる静止画）を意識。SNS映え1ポイント必須<br>やらないこと：強い煽り後の弱結果・「破断っぽいのに破断しない」連発</p>
+    </div>
+
+    <div class="cut-card" style="background:var(--color-background-secondary);border-color:#7F77DD;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+        <span style="font-size:13px;font-weight:500;">カットE　発展あり確定 / 祝福</span>
+        <span class="badge" style="background:#CECBF6;color:#26215C;">16〜22秒（+5〜7秒）</span>
+      </div>
+      <div class="grid2">
+        <div><p class="sub">優先順位</p><p class="item">脳汁最大 ＞ ブランド記憶 ＞ 祝福 ＞ テンポ</p></div>
+        <div><p class="sub">目的</p><p class="item">当たり価値の最大増幅</p></div>
+      </div>
+      <p class="sub" style="margin-top:6px;">演出：ベル → 激しい円環+ルーン → 強ヒビ+光 → 破断 → 色確定 → Celebrate → 結果UIへ<br>記念カット必須。祝福は「確定後」に厚く入れる（安全に長くできるポイント）<br>やらないこと：Eで確定しない・確定前の長い溜め禁止</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- サウンド設計 -->
+<div id="tab-sound" class="tab-content">
+
+  <p class="sec-title">インタラクション設計</p>
+  <div class="grid2" style="margin-bottom:14px;">
+    <div class="card">
+      <p class="card-title">音ON/OFF</p>
+      <p class="item">開始前ポップアップ → タップでスタート</p>
+      <p class="sub">再生時は音ありでスタート<br>右上アイコンで ON/OFF 操作可<br>自動設定保存なし</p>
+    </div>
+    <div class="card">
+      <p class="card-title">スキップ</p>
+      <p class="item">全パターンスキップ可能</p>
+      <p class="sub">最初から可能。ボタンは下部配置<br>スキップ後：実カードを提示し結果UIへ<br>10連：最高Tier演出のみ1本表示</p>
+    </div>
+  </div>
+
+  <p class="sec-title">BGM設計</p>
+  <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
+    <div class="card" style="display:flex;gap:12px;align-items:flex-start;">
+      <span class="badge" style="background:#D3D1C7;color:#2C2C2A;flex-shrink:0;">カットS+M</span>
+      <div><p class="item">通常BGM（ループ）</p><p class="sub">軽快なイメージ。祭壇+円環の雰囲気に合わせる。参考：秘宝伝チャンスゾーン</p></div>
+    </div>
+    <div class="card" style="display:flex;gap:12px;align-items:flex-start;">
+      <span class="badge" style="background:#FAC775;color:#412402;flex-shrink:0;">カットXL</span>
+      <div><p class="item">チャンスBGM</p><p class="sub">通常BGMと同傾向。チャンスアップ演出を活かすため若干ボリューム下げも検討</p></div>
+    </div>
+    <div class="card" style="display:flex;gap:12px;align-items:flex-start;">
+      <span class="badge" style="background:#888780;color:#F1EFE8;flex-shrink:0;">カットL</span>
+      <div><p class="item">発展なし確定BGM</p><p class="sub">結果確定のイメージ。ハズレなので派手さ控えめ</p></div>
+    </div>
+    <div class="card" style="display:flex;gap:12px;align-items:flex-start;">
+      <span class="badge" style="background:#7F77DD;color:#EEEDFE;flex-shrink:0;">カットE</span>
+      <div><p class="item">発展あり確定BGM</p><p class="sub">結果確定のイメージ。当たりなのでLより盛大に</p></div>
+    </div>
+  </div>
+
+  <p class="sec-title">SE設計</p>
+  <div style="display: flex; flex-direction: column; gap: 8px;">
+    <div class="card"><p class="card-title">カットS SE</p><p class="sub">① 祭壇の出現音　② 封印核（浮遊核）出現音</p></div>
+    <div class="card"><p class="card-title">カットM SE</p><p class="sub">① ベルが鳴る音　② 円環+ルーンが現れる音　③ 回転+封印シールを破ろうとする音（ループ）　④ 微細ヒビが入る音</p></div>
+    <div class="card">
+      <p class="card-title">カットXL SE（チャンスアップ別）</p>
+      <p class="sub">
+        <b style="font-weight:500;">カットイン：</b>画像がカットインする音<br>
+        <b style="font-weight:500;">告知演出強：</b>暗転音 / テキスト表示音 / 告知音 / テキスト読み上げ声（重ければ初期はなし）<br>
+        <b style="font-weight:500;">シャッター：</b>シャッター閉まる音 / 印がぶつかる音 / シャッターが開く音<br>
+        <b style="font-weight:500;">アケル登場：</b>出現音 / 歩く音 / ベル→響く音<br>
+        <b style="font-weight:500;">逆転演出：</b>違和感音（must非必須）/ ブラックアウト音 / 暗転後の鼓動音 / 結果を大げさに表現する音
+      </p>
+    </div>
+    <div class="card"><p class="card-title">カットL SE</p><p class="sub">① 封印核が破断する音　② 色確定+表示音</p></div>
+    <div class="card"><p class="card-title">カットE SE</p><p class="sub">① ベルが鳴る音　② 円環+ルーンが激しく回転する音　③ 大きくヒビが入る音+光が漏れる音　④ 封印核が破断する音　⑤ 色確定+表示音　⑥ 祝福/Celebrate（派手に）</p></div>
+  </div>
+</div>
+
+<!-- 納品仕様 -->
+<div id="tab-delivery" class="tab-content">
+
+  <p class="sec-title">基本スペック</p>
+  <div class="grid3" style="margin-bottom:14px;">
+    <div class="card"><p class="card-title">フォーマット</p><p class="item">MP4（H.264 / AAC）</p></div>
+    <div class="card"><p class="card-title">解像度</p><p class="item">720 × 1280（9:16縦型）</p></div>
+    <div class="card"><p class="card-title">フレームレート</p><p class="item">24fps</p></div>
+    <div class="card"><p class="card-title">ビットレート</p><p class="item">平均 3〜4Mbps</p></div>
+    <div class="card"><p class="card-title">ファイルサイズ</p><p class="item">最大 20MB / 本</p></div>
+    <div class="card"><p class="card-title">表示基準</p><p class="item">スマホ基準<br><span class="sub">PCもスマホ基準で表示</span></p></div>
+  </div>
+
+  <p class="sec-title">最終納品物</p>
+  <div class="warn">非対応：WebGL等のリアルタイム3D合成・背景透過動画・PNG連番アニメ（スプライト）などの素材納品は不可</div>
+  <div class="card" style="margin-bottom:8px;">
+    <p class="card-title">① 完成済みMP4 一式（3D含む）</p>
+    <p class="sub">演出7本すべて。3D/2D/エフェクト/テキスト等を焼き込んだ単一MP4として納品。レイヤー分割・実装側合成は行わない</p>
+  </div>
+  <div class="card" style="margin-bottom:8px;">
+    <p class="card-title">② 素材一式リスト</p>
+    <p class="sub">制作・使用した全素材を編集可能な形式で保管（封印シール・ベル・ルーンなど）<br>BGM/SE の元音源<br>カット構成と素材の対応表<br>第三者素材がある場合は買い取り/再利用可能な形で</p>
+  </div>
+
+</div>
+
+<!-- 封印コア設計 -->
+<div id="tab-core" class="tab-content">
+
+  <p class="sec-title">ブランド核・体験核</p>
+  <div class="grid2" style="margin-bottom:12px;">
+    <div class="card">
+      <p class="card-title">核モチーフ</p>
+      <p class="item">中央核：封印シール（サイト名/ロゴ入り）</p>
+      <p class="sub">外形：パック封印核（小さなパック形状）</p>
+    </div>
+    <div class="card">
+      <p class="card-title">体験核（舞台世界観）</p>
+      <p class="sub">祭壇（神域）<br>封印の光（神性）<br>円環/ルーン文字（結界/術式）</p>
+    </div>
+  </div>
+
+  <p class="sec-title">アケルの役割定義</p>
+  <div class="card" style="margin-bottom:12px;">
+    <p class="item">封印解除のカードパック妖精。解放者・ユーザーの味方</p>
+    <p class="sub" style="margin-top:4px;">手/装置/司会役＝「解除の起点」を作る存在<br>レアなときのみ本体が出演（声/ベルを鳴らすなど）</p>
+  </div>
+
+  <p class="sec-title">「解放」の物語ライン</p>
+  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+    <span class="badge" style="background:var(--color-background-secondary);color:var(--color-text-primary);border:0.5px solid var(--color-border-tertiary);">貼られている</span>
+    <span style="color:var(--color-text-secondary);">→</span>
+    <span class="badge" style="background:var(--color-background-secondary);color:var(--color-text-primary);border:0.5px solid var(--color-border-tertiary);">ヒビが入る</span>
+    <span style="color:var(--color-text-secondary);">→</span>
+    <span class="badge" style="background:var(--color-background-secondary);color:var(--color-text-primary);border:0.5px solid var(--color-border-tertiary);">光が漏れる</span>
+    <span style="color:var(--color-text-secondary);">→</span>
+    <span class="badge" style="background:#7F77DD;color:#EEEDFE;">解放</span>
+  </div>
+
+  <p class="sec-title">演出の5つの役割</p>
+  <div style="display:flex;flex-direction:column;gap:6px;">
+    <div class="card" style="display:flex;gap:10px;align-items:flex-start;">
+      <span class="badge" style="background:#E1F5EE;color:#04342C;flex-shrink:0;">期待</span>
+      <p class="sub">当たりが近い「感じ」を段階で作る。M/XLが主戦場</p>
+    </div>
+    <div class="card" style="display:flex;gap:10px;align-items:flex-start;">
+      <span class="badge" style="background:#FAEEDA;color:#412402;flex-shrink:0;">報酬強化</span>
+      <p class="sub">当たりのうれしさを増幅。XLが主戦場（Mでやりすぎない）</p>
+    </div>
+    <div class="card" style="display:flex;gap:10px;align-items:flex-start;">
+      <span class="badge" style="background:#D3D1C7;color:#2C2C2A;flex-shrink:0;">テンポ</span>
+      <p class="sub">気持ちよく次に回したくさせる。Mが主戦場。スキップは最初から可</p>
+    </div>
+    <div class="card" style="display:flex;gap:10px;align-items:flex-start;">
+      <span class="badge" style="background:#EEEDFE;color:#26215C;flex-shrink:0;">ブランド体験</span>
+      <p class="sub">世界観/キャラ/トーンを記憶させる。Sで署名表示、Mで記憶に焼く</p>
+    </div>
+    <div class="card" style="display:flex;gap:10px;align-items:flex-start;">
+      <span class="badge" style="background:var(--color-background-danger);color:var(--color-text-danger);flex-shrink:0;">信頼</span>
+      <p class="sub">「強さの表現」をカット階層で制限する。誤解されやすいが最重要</p>
+    </div>
+  </div>
+
+  <p class="sec-title" style="margin-top:14px;">質感の統一ルール</p>
+  <div class="grid2">
+    <div class="card"><p class="sub">封印は「割る」に固定</p></div>
+    <div class="card"><p class="sub">見た目：パック封印核 + 封印シール + 光 + 亀裂（背景固定）</p></div>
+    <div class="card"><p class="sub">光の出方：亀裂から漏れ出す光の強さで示唆</p></div>
+    <div class="card"><p class="sub">レア度の文法は「封印状態」で表現（色は後付け）</p></div>
+  </div>
+</div>
+
+<!-- 著作権 -->
+<div id="tab-rights" class="tab-content">
+
+  <div class="warn" style="margin-bottom:12px;">著作権譲渡不可の場合、以下の条件をすべて契約に明記することが必須</div>
+
+  <div style="display:flex;flex-direction:column;gap:8px;">
+    <div class="card">
+      <p class="card-title">A. 永続的な利用（期限なし）</p>
+      <p class="sub">サービスが継続運用・長期前提のため。期限付きライセンスは不可</p>
+    </div>
+    <div class="card">
+      <p class="card-title">B. 改変・編集・再構成が可能</p>
+      <p class="sub">チャンスアップ追加・尺/構成/演出順の変更・一部差し替えが将来的に確実に必要なため</p>
+    </div>
+    <div class="card">
+      <p class="card-title">C. 二次利用・商用利用が可能（媒体追加）</p>
+      <p class="sub">LP・告知ページ・SNS・広告・将来の別UIなどで使うため</p>
+    </div>
+    <div class="card">
+      <p class="card-title">D. 第三者への再委託（再許諾）が可能</p>
+      <p class="sub">制作者が変わる前提（依頼が難しくなるケースを加味）。別会社への改修/追加制作依頼のため</p>
+    </div>
+    <div class="card">
+      <p class="card-title">E. 著作者人格権の不行使</p>
+      <p class="sub">改変・再委託に対する後のトラブル防止。「その改変は想定外」「他社に渡すのはNG」などの後からの主張変更を防ぐため</p>
+    </div>
+    <div class="card">
+      <p class="card-title">F. 第三者素材の条件</p>
+      <p class="sub">BGM/SE/フォント/プラグインが再委託不可だと全体が詰むため<br>使用素材は「商用利用可・改変可・二次利用可・再委託可」をすべて満たすこと<br>素材一覧とライセンス条件の明示が必須</p>
+    </div>
+    <div class="card">
+      <p class="card-title">G+H. 本件成果物の扱いと再利用禁止</p>
+      <p class="sub">本件向けに制作・加工したすべての素材/エフェクト/UIは成果物扱い<br>映像・演出構成・素材の他案件転用は禁止（ノウハウ/スキルの再利用は可）</p>
+    </div>
+    <div class="card">
+      <p class="card-title">I. 制作元データ・素材の取り扱い</p>
+      <p class="sub">制作・使用した素材/音源/プロジェクトは、契約で定めた納品物以外に第三者提供禁止</p>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    const ids = ['grammar','cuts','sound','delivery','core','rights'];
+    b.classList.toggle('active', ids[i] === id);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => {
+    c.classList.toggle('active', c.id === 'tab-' + id);
+  });
+}
+</script>
