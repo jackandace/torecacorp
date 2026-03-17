@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>シナリオ設計 要件定義</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gray-50: #F1EFE8; --gray-100: #D3D1C7; --gray-200: #B4B2A9;
+    --gray-600: #5F5E5A; --gray-800: #444441; --gray-900: #2C2C2A;
+    --teal-50: #E1F5EE; --teal-200: #5DCAA5; --teal-600: #0F6E56; --teal-main: #1D9E75;
+    --coral-50: #FAECE7; --coral-200: #F0997B; --coral-main: #D85A30; --coral-dark: #4A1B0C;
+    --amber-50: #FAEEDA; --amber-200: #FAC775; --amber-600: #854F0B; --amber-main: #BA7517;
+    --purple-50: #EEEDFE; --purple-200: #AFA9EC; --purple-600: #534AB7; --purple-main: #7F77DD;
+    --red-50: #FCEBEB; --red-main: #A32D2D;
+    --border: #D3D1C7;
+    --text: #1A1A18; --text-sub: #5F5E5A;
+    --bg: #ffffff; --bg-sub: #F8F7F3;
+  }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px; line-height: 1.7;
+    color: var(--text); background: var(--bg-sub);
+    padding: 0;
+  }
+
+  /* ── HEADER ── */
+  .doc-header {
+    background: var(--gray-900);
+    padding: 14px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .doc-header h1 { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.04em; }
+  .doc-header .meta { font-size: 11px; color: var(--gray-200); }
+
+  /* ── TABS ── */
+  .tab-bar {
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex; gap: 4px; overflow-x: auto;
+    position: sticky; top: 45px; z-index: 99;
+  }
+  .tab-btn {
+    background: none; border: none; border-bottom: 2px solid transparent;
+    padding: 12px 16px; font-family: inherit; font-size: 13px; font-weight: 500;
+    color: var(--text-sub); cursor: pointer; white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--text); border-bottom-color: var(--gray-900); }
+
+  /* ── CONTENT ── */
+  .tab-content { display: none; padding: 28px 32px 48px; max-width: 960px; margin: 0 auto; }
+  .tab-content.active { display: block; }
+
+  /* ── SECTIONS ── */
+  .sec-title {
+    font-size: 11px; font-weight: 700; color: var(--text-sub);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    margin: 24px 0 14px;
+  }
+  .sec-title:first-child { margin-top: 0; }
+  .sub-title { font-size: 12px; font-weight: 700; color: var(--text-sub); margin: 16px 0 8px; }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--bg); border: 0.5px solid var(--border);
+    border-radius: 10px; padding: 14px 16px;
+  }
+  .card .card-label { font-size: 11px; font-weight: 700; color: var(--text-sub); margin-bottom: 6px; }
+  .card .card-val   { font-size: 13px; font-weight: 500; }
+  .card .card-sub   { font-size: 12px; color: var(--text-sub); margin-top: 4px; line-height: 1.6; }
+
+  /* ── COLOR CARD (tinted) ── */
+  .card-teal   { background: var(--teal-50);   border-color: var(--teal-200); }
+  .card-amber  { background: var(--amber-50);  border-color: var(--amber-200); }
+  .card-purple { background: var(--purple-50); border-color: var(--purple-200); }
+  .card-gray   { background: var(--gray-50);   border-color: var(--border); }
+  .card-red    { background: var(--red-50);    border-color: var(--red-main); }
+  .card-coral  { background: var(--coral-50);  border-color: var(--coral-200); }
+
+  /* ── DOT ROW ── */
+  .dot-row { display: flex; align-items: center; gap: 10px; padding: 5px 0; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .dot-row .label { font-weight: 700; min-width: 2em; }
+  .dot-row .desc  { color: var(--text-sub); font-size: 13px; }
+
+  /* ── SEAL STATE ── */
+  .seal-row {
+    display: grid; grid-template-columns: 200px 1fr;
+    border: 0.5px solid var(--border); border-radius: 8px;
+    overflow: hidden; margin-bottom: 6px;
+  }
+  .seal-row .seal-main { padding: 10px 14px; font-weight: 500; font-size: 13px; display: flex; align-items: center; }
+  .seal-row .seal-sub  { padding: 10px 14px; font-size: 12px; color: var(--text-sub); display: flex; align-items: center; border-left: 0.5px solid var(--border); }
+  .seal-row.hot { background: var(--amber-50); }
+  .seal-row.hot .seal-sub { border-left-color: var(--amber-200); }
+
+  /* ── BADGE ROW ── */
+  .badge-row {
+    display: grid; grid-template-columns: 80px 1fr;
+    border: 0.5px solid var(--border); border-radius: 8px;
+    overflow: hidden; margin-bottom: 6px;
+  }
+  .badge-row .br-badge {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; padding: 10px 8px; text-align: center; line-height: 1.4;
+  }
+  .badge-row .br-body { padding: 10px 14px; background: var(--bg); }
+  .badge-row .br-title { font-size: 13px; font-weight: 500; }
+  .badge-row .br-sub   { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
+
+  /* ── CUT CARD ── */
+  .cut-card {
+    background: var(--bg); border: 0.5px solid var(--border);
+    border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
+  }
+  .cut-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
+  .cut-title  { font-size: 14px; font-weight: 700; }
+  .cut-badge  { font-size: 11px; font-weight: 700; padding: 3px 12px; border-radius: 20px; }
+  .cut-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .cut-meta   { font-size: 11px; color: var(--text-sub); }
+  .cut-meta span { font-weight: 700; color: var(--text); }
+  .cut-do   { font-size: 12px; color: var(--text-sub); line-height: 1.6; }
+  .cut-dont { font-size: 12px; color: var(--red-main); line-height: 1.6; margin-top: 4px; }
+  hr.cut-sep { border: none; border-top: 0.5px solid var(--border); margin: 8px 0; }
+
+  /* ── FLOW ── */
+  .flow-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+  .flow-pill {
+    padding: 7px 18px; border-radius: 8px; border: 0.5px solid var(--border);
+    font-size: 13px; font-weight: 500; background: var(--gray-50);
+  }
+  .flow-pill.active { background: var(--purple-main); color: #fff; border-color: var(--purple-main); }
+  .flow-pill.warm   { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-600); }
+  .flow-arrow { color: var(--text-sub); font-size: 16px; }
+
+  /* ── ROLE ROW ── */
+  .role-row {
+    display: grid; grid-template-columns: 100px 1fr;
+    border: 0.5px solid var(--border); border-radius: 8px;
+    overflow: hidden; margin-bottom: 6px;
+  }
+  .role-row .role-badge {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; padding: 12px 10px; text-align: center; line-height: 1.4;
+  }
+  .role-row .role-body {
+    padding: 12px 16px; background: var(--bg);
+    font-size: 13px; color: var(--text-sub);
+    border-left: 0.5px solid var(--border);
+  }
+
+  /* ── WARN BOX ── */
+  .warn-box {
+    background: var(--red-50); border: 0.5px solid var(--red-main);
+    border-radius: 8px; padding: 10px 16px;
+    font-size: 13px; color: var(--red-main); margin-bottom: 14px;
+  }
+
+  /* ── SPEC TABLE ── */
+  .spec-table { width: 100%; border-collapse: collapse; border: 0.5px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
+  .spec-table td { padding: 10px 14px; font-size: 13px; border: 0.5px solid var(--border); }
+  .spec-table .spec-lbl { font-weight: 700; color: var(--text-sub); background: var(--gray-50); width: 120px; }
+  .spec-table .spec-val { background: var(--bg); }
+
+  /* ── RIGHTS ROW ── */
+  .right-row {
+    display: grid; grid-template-columns: 52px 1fr;
+    border: 0.5px solid var(--border); border-radius: 8px;
+    overflow: hidden; margin-bottom: 6px;
+  }
+  .right-row .rr-key {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: var(--text-sub);
+    background: var(--gray-50); border-right: 0.5px solid var(--border);
+    padding: 12px 8px;
+  }
+  .right-row .rr-body { padding: 12px 16px; background: var(--bg); }
+  .right-row .rr-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+  .right-row .rr-desc  { font-size: 12px; color: var(--text-sub); line-height: 1.6; }
+
+  /* ── PRINT ── */
+  @media print {
+    .doc-header { position: static; }
+    .tab-bar    { display: none; }
+    .tab-content { display: block !important; padding: 20px; }
+    .tab-content::before {
+      content: attr(data-title);
+      display: block; font-size: 16px; font-weight: 700;
+      border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 16px;
+    }
+    body { background: #fff; }
+    .cut-card, .card, .seal-row, .badge-row, .role-row, .right-row { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <h1>シナリオ設計 — ガチャアニメーション要件定義</h1>
+  <span class="meta">Confidential / Internal Use</span>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('grammar')">01 演出文法</button>
+  <button class="tab-btn" onclick="switchTab('cuts')">02 カット仕様</button>
+  <button class="tab-btn" onclick="switchTab('sound')">03 サウンド設計</button>
+  <button class="tab-btn" onclick="switchTab('delivery')">04 納品仕様</button>
+  <button class="tab-btn" onclick="switchTab('core')">05 封印コア設計</button>
+  <button class="tab-btn" onclick="switchTab('rights')">06 著作権・契約条件</button>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     01 演出文法
+══════════════════════════════════════════════ -->
+<div id="tab-grammar" class="tab-content active" data-title="01 演出文法">
+
+  <p class="sec-title">A. 色示唆（等賞の示唆）</p>
+  <div class="dot-row"><span class="dot" style="background:#C8C8C2;border:1px solid #aaa;"></span><span class="label">白</span><span class="desc">ハズレ</span></div>
+  <div class="dot-row"><span class="dot" style="background:var(--teal-main);"></span><span class="label">緑</span><span class="desc">アド確定。まれにD賞</span></div>
+  <div class="dot-row"><span class="dot" style="background:var(--coral-main);"></span><span class="label">赤</span><span class="desc">C〜D賞確定。まれにB賞</span></div>
+  <div class="dot-row"><span class="dot" style="background:var(--amber-main);"></span><span class="label">金</span><span class="desc">A〜B賞確定</span></div>
+  <div class="dot-row"><span class="dot" style="background:var(--purple-main);"></span><span class="label">虹</span><span class="desc">S〜A賞確定</span></div>
+
+  <p class="sec-title">B. 封印状態（熱さの示唆）</p>
+  <div class="seal-row"><div class="seal-main">無傷 / 光なし</div><div class="seal-sub">熱さ最低。デフォルト状態</div></div>
+  <div class="seal-row"><div class="seal-main">微細ヒビ / 光が弱く漏れる</div><div class="seal-sub">兆候あり</div></div>
+  <div class="seal-row"><div class="seal-main">複数ヒビ / 光が少し強く漏れる</div><div class="seal-sub">期待上昇</div></div>
+  <div class="seal-row hot"><div class="seal-main">破断直前 / 光が強く漏れる</div><div class="seal-sub">激熱サイン</div></div>
+
+  <p class="sec-title">C. チャンスアップ部品</p>
+  <div class="grid-3">
+    <div class="card card-teal">
+      <div class="card-label" style="color:var(--teal-600);">熱さ弱（緑〜赤）</div>
+      <div class="card-val" style="color:var(--teal-600);">カットイン</div>
+      <div class="card-sub">アケルの画像がカットイン<br>素材は制作済み・共有可</div>
+    </div>
+    <div class="card card-amber">
+      <div class="card-label" style="color:var(--amber-600);">熱さ強（赤〜金）</div>
+      <div class="card-val" style="color:var(--amber-600);">① 告知演出強</div>
+      <div class="card-sub">暗転→テキスト表示<br>「チャンスじゃない？」<br>アケルの声（未制作）</div>
+      <div class="card-val" style="color:var(--amber-600); margin-top:10px;">② シャッター</div>
+      <div class="card-sub">吉宗ふすま演出参考<br>シャッター閉→印がぶつかる</div>
+    </div>
+    <div class="card card-purple">
+      <div class="card-label" style="color:var(--purple-600);">激熱（金〜虹）</div>
+      <div class="card-val" style="color:var(--purple-600);">① アケル登場</div>
+      <div class="card-sub">歩き入り→ベルを鳴らす</div>
+      <div class="card-val" style="color:var(--purple-600); margin-top:10px;">② 逆転演出</div>
+      <div class="card-sub">カットM延長+違和感<br>→ブラックアウト→大当たり<br>虹確定</div>
+    </div>
+  </div>
+
+  <p class="sec-title">D. 文法の軸ルール</p>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-label">音文法</div>
+      <div class="card-val">ミュートでも成立する設計を優先</div>
+      <div class="card-sub">視覚の確定合図を主軸に置く</div>
+    </div>
+    <div class="card">
+      <div class="card-label">カメラ文法</div>
+      <div class="card-val">ズーム / スロー / 振動で熱量を作る</div>
+      <div class="card-sub">音に合わせてカメラを動かす</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     02 カット仕様
+══════════════════════════════════════════════ -->
+<div id="tab-cuts" class="tab-content" data-title="02 カット仕様">
+
+  <div class="cut-card">
+    <div class="cut-header">
+      <span class="cut-title">カットS　Hook / 導入</span>
+      <span class="cut-badge" style="background:var(--gray-100);color:var(--gray-900);">〜3秒</span>
+    </div>
+    <div class="cut-grid">
+      <div class="cut-meta"><span>優先：</span>テンポ ＞ 最小ブランド</div>
+      <div class="cut-meta"><span>目的：</span>離脱・スキップされない掴み</div>
+    </div>
+    <hr class="cut-sep">
+    <div class="cut-do">やること：祭壇出現 → 封印核（署名）浮遊・静止</div>
+    <div class="cut-dont">やらないこと：署名提示以外すべて禁止</div>
+  </div>
+
+  <div class="cut-card">
+    <div class="cut-header">
+      <span class="cut-title">カットM　示唆</span>
+      <span class="cut-badge" style="background:var(--gray-100);color:var(--gray-900);">6〜8秒（+3〜5秒）</span>
+    </div>
+    <div class="cut-grid">
+      <div class="cut-meta"><span>優先：</span>期待 ＞ テンポ ＞ ブランド ＞ 脳汁</div>
+      <div class="cut-meta"><span>目的：</span>期待・熱さを上げる</div>
+    </div>
+    <hr class="cut-sep">
+    <div class="cut-do">やること：ベル合図 → 円環+ルーン出現 → 回転+ヒビ示唆 → カットL or XLへ</div>
+    <div class="cut-dont">やらないこと：長い前兆・フェイント・キャラ本体登場・強そうな要素・逆転多用・最上位別表現（虹核/二重刻印）</div>
+  </div>
+
+  <div class="cut-card" style="border-color:var(--gray-200);">
+    <div class="cut-header">
+      <span class="cut-title">カットL　発展なし確定 / ハズレ</span>
+      <span class="cut-badge" style="background:var(--gray-600);color:#fff;">8〜12秒（+2〜4秒）</span>
+    </div>
+    <div class="cut-grid">
+      <div class="cut-meta"><span>優先：</span>テンポ最優先</div>
+      <div class="cut-meta"><span>目的：</span>発展なしで気持ちよく確定</div>
+    </div>
+    <hr class="cut-sep">
+    <div class="cut-do">演出：封印核破断 → 白確定表示 → 結果UIへ</div>
+    <div class="cut-dont">やらないこと：確定前の長い溜め禁止</div>
+  </div>
+
+  <div class="cut-card" style="border-color:var(--amber-200);">
+    <div class="cut-header">
+      <span class="cut-title">カットXL　チャンスアップ</span>
+      <span class="cut-badge" style="background:var(--amber-main);color:var(--amber-50);">11〜15秒（+5〜7秒）</span>
+    </div>
+    <div class="cut-grid">
+      <div class="cut-meta"><span>優先：</span>脳汁 ＞ 期待 ＞ ブランド ＞ テンポ</div>
+      <div class="cut-meta"><span>目的：</span>脳汁スイッチ。終了 or 発展</div>
+    </div>
+    <hr class="cut-sep">
+    <div class="cut-do">やること：破断直前+チャンスアップ部品。記念カット（スクショ映え）・SNS映え1ポイント必須</div>
+    <div class="cut-dont">やらないこと：強い煽り後の弱結果・「破断っぽいのに破断しない」連発</div>
+  </div>
+
+  <div class="cut-card" style="border-color:var(--purple-200);">
+    <div class="cut-header">
+      <span class="cut-title">カットE　発展あり確定 / 祝福</span>
+      <span class="cut-badge" style="background:var(--purple-main);color:var(--purple-50);">16〜22秒（+5〜7秒）</span>
+    </div>
+    <div class="cut-grid">
+      <div class="cut-meta"><span>優先：</span>脳汁最大 ＞ ブランド記憶 ＞ 祝福 ＞ テンポ</div>
+      <div class="cut-meta"><span>目的：</span>当たり価値の最大増幅</div>
+    </div>
+    <hr class="cut-sep">
+    <div class="cut-do">演出：ベル → 激しい円環+ルーン → 強ヒビ+光 → 破断 → 色確定 → Celebrate → 結果UIへ。祝福は確定後に厚く。記念カット必須。</div>
+    <div class="cut-dont">やらないこと：Eで確定しない・確定前の長い溜め禁止</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     03 サウンド設計
+══════════════════════════════════════════════ -->
+<div id="tab-sound" class="tab-content" data-title="03 サウンド設計">
+
+  <p class="sec-title">インタラクション設計</p>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-label">音ON/OFF</div>
+      <div class="card-val">開始前ポップアップ → タップでスタート</div>
+      <div class="card-sub">再生時は音ありでスタート<br>右上アイコンでON/OFF操作可<br>自動設定保存なし</div>
+    </div>
+    <div class="card">
+      <div class="card-label">スキップ</div>
+      <div class="card-val">全パターンスキップ可能</div>
+      <div class="card-sub">最初から可能。ボタンは下部配置<br>スキップ後：実カードを提示し結果UIへ<br>10連：最高Tier演出のみ1本表示</div>
+    </div>
+  </div>
+
+  <p class="sec-title">BGM設計</p>
+  <div class="badge-row">
+    <div class="br-badge" style="background:var(--gray-100);color:var(--gray-900);">カットS+M</div>
+    <div class="br-body"><div class="br-title">通常BGM（ループ）</div><div class="br-sub">軽快なイメージ。祭壇+円環の雰囲気。参考：秘宝伝チャンスゾーン</div></div>
+  </div>
+  <div class="badge-row">
+    <div class="br-badge" style="background:var(--amber-200);color:var(--amber-600);">カットXL</div>
+    <div class="br-body"><div class="br-title">チャンスBGM</div><div class="br-sub">通常BGMと同傾向。チャンスアップ演出を活かすため若干ボリューム下げも検討</div></div>
+  </div>
+  <div class="badge-row">
+    <div class="br-badge" style="background:var(--gray-600);color:#fff;">カットL</div>
+    <div class="br-body"><div class="br-title">発展なし確定BGM</div><div class="br-sub">結果確定のイメージ。ハズレなので派手さ控えめ</div></div>
+  </div>
+  <div class="badge-row">
+    <div class="br-badge" style="background:var(--purple-main);color:var(--purple-50);">カットE</div>
+    <div class="br-body"><div class="br-title">発展あり確定BGM</div><div class="br-sub">結果確定のイメージ。当たりなのでLより盛大に</div></div>
+  </div>
+
+  <p class="sec-title">SE設計</p>
+  <div class="badge-row">
+    <div class="br-badge" style="background:var(--gray-50);color:var(--gray-600);font-size:10px;">カットS</div>
+    <div class="br-body"><div class="br-title">通常SE</div><div class="br-sub">① 祭壇の出現音　② 封印核（浮遊核）の出現音</div></div>
+  </div>
+  <div class="badge-row">
+    <div class="br-badge" style="background:var(--gray-50);color:var(--gray-600);font-size:10px;">カットM</div>
+    <div class="br-body"><div class="br-title">通常SE</div><div class="br-sub">① ベルが鳴る音　② 円環+ルーンが現れる音　③ 回転+封印シールを破ろうとする音（ループ）　④ 微細ヒビが入る音</div></div>
+  </div>
+  <div class="badge-row">
+    <div class="br-badge" style="background:var(--amber-50);color:var(--amber-600);font-size:10px;">カットXL</div>
+    <div class="br-body">
+      <div class="br-title">チャンスアップ別SE</div>
+      <div class="br-sub" style="margin-top:4px;">
+        <b>カットイン：</b>画像がカットインする音<br>
+        <b>告知演出強：</b>暗転音 / テキスト表示音 / 告知音 / テキスト読み上げ声（重ければ初期はなし）<br>
+        <b>シャッター：</b>シャッター閉まる音 / 印がぶつかる音 / シャッターが開く音<br>
+        <b>アケル登場：</b>出現音 / 歩く音 / ベル→響く音<br>
+        <b>逆転演出：</b>違和感音（must非必須）/ ブラックアウト音 / 暗転後の鼓動音 / 結果を大げさに表現する音
+      </div>
+    </div>
+  </div>
+  <div class="badge-row">
+    <div class="br-badge" style="background:var(--gray-50);color:var(--gray-600);font-size:10px;">カットL</div>
+    <div class="br-body"><div class="br-title">確定SE</div><div class="br-sub">① 封印核が破断する音　② 色確定+表示音</div></div>
+  </div>
+  <div class="badge-row">
+    <div class="br-badge" style="background:var(--purple-50);color:var(--purple-600);font-size:10px;">カットE</div>
+    <div class="br-body"><div class="br-title">祝福SE</div><div class="br-sub">① ベルが鳴る音　② 円環+ルーンが激しく回転する音　③ 大きくヒビが入る音+光が漏れる音　④ 封印核が破断する音　⑤ 色確定+表示音　⑥ 祝福/Celebrate（派手に）</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     04 納品仕様
+══════════════════════════════════════════════ -->
+<div id="tab-delivery" class="tab-content" data-title="04 納品仕様">
+
+  <p class="sec-title">基本スペック</p>
+  <table class="spec-table">
+    <tr><td class="spec-lbl">フォーマット</td><td class="spec-val">MP4（H.264 / AAC）</td><td class="spec-lbl">フレームレート</td><td class="spec-val">24fps</td></tr>
+    <tr><td class="spec-lbl">解像度</td><td class="spec-val">720 × 1280（9:16縦型）</td><td class="spec-lbl">ビットレート</td><td class="spec-val">平均 3〜4Mbps</td></tr>
+    <tr><td class="spec-lbl">ファイルサイズ</td><td class="spec-val">最大 20MB / 本</td><td class="spec-lbl">表示基準</td><td class="spec-val">スマホ基準（PCも同様）</td></tr>
+  </table>
+
+  <div class="warn-box">非対応：WebGL等のリアルタイム3D合成・背景透過動画・PNG連番アニメ（スプライト）などの素材納品形式は不可</div>
+
+  <p class="sec-title">最終納品物</p>
+  <div class="card" style="margin-bottom:10px;">
+    <div class="card-label">① 完成済みMP4 一式（3D含む）</div>
+    <div class="card-sub">演出7本すべて。3D/2D/エフェクト/テキスト等を焼き込んだ単一MP4として納品。レイヤー分割・実装側合成は行わない。</div>
+  </div>
+  <div class="card">
+    <div class="card-label">② 素材一式リスト</div>
+    <div class="card-sub">
+      制作・使用した全素材を編集可能な形式で保管（封印シール・ベル・ルーンなど）<br>
+      BGM/SE の元音源<br>
+      カット構成と素材の対応表<br>
+      第三者素材がある場合は買い取り/再利用可能な形で提出
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     05 封印コア設計
+══════════════════════════════════════════════ -->
+<div id="tab-core" class="tab-content" data-title="05 封印コア設計">
+
+  <p class="sec-title">ブランド核・体験核</p>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-label">核モチーフ</div>
+      <div class="card-val">中央核：封印シール（サイト名/ロゴ入り）</div>
+      <div class="card-sub">外形：パック封印核（小さなパック形状）</div>
+    </div>
+    <div class="card">
+      <div class="card-label">体験核（舞台世界観）</div>
+      <div class="card-sub">祭壇（神域）<br>封印の光（神性）<br>円環/ルーン文字（結界/術式）</div>
+    </div>
+  </div>
+
+  <p class="sec-title">アケルの役割定義</p>
+  <div class="card">
+    <div class="card-val">封印解除のカードパック妖精。解放者・ユーザーの味方</div>
+    <div class="card-sub" style="margin-top:6px;">手/装置/司会役＝「解除の起点」を作る存在<br>レアなときのみ本体が出演（声/ベルを鳴らすなど）</div>
+  </div>
+
+  <p class="sec-title">「解放」の物語ライン</p>
+  <div class="flow-line">
+    <span class="flow-pill">貼られている</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-pill">ヒビが入る</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-pill warm">光が漏れる</span>
+    <span class="flow-arrow">→</span>
+    <span class="flow-pill active">解放</span>
+  </div>
+
+  <p class="sec-title">演出の5つの役割</p>
+  <div class="role-row"><div class="role-badge card-teal" style="color:var(--teal-600);">期待</div><div class="role-body">当たりが近い「感じ」を段階で作る。M/XLが主戦場</div></div>
+  <div class="role-row"><div class="role-badge card-amber" style="color:var(--amber-600);">報酬強化</div><div class="role-body">当たりのうれしさを増幅。XLが主戦場（Mでやりすぎない）</div></div>
+  <div class="role-row"><div class="role-badge card-gray" style="color:var(--gray-600);">テンポ</div><div class="role-body">気持ちよく次に回したくさせる。Mが主戦場。スキップは最初から可</div></div>
+  <div class="role-row"><div class="role-badge card-purple" style="color:var(--purple-600);">ブランド体験</div><div class="role-body">世界観/キャラ/トーンを記憶させる。Sで署名表示、Mで記憶に焼く</div></div>
+  <div class="role-row"><div class="role-badge card-red" style="color:var(--red-main);">信頼（最重要）</div><div class="role-body">「強さの表現」をカット階層で制限する。誤解されやすいが最重要</div></div>
+
+  <p class="sec-title">質感の統一ルール</p>
+  <div class="grid-2">
+    <div class="card card-gray"><div class="card-sub">封印は「割る」に固定</div></div>
+    <div class="card card-gray"><div class="card-sub">見た目：パック封印核 + 封印シール + 光 + 亀裂（背景固定）</div></div>
+    <div class="card card-gray"><div class="card-sub">光の出方：亀裂から漏れ出す光の強さで示唆</div></div>
+    <div class="card card-gray"><div class="card-sub">レア度の文法は「封印状態」で表現（色は後付け）</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     06 著作権・契約条件
+══════════════════════════════════════════════ -->
+<div id="tab-rights" class="tab-content" data-title="06 著作権・契約条件">
+
+  <div class="warn-box">著作権譲渡不可の場合、以下の条件をすべて契約に明記することが必須</div>
+
+  <div class="right-row"><div class="rr-key">A</div><div class="rr-body"><div class="rr-title">永続的な利用（期限なし）</div><div class="rr-desc">サービスが継続運用・長期前提のため。期限付きライセンスは不可</div></div></div>
+  <div class="right-row"><div class="rr-key">B</div><div class="rr-body"><div class="rr-title">改変・編集・再構成が可能</div><div class="rr-desc">チャンスアップ追加・尺/構成/演出順の変更・一部差し替えが将来的に確実に必要なため</div></div></div>
+  <div class="right-row"><div class="rr-key">C</div><div class="rr-body"><div class="rr-title">二次利用・商用利用が可能（媒体追加）</div><div class="rr-desc">LP・告知ページ・SNS・広告・将来の別UIなどで使うため</div></div></div>
+  <div class="right-row"><div class="rr-key">D</div><div class="rr-body"><div class="rr-title">第三者への再委託（再許諾）が可能</div><div class="rr-desc">制作者が変わる前提（依頼が難しくなるケースを加味）。別会社への改修/追加制作依頼のため</div></div></div>
+  <div class="right-row"><div class="rr-key">E</div><div class="rr-body"><div class="rr-title">著作者人格権の不行使</div><div class="rr-desc">改変・再委託に対する後のトラブル防止。「その改変は想定外」などの後からの主張変更を防ぐため</div></div></div>
+  <div class="right-row"><div class="rr-key">F</div><div class="rr-body"><div class="rr-title">第三者素材の条件</div><div class="rr-desc">BGM/SE/フォント/プラグインが再委託不可だと全体が詰むため。使用素材は「商用利用可・改変可・二次利用可・再委託可」をすべて満たすこと。素材一覧とライセンス条件の明示が必須</div></div></div>
+  <div class="right-row"><div class="rr-key">G+H</div><div class="rr-body"><div class="rr-title">本件成果物の扱いと再利用禁止</div><div class="rr-desc">本件向けに制作・加工したすべての素材/エフェクト/UIは成果物扱い。映像・演出構成・素材の他案件転用は禁止（ノウハウ/スキルの再利用は可）</div></div></div>
+  <div class="right-row"><div class="rr-key">I</div><div class="rr-body"><div class="rr-title">制作元データ・素材の取り扱い</div><div class="rr-desc">制作・使用した素材/音源/プロジェクトは、契約で定めた納品物以外に第三者提供禁止</div></div></div>
+</div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`[onclick="switchTab('${id}')"]`).classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+</script>
+</body>
+</html>
