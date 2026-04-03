@@ -1,0 +1,161 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-sans,sans-serif);}
+.wrap{padding:1rem 0;}
+h2{font-size:18px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px;}
+.sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:1.5rem;}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem;}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px;}
+.metric-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px;}
+.metric-val{font-size:22px;font-weight:500;color:var(--color-text-primary);}
+.metric-val.green{color:#1D9E75;}
+.table-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:1.5rem;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:var(--color-background-secondary);padding:8px 12px;text-align:left;font-weight:500;color:var(--color-text-secondary);font-size:12px;border-bottom:0.5px solid var(--color-border-tertiary);}
+td{padding:9px 12px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:100px;}
+.sss{background:#FAEEDA;color:#633806;}
+.ss{background:#E6F1FB;color:#0C447C;}
+.s{background:#EAF3DE;color:#27500A;}
+.a{background:#E1F5EE;color:#085041;}
+.b{background:#EEEDFE;color:#3C3489;}
+.c{background:#F1EFE8;color:#444441;}
+.num{text-align:right;}
+.bold{font-weight:500;}
+.bar-wrap{margin-bottom:1.5rem;}
+.bar-title{font-size:13px;font-weight:500;color:var(--color-text-secondary);margin-bottom:8px;}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px;}
+.bar-label{width:130px;color:var(--color-text-secondary);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bar-track{flex:1;background:var(--color-background-secondary);border-radius:4px;height:10px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;}
+.bar-amt{width:60px;text-align:right;color:var(--color-text-primary);font-weight:500;}
+.note{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 14px;font-size:12px;color:var(--color-text-secondary);line-height:1.7;}
+.note strong{color:var(--color-text-primary);font-weight:500;}
+.prob{font-size:11px;color:var(--color-text-secondary);}
+</style>
+<div class="wrap">
+<h2>ポケカ自販機ガチャ 封入設計書</h2>
+<p class="sub">270口 × 1,000円 ／ 原価率50% ／ 総原価上限 135,000円</p>
+
+<div class="metrics">
+  <div class="metric"><div class="metric-label">総口数</div><div class="metric-val">270</div></div>
+  <div class="metric"><div class="metric-label">販売総額</div><div class="metric-val">270,000<span style="font-size:13px;font-weight:400;">円</span></div></div>
+  <div class="metric"><div class="metric-label">原価合計</div><div class="metric-val">134,060<span style="font-size:13px;font-weight:400;">円</span></div></div>
+  <div class="metric"><div class="metric-label">粗利（予想）</div><div class="metric-val green">135,940<span style="font-size:13px;font-weight:400;">円</span></div></div>
+</div>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+  <th>グレード</th>
+  <th>封入カード（仕入根拠）</th>
+  <th class="num">口数</th>
+  <th class="num">確率</th>
+  <th class="num">仕入単価</th>
+  <th class="num">小計</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><span class="badge sss">SSS 大大当たり</span></td>
+  <td class="bold">ゲッコウガex SAR（ニンジャスピナー）<br><span class="prob">カードラッシュ買取相場 ~45,000円 ／ 販売相場 ~60,000円</span></td>
+  <td class="num bold">1</td>
+  <td class="num">0.37%</td>
+  <td class="num">¥50,000</td>
+  <td class="num bold">¥50,000</td>
+</tr>
+<tr>
+  <td><span class="badge ss">SS 大当たり</span></td>
+  <td class="bold">メガゲンガーex SAR（MEGAドリームex）<br><span class="prob">MEGAドリームex トップレア ／ 販売相場 ~25,000〜30,000円</span></td>
+  <td class="num bold">1</td>
+  <td class="num">0.37%</td>
+  <td class="num">¥20,000</td>
+  <td class="num bold">¥20,000</td>
+</tr>
+<tr>
+  <td><span class="badge ss">SS 大当たり</span></td>
+  <td class="bold">ルカリオex SAR（インフェルノX等）<br><span class="prob">人気キャラSAR ／ 販売相場 ~10,000〜12,000円</span></td>
+  <td class="num bold">1</td>
+  <td class="num">0.37%</td>
+  <td class="num">¥9,000</td>
+  <td class="num bold">¥9,000</td>
+</tr>
+<tr>
+  <td><span class="badge s">S 中当たり</span></td>
+  <td class="bold">ナンジャモ SAR（サポートカード）<br><span class="prob">人気サポートSAR ／ 販売相場 ~6,000〜8,000円</span></td>
+  <td class="num bold">1</td>
+  <td class="num">0.37%</td>
+  <td class="num">¥5,000</td>
+  <td class="num bold">¥5,000</td>
+</tr>
+<tr>
+  <td><span class="badge s">S 中当たり</span></td>
+  <td class="bold">リザードンex RRR（黒炎の支配者等）<br><span class="prob">人気キャラ高レアリティ ／ 販売相場 ~3,500〜5,000円</span></td>
+  <td class="num bold">1</td>
+  <td class="num">0.37%</td>
+  <td class="num">¥3,000</td>
+  <td class="num bold">¥3,000</td>
+</tr>
+<tr>
+  <td><span class="badge a">A 中当たり</span></td>
+  <td>ピカチュウex RRR（MEGAシリーズ等）×2<br><span class="prob">販売相場 ~1,500〜2,000円 ／ イーブイ AR ×1（~1,500〜2,000円）</span><br>イーブイ AR（スタートデッキ100 バトルコレクション）×1</td>
+  <td class="num bold">3</td>
+  <td class="num">1.11%</td>
+  <td class="num">¥1,500</td>
+  <td class="num bold">¥4,500</td>
+</tr>
+<tr>
+  <td><span class="badge a">A 中当たり</span></td>
+  <td>ミミッキュex RR ／ ゲンガーex RR 等 希望キャラRR<br><span class="prob">販売相場 ~400〜800円 ／ 人気キャラを中心に選定</span></td>
+  <td class="num bold">4</td>
+  <td class="num">1.48%</td>
+  <td class="num">¥500</td>
+  <td class="num bold">¥2,000</td>
+</tr>
+<tr>
+  <td><span class="badge b">B 小当たり</span></td>
+  <td class="bold">未開封パック 1パック（ニンジャスピナー or インフェルノX）<br><span class="prob">定価パック ／ 小当たりとして高い満足感</span></td>
+  <td class="num bold">20</td>
+  <td class="num">7.41%</td>
+  <td class="num">¥600</td>
+  <td class="num bold">¥12,000</td>
+</tr>
+<tr>
+  <td><span class="badge c">C ハズレ</span></td>
+  <td>希望キャラ RR 2枚セット<br><span class="prob">リザードンex RR ／ ピカチュウex RR ／ ゲッコウガex RR 等から2枚封入</span></td>
+  <td class="num bold">238</td>
+  <td class="num">88.15%</td>
+  <td class="num">¥120</td>
+  <td class="num bold">¥28,560</td>
+</tr>
+<tr style="background:var(--color-background-secondary);">
+  <td colspan="2" class="bold">合計</td>
+  <td class="num bold">270</td>
+  <td class="num bold">100%</td>
+  <td class="num">—</td>
+  <td class="num bold">¥134,060</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="bar-wrap">
+<div class="bar-title">原価構成 内訳</div>
+<div class="bar-row"><div class="bar-label">SSS ゲッコウガex SAR</div><div class="bar-track"><div class="bar-fill" style="width:37.3%;background:#EF9F27;"></div></div><div class="bar-amt">¥50,000</div></div>
+<div class="bar-row"><div class="bar-label">SS 大当たり×2</div><div class="bar-track"><div class="bar-fill" style="width:21.6%;background:#378ADD;"></div></div><div class="bar-amt">¥29,000</div></div>
+<div class="bar-row"><div class="bar-label">S 中当たり×2</div><div class="bar-track"><div class="bar-fill" style="width:6%;background:#639922;"></div></div><div class="bar-amt">¥8,000</div></div>
+<div class="bar-row"><div class="bar-label">A 中当たり×7</div><div class="bar-track"><div class="bar-fill" style="width:4.9%;background:#1D9E75;"></div></div><div class="bar-amt">¥6,500</div></div>
+<div class="bar-row"><div class="bar-label">B 小当たり×20</div><div class="bar-track"><div class="bar-fill" style="width:9%;background:#7F77DD;"></div></div><div class="bar-amt">¥12,000</div></div>
+<div class="bar-row"><div class="bar-label">C ハズレ×238</div><div class="bar-track"><div class="bar-fill" style="width:21.3%;background:#888780;"></div></div><div class="bar-amt">¥28,560</div></div>
+</div>
+
+<div class="note">
+<strong>仕入先・価格根拠（2026年4月3日時点）</strong><br>
+ゲッコウガex SAR：カードラッシュ買取相場 45,000円（3月24日）→ 仕入目安 50,000円。メガゲンガーex SAR / ルカリオex SAR：MEGAドリームex / インフェルノXのSARレンジから推定。ピカチュウex RR買取価格は約100円（ポケカチ調べ）のため、ハズレの2枚セットは仕入120円は複数枚セット購入時の実勢価格を想定。<br><br>
+<strong>ハズレRRカードの仕入方法：</strong>カードラッシュ・駿河屋・メルカリ等での大量まとめ購入が推奨。希望キャラ（ピカチュウ・リザードン・ゲッコウガ等）のRRを中心にセット購入すると集客力を維持しつつ原価を抑えられる。<br><br>
+<strong>注意：</strong>SAR等の高額カードの相場は日々変動します。仕入れ時に必ず最新価格を確認し、予算超過しないよう調整してください。
+</div>
+</div>
