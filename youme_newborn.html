@@ -57,32 +57,33 @@
       z-index: 100;
     }
     .fixed-cta a {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: var(--amber);
+      display: block;
+      background: var(--line-green);
       color: white;
       writing-mode: vertical-rl;
+      text-orientation: mixed;
       padding: 28px 13px;
       font-size: 12px;
       letter-spacing: 0.18em;
       font-family: 'Noto Sans JP', sans-serif;
       font-weight: 400;
-      gap: 10px;
       transition: background 0.3s;
       cursor: pointer;
+      text-align: center;
+      line-height: 1.6;
     }
-    .fixed-cta a:hover { background: #BF7540; }
+    .fixed-cta a:hover { background: #05b24b; }
     .fixed-cta .line-badge {
+      display: inline-block;
       writing-mode: horizontal-tb;
       font-size: 10px;
       font-weight: 500;
       background: white;
-      color: var(--amber);
+      color: var(--line-green);
       border-radius: 2px;
-      padding: 2px 4px;
+      padding: 3px 5px;
       letter-spacing: 0;
+      margin-bottom: 10px;
     }
 
     /* ===== HEADER ===== */
