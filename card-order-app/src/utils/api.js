@@ -1,5 +1,5 @@
 // GAS WebApp URL
-export const GAS_URL = "https://script.google.com/macros/s/AKfycbwac6Wd1B_gQnJzZO_nufUakuZYzw8QCgsroThiA8OHE3fbgEyKSL0NspGvmSjPQe09Yg/exec";
+export const GAS_URL = "https://script.google.com/macros/s/AKfycbyaPDonzM9PGUoL7Sw7YqHnitYJS4nOa6NPeD6e_CX7G2jFtN8PcTsAnaoGlQLZesWc0g/exec";
 export const API_SECRET = "palette369secret";
 
 export async function apiGet(action, params = {}) {
