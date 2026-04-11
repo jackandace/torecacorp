@@ -55,16 +55,16 @@ export default function AdminPage() {
       const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
       const dataRows = rows.slice(1).filter(r => r[1]);
       const parsed = dataRows.map(r => ({
-        title: r[1] || "",
-        fullName: r[2] || "",
-        modelNumber: r[3] || "",
-        qty: r[4] || "",
-        deadline: r[5] ? new Date(r[5]).toLocaleDateString("ja-JP") : "",
-        rate: r[6] ? `${Math.round(r[6] * 100)}%` : "",
-        price: r[7] || "",
-        cutType: r[8] || "",
-        notes: r[9] || ""
-      }));
+          title: r[1] || "",
+          fullName: r[2] || "",
+          modelNumber: r[3] || "",
+          qty: r[4] || "",
+          deadline: r[5] || "",
+          rate: r[6] ? (String(r[6]).includes("%") ? r[6] : `${Math.round(parseFloat(r[6]) * 100)}%`) : "",
+          price: r[7] || "",
+          cutType: r[8] || "",
+          notes: r[9] || ""
+        }));
       setPreview(parsed);
       setTab("upload");
     };
