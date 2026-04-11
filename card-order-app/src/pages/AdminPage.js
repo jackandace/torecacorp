@@ -50,9 +50,9 @@ export default function AdminPage() {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (evt) => {
-      const wb = XLSX.read(evt.target.result, { type: "binary" });
+      const wb = XLSX.read(evt.target.result, { type: "binary", cellDates: true });
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(ws, { header: 1 });
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, dateNF: "yyyy/mm/dd" });
       const dataRows = rows.slice(1).filter(r => r[1]);
       const parsed = dataRows.map(r => ({
           title: r[1] || "",
