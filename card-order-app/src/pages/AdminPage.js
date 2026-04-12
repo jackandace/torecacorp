@@ -16,7 +16,7 @@ function Toast({ message, type, onClose }) {
 export default function AdminPage() {
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState("inventory"); // inventory | upload | settings
+  const [tab, setTab] = useState("inventory");
   const [items, setItems] = useState([]);
   const [preview, setPreview] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,23 +55,23 @@ export default function AdminPage() {
       const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, dateNF: "yyyy/mm/dd" });
       const dataRows = rows.slice(1).filter(r => r[1]);
       const parsed = dataRows.map(r => ({
-          title: r[1] || "",
-          fullName: r[2] || "",
-          modelNumber: r[3] || "",
-          qty: r[4] || "",
-          deadline: r[5] ? String(r[5]).replace(/(\d+)\/(\d+)\/(\d+)/, (_, m, d, y) => `20${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`) : "",
-          rate: (() => {
-              const v = r[6];
-              if (!v) return "";
-              const s = String(v);
-              if (s.includes("%")) return s;
-              const n = parseFloat(s);
-              return !isNaN(n) ? `${Math.round(n * 100)}%` : s;
-            })(),
-          price: r[7] || "",
-          cutType: r[8] || "",
-          notes: r[9] || ""
-        }));
+        title: r[1] || "",
+        fullName: r[2] || "",
+        modelNumber: r[3] || "",
+        qty: r[4] || "",
+        deadline: r[5] ? String(r[5]).replace(/(\d+)\/(\d+)\/(\d+)/, (_, m, d, y) => `20${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`) : "",
+        rate: (() => {
+          const v = r[6];
+          if (!v) return "";
+          const s = String(v);
+          if (s.includes("%")) return s;
+          const n = parseFloat(s);
+          return !isNaN(n) ? `${Math.round(n * 100)}%` : s;
+        })(),
+        price: r[7] || "",
+        cutType: r[8] || "",
+        notes: r[9] || ""
+      }));
       setPreview(parsed);
       setTab("upload");
     };
@@ -82,12 +82,12 @@ export default function AdminPage() {
     try {
       await apiPost("uploadItems", { items: preview });
       const result = await apiPost("approveItems", {});
-      showToast(`${result.addedCount}件を在庫マスターに反映しました`);
+      showToast(`${result.addedCount}件反映・${result.skippedCount || 0}件スキップ`);
       setPreview([]);
       setTab("inventory");
       await loadAll();
     } catch (err) {
-      showToast("反映に失敗しました", "error");
+      showToast("反映に失敗しました：" + (err.message || "不明なエラー"), "error");
     }
   };
 
@@ -169,16 +169,18 @@ export default function AdminPage() {
                 <table className="inventory-table">
                   <thead>
                     <tr>
-                      <th>追加日</th>
                       <th>公開</th>
                       <th>承認</th>
+                      <th>追加日</th>
                       <th>タイトル</th>
+                      <th>商品名（フル）</th>
                       <th>型番</th>
-                      <th>入荷予定数</th>
+                      <th>発注可能数</th>
                       <th>受注済み</th>
                       <th>残在庫</th>
                       <th>締切日</th>
                       <th>掛率</th>
+                      <th>定価</th>
                       <th>区分</th>
                       <th>ステータス</th>
                       <th>備考</th>
@@ -195,7 +197,6 @@ export default function AdminPage() {
                             {item.visible ? "公開" : "非公開"}
                           </button>
                         </td>
-                        <td>{item.registeredAt || "—"}</td>
                         <td>
                           <button
                             className={`toggle-btn ${item.approved ? "on" : "off"}`}
@@ -204,12 +205,22 @@ export default function AdminPage() {
                             {item.approved ? "承認済" : "未承認"}
                           </button>
                         </td>
+                        <td className="cell-date">{item.registeredAt || "—"}</td>
                         <td className="cell-title">
                           <EditableCell
                             value={item.title}
                             isEditing={editingCell === `${i}-title`}
                             onEdit={() => setEditingCell(`${i}-title`)}
                             onSave={v => handleCellEdit(i, "title", v)}
+                            onCancel={() => setEditingCell(null)}
+                          />
+                        </td>
+                        <td className="cell-fullname">
+                          <EditableCell
+                            value={item.fullName || "—"}
+                            isEditing={editingCell === `${i}-fullName`}
+                            onEdit={() => setEditingCell(`${i}-fullName`)}
+                            onSave={v => handleCellEdit(i, "fullName", v)}
                             onCancel={() => setEditingCell(null)}
                           />
                         </td>
@@ -224,17 +235,16 @@ export default function AdminPage() {
                         </td>
                         <td>
                           <EditableCell
-                            value={item.plannedQty || "要確認"}
+                            value={String(item.plannedQty || "要確認")}
                             isEditing={editingCell === `${i}-qty`}
                             onEdit={() => setEditingCell(`${i}-qty`)}
                             onSave={v => handleCellEdit(i, "plannedQty", v)}
                             onCancel={() => setEditingCell(null)}
-                            type="number"
                           />
                         </td>
                         <td>{item.orderedQty || 0}</td>
                         <td className={Number(item.remainingQty) <= 0 ? "cell-soldout" : Number(item.remainingQty) <= 20 ? "cell-low" : ""}>
-                          {item.remainingQty ?? "—"}
+                          {item.remainingQty !== "" ? item.remainingQty : "—"}
                         </td>
                         <td>
                           <EditableCell
@@ -246,6 +256,15 @@ export default function AdminPage() {
                           />
                         </td>
                         <td>{item.rate || "—"}</td>
+                        <td className="cell-price">
+                          <EditableCell
+                            value={item.price || "—"}
+                            isEditing={editingCell === `${i}-price`}
+                            onEdit={() => setEditingCell(`${i}-price`)}
+                            onSave={v => handleCellEdit(i, "price", v)}
+                            onCancel={() => setEditingCell(null)}
+                          />
+                        </td>
                         <td>
                           <span className={`badge ${item.cutType?.includes("配分") ? "badge-gold" : "badge-red"}`}>
                             {item.cutType || "—"}
@@ -314,7 +333,7 @@ export default function AdminPage() {
                       <thead>
                         <tr>
                           <th>タイトル</th>
-                          <th>商品名</th>
+                          <th>商品名（フル）</th>
                           <th>型番</th>
                           <th>発注可能数</th>
                           <th>締切日</th>
@@ -328,13 +347,17 @@ export default function AdminPage() {
                         {preview.map((item, i) => (
                           <tr key={i}>
                             <td className="cell-title">{item.title}</td>
-                            <td>{item.fullName}</td>
+                            <td className="cell-fullname">{item.fullName || "—"}</td>
                             <td>{item.modelNumber || "—"}</td>
                             <td>{item.qty || <span className="cell-warn">要確認</span>}</td>
                             <td>{item.deadline || "—"}</td>
                             <td>{item.rate || "—"}</td>
                             <td>{item.price || "—"}</td>
-                            <td><span className={`badge ${item.cutType?.includes("配分") ? "badge-gold" : "badge-red"}`}>{item.cutType || "—"}</span></td>
+                            <td>
+                              <span className={`badge ${item.cutType?.includes("配分") ? "badge-gold" : "badge-red"}`}>
+                                {item.cutType || "—"}
+                              </span>
+                            </td>
                             <td className="cell-notes">{item.notes || "—"}</td>
                           </tr>
                         ))}
