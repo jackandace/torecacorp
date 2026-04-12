@@ -10,22 +10,37 @@ export default async function handler(req, res) {
   const GAS_URL = "https://script.google.com/macros/s/AKfycbyaPDonzM9PGUoL7Sw7YqHnitYJS4nOa6NPeD6e_CX7G2jFtN8PcTsAnaoGlQLZesWc0g/exec";
 
   try {
-    let url = GAS_URL;
-    let options = { method: req.method, redirect: "follow" };
+    let response;
 
     if (req.method === "GET") {
       const qs = new URLSearchParams(req.query).toString();
-      url = `${GAS_URL}?${qs}`;
+      response = await fetch(`${GAS_URL}?${qs}`, {
+        method: "GET",
+        redirect: "follow",
+        headers: {
+          "User-Agent": "Mozilla/5.0",
+          "Accept": "application/json"
+        }
+      });
     } else {
-      options.headers = { "Content-Type": "application/json" };
-      options.body = JSON.stringify(req.body);
+      response = await fetch(GAS_URL, {
+        method: "POST",
+        redirect: "follow",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": "Mozilla/5.0",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(req.body)
+      });
     }
 
-    const gasRes = await fetch(url, options);
-    const text = await gasRes.text();
-    res.status(200).send(text);
+    const text = await response.text();
+    res.setHeader("Content-Type", "application/json");
+    return res.status(200).send(text);
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Proxy error:", err.message);
+    return res.status(500).json({ error: err.message });
   }
 }
