@@ -169,6 +169,7 @@ export default function AdminPage() {
                 <table className="inventory-table">
                   <thead>
                     <tr>
+                      <th>追加日</th>
                       <th>公開</th>
                       <th>承認</th>
                       <th>タイトル</th>
@@ -194,6 +195,7 @@ export default function AdminPage() {
                             {item.visible ? "公開" : "非公開"}
                           </button>
                         </td>
+                        <td>{item.registeredAt || "—"}</td>
                         <td>
                           <button
                             className={`toggle-btn ${item.approved ? "on" : "off"}`}
