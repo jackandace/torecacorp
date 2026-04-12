@@ -161,7 +161,7 @@
 .cell-fullname { min-width: 280px; white-space: nowrap; font-size: 12px; color: var(--text2); }
 .cell-price { min-width: 100px; white-space: nowrap; font-size: 12px; }
 .cell-date { min-width: 90px; white-space: nowrap; font-size: 11px; color: var(--text3); }
-.cell-notes { min-width: 240px; white-space: nowrap; font-size: 11px; color: var(--text2); }
+.cell-notes { min-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; color: var(--text2); }
 .cell-soldout { color: var(--error); font-weight: 700; }
 .cell-low { color: var(--warning); font-weight: 600; }
 .cell-warn { color: var(--warning); font-size: 11px; }
