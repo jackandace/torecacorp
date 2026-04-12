@@ -157,7 +157,10 @@
 .row-hidden td { opacity: 0.4; }
 .row-pending td { background: rgba(201,168,76,0.04); }
 
-.cell-title { max-width: 200px; white-space: normal; }
+.cell-title { max-width: 160px; white-space: normal; }
+.cell-fullname { max-width: 260px; white-space: normal; font-size: 11px; color: var(--text2); }
+.cell-price { min-width: 100px; white-space: normal; font-size: 11px; }
+.cell-date { min-width: 90px; font-size: 11px; color: var(--text3); }
 .cell-notes { max-width: 160px; white-space: normal; font-size: 11px; color: var(--text2); }
 .cell-soldout { color: var(--error); font-weight: 700; }
 .cell-low { color: var(--warning); font-weight: 600; }
