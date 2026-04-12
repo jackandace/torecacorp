@@ -148,7 +148,7 @@
 .inventory-table td {
   padding: 8px 12px;
   border-bottom: 1px solid var(--border);
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .inventory-table tr:last-child td { border-bottom: none; }
@@ -157,11 +157,11 @@
 .row-hidden td { opacity: 0.4; }
 .row-pending td { background: rgba(201,168,76,0.04); }
 
-.cell-title { min-width: 140px; max-width: 200px; white-space: normal; word-break: keep-all; }
-.cell-fullname { min-width: 220px; max-width: 320px; white-space: normal; font-size: 11px; color: var(--text2); }
-.cell-price { min-width: 100px; white-space: nowrap; font-size: 11px; }
+.cell-title { min-width: 160px; white-space: nowrap; }
+.cell-fullname { min-width: 280px; white-space: nowrap; font-size: 12px; color: var(--text2); }
+.cell-price { min-width: 100px; white-space: nowrap; font-size: 12px; }
 .cell-date { min-width: 90px; white-space: nowrap; font-size: 11px; color: var(--text3); }
-.cell-notes { min-width: 200px; max-width: 280px; white-space: normal; font-size: 11px; color: var(--text2); line-height: 1.5; }
+.cell-notes { min-width: 240px; white-space: nowrap; font-size: 11px; color: var(--text2); }
 .cell-soldout { color: var(--error); font-weight: 700; }
 .cell-low { color: var(--warning); font-weight: 600; }
 .cell-warn { color: var(--warning); font-size: 11px; }
