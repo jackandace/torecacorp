@@ -59,7 +59,8 @@ export default function AdminPage() {
         fullName: r[2] || "",
         modelNumber: r[3] || "",
         qty: r[4] || "",
-        deadline: r[5] ? String(r[5]).replace(/(\d+)\/(\d+)\/(\d+)/, (_, m, d, y) => `20${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`) : "",
+        deadline: r[5] ? String(r[5]).replace(/(\d+)\/(\d+)\/(\d+)/, (_, m, d, y) =>
+          `20${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`) : "",
         rate: (() => {
           const v = r[6];
           if (!v) return "";
@@ -87,7 +88,7 @@ export default function AdminPage() {
       setTab("inventory");
       await loadAll();
     } catch (err) {
-      showToast("反映に失敗しました：" + (err.message || "不明なエラー"), "error");
+      showToast("反映に失敗しました：" + err.message, "error");
     }
   };
 
@@ -190,80 +191,38 @@ export default function AdminPage() {
                     {items.map((item, i) => (
                       <tr key={i} className={!item.visible ? "row-hidden" : !item.approved ? "row-pending" : ""}>
                         <td>
-                          <button
-                            className={`toggle-btn ${item.visible ? "on" : "off"}`}
-                            onClick={() => toggleVisible(i, item.visible)}
-                          >
+                          <button className={`toggle-btn ${item.visible ? "on" : "off"}`} onClick={() => toggleVisible(i, item.visible)}>
                             {item.visible ? "公開" : "非公開"}
                           </button>
                         </td>
                         <td>
-                          <button
-                            className={`toggle-btn ${item.approved ? "on" : "off"}`}
-                            onClick={() => toggleApproved(i, item.approved)}
-                          >
+                          <button className={`toggle-btn ${item.approved ? "on" : "off"}`} onClick={() => toggleApproved(i, item.approved)}>
                             {item.approved ? "承認済" : "未承認"}
                           </button>
                         </td>
                         <td className="cell-date">{item.registeredAt || "—"}</td>
                         <td className="cell-title">
-                          <EditableCell
-                            value={item.title}
-                            isEditing={editingCell === `${i}-title`}
-                            onEdit={() => setEditingCell(`${i}-title`)}
-                            onSave={v => handleCellEdit(i, "title", v)}
-                            onCancel={() => setEditingCell(null)}
-                          />
+                          <EditableCell value={item.title} isEditing={editingCell === `${i}-title`} onEdit={() => setEditingCell(`${i}-title`)} onSave={v => handleCellEdit(i, "title", v)} onCancel={() => setEditingCell(null)} />
                         </td>
                         <td className="cell-fullname">
-                          <EditableCell
-                            value={item.fullName || "—"}
-                            isEditing={editingCell === `${i}-fullName`}
-                            onEdit={() => setEditingCell(`${i}-fullName`)}
-                            onSave={v => handleCellEdit(i, "fullName", v)}
-                            onCancel={() => setEditingCell(null)}
-                          />
+                          <EditableCell value={item.fullName || "—"} isEditing={editingCell === `${i}-fullName`} onEdit={() => setEditingCell(`${i}-fullName`)} onSave={v => handleCellEdit(i, "fullName", v)} onCancel={() => setEditingCell(null)} />
                         </td>
                         <td>
-                          <EditableCell
-                            value={item.modelNumber || "—"}
-                            isEditing={editingCell === `${i}-model`}
-                            onEdit={() => setEditingCell(`${i}-model`)}
-                            onSave={v => handleCellEdit(i, "modelNumber", v)}
-                            onCancel={() => setEditingCell(null)}
-                          />
+                          <EditableCell value={item.modelNumber || "—"} isEditing={editingCell === `${i}-model`} onEdit={() => setEditingCell(`${i}-model`)} onSave={v => handleCellEdit(i, "modelNumber", v)} onCancel={() => setEditingCell(null)} />
                         </td>
                         <td>
-                          <EditableCell
-                            value={String(item.plannedQty || "要確認")}
-                            isEditing={editingCell === `${i}-qty`}
-                            onEdit={() => setEditingCell(`${i}-qty`)}
-                            onSave={v => handleCellEdit(i, "plannedQty", v)}
-                            onCancel={() => setEditingCell(null)}
-                          />
+                          <EditableCell value={String(item.plannedQty || "要確認")} isEditing={editingCell === `${i}-qty`} onEdit={() => setEditingCell(`${i}-qty`)} onSave={v => handleCellEdit(i, "plannedQty", v)} onCancel={() => setEditingCell(null)} />
                         </td>
                         <td>{item.orderedQty || 0}</td>
                         <td className={Number(item.remainingQty) <= 0 ? "cell-soldout" : Number(item.remainingQty) <= 20 ? "cell-low" : ""}>
                           {item.remainingQty !== "" ? item.remainingQty : "—"}
                         </td>
                         <td>
-                          <EditableCell
-                            value={item.orderDeadline || "—"}
-                            isEditing={editingCell === `${i}-deadline`}
-                            onEdit={() => setEditingCell(`${i}-deadline`)}
-                            onSave={v => handleCellEdit(i, "orderDeadline", v)}
-                            onCancel={() => setEditingCell(null)}
-                          />
+                          <EditableCell value={item.orderDeadline || "—"} isEditing={editingCell === `${i}-deadline`} onEdit={() => setEditingCell(`${i}-deadline`)} onSave={v => handleCellEdit(i, "orderDeadline", v)} onCancel={() => setEditingCell(null)} />
                         </td>
                         <td>{item.rate || "—"}</td>
                         <td className="cell-price">
-                          <EditableCell
-                            value={item.price || "—"}
-                            isEditing={editingCell === `${i}-price`}
-                            onEdit={() => setEditingCell(`${i}-price`)}
-                            onSave={v => handleCellEdit(i, "price", v)}
-                            onCancel={() => setEditingCell(null)}
-                          />
+                          <EditableCell value={item.price || "—"} isEditing={editingCell === `${i}-price`} onEdit={() => setEditingCell(`${i}-price`)} onSave={v => handleCellEdit(i, "price", v)} onCancel={() => setEditingCell(null)} />
                         </td>
                         <td>
                           <span className={`badge ${item.cutType?.includes("配分") ? "badge-gold" : "badge-red"}`}>
@@ -271,24 +230,14 @@ export default function AdminPage() {
                           </span>
                         </td>
                         <td>
-                          <select
-                            value={item.status || "受付中"}
-                            onChange={e => handleCellEdit(i, "status", e.target.value)}
-                            className="status-select"
-                          >
+                          <select value={item.status || "受付中"} onChange={e => handleCellEdit(i, "status", e.target.value)} className="status-select">
                             <option>受付中</option>
                             <option>受付停止</option>
                             <option>終了</option>
                           </select>
                         </td>
                         <td className="cell-notes">
-                          <EditableCell
-                            value={item.notes || ""}
-                            isEditing={editingCell === `${i}-notes`}
-                            onEdit={() => setEditingCell(`${i}-notes`)}
-                            onSave={v => handleCellEdit(i, "notes", v)}
-                            onCancel={() => setEditingCell(null)}
-                          />
+                          <EditableCell value={item.notes || ""} isEditing={editingCell === `${i}-notes`} onEdit={() => setEditingCell(`${i}-notes`)} onSave={v => handleCellEdit(i, "notes", v)} onCancel={() => setEditingCell(null)} />
                         </td>
                       </tr>
                     ))}
@@ -307,13 +256,7 @@ export default function AdminPage() {
                 <div className="upload-icon">↑</div>
                 <p>橋本さんのExcelファイルをアップロード</p>
                 <p className="upload-sub">クリックしてファイルを選択</p>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept=".xlsx,.xls"
-                  onChange={handleFileUpload}
-                  style={{ display: "none" }}
-                />
+                <input ref={fileRef} type="file" accept=".xlsx,.xls" onChange={handleFileUpload} style={{ display: "none" }} />
               </div>
 
               {preview.length > 0 && (
@@ -322,9 +265,7 @@ export default function AdminPage() {
                     <h3>プレビュー（{preview.length}件）</h3>
                     <div className="preview-actions">
                       <button className="btn btn-secondary" onClick={() => setPreview([])}>キャンセル</button>
-                      <button className="btn btn-primary" onClick={handleApprove}>
-                        承認して在庫マスターに反映
-                      </button>
+                      <button className="btn btn-primary" onClick={handleApprove}>承認して在庫マスターに反映</button>
                     </div>
                   </div>
 
@@ -353,11 +294,7 @@ export default function AdminPage() {
                             <td>{item.deadline || "—"}</td>
                             <td>{item.rate || "—"}</td>
                             <td>{item.price || "—"}</td>
-                            <td>
-                              <span className={`badge ${item.cutType?.includes("配分") ? "badge-gold" : "badge-red"}`}>
-                                {item.cutType || "—"}
-                              </span>
-                            </td>
+                            <td><span className={`badge ${item.cutType?.includes("配分") ? "badge-gold" : "badge-red"}`}>{item.cutType || "—"}</span></td>
                             <td className="cell-notes">{item.notes || "—"}</td>
                           </tr>
                         ))}
@@ -374,28 +311,18 @@ export default function AdminPage() {
                 <h2 className="tab-title">システム設定</h2>
                 <button className="btn btn-primary" onClick={handleSettingsSave}>保存</button>
               </div>
-
               <div className="settings-grid">
                 <div className="card">
                   <h3 className="settings-section-title">通知設定</h3>
                   <div className="form-group">
                     <label>エラー通知先メール</label>
-                    <input
-                      type="email"
-                      value={settings["通知先メール"] || ""}
-                      onChange={e => setSettings({ ...settings, "通知先メール": e.target.value })}
-                    />
+                    <input type="email" value={settings["通知先メール"] || ""} onChange={e => setSettings({ ...settings, "通知先メール": e.target.value })} />
                   </div>
                   <div className="form-group">
                     <label>管理者メール</label>
-                    <input
-                      type="email"
-                      value={settings["管理者メール"] || ""}
-                      onChange={e => setSettings({ ...settings, "管理者メール": e.target.value })}
-                    />
+                    <input type="email" value={settings["管理者メール"] || ""} onChange={e => setSettings({ ...settings, "管理者メール": e.target.value })} />
                   </div>
                 </div>
-
                 <div className="card">
                   <h3 className="settings-section-title">管理者パスワード変更</h3>
                   <div className="form-group">
