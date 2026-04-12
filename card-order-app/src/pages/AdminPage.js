@@ -59,7 +59,7 @@ export default function AdminPage() {
           fullName: r[2] || "",
           modelNumber: r[3] || "",
           qty: r[4] || "",
-          deadline: r[5] || "",
+          deadline: r[5] ? String(r[5]).replace(/(\d+)\/(\d+)\/(\d+)/, (_, m, d, y) => `20${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`) : "",
           rate: r[6] ? (String(r[6]).includes("%") ? r[6] : `${Math.round(parseFloat(r[6]) * 100)}%`) : "",
           price: r[7] || "",
           cutType: r[8] || "",
