@@ -60,7 +60,14 @@ export default function AdminPage() {
           modelNumber: r[3] || "",
           qty: r[4] || "",
           deadline: r[5] ? String(r[5]).replace(/(\d+)\/(\d+)\/(\d+)/, (_, m, d, y) => `20${y}/${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`) : "",
-          rate: r[6] ? (String(r[6]).includes("%") ? r[6] : `${Math.round(parseFloat(r[6]) * 100)}%`) : "",
+          rate: (() => {
+              const v = r[6];
+              if (!v) return "";
+              const s = String(v);
+              if (s.includes("%")) return s;
+              const n = parseFloat(s);
+              return !isNaN(n) ? `${Math.round(n * 100)}%` : s;
+            })(),
           price: r[7] || "",
           cutType: r[8] || "",
           notes: r[9] || ""
