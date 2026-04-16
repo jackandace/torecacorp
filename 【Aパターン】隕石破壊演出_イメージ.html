@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>隕石貫通演出仕様書 — コックピット視点 7分岐</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --bg: #040812;
+    --bg2: #080f1e;
+    --panel: #0a1628;
+    --border: #1a2a4a;
+    --text: #c8d8f0;
+    --muted: #4a6080;
+    --accent: #2a7fff;
+
+    --e-col: #5a6a7a;
+    --d-col: #2266bb;
+    --c-col: #0090dd;
+    --b-col: #00bbdd;
+    --a-col: #00dd88;
+    --s-col: #ffcc00;
+    --p-col: #ff44ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Noto Sans JP', sans-serif; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(180deg, #0a1628 0%, #040812 100%);
+    border-bottom: 1px solid #1a3a6a;
+    padding: 1.8rem 3rem;
+    position: relative; overflow: hidden;
+  }
+  .header::before {
+    content: '';position:absolute;inset:0;
+    background: repeating-linear-gradient(90deg, transparent 0px, transparent 39px, rgba(30,80,160,0.07) 39px, rgba(30,80,160,0.07) 40px),
+      repeating-linear-gradient(0deg, transparent 0px, transparent 39px, rgba(30,80,160,0.07) 39px, rgba(30,80,160,0.07) 40px);
+  }
+  .header-inner { position: relative; }
+  .header-tag { font-family:'Share Tech Mono',monospace; font-size:11px; color:var(--accent); letter-spacing:0.2em; margin-bottom:0.4rem; opacity:0.8; }
+  .header h1 { font-family:'Orbitron',sans-serif; font-size:1.5rem; font-weight:900; color:#fff; letter-spacing:0.05em; text-shadow:0 0 30px rgba(42,127,255,0.5); }
+  .header-sub { margin-top:0.4rem; font-size:12px; color:var(--muted); letter-spacing:0.05em; }
+
+  /* TABS */
+  .tab-bar { display:flex; gap:4px; padding:0.8rem 2rem; background:var(--bg2); border-bottom:1px solid var(--border); overflow-x:auto; }
+  .tab { flex:0 0 auto; padding:7px 18px; border-radius:5px; border:1px solid transparent; cursor:pointer; font-family:'Orbitron',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.1em; transition:all 0.2s; background:#0a1628; color:var(--muted); }
+  .tab:hover { opacity:0.8; }
+  .tab.active { border-color:currentColor; color:#fff; }
+  .tab[data-rank="ALL"]  { color:#7ab8ff; }
+  .tab[data-rank="E"]  { color:var(--e-col); }
+  .tab[data-rank="D"]  { color:var(--d-col); }
+  .tab[data-rank="C"]  { color:var(--c-col); }
+  .tab[data-rank="B"]  { color:var(--b-col); }
+  .tab[data-rank="A"]  { color:var(--a-col); }
+  .tab[data-rank="S"]  { color:var(--s-col); }
+  .tab[data-rank="P"]  { color:var(--p-col); }
+  .tab.active[data-rank="ALL"] { background:rgba(122,184,255,0.15); }
+  .tab.active[data-rank="E"]  { background:rgba(90,106,122,0.2); }
+  .tab.active[data-rank="D"]  { background:rgba(34,102,187,0.2); }
+  .tab.active[data-rank="C"]  { background:rgba(0,144,221,0.2); }
+  .tab.active[data-rank="B"]  { background:rgba(0,187,221,0.2); }
+  .tab.active[data-rank="A"]  { background:rgba(0,221,136,0.2); }
+  .tab.active[data-rank="S"]  { background:rgba(255,204,0,0.15); }
+  .tab.active[data-rank="P"]  { background:rgba(255,68,255,0.15); }
+
+  /* LAYOUT */
+  .main { display:flex; min-height:calc(100vh - 180px); }
+
+  /* LEFT */
+  .preview-panel { width:340px; min-width:300px; background:var(--bg2); border-right:1px solid var(--border); display:flex; flex-direction:column; align-items:center; padding:1.5rem; gap:1rem; }
+  .preview-label { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.2em; text-transform:uppercase; }
+
+  /* COCKPIT CANVAS */
+  .cockpit-wrap {
+    width:290px; height:400px; position:relative; border-radius:12px; overflow:hidden;
+    background:#000508;
+    border:1px solid #1a3060;
+  }
+
+  /* Space bg */
+  .space-bg {
+    position:absolute; inset:0;
+    background: radial-gradient(ellipse 80% 60% at 50% 30%, #060c20 0%, #000508 100%);
+  }
+  /* Stars */
+  .stars {
+    position:absolute; inset:0;
+    background:
+      radial-gradient(1px 1px at 12% 8%, rgba(255,255,255,0.9) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 85% 12%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 22%, rgba(200,220,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 72% 35%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 22% 45%, rgba(255,255,255,0.9) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 52%, rgba(200,220,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 35% 60%, rgba(255,255,255,0.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 58% 75%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 8% 80%, rgba(200,220,255,0.8) 0%, transparent 100%),
+      radial-gradient(1px 1px at 78% 88%, rgba(255,255,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 15%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 90%, rgba(200,220,255,0.4) 0%, transparent 100%);
+  }
+  /* Nebula */
+  .nebula {
+    position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse 70% 25% at 65% 15%, rgba(0,30,100,0.5) 0%, transparent 100%),
+      radial-gradient(ellipse 40% 20% at 20% 60%, rgba(0,50,120,0.25) 0%, transparent 100%);
+  }
+
+  /* Celestial bodies container */
+  .bodies-layer { position:absolute; inset:0; }
+
+  /* Cockpit frame */
+  .cockpit-frame {
+    position:absolute; inset:0; pointer-events:none;
+    z-index:20;
+  }
+  .cockpit-frame svg { width:100%; height:100%; }
+
+  /* HUD overlay */
+  .hud {
+    position:absolute; inset:0; z-index:15; pointer-events:none;
+  }
+
+  /* Crosshair */
+  .crosshair {
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:50px; height:50px;
+    z-index:16;
+  }
+
+  /* Beam */
+  .beam-layer {
+    position:absolute; inset:0; z-index:12;
+    display:flex; justify-content:center;
+    bottom:0; top:0;
+  }
+  .beam {
+    position:absolute;
+    bottom:220px;
+    left:50%; transform:translateX(-50%);
+    width:4px;
+    background:linear-gradient(to top, transparent, #fff);
+    border-radius:2px;
+    opacity:0;
+    height:0;
+    transform-origin:bottom center;
+  }
+
+  /* Target label */
+  .target-label {
+    position:absolute;
+    top:12px; left:50%;
+    transform:translateX(-50%);
+    font-family:'Share Tech Mono',monospace;
+    font-size:10px;
+    color:rgba(100,180,255,0.7);
+    letter-spacing:0.15em;
+    z-index:18;
+    text-align:center;
+  }
+
+  /* Flash overlay */
+  .flash { position:absolute; inset:0; z-index:25; opacity:0; border-radius:12px; pointer-events:none; }
+
+  /* Result text */
+  .result-overlay {
+    position:absolute; inset:0; z-index:30;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none;
+  }
+  .result-rank {
+    font-family:'Orbitron',sans-serif; font-size:2.5rem; font-weight:900;
+    letter-spacing:0.1em; text-shadow:0 0 30px currentColor;
+  }
+  .result-sub { font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:0.2em; opacity:0.7; margin-top:4px; }
+
+  /* Charge bar */
+  .charge-bar-wrap { width:100%; }
+  .charge-bar-bg { height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+  .charge-bar-fill { height:100%; width:0%; border-radius:2px; transition:width 0s; }
+  .charge-label { display:flex; justify-content:space-between; margin-bottom:4px; font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted); }
+
+  /* Phase timeline */
+  .mini-timeline { width:100%; display:flex; gap:3px; }
+  .mini-phase { flex:1; height:3px; background:var(--border); border-radius:2px; transition:background 0.3s; }
+  .mini-phase.done { background:var(--accent); }
+  .mini-phase.active { background:#fff; }
+
+  .play-btn { width:100%; padding:9px 20px; border-radius:5px; border:1px solid var(--accent); background:rgba(42,127,255,0.1); color:#7abfff; font-family:'Share Tech Mono',monospace; font-size:12px; letter-spacing:0.1em; cursor:pointer; transition:all 0.2s; }
+  .play-btn:hover { background:rgba(42,127,255,0.2); }
+
+  .phase-status { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.1em; }
+
+  /* RIGHT SPEC */
+  .spec-panel { flex:1; padding:2rem 2.5rem; overflow-y:auto; }
+  .rank-page { display:none; }
+  .rank-page.active { display:block; }
+
+  .sec-title { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.3em; text-transform:uppercase; margin-bottom:0.4rem; }
+  .rank-headline { font-family:'Orbitron',sans-serif; font-size:1.6rem; font-weight:900; letter-spacing:0.05em; margin-bottom:0.3rem; }
+  .rank-desc { font-size:13px; color:var(--muted); margin-bottom:1.5rem; line-height:1.7; max-width:580px; }
+
+  /* Overview cards */
+  .ov-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:1.5rem; }
+  .ov-card { background:var(--panel); border:1px solid var(--border); border-radius:7px; padding:10px 12px; }
+  .ov-label { font-size:9px; color:var(--muted); letter-spacing:0.15em; text-transform:uppercase; margin-bottom:5px; font-family:'Share Tech Mono',monospace; }
+  .ov-val { font-size:13px; font-weight:500; color:#e0eeff; }
+
+  /* Penetration diagram */
+  .pen-diagram { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:1.2rem 1.5rem; margin-bottom:1.5rem; }
+  .pen-title { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.2em; margin-bottom:1rem; }
+  .pen-row { display:flex; align-items:center; gap:0; }
+  .pen-body {
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    min-width:60px;
+  }
+  .pen-body .body-circle {
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'Share Tech Mono',monospace; font-size:8px; color:rgba(255,255,255,0.6);
+    letter-spacing:0.05em; flex-shrink:0;
+    border:1px solid rgba(255,255,255,0.15);
+    position:relative;
+  }
+  .pen-body .body-name { font-size:10px; color:var(--muted); text-align:center; line-height:1.3; }
+  .pen-arrow { flex:1; display:flex; align-items:center; padding:0 4px; min-width:20px; }
+  .pen-arrow-inner { flex:1; height:2px; position:relative; }
+  .pen-arrow-inner::after { content:'▶'; position:absolute; right:-6px; top:50%; transform:translateY(-50%); font-size:10px; color:inherit; }
+  .pen-stop { width:3px; height:30px; border-radius:2px; flex-shrink:0; }
+  .pen-label { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:0.1em; margin-left:8px; padding:3px 8px; border-radius:3px; }
+
+  /* Phase rows */
+  .phase-title { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.2em; margin:1.5rem 0 0.8rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border); }
+  .phase-row { display:grid; grid-template-columns:90px 55px 1fr; gap:0; margin-bottom:2px; border-radius:5px; overflow:hidden; }
+  .ph-label { background:#0c1830; padding:9px 12px; font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.08em; display:flex; align-items:center; }
+  .ph-time { background:#0c1830; padding:9px 10px; font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--accent); display:flex; align-items:center; border-left:1px solid var(--border); }
+  .ph-desc { background:var(--panel); padding:9px 14px; line-height:1.6; color:#b0c8e0; font-size:13px; border-left:1px solid var(--border); }
+  .ph-desc strong { color:#e0eeff; font-weight:500; }
+  .ph-desc em { font-style:normal; opacity:0.55; font-size:11px; display:block; margin-top:2px; }
+
+  .diverge-marker { display:flex; align-items:center; gap:8px; margin:0.6rem 0; }
+  .diverge-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .diverge-line { flex:1; height:1px; background:var(--border); }
+  .diverge-tag { font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--muted); letter-spacing:0.15em; }
+
+  /* global grid */
+  .global-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem; }
+  .g-card { background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:1.1rem 1.3rem; }
+  .g-card h3 { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:0.2em; margin-bottom:0.7rem; }
+  .g-card ul { list-style:none; display:flex; flex-direction:column; gap:5px; }
+  .g-card li { font-size:13px; color:#b0c8e0; display:flex; align-items:flex-start; gap:8px; line-height:1.5; }
+  .g-card li::before { content:'—'; color:var(--accent); flex-shrink:0; }
+
+  /* body scale chart */
+  .body-scale { display:flex; align-items:flex-end; gap:16px; padding:1.5rem; background:var(--panel); border:1px solid var(--border); border-radius:10px; margin-bottom:1.5rem; flex-wrap:wrap; }
+  .body-item { display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .body-sphere { border-radius:50%; flex-shrink:0; }
+  .body-info { text-align:center; }
+  .body-rank { font-family:'Orbitron',sans-serif; font-size:10px; font-weight:700; }
+  .body-name-txt { font-size:10px; color:var(--muted); font-family:'Share Tech Mono',monospace; margin-top:2px; }
+
+  /* compare table */
+  .cmp-table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:1.5rem; }
+  .cmp-table th { padding:9px 12px; text-align:left; font-family:'Share Tech Mono',monospace; font-size:9px; color:var(--muted); letter-spacing:0.15em; font-weight:400; border-bottom:1px solid var(--border); background:#0c1830; }
+  .cmp-table td { padding:9px 12px; border-bottom:1px solid var(--border); color:#b0c8e0; }
+  .cmp-table tr:nth-child(even) td { background:#080f1e; }
+  .cmp-table tr:nth-child(odd) td { background:var(--panel); }
+
+  /* rank badge */
+  .rank-badge { font-family:'Orbitron',sans-serif; font-size:2.5rem; font-weight:900; letter-spacing:0.1em; text-align:center; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="header-tag">▸ GACHA ANIMATION SPEC / 演出仕様書 v2.0 — COCKPIT VIEW</div>
+    <h1>コックピット × 天体貫通演出<br>7分岐アニメーション仕様</h1>
+    <div class="header-sub">一人称コックピット視点 / 貫通距離でランク示唆 / パチスロ風ハラハラ演出</div>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <div class="tab active" data-rank="ALL" onclick="setTab('ALL')">概要</div>
+  <div class="tab" data-rank="E"   onclick="setTab('E')">RANK E</div>
+  <div class="tab" data-rank="D"   onclick="setTab('D')">RANK D</div>
+  <div class="tab" data-rank="C"   onclick="setTab('C')">RANK C</div>
+  <div class="tab" data-rank="B"   onclick="setTab('B')">RANK B</div>
+  <div class="tab" data-rank="A"   onclick="setTab('A')">RANK A</div>
+  <div class="tab" data-rank="S"   onclick="setTab('S')">RANK S</div>
+  <div class="tab" data-rank="P"   onclick="setTab('P')">PREMIUM</div>
+</div>
+
+<div class="main">
+
+  <!-- ── LEFT: COCKPIT PREVIEW ── -->
+  <div class="preview-panel">
+    <div class="preview-label">▸ COCKPIT VIEW PREVIEW</div>
+
+    <div class="cockpit-wrap" id="cockpitWrap">
+      <!-- Space -->
+      <div class="space-bg"></div>
+      <div class="stars"></div>
+      <div class="nebula"></div>
+
+      <!-- Celestial bodies layer -->
+      <div class="bodies-layer" id="bodiesLayer"></div>
+
+      <!-- Beam -->
+      <div class="beam-layer">
+        <div class="beam" id="beam"></div>
+      </div>
+
+      <!-- Cockpit SVG frame -->
+      <div class="cockpit-frame">
+        <svg viewBox="0 0 290 400" xmlns="http://www.w3.org/2000/svg">
+          <!-- Dashboard bottom panel -->
+          <rect x="0" y="290" width="290" height="110" fill="#050d1a" rx="0"/>
+          <rect x="0" y="288" width="290" height="4" fill="#0a2040"/>
+          <!-- Dashboard detail lines -->
+          <line x1="0" y1="310" x2="290" y2="310" stroke="#0d2848" stroke-width="1"/>
+          <rect x="10" y="298" width="60" height="16" rx="3" fill="#0a1e36" stroke="#1a3a60" stroke-width="0.5"/>
+          <rect x="80" y="298" width="40" height="16" rx="3" fill="#0a1e36" stroke="#1a3a60" stroke-width="0.5"/>
+          <rect x="170" y="298" width="60" height="16" rx="3" fill="#0a1e36" stroke="#1a3a60" stroke-width="0.5"/>
+          <rect x="240" y="298" width="42" height="16" rx="3" fill="#0a1e36" stroke="#1a3a60" stroke-width="0.5"/>
+          <!-- Gauge circles -->
+          <circle cx="40" cy="345" r="26" fill="#060f1e" stroke="#1a3a60" stroke-width="1"/>
+          <circle cx="40" cy="345" r="20" fill="none" stroke="#0d2848" stroke-width="8" stroke-dasharray="125 125" stroke-dashoffset="0"/>
+          <circle cx="40" cy="345" r="20" fill="none" stroke="#2a6090" stroke-width="8" stroke-dasharray="80 125" stroke-dashoffset="-10" id="gauge1"/>
+          <circle cx="250" cy="345" r="26" fill="#060f1e" stroke="#1a3a60" stroke-width="1"/>
+          <circle cx="250" cy="345" r="20" fill="none" stroke="#0d2848" stroke-width="8" stroke-dasharray="125 125" stroke-dashoffset="0"/>
+          <circle cx="250" cy="345" r="20" fill="none" stroke="#2a6090" stroke-width="8" stroke-dasharray="60 125" stroke-dashoffset="-20" id="gauge2"/>
+          <!-- Center cannon housing -->
+          <path d="M115 400 L115 310 L125 300 L145 296 L165 300 L175 310 L175 400 Z" fill="#070e1c" stroke="#1a3060" stroke-width="0.8"/>
+          <rect x="130" y="296" width="30" height="104" rx="2" fill="#060c18" stroke="#152545" stroke-width="0.5"/>
+          <!-- Cannon barrel glow -->
+          <rect x="139" y="296" width="12" height="30" rx="2" fill="#080f20" stroke="#1a4070" stroke-width="0.5" id="cannonGlow"/>
+          <!-- Side panels -->
+          <path d="M0 370 L0 310 L90 310 L115 340 L115 400 Z" fill="#040c18" stroke="#0d2040" stroke-width="0.5"/>
+          <path d="M290 370 L290 310 L200 310 L175 340 L175 400 Z" fill="#040c18" stroke="#0d2040" stroke-width="0.5"/>
+          <!-- Mini displays left -->
+          <rect x="8" y="318" width="74" height="44" rx="3" fill="#030810" stroke="#1a3060" stroke-width="0.5"/>
+          <line x1="8" y1="328" x2="82" y2="328" stroke="#0d2040" stroke-width="0.5"/>
+          <!-- Mini displays right -->
+          <rect x="208" y="318" width="74" height="44" rx="3" fill="#030810" stroke="#1a3060" stroke-width="0.5"/>
+          <line x1="208" y1="328" x2="282" y2="328" stroke="#0d2040" stroke-width="0.5"/>
+          <!-- Cockpit window frame -->
+          <path d="M0 0 L0 290 L30 270 L30 20 Z" fill="rgba(4,12,30,0.7)" stroke="#0d2848" stroke-width="1"/>
+          <path d="M290 0 L290 290 L260 270 L260 20 Z" fill="rgba(4,12,30,0.7)" stroke="#0d2848" stroke-width="1"/>
+          <path d="M30 20 L80 8 L210 8 L260 20 L260 10 L145 0 L30 10 Z" fill="rgba(4,12,30,0.5)" stroke="#0d2848" stroke-width="0.8"/>
+          <!-- Window glass reflections -->
+          <path d="M32 22 L60 14 L60 60 L32 70 Z" fill="rgba(40,100,200,0.04)" stroke="none"/>
+          <path d="M258 22 L230 14 L230 60 L258 70 Z" fill="rgba(40,100,200,0.04)" stroke="none"/>
+          <!-- Corner indicator lights -->
+          <circle cx="35" cy="25" r="3" fill="#1a4080" id="indL"/>
+          <circle cx="255" cy="25" r="3" fill="#1a4080" id="indR"/>
+          <!-- Targeting reticle -->
+          <g id="reticle">
+            <circle cx="145" cy="145" r="22" fill="none" stroke="rgba(42,127,255,0.5)" stroke-width="0.8"/>
+            <circle cx="145" cy="145" r="3" fill="none" stroke="rgba(42,127,255,0.7)" stroke-width="1"/>
+            <line x1="145" y1="118" x2="145" y2="128" stroke="rgba(42,127,255,0.6)" stroke-width="0.8"/>
+            <line x1="145" y1="162" x2="145" y2="172" stroke="rgba(42,127,255,0.6)" stroke-width="0.8"/>
+            <line x1="118" y1="145" x2="128" y2="145" stroke="rgba(42,127,255,0.6)" stroke-width="0.8"/>
+            <line x1="162" y1="145" x2="172" y2="145" stroke="rgba(42,127,255,0.6)" stroke-width="0.8"/>
+            <line x1="128" y1="128" x2="134" y2="134" stroke="rgba(42,127,255,0.4)" stroke-width="0.6"/>
+            <line x1="162" y1="128" x2="156" y2="134" stroke="rgba(42,127,255,0.4)" stroke-width="0.6"/>
+            <line x1="128" y1="162" x2="134" y2="156" stroke="rgba(42,127,255,0.4)" stroke-width="0.6"/>
+            <line x1="162" y1="162" x2="156" y2="156" stroke="rgba(42,127,255,0.4)" stroke-width="0.6"/>
+          </g>
+          <!-- HUD text elements -->
+          <text x="15" y="327" font-family="'Share Tech Mono',monospace" font-size="7" fill="rgba(42,127,255,0.5)" letter-spacing="0.1em">POWER</text>
+          <text x="215" y="327" font-family="'Share Tech Mono',monospace" font-size="7" fill="rgba(42,127,255,0.5)" letter-spacing="0.1em">SHIELD</text>
+          <text x="15" y="378" font-family="'Share Tech Mono',monospace" font-size="7" fill="rgba(42,127,255,0.4)" letter-spacing="0.05em" id="powerText">PWR: 000</text>
+          <text x="215" y="378" font-family="'Share Tech Mono',monospace" font-size="7" fill="rgba(42,127,255,0.4)" letter-spacing="0.05em">SHD: 100%</text>
+          <!-- Target label area -->
+          <text x="145" y="115" font-family="'Share Tech Mono',monospace" font-size="8" fill="rgba(100,180,255,0)" text-anchor="middle" id="targetLabel">TARGET LOCKED</text>
+        </svg>
+      </div>
+
+      <!-- Flash overlay -->
+      <div class="flash" id="flash"></div>
+      <!-- Result overlay -->
+      <div class="result-overlay" id="resultOverlay">
+        <div class="result-rank" id="resultRank">RANK E</div>
+        <div class="result-sub" id="resultSub">PENETRATION DEPTH: 1</div>
+      </div>
+    </div>
+
+    <!-- Charge bar -->
+    <div class="charge-bar-wrap">
+      <div class="charge-label">
+        <span>CHARGE</span>
+        <span id="chargePct">0%</span>
+      </div>
+      <div class="charge-bar-bg">
+        <div class="charge-bar-fill" id="chargeBar"></div>
+      </div>
+    </div>
+
+    <div class="mini-timeline" id="miniTimeline">
+      <div class="mini-phase" id="mp0"></div>
+      <div class="mini-phase" id="mp1"></div>
+      <div class="mini-phase" id="mp2"></div>
+      <div class="mini-phase" id="mp3"></div>
+      <div class="mini-phase" id="mp4"></div>
+    </div>
+
+    <div class="rank-badge" id="rankBadge" style="color:#7ab8ff;text-shadow:0 0 20px #7ab8ff88;">—</div>
+    <button class="play-btn" onclick="playAnim()">▶ PLAY COCKPIT PREVIEW</button>
+    <div class="phase-status" id="phaseStatus">— SELECT RANK & PRESS PLAY —</div>
+  </div>
+
+  <!-- ── RIGHT SPEC ── -->
+  <div class="spec-panel">
+
+    <!-- ===== 概要 ===== -->
+    <div class="rank-page active" id="page-ALL">
+      <div class="sec-title">▸ CONCEPT OVERVIEW</div>
+      <div class="rank-headline" style="color:#7ab8ff;">コックピット × 天体貫通</div>
+      <div class="rank-desc">一人称コックピット視点で宇宙前方を見渡す画面。ショットを発射すると天体（小惑星→中惑星→月→惑星…）を次々と貫通していく。<strong style="color:#e0eeff;">どこで止まるか＝ランク</strong>という直感的な設計。パチスロ的には「もう一個突き抜けるか！？」のハラハラが連続する。</div>
+
+      <!-- BODY SCALE CHART -->
+      <div class="sec-title" style="margin-bottom:0.5rem;">▸ 天体スケール & ランク対応</div>
+      <div class="body-scale">
+        <div class="body-item">
+          <div class="body-sphere" style="width:20px;height:20px;background:radial-gradient(circle at 35% 35%,#9a8878,#5a4a3a 60%,#3a2a1a);"></div>
+          <div class="body-info"><div class="body-rank" style="color:var(--e-col);">E 止</div><div class="body-name-txt">小惑星A</div></div>
+        </div>
+        <div class="body-item" style="margin-bottom:8px;">
+          <div style="font-size:18px;color:var(--muted);">→</div>
+        </div>
+        <div class="body-item">
+          <div class="body-sphere" style="width:32px;height:32px;background:radial-gradient(circle at 35% 35%,#8a7a6a,#504030 60%,#302010);"></div>
+          <div class="body-info"><div class="body-rank" style="color:var(--d-col);">D 止</div><div class="body-name-txt">中惑星A</div></div>
+        </div>
+        <div class="body-item" style="margin-bottom:8px;">
+          <div style="font-size:18px;color:var(--muted);">→</div>
+        </div>
+        <div class="body-item">
+          <div class="body-sphere" style="width:48px;height:48px;background:radial-gradient(circle at 35% 35%,#7a8090,#404550 60%,#202530);"></div>
+          <div class="body-info"><div class="body-rank" style="color:var(--c-col);">C 止</div><div class="body-name-txt">大惑星A</div></div>
+        </div>
+        <div class="body-item" style="margin-bottom:8px;">
+          <div style="font-size:18px;color:var(--muted);">→</div>
+        </div>
+        <div class="body-item">
+          <div class="body-sphere" style="width:60px;height:60px;background:radial-gradient(circle at 35% 35%,#c0c8d8,#8090a8 50%,#404858);"></div>
+          <div class="body-info"><div class="body-rank" style="color:var(--b-col);">B 止</div><div class="body-name-txt">月</div></div>
+        </div>
+        <div class="body-item" style="margin-bottom:8px;">
+          <div style="font-size:18px;color:var(--muted);">→</div>
+        </div>
+        <div class="body-item">
+          <div class="body-sphere" style="width:76px;height:76px;background:radial-gradient(circle at 35% 35%,#6080c0,#304080 50%,#102040);"></div>
+          <div class="body-info"><div class="body-rank" style="color:var(--a-col);">A 止</div><div class="body-name-txt">惑星</div></div>
+        </div>
+        <div class="body-item" style="margin-bottom:8px;">
+          <div style="font-size:18px;color:var(--muted);">→</div>
+        </div>
+        <div class="body-item">
+          <div class="body-sphere" style="width:90px;height:90px;background:radial-gradient(circle at 35% 35%,#e0b040,#a06010 50%,#402000);box-shadow:0 0 15px rgba(255,180,0,0.4)"></div>
+          <div class="body-info"><div class="body-rank" style="color:var(--s-col);">S 止</div><div class="body-name-txt">巨大惑星</div></div>
+        </div>
+        <div class="body-item" style="margin-bottom:8px;">
+          <div style="font-size:18px;color:var(--p-col);">→</div>
+        </div>
+        <div class="body-item">
+          <div class="body-sphere" style="width:90px;height:90px;background:radial-gradient(circle at 35% 35%,#fff4a0,#ffaa00 40%,#ff4400 70%,#800000);box-shadow:0 0 25px rgba(255,150,0,0.6)"></div>
+          <div class="body-info"><div class="body-rank" style="color:var(--p-col);">PREMIUM</div><div class="body-name-txt">太陽 全貫通</div></div>
+        </div>
+      </div>
+
+      <div class="global-grid">
+        <div class="g-card">
+          <h3>▸ コックピット設計方針</h3>
+          <ul>
+            <li>画面下部にダッシュボード（フレーム固定）</li>
+            <li>照準レティクルは常時中央に表示</li>
+            <li>天体は奥から手前（ズームイン）で迫ってくる</li>
+            <li>破壊後はビームが奥へ伸び次の天体へ</li>
+            <li>コックピット枠が衝撃で揺れるシェイク演出</li>
+          </ul>
+        </div>
+        <div class="g-card">
+          <h3>▸ ハラハラ設計の核心</h3>
+          <ul>
+            <li>天体破壊ごとに一瞬のインターバル（0.5s）</li>
+            <li>「次があるか？」のドキドキ間を演出</li>
+            <li>天体が大きいほどチャージに時間がかかる</li>
+            <li>S/Pはチャージ色で確定示唆（金・虹）</li>
+            <li>最後の天体への突入前に必ずスロー演出</li>
+          </ul>
+        </div>
+        <div class="g-card">
+          <h3>▸ 天体テクスチャ設計</h3>
+          <ul>
+            <li>小惑星: 岩石系（茶・グレー）凸凹あり</li>
+            <li>中惑星: 大型岩塊（暗灰色）クレーター</li>
+            <li>大惑星: 岩・氷混合（青灰）表面ひび</li>
+            <li>月: 灰白色、クレーター多数</li>
+            <li>惑星: 大気圏あり（青）雲模様</li>
+            <li>巨大惑星: 縞模様（土星・木星風）</li>
+            <li>太陽: 燃え盛る炎面、プロミネンス</li>
+          </ul>
+        </div>
+        <div class="g-card">
+          <h3>▸ フリー素材実装方針</h3>
+          <ul>
+            <li>天体: Canvas 2D + シェーダー風CSS</li>
+            <li>爆発: tsParticles or pixi.js</li>
+            <li>ビーム: CSS linear-gradient + animation</li>
+            <li>コックピットフレーム: SVG固定レイヤー</li>
+            <li>SE: Freesound / Pixabay SFX</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="sec-title">▸ ランク別パラメータ一覧</div>
+      <table class="cmp-table">
+        <thead><tr>
+          <th>RANK</th><th>最終到達天体</th><th>貫通数</th><th>チャージ色</th><th>スロー演出</th><th>画面振動</th><th>総尺</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="color:var(--e-col);font-family:'Orbitron',sans-serif;font-weight:700;">E</td><td>小惑星Aで停止</td><td>0</td><td style="color:#7a8a9a;">グレー</td><td>なし</td><td>なし</td><td style="color:var(--accent);font-family:'Share Tech Mono',monospace;">6s</td></tr>
+          <tr><td style="color:var(--d-col);font-family:'Orbitron',sans-serif;font-weight:700;">D</td><td>中惑星Aで停止</td><td>1</td><td style="color:var(--d-col);">ダークブルー</td><td>なし</td><td>弱</td><td style="color:var(--accent);font-family:'Share Tech Mono',monospace;">7s</td></tr>
+          <tr><td style="color:var(--c-col);font-family:'Orbitron',sans-serif;font-weight:700;">C</td><td>大惑星Aで停止</td><td>2</td><td style="color:var(--c-col);">ブルー</td><td>軽微</td><td>中</td><td style="color:var(--accent);font-family:'Share Tech Mono',monospace;">8s</td></tr>
+          <tr><td style="color:var(--b-col);font-family:'Orbitron',sans-serif;font-weight:700;">B</td><td>月で停止</td><td>3</td><td style="color:var(--b-col);">シアン</td><td>あり</td><td>中強</td><td style="color:var(--accent);font-family:'Share Tech Mono',monospace;">9s</td></tr>
+          <tr><td style="color:var(--a-col);font-family:'Orbitron',sans-serif;font-weight:700;">A</td><td>惑星で停止</td><td>4</td><td style="color:var(--a-col);">グリーン</td><td>強</td><td>強</td><td style="color:var(--accent);font-family:'Share Tech Mono',monospace;">10s</td></tr>
+          <tr><td style="color:var(--s-col);font-family:'Orbitron',sans-serif;font-weight:700;">S</td><td>巨大惑星で停止</td><td>5</td><td style="color:var(--s-col);">ゴールド★確定</td><td>最強</td><td>最強</td><td style="color:var(--accent);font-family:'Share Tech Mono',monospace;">11s</td></tr>
+          <tr><td style="font-family:'Orbitron',sans-serif;font-weight:700;background:linear-gradient(90deg,#ff44ff,#ffaa00,#4488ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">P</td><td>太陽まで全貫通</td><td>6+</td><td style="color:var(--p-col);">レインボー★超確定</td><td>超越</td><td>超越</td><td style="color:var(--p-col);font-family:'Share Tech Mono',monospace;">13s</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== RANK E ===== -->
+    <div class="rank-page" id="page-E">
+      <div class="sec-title">▸ RANK E</div>
+      <div class="rank-headline" style="color:var(--e-col);">小惑星 停止</div>
+      <div class="rank-desc">最初の小惑星を破壊できず、ビームが貫通しない（表面でスパーク止まり）。または貫通するが直後に光が消える。最低ランクの表現。</div>
+      <div class="ov-grid">
+        <div class="ov-card"><div class="ov-label">到達天体</div><div class="ov-val">小惑星A</div></div>
+        <div class="ov-card"><div class="ov-label">貫通数</div><div class="ov-val" style="color:var(--e-col);">0回</div></div>
+        <div class="ov-card"><div class="ov-label">チャージ色</div><div class="ov-val" style="color:#7a8a9a;">グレー</div></div>
+        <div class="ov-card"><div class="ov-label">総尺</div><div class="ov-val" style="color:var(--accent);">6.0s</div></div>
+      </div>
+      <div class="pen-diagram">
+        <div class="pen-title">▸ 貫通フロー</div>
+        <div class="pen-row">
+          <div class="pen-body">
+            <div class="body-sphere" style="width:28px;height:28px;background:radial-gradient(circle at 35% 35%,#9a8878,#5a4a3a,#3a2a1a);border-radius:50%;"></div>
+            <div class="body-name">小惑星A</div>
+          </div>
+          <div class="pen-arrow"><div class="pen-arrow-inner" style="background:var(--e-col);"></div></div>
+          <div class="pen-stop" style="background:var(--e-col);"></div>
+          <div class="pen-label" style="color:var(--e-col);background:rgba(90,106,122,0.1);border:1px solid var(--e-col);">RANK E 停止</div>
+        </div>
+      </div>
+      <div class="phase-title">▸ フェーズ詳細</div>
+      <div class="phase-row"><div class="ph-label">① INTRO</div><div class="ph-time">0.0s</div><div class="ph-desc"><strong>コックピット視点</strong>で宇宙が広がる。正面やや遠方に小惑星Aが浮かぶ。静かな宇宙音。<em>天体は最初は小さく見え、ゆっくり近づいてくる</em></div></div>
+      <div class="phase-row"><div class="ph-label">② WARNING</div><div class="ph-time">1.5s</div><div class="ph-desc"><strong>レティクルが小惑星Aをロック。</strong>「TARGET LOCKED」表示。照準が赤く点滅。<em>SE: 軽いピコ音</em></div></div>
+      <div class="phase-row"><div class="ph-label">③ CHARGE</div><div class="ph-time">2.5s</div><div class="ph-desc"><strong>グレーの弱チャージ。</strong>砲台部分がうっすら光るのみ。チャージ音は短く単音。2秒で完了。<em>画面の色変化なし。弱々しさがランクを示唆</em></div></div>
+      <div class="diverge-marker"><div class="diverge-dot" style="background:var(--e-col)"></div><div class="diverge-line"></div><div class="diverge-tag">E ROUTE — 1天体のみ登場</div><div class="diverge-line"></div></div>
+      <div class="phase-row"><div class="ph-label">④ FIRE</div><div class="ph-time">4.5s</div><div class="ph-desc"><strong>細いグレービーム</strong>を発射。小惑星Aに命中するが表面で火花散るのみ（貫通しない）。<em>小惑星はひびが入るだけで爆発しない</em></div></div>
+      <div class="phase-row"><div class="ph-label">⑤ RESULT</div><div class="ph-time">5.2s</div><div class="ph-desc">画面が薄暗く。<strong>「RANK E」</strong>がグレーで表示。<em>SEは低いブザー音</em></div></div>
+    </div>
+
+    <!-- ===== RANK D ===== -->
+    <div class="rank-page" id="page-D">
+      <div class="sec-title">▸ RANK D</div>
+      <div class="rank-headline" style="color:var(--d-col);">小惑星 → 中惑星 停止</div>
+      <div class="rank-desc">小惑星Aを貫通！しかし次の中惑星Aで力尽きる。「あと一個！」の惜しさが残る演出。</div>
+      <div class="ov-grid">
+        <div class="ov-card"><div class="ov-label">到達天体</div><div class="ov-val">中惑星A</div></div>
+        <div class="ov-card"><div class="ov-label">貫通数</div><div class="ov-val" style="color:var(--d-col);">1回</div></div>
+        <div class="ov-card"><div class="ov-label">チャージ色</div><div class="ov-val" style="color:var(--d-col);">ダークブルー</div></div>
+        <div class="ov-card"><div class="ov-label">総尺</div><div class="ov-val" style="color:var(--accent);">7.0s</div></div>
+      </div>
+      <div class="pen-diagram">
+        <div class="pen-title">▸ 貫通フロー</div>
+        <div class="pen-row">
+          <div class="pen-body"><div class="body-sphere" style="width:22px;height:22px;background:radial-gradient(circle at 35% 35%,#9a8878,#5a4a3a,#3a2a1a);border-radius:50%;"></div><div class="body-name">小惑星A</div></div>
+          <div class="pen-arrow"><div class="pen-arrow-inner" style="background:#888;"></div></div>
+          <div class="pen-body"><div style="font-size:18px;color:#888;margin-bottom:10px;">💥</div><div class="body-name" style="color:#888;">貫通</div></div>
+          <div class="pen-arrow"><div class="pen-arrow-inner" style="background:var(--d-col);"></div></div>
+          <div class="pen-body"><div class="body-sphere" style="width:36px;height:36px;background:radial-gradient(circle at 35% 35%,#8a7a6a,#504030,#302010);border-radius:50%;"></div><div class="body-name">中惑星A</div></div>
+          <div class="pen-arrow"><div class="pen-arrow-inner" style="background:var(--d-col);"></div></div>
+          <div class="pen-stop" style="background:var(--d-col);"></div>
+          <div class="pen-label" style="color:var(--d-col);background:rgba(34,102,187,0.1);border:1px solid var(--d-col);">RANK D 停止</div>
+        </div>
+      </div>
+      <div class="phase-title">▸ フェーズ詳細</div>
+      <div class="phase-row"><div class="ph-label">① INTRO</div><div class="ph-time">0.0s</div><div class="ph-desc">コックピット前方に<strong>小惑星A（手前）+ 中惑星A（奥）</strong>が並んで見える。奥のほうが大きい。</div></div>
+      <div class="phase-row"><div class="ph-label">② LOCK</div><div class="ph-time">1.5s</div><div class="ph-desc">レティクルが<strong>小惑星Aをロック</strong>（手前ターゲット）。奥の中惑星はシルエットで見える。</div></div>
+      <div class="phase-row"><div class="ph-label">③ CHARGE</div><div class="ph-time">2.5s</div><div class="ph-desc"><strong>ダークブルーのチャージ。</strong>画面端がうっすら青く。チャージ音は複音。</div></div>
+      <div class="diverge-marker"><div class="diverge-dot" style="background:var(--d-col)"></div><div class="diverge-line"></div><div class="diverge-tag">D ROUTE — 2天体登場</div><div class="diverge-line"></div></div>
+      <div class="phase-row"><div class="ph-label">④ PENETRATE1</div><div class="ph-time">4.5s</div><div class="ph-desc"><strong>ビーム発射 → 小惑星A貫通爆発！</strong>コックピットが揺れる（弱）。ビームがさらに奥へ伸びる。<em>SE: 破壊音 + 貫通音</em></div></div>
+      <div class="phase-row"><div class="ph-label">⑤ STOP</div><div class="ph-time">5.5s</div><div class="ph-desc">ビームが<strong>中惑星Aに到達するも表面でスパーク</strong>。貫通できず消滅。<em>「惜しい！」演出。中惑星にひびが入って終わり</em></div></div>
+      <div class="phase-row"><div class="ph-label">⑥ RESULT</div><div class="ph-time">6.5s</div><div class="ph-desc"><strong>「RANK D」</strong>がダークブルーで表示。</div></div>
+    </div>
+
+    <!-- ===== RANK C ===== -->
+    <div class="rank-page" id="page-C">
+      <div class="sec-title">▸ RANK C</div>
+      <div class="rank-headline" style="color:var(--c-col);">〜大惑星A 停止</div>
+      <div class="rank-desc">小→中→大惑星と連続貫通。3連続爆発のテンポが気持ちいい中級演出。大惑星で力尽きる。</div>
+      <div class="ov-grid">
+        <div class="ov-card"><div class="ov-label">到達天体</div><div class="ov-val">大惑星A</div></div>
+        <div class="ov-card"><div class="ov-label">貫通数</div><div class="ov-val" style="color:var(--c-col);">2回</div></div>
+        <div class="ov-card"><div class="ov-label">チャージ色</div><div class="ov-val" style="color:var(--c-col);">ブルー</div></div>
+        <div class="ov-card"><div class="ov-label">総尺</div><div class="ov-val" style="color:var(--accent);">8.0s</div></div>
+      </div>
+      <div class="pen-diagram">
+        <div class="pen-title">▸ 貫通フロー</div>
+        <div class="pen-row">
+          <div class="pen-body"><div class="body-sphere" style="width:18px;height:18px;background:radial-gradient(circle at 35% 35%,#9a8878,#5a4a3a,#3a2a1a);border-radius:50%;"></div><div class="body-name">小惑星</div></div>
+          <div class="pen-arrow"><div class="pen-arrow-inner" style="background:#888;"></div></div>
+          <div class="pen-body"><div style="font-size:14px;color:#888;margin-bottom:10px;">💥</div><div class="body-name" style="color:#888;font-size:9px;">貫通</div></div>
+          <div class="pen-arrow"><div class="pen-arrow-inner" style="background:#888;"></div></div>
+          <div class="pen-body"><div class="body-sphere" style="width:28px;height:28px;background:radial-gradient(circle at 35% 35%,#8a7a6a,#504030,#302010);border-radius:50%;"></div><div class="body-name">中惑星</div></div>
+          <div class="pen-arrow"><div class="pen-arrow-inner" style="background:#888;"></div></div>
+          <div class="pen-body"><div style="font-size:14px;color:#888;margin-bottom:10px;">💥</div><div class="body-name" style="color:#888;font-size:9px;">貫通</div></div>
+          <div class="pen-arrow"><div class="pen-arrow-inner" style="background:var(--c-col);"></div></div>
+          <div class="pen-body"><div class="body-sphere" style="width:40px;height:40px;background:radial-gradient(circle at 35% 35%,#7a8090,#404550,#202530);border-radius:50%;"></div><div class="body-name">大惑星A</div></div>
+          <div class="pen-arrow"><div class="pen-arrow-inner" style="background:var(--c-col);"></div></div>
+          <div class="pen-stop" style="background:var(--c-col);"></div>
+          <div class="pen-label" style="color:var(--c-col);background:rgba(0,144,221,0.1);border:1px solid var(--c-col);">C 停止</div>
+        </div>
+      </div>
+      <div class="phase-title">▸ フェーズ詳細</div>
+      <div class="phase-row"><div class="ph-label">① INTRO</div><div class="ph-time">0.0s</div><div class="ph-desc">3天体が奥から手前へ<strong>縦に並んで見える</strong>。小が手前、大が奥。奥ほど大きく見えるパースペクティブ。</div></div>
+      <div class="phase-row"><div class="ph-label">② LOCK</div><div class="ph-time">1.5s</div><div class="ph-desc">レティクルがロック。<strong>「3 TARGETS AHEAD」</strong>表示。</div></div>
+      <div class="phase-row"><div class="ph-label">③ CHARGE</div><div class="ph-time">2.5s</div><div class="ph-desc"><strong>ブルーチャージ</strong>。画面が青く染まる。チャージ音はリズムを持つ。</div></div>
+      <div class="diverge-marker"><div class="diverge-dot" style="background:var(--c-col)"></div><div class="diverge-line"></div><div class="diverge-tag">C ROUTE — 3天体登場</div><div class="diverge-line"></div></div>
+      <div class="phase-row"><div class="ph-label">④ PEN×2</div><div class="ph-time">4.5s</div><div class="ph-desc"><strong>小惑星貫通→0.4s→中惑星貫通。</strong>爆発が2連続。コックピット振動（中）。ビームが奥に延伸していく。<em>「あと一個行く!?」の期待感</em></div></div>
+      <div class="phase-row"><div class="ph-label">⑤ SLOW+STOP</div><div class="ph-time">6.0s</div><div class="ph-desc"><strong>スロー（0.3s）</strong>→大惑星Aに当たりひびが走る→貫通できず停止。<em>軽スローで惜しさを演出</em></div></div>
+      <div class="phase-row"><div class="ph-label">⑥ RESULT</div><div class="ph-time">7.5s</div><div class="ph-desc"><strong>「RANK C」</strong>ブルー輝き。</div></div>
+    </div>
+
+    <!-- ===== RANK B ===== -->
+    <div class="rank-page" id="page-B">
+      <div class="sec-title">▸ RANK B</div>
+      <div class="rank-headline" style="color:var(--b-col);">〜月 停止</div>
+      <div class="rank-desc">3天体を貫通し、月の前で止まる。「月まで行く!?」の期待感と、停止時の圧倒的な月の質感が見せ場。</div>
+      <div class="ov-grid">
+        <div class="ov-card"><div class="ov-label">到達天体</div><div class="ov-val">月</div></div>
+        <div class="ov-card"><div class="ov-label">貫通数</div><div class="ov-val" style="color:var(--b-col);">3回</div></div>
+        <div class="ov-card"><div class="ov-label">チャージ色</div><div class="ov-val" style="color:var(--b-col);">シアン</div></div>
+        <div class="ov-card"><div class="ov-label">総尺</div><div class="ov-val" style="color:var(--accent);">9.0s</div></div>
+      </div>
+      <div class="phase-title">▸ フェーズ詳細</div>
+      <div class="phase-row"><div class="ph-label">① INTRO</div><div class="ph-time">0.0s</div><div class="ph-desc">コックピット前方に<strong>4天体が見える</strong>。月はシルエットでうっすらと最奥に。</div></div>
+      <div class="phase-row"><div class="ph-label">② LOCK</div><div class="ph-time">1.5s</div><div class="ph-desc"><strong>シアンのレティクル</strong>でロック。「MULTI TARGET LOCK」。</div></div>
+      <div class="phase-row"><div class="ph-label">③ CHARGE</div><div class="ph-time">2.5s</div><div class="ph-desc"><strong>シアンパルスチャージ。</strong>画面が光輪状に明滅。ドラムロール系SE。</div></div>
+      <div class="diverge-marker"><div class="diverge-dot" style="background:var(--b-col)"></div><div class="diverge-line"></div><div class="diverge-tag">B ROUTE — 4天体登場（月含む）</div><div class="diverge-line"></div></div>
+      <div class="phase-row"><div class="ph-label">④ PEN×3</div><div class="ph-time">4.5s</div><div class="ph-desc"><strong>小→中→大惑星と3連続貫通。</strong>各爆発が前より大きくなる段階演出。コックピット振動が徐々に強くなる。<em>「もしかして月まで？！」の高揚感</em></div></div>
+      <div class="phase-row"><div class="ph-label">⑤ MOON LOCK</div><div class="ph-time">6.5s</div><div class="ph-desc"><strong>スロー（0.5s）。</strong>月が画面いっぱいに迫る。レティクルが月を捉える演出。SE: 静寂→緊張音。<em>圧巻の月の質感（クレーター表面）をここで見せる</em></div></div>
+      <div class="phase-row"><div class="ph-label">⑥ STOP</div><div class="ph-time">7.2s</div><div class="ph-desc">ビームが月に命中→大きなクレーター跡が残る→貫通できず。<strong>月が振動する（揺れる演出）</strong>。<em>「惜しい」でも「すごい」の両立</em></div></div>
+      <div class="phase-row"><div class="ph-label">⑦ RESULT</div><div class="ph-time">8.5s</div><div class="ph-desc"><strong>「RANK B」</strong>シアン。月をバックに輝く。</div></div>
+    </div>
+
+    <!-- ===== RANK A ===== -->
+    <div class="rank-page" id="page-A">
+      <div class="sec-title">▸ RANK A — HIGH TIER</div>
+      <div class="rank-headline" style="color:var(--a-col);">〜惑星 停止</div>
+      <div class="rank-desc">月すら貫通し、青い惑星（地球型）に止まる。月貫通時の大爆発が最大の演出ポイント。惑星のスケール感で上位を表現。</div>
+      <div class="ov-grid">
+        <div class="ov-card"><div class="ov-label">到達天体</div><div class="ov-val">惑星</div></div>
+        <div class="ov-card"><div class="ov-label">貫通数</div><div class="ov-val" style="color:var(--a-col);">4回</div></div>
+        <div class="ov-card"><div class="ov-label">チャージ色</div><div class="ov-val" style="color:var(--a-col);">グリーン</div></div>
+        <div class="ov-card"><div class="ov-label">総尺</div><div class="ov-val" style="color:var(--accent);">10.0s</div></div>
+      </div>
+      <div class="phase-title">▸ フェーズ詳細</div>
+      <div class="phase-row"><div class="ph-label">① INTRO</div><div class="ph-time">0.0s</div><div class="ph-desc">5天体が縦列。最奥に惑星の青い光がぼんやり見える。</div></div>
+      <div class="phase-row"><div class="ph-label">② LOCK</div><div class="ph-time">1.5s</div><div class="ph-desc"><strong>グリーンのレティクル。</strong>「HIGH ENERGY TARGET」表示。</div></div>
+      <div class="phase-row"><div class="ph-label">③ CHARGE</div><div class="ph-time">2.5s</div><div class="ph-desc"><strong>グリーン強チャージ。</strong>光柱が天頂まで伸びる。全画面グリーンフラッシュ×3。重低音ビルドアップSE。</div></div>
+      <div class="diverge-marker"><div class="diverge-dot" style="background:var(--a-col)"></div><div class="diverge-line"></div><div class="diverge-tag">A ROUTE — 5天体（月+惑星）</div><div class="diverge-line"></div></div>
+      <div class="phase-row"><div class="ph-label">④ PEN×4</div><div class="ph-time">4.5s</div><div class="ph-desc"><strong>小→中→大→月と連続貫通。</strong>月貫通時のみ特大爆発。画面全体がホワイトアウト（0.5s）。<em>「月を貫いた！」の衝撃体験がA最大の見せ場</em></div></div>
+      <div class="phase-row"><div class="ph-label">⑤ PLANET LOCK</div><div class="ph-time">7.5s</div><div class="ph-desc"><strong>スロー（0.8s）。</strong>惑星の大気圏が画面を覆う。雲の質感、オーロラ光の演出。<em>「惑星まで到達した」という到達感</em></div></div>
+      <div class="phase-row"><div class="ph-label">⑥ STOP</div><div class="ph-time">8.5s</div><div class="ph-desc">惑星大気圏でビームが拡散し停止。惑星がわずかに揺れる大型振動演出。</div></div>
+      <div class="phase-row"><div class="ph-label">⑦ RESULT</div><div class="ph-time">9.5s</div><div class="ph-desc"><strong>「RANK A」</strong>グリーン。惑星の光をバックに。</div></div>
+    </div>
+
+    <!-- ===== RANK S ===== -->
+    <div class="rank-page" id="page-S">
+      <div class="sec-title">▸ RANK S — TOP TIER ★CONFIRMED</div>
+      <div class="rank-headline" style="color:var(--s-col);">〜巨大惑星 停止</div>
+      <div class="rank-desc">チャージ時点でゴールド確定。全天体を貫通し、木星・土星クラスの巨大惑星でのみ止まる。ビームの眩しさが別格。</div>
+      <div class="ov-grid">
+        <div class="ov-card"><div class="ov-label">到達天体</div><div class="ov-val">巨大惑星</div></div>
+        <div class="ov-card"><div class="ov-label">貫通数</div><div class="ov-val" style="color:var(--s-col);">5回</div></div>
+        <div class="ov-card"><div class="ov-label">チャージ色</div><div class="ov-val" style="color:var(--s-col);">ゴールド★確定</div></div>
+        <div class="ov-card"><div class="ov-label">総尺</div><div class="ov-val" style="color:var(--accent);">11.0s</div></div>
+      </div>
+      <div class="phase-title">▸ フェーズ詳細</div>
+      <div class="phase-row"><div class="ph-label">① INTRO</div><div class="ph-time">0.0s</div><div class="ph-desc">最奥に巨大惑星の縞模様がうっすら光る。圧倒的な存在感。</div></div>
+      <div class="phase-row"><div class="ph-label">② LOCK★</div><div class="ph-time">1.5s</div><div class="ph-desc"><strong>ゴールドレティクルでロック。</strong>コックピット全体が金色に縁取られる（確定演出）。SE: 特別ファンファーレ短ver.</div></div>
+      <div class="phase-row"><div class="ph-label">③ CHARGE★</div><div class="ph-time">2.5s</div><div class="ph-desc"><strong>ゴールドチャージ3秒。</strong>砲台が金色に輝き、コックピットウィンドウに金の光が反射。全画面ゴールドフレーム。<em>「ゴールドチャージ=S確定」演出</em></div></div>
+      <div class="diverge-marker"><div class="diverge-dot" style="background:var(--s-col)"></div><div class="diverge-line"></div><div class="diverge-tag">S ROUTE — 6天体（巨大惑星まで）</div><div class="diverge-line"></div></div>
+      <div class="phase-row"><div class="ph-label">④ PEN×5</div><div class="ph-time">5.5s</div><div class="ph-desc"><strong>全5天体を次々貫通。</strong>各爆発が前回より大きい。月貫通でホワイトアウト、惑星貫通でゴールドアウト。<em>爆発の色がグレー→ブルー→シアン→ゴールドと変化</em></div></div>
+      <div class="phase-row"><div class="ph-label">⑤ GIANT LOCK</div><div class="ph-time">8.0s</div><div class="ph-desc"><strong>スロー（1.0s）。</strong>巨大惑星の縞模様が画面を埋める。嵐の目のような渦が見える。SE: 無音→低周波。</div></div>
+      <div class="phase-row"><div class="ph-label">⑥ STOP+EXP</div><div class="ph-time">9.2s</div><div class="ph-desc">巨大惑星に命中→<strong>巨大爆発（画面全体ゴールドフラッシュ2回）</strong>。惑星表面に巨大な衝突跡。</div></div>
+      <div class="phase-row"><div class="ph-label">⑦ RESULT</div><div class="ph-time">10.5s</div><div class="ph-desc"><strong>「RANK S」</strong>ゴールド粒子とともに登場。SE: ファンファーレ。</div></div>
+    </div>
+
+    <!-- ===== PREMIUM ===== -->
+    <div class="rank-page" id="page-P">
+      <div class="sec-title">▸ PREMIUM — ULTRA RARE</div>
+      <div class="rank-headline" style="background:linear-gradient(90deg,#ff44ff,#ffaa00,#4488ff,#ff44ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">太陽 完全貫通</div>
+      <div class="rank-desc">全天体を貫通し、さらに太陽すら貫く。宇宙の果てまでビームが届く究極演出。太陽貫通後のスーパーノバが最大の見せ場。</div>
+      <div class="ov-grid">
+        <div class="ov-card"><div class="ov-label">到達天体</div><div class="ov-val" style="color:var(--p-col);">太陽（完全貫通）</div></div>
+        <div class="ov-card"><div class="ov-label">貫通数</div><div class="ov-val" style="color:var(--p-col);">6回以上</div></div>
+        <div class="ov-card"><div class="ov-label">チャージ色</div><div class="ov-val" style="color:var(--p-col);">レインボー★超確定</div></div>
+        <div class="ov-card"><div class="ov-label">総尺</div><div class="ov-val" style="color:var(--p-col);">13.0s</div></div>
+      </div>
+      <div class="phase-title">▸ フェーズ詳細（プレミアム専用ルート）</div>
+      <div class="phase-row"><div class="ph-label">① SPECIAL INTRO</div><div class="ph-time">0.0s</div><div class="ph-desc"><strong>通常と異なるBGMで開幕。</strong>遠方に太陽の輝きがうっすら見える。「これは違う」と直感させる演出。<em>BGM: 専用トラック（他と完全に別）</em></div></div>
+      <div class="phase-row"><div class="ph-label">② RAINBOW LOCK</div><div class="ph-time">1.5s</div><div class="ph-desc">レティクルが<strong>レインボーに光り、「∞ TARGETS」</strong>表示。コックピット全体が虹色のオーロラに包まれる。<em>SE: グリッチ音 → 高揚感SEへ変化</em></div></div>
+      <div class="phase-row"><div class="ph-label">③ RAINBOW CHG</div><div class="ph-time">2.5s</div><div class="ph-desc"><strong>虹色チャージ4秒。</strong>砲台が七色に順次点灯。コックピットウィンドウ全面が虹色オーロラ。スターバースト×5。<em>「虹チャージ=PREMIUM確定」</em></div></div>
+      <div class="diverge-marker"><div class="diverge-dot" style="background:linear-gradient(90deg,#ff44ff,#ffaa00)"></div><div class="diverge-line"></div><div class="diverge-tag">PREMIUM ROUTE — 太陽まで全貫通</div><div class="diverge-line"></div></div>
+      <div class="phase-row"><div class="ph-label">④ PEN×5→SUN</div><div class="ph-time">6.5s</div><div class="ph-desc"><strong>小→中→大→月→惑星→巨大惑星と高速連続貫通（速度がSより速い）。</strong>爆発が毎回前回の2倍の規模。巨大惑星貫通後、画面奥に太陽が迫る。<em>太陽の熱揺らぎ演出（陽炎エフェクト）</em></div></div>
+      <div class="phase-row"><div class="ph-label">⑤ SILENCE</div><div class="ph-time">9.0s</div><div class="ph-desc"><strong>0.8秒の完全静止・無音。</strong>全てが止まる。太陽表面のプロミネンスだけが揺れる。コックピットの計器がMax振り切れる演出。<em>最大の溜め。全演出中最長の静寂</em></div></div>
+      <div class="phase-row"><div class="ph-label">⑥ SUN PIERCE</div><div class="ph-time">9.8s</div><div class="ph-desc"><strong>ビームが太陽を貫通！</strong>太陽が内側から虹色に爆発しながら分裂。画面全体がホワイト→レインボーに染まる。ビームが宇宙の果てまで届いていくエフェクト（消えるまで続く光）。</div></div>
+      <div class="phase-row"><div class="ph-label">⑦ SUPERNOVA</div><div class="ph-time">10.5s</div><div class="ph-desc"><strong>スーパーノバ爆発。</strong>画面全体が何度もフラッシュ（虹×3回）。爆発の光が収まるとオーロラに包まれた宇宙が広がる。<em>SE: オーケストラ最高潮 + 爆発音</em></div></div>
+      <div class="phase-row"><div class="ph-label">⑧ RESULT★</div><div class="ph-time">12.0s</div><div class="ph-desc"><strong>「PREMIUM」</strong>が虹の光柱とともに降臨。特別ボイス + ファンファーレ最大。カード遷移も専用エフェクト。<em>コックピットのHUD全点灯 + 祝砲エフェクト</em></div></div>
+    </div>
+
+  </div><!-- /spec-panel -->
+</div><!-- /main -->
+
+<script>
+const RANK_COLS = { ALL:'#7ab8ff', E:'#5a6a7a', D:'#2266bb', C:'#0090dd', B:'#00bbdd', A:'#00dd88', S:'#ffcc00', P:'#ff44ff' };
+let currentRank = 'ALL';
+let animTimer = null;
+
+function setTab(rank) {
+  currentRank = rank;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.rank === rank));
+  document.querySelectorAll('.rank-page').forEach(p => p.classList.toggle('active', p.id === 'page-' + rank));
+  const col = RANK_COLS[rank] || '#7ab8ff';
+  const badge = document.getElementById('rankBadge');
+  badge.textContent = rank === 'ALL' ? '7' : rank;
+  badge.style.color = col;
+  badge.style.textShadow = `0 0 25px ${col}88`;
+  resetCanvas();
+}
+
+function resetCanvas() {
+  if(animTimer) clearTimeout(animTimer);
+  const bl = document.getElementById('bodiesLayer');
+  bl.innerHTML = '';
+  const beam = document.getElementById('beam');
+  beam.style.cssText = 'position:absolute;bottom:220px;left:50%;transform:translateX(-50%);width:4px;background:linear-gradient(to top,transparent,#fff);border-radius:2px;opacity:0;height:0;transform-origin:bottom center;';
+  const flash = document.getElementById('flash');
+  flash.style.opacity = 0;
+  const ro = document.getElementById('resultOverlay');
+  ro.style.opacity = 0; ro.style.transition = 'none';
+  const cb = document.getElementById('chargeBar');
+  cb.style.transition = 'none'; cb.style.width = '0%';
+  const cg = document.getElementById('cannonGlow');
+  cg.style.fill = '#080f20';
+  document.getElementById('chargePct').textContent = '0%';
+  for(let i=0;i<5;i++) {
+    const mp = document.getElementById('mp'+i);
+    if(mp) { mp.classList.remove('done','active'); }
+  }
+  document.getElementById('phaseStatus').textContent = '— SELECT RANK & PRESS PLAY —';
+  const tl = document.getElementById('targetLabel');
+  if(tl) tl.style.fill = 'rgba(100,180,255,0)';
+}
+
+function setPhase(idx, name) {
+  for(let i=0;i<5;i++) {
+    const mp = document.getElementById('mp'+i);
+    if(!mp) continue;
+    mp.classList.remove('done','active');
+    if(i < idx) mp.classList.add('done');
+    if(i === idx) mp.classList.add('active');
+  }
+  document.getElementById('phaseStatus').textContent = name;
+}
+
+function delay(ms) { return new Promise(r => { animTimer = setTimeout(r, ms); }); }
+
+// Celestial body configs [color, size, name]
+const BODIES = [
+  { name:'小惑星A', r:18, grad:'radial-gradient(circle at 35% 35%, #aa9888 0%, #6a5040 50%, #3a2a1a 100%)', glow:'rgba(160,120,80,0)', stopRank:'E' },
+  { name:'中惑星A', r:28, grad:'radial-gradient(circle at 35% 35%, #8a7a6a 0%, #504030 50%, #2a1810 100%)', glow:'rgba(120,100,60,0)', stopRank:'D' },
+  { name:'大惑星A', r:40, grad:'radial-gradient(circle at 35% 35%, #7a8090 0%, #404555 50%, #202535 100%)', glow:'rgba(80,100,150,0)', stopRank:'C' },
+  { name:'月',     r:52, grad:'radial-gradient(circle at 35% 35%, #d0d0c8 0%, #909090 50%, #484848 100%)', glow:'rgba(200,200,180,0.1)', stopRank:'B' },
+  { name:'惑星',   r:68, grad:'radial-gradient(circle at 35% 35%, #6090d0 0%, #304080 50%, #102050 100%)', glow:'rgba(60,120,220,0.2)', stopRank:'A' },
+  { name:'巨大惑星', r:82, grad:'radial-gradient(circle at 35% 35%, #e0b060 0%, #a06020 40%, #602000 70%, #200000 100%)', glow:'rgba(240,160,40,0.3)', stopRank:'S' },
+  { name:'太陽', r:82, grad:'radial-gradient(circle at 35% 35%, #ffffa0 0%, #ffcc00 30%, #ff6600 60%, #cc2200 100%)', glow:'rgba(255,160,0,0.5)', stopRank:'P' },
+];
+
+const RANK_ORDER = ['E','D','C','B','A','S','P'];
+const RANK_BEAM_COL = { E:'#7a8a9a', D:'#4488dd', C:'#0099ff', B:'#00ccff', A:'#00ff99', S:'#ffdd00', P:'#ff44ff' };
+
+async function playAnim() {
+  const rank = (currentRank === 'ALL') ? 'S' : currentRank;
+  const rankIdx = RANK_ORDER.indexOf(rank);
+  const col = RANK_COLS[rank];
+  const beamCol = RANK_BEAM_COL[rank];
+
+  resetCanvas();
+  await delay(80);
+
+  const bl = document.getElementById('bodiesLayer');
+  const beam = document.getElementById('beam');
+  const flash = document.getElementById('flash');
+  const cb = document.getElementById('chargeBar');
+  const cg = document.getElementById('cannonGlow');
+  const ro = document.getElementById('resultOverlay');
+
+  // Phase 0: Intro — show all bodies
+  setPhase(0, '① COCKPIT INTRO');
+  const bodiesToShow = BODIES.slice(0, rankIdx + 1);
+
+  // Place bodies (far = small, close = large perspective)
+  // Bodies spread from center outward as z distance
+  bodiesToShow.forEach((b, i) => {
+    const el = document.createElement('div');
+    const scale = 0.3 + (i / (bodiesToShow.length - 0.5)) * 0.7;
+    const w = Math.round(b.r * 2 * scale);
+    const offsetX = (Math.random() - 0.5) * 40;
+    el.id = 'body_' + i;
+    el.style.cssText = `position:absolute; width:${w}px; height:${w}px; border-radius:50%; background:${b.grad}; left:calc(50% - ${w/2}px + ${offsetX}px); top:${30 + i * 20}px; opacity:${0.4 + i * 0.1}; box-shadow:0 0 ${Math.round(12 * scale)}px ${b.glow}; transition:none;`;
+    el.dataset.idx = i;
+    bl.appendChild(el);
+  });
+  await delay(1200);
+
+  // Phase 1: Lock
+  setPhase(1, '② TARGET LOCK');
+  // Reticle flash to rank color
+  const reticle = document.getElementById('reticle');
+  reticle.querySelector('circle').style.stroke = col + '88';
+  await delay(800);
+
+  // Phase 2: Charge
+  setPhase(2, '③ CHARGING...');
+  cg.setAttribute('fill', beamCol + '33');
+  cb.style.background = beamCol;
+  cb.style.boxShadow = `0 0 8px ${beamCol}`;
+  // Animate charge bar
+  const chargeDur = rank === 'P' ? 2000 : rank === 'S' ? 1800 : 1200;
+  const chargeStart = Date.now();
+  await new Promise(resolve => {
+    function tickCharge() {
+      const p = Math.min((Date.now() - chargeStart) / chargeDur, 1);
+      cb.style.transition = 'none';
+      cb.style.width = (p * 100) + '%';
+      document.getElementById('chargePct').textContent = Math.round(p * 100) + '%';
+      if(p < 1) requestAnimationFrame(tickCharge);
+      else resolve();
+    }
+    requestAnimationFrame(tickCharge);
+  });
+
+  // Phase 3: Fire & penetrate
+  setPhase(3, '④ PENETRATING...');
+
+  for(let i = 0; i <= rankIdx; i++) {
+    const bodyEl = document.getElementById('body_' + i);
+    const b = BODIES[i];
+    const isLast = (i === rankIdx);
+
+    // Show beam shooting up
+    beam.style.transition = 'none';
+    beam.style.opacity = '1';
+    beam.style.height = '0px';
+    beam.style.background = `linear-gradient(to top, transparent, ${beamCol}, #fff)`;
+    beam.style.boxShadow = `0 0 8px ${beamCol}`;
+    beam.style.width = isLast ? '6px' : '4px';
+    await delay(50);
+    beam.style.transition = 'height 0.2s ease-out';
+    beam.style.height = '240px';
+    await delay(220);
+
+    // Shake cockpit
+    const wrap = document.getElementById('cockpitWrap');
+    if(i >= 2) {
+      const shakeAmt = [1,1,2,3,4,5,6][i];
+      wrap.style.transform = `translate(${shakeAmt}px,-${shakeAmt}px)`;
+      await delay(60);
+      wrap.style.transform = `translate(-${shakeAmt}px,${shakeAmt}px)`;
+      await delay(60);
+      wrap.style.transform = '';
+    }
+
+    if(!isLast) {
+      // Penetration: body explodes, beam continues
+      bodyEl.style.transition = 'all 0.25s ease-out';
+      bodyEl.style.transform = 'scale(2.5)';
+      bodyEl.style.opacity = '0';
+      bodyEl.style.filter = `blur(3px) brightness(3)`;
+
+      // Flash
+      flash.style.background = `${beamCol}33`;
+      flash.style.transition = 'opacity 0.1s';
+      flash.style.opacity = '1';
+      await delay(120);
+      flash.style.opacity = '0';
+      await delay(300);
+      beam.style.opacity = '0';
+      await delay(150);
+
+    } else {
+      // Stop: spark but no penetration
+      bodyEl.style.transition = 'all 0.3s';
+      bodyEl.style.filter = `brightness(2.5)`;
+      flash.style.background = `${col}55`;
+      flash.style.transition = 'opacity 0.15s';
+      flash.style.opacity = '1';
+      await delay(200);
+      flash.style.opacity = '0';
+      await delay(100);
+      bodyEl.style.filter = `brightness(1)`;
+      beam.style.transition = 'opacity 0.3s';
+      beam.style.opacity = '0';
+
+      // Premium: supernova
+      if(rank === 'P') {
+        await delay(400);
+        flash.style.background = 'linear-gradient(135deg, rgba(255,68,255,0.6), rgba(255,170,0,0.6), rgba(68,136,255,0.6))';
+        flash.style.opacity = '1'; await delay(300);
+        flash.style.opacity = '0'; await delay(200);
+        flash.style.background = '#ffffff';
+        flash.style.opacity = '1'; await delay(200);
+        flash.style.opacity = '0'; await delay(200);
+        flash.style.background = 'linear-gradient(135deg, rgba(255,68,255,0.4), rgba(255,170,0,0.4), rgba(68,136,255,0.4))';
+        flash.style.opacity = '1'; await delay(400);
+        flash.style.opacity = '0';
+      }
+    }
+  }
+
+  // Phase 4: Result
+  setPhase(4, '⑤ RESULT');
+  await delay(300);
+
+  const rr = document.getElementById('resultRank');
+  const rs = document.getElementById('resultSub');
+  rr.textContent = rank === 'P' ? 'PREMIUM' : 'RANK ' + rank;
+  rr.style.color = col;
+  rr.style.textShadow = `0 0 25px ${col}`;
+  rs.textContent = `PENETRATION: ${rankIdx} BODIES`;
+  rs.style.color = col + 'aa';
+  ro.style.transition = 'opacity 0.5s ease';
+  ro.style.opacity = '1';
+
+  // Charge bar to full in rank color
+  cb.style.width = '100%';
+  document.getElementById('chargePct').textContent = '100%';
+}
+
+// init
+setTab('ALL');
+</script>
+</body>
+</html>
