@@ -3,21 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./LoginPage.css";
 
-export default function LoginPage() {
-  const { loginWithEmail } = useAuth();
+export default function AdminLoginPage() {
+  const { loginAsAdmin } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
-    if (!email.trim()) return;
     setLoading(true);
     setError("");
     try {
-      await loginWithEmail(email.trim());
-      navigate("/order");
+      loginAsAdmin(password);
+      navigate("/admin");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -31,19 +30,19 @@ export default function LoginPage() {
         <div className="login-logo">
           <span className="login-logo-mark">P</span>
           <div>
-            <div className="login-title">PALETTE GROUP</div>
-            <div className="login-sub">トレカ商事カンパニー 発注システム</div>
+            <div className="login-title">管理者ログイン</div>
+            <div className="login-sub">PALETTE GROUP トレカ商事カンパニー</div>
           </div>
         </div>
 
         <form onSubmit={handleLogin} className="login-form">
           <div className="form-group">
-            <label>登録メールアドレス</label>
+            <label>管理者パスワード</label>
             <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="shop@example.com"
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="パスワードを入力"
               autoFocus
               required
             />
@@ -55,7 +54,7 @@ export default function LoginPage() {
         </form>
 
         <div className="login-note">
-          ご登録がお済みでない方は担当者までお問い合わせください。
+          <a href="/login" style={{color: "var(--text3)", fontSize: "12px"}}>← ショップログインはこちら</a>
         </div>
       </div>
     </div>
