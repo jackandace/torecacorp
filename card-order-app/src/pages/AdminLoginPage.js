@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./LoginPage.css";
 
@@ -28,7 +28,7 @@ export default function AdminLoginPage() {
     <div className="login-page">
       <div className="login-card">
         <div className="login-logo">
-          <span className="login-logo-mark">P</span>
+          <span className="login-logo-mark" style={{ background: "linear-gradient(135deg, #1B3A5C, #2E6DA4)" }}>P</span>
           <div>
             <div className="login-title">管理者ログイン</div>
             <div className="login-sub">PALETTE GROUP トレカ商事カンパニー</div>
@@ -53,9 +53,10 @@ export default function AdminLoginPage() {
           </button>
         </form>
 
-        <div className="login-note">
-          <a href="/login" style={{color: "var(--text3)", fontSize: "12px"}}>← ショップログインはこちら</a>
-        </div>
+        <hr className="login-divider" />
+        <Link to="/login" className="login-admin-link">
+          ← ショップログインはこちら
+        </Link>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./LoginPage.css";
 
@@ -57,6 +57,10 @@ export default function LoginPage() {
         <div className="login-note">
           ご登録がお済みでない方は担当者までお問い合わせください。
         </div>
+        <hr className="login-divider" />
+        <Link to="/admin-login" className="login-admin-link">
+          管理者の方はこちら →
+        </Link>
       </div>
     </div>
   );
