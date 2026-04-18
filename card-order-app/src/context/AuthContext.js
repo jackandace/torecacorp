@@ -22,13 +22,19 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  // ショップログイン: メールアドレスで照合 + 承認済みチェック
+  // ショップログイン: メールアドレス照合
+  // ※ approved チェックは顧客マスターD列にTRUEが入ってから有効になる
   const loginWithEmail = async (email) => {
     const data = await apiGet("getCustomers");
     const customers = data.customers || [];
-    const found = customers.find(c => c.email.toLowerCase() === email.toLowerCase());
+    const found = customers.find(c =>
+      String(c.email).trim().toLowerCase() === email.trim().toLowerCase()
+    );
     if (!found) throw new Error("このメールアドレスは登録されていません");
-    if (!found.approved) throw new Error("アカウントがまだ承認されていません。担当者にお問い合わせください。");
+    // approved が明示的に false の場合のみブロック（未設定=true扱い）
+    if (found.approved === false) {
+      throw new Error("アカウントがまだ承認されていません。担当者にお問い合わせください。");
+    }
     const userData = { ...found, isAdmin: false };
     setUser(userData);
     setIsAdmin(false);
