@@ -11,18 +11,24 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const saved = localStorage.getItem("card_order_user");
     if (saved) {
-      const parsed = JSON.parse(saved);
-      setUser(parsed);
-      setIsAdmin(parsed.isAdmin || false);
+      try {
+        const parsed = JSON.parse(saved);
+        setUser(parsed);
+        setIsAdmin(parsed.isAdmin || false);
+      } catch(e) {
+        localStorage.removeItem("card_order_user");
+      }
     }
     setLoading(false);
   }, []);
 
+  // ショップログイン: メールアドレスで照合 + 承認済みチェック
   const loginWithEmail = async (email) => {
     const data = await apiGet("getCustomers");
-    const customers = data.emails || [];
+    const customers = data.customers || [];
     const found = customers.find(c => c.email.toLowerCase() === email.toLowerCase());
     if (!found) throw new Error("このメールアドレスは登録されていません");
+    if (!found.approved) throw new Error("アカウントがまだ承認されていません。担当者にお問い合わせください。");
     const userData = { ...found, isAdmin: false };
     setUser(userData);
     setIsAdmin(false);
@@ -30,6 +36,7 @@ export function AuthProvider({ children }) {
     return userData;
   };
 
+  // 管理者ログイン
   const loginAsAdmin = (password) => {
     if (password !== "palette2024admin") throw new Error("パスワードが違います");
     const adminUser = { email: "admin", company: "管理者", name: "管理者", isAdmin: true };
