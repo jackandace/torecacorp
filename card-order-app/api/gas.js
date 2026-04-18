@@ -1,46 +1,27 @@
-export default async function handler(req, res) {
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxY_7wUeM24udv12hKtIUayXXWHmNLTtWKfwnabKZZNRoHkFVutCgpulWjq1duTLU0fUA/exec";
+
+module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbwn--uOZraoJecGvny2_tVBoX1TuxMoE45mG484kp3x7xxEuOpAV1AuW1u6V9yxUsK27Q/exec";
+  if (req.method === "OPTIONS") { res.status(200).end(); return; }
 
   try {
-    let response;
-
     if (req.method === "GET") {
-      const qs = new URLSearchParams(req.query).toString();
-      response = await fetch(`${GAS_URL}?${qs}`, {
-        method: "GET",
-        redirect: "follow",
-        headers: {
-          "User-Agent": "Mozilla/5.0",
-          "Accept": "application/json"
-        }
-      });
-    } else {
-      response = await fetch(GAS_URL, {
+      const params = new URLSearchParams(req.query);
+      const response = await fetch(`${GAS_URL}?${params.toString()}`);
+      const data = await response.json();
+      res.status(200).json(data);
+    } else if (req.method === "POST") {
+      const response = await fetch(GAS_URL, {
         method: "POST",
-        redirect: "follow",
-        headers: {
-          "Content-Type": "application/json",
-          "User-Agent": "Mozilla/5.0",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify(req.body)
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(req.body),
       });
+      const data = await response.json();
+      res.status(200).json(data);
     }
-
-    const text = await response.text();
-    res.setHeader("Content-Type", "application/json");
-    return res.status(200).send(text);
-
   } catch (err) {
-    console.error("Proxy error:", err.message);
-    return res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
-}
+};
