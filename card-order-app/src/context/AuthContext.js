@@ -22,8 +22,7 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
-  // ショップログイン: メールアドレス照合
-  // ※ approved チェックは顧客マスターD列にTRUEが入ってから有効になる
+  // ショップログイン: メールアドレスが存在すればOK（承認チェックなし）
   const loginWithEmail = async (email) => {
     const data = await apiGet("getCustomers");
     const customers = data.customers || [];
@@ -31,10 +30,6 @@ export function AuthProvider({ children }) {
       String(c.email).trim().toLowerCase() === email.trim().toLowerCase()
     );
     if (!found) throw new Error("このメールアドレスは登録されていません");
-    // approved が明示的に false の場合のみブロック（未設定=true扱い）
-    if (found.approved === false) {
-      throw new Error("アカウントがまだ承認されていません。担当者にお問い合わせください。");
-    }
     const userData = { ...found, isAdmin: false };
     setUser(userData);
     setIsAdmin(false);
