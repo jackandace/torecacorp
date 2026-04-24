@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>トレカ自販機 発注仕様確認フォーム</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700;900&family=Noto+Sans+JP:wght@300;400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a1e3f;
+    --ink-soft: #1e3a6f;
+    --paper: #f5f8fc;
+    --paper-warm: #e8eff8;
+    --accent: #1e5cb8;
+    --accent-deep: #0f3a7a;
+    --gold: #5bb8e0;
+    --border: #0a1e3f;
+    --muted: #6b7a93;
+    --success: #2d6a4f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.7;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(30, 92, 184, 0.06) 0%, transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(15, 58, 122, 0.05) 0%, transparent 40%);
+  }
+
+  /* ノイズテクスチャ */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .container {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ヘッダー */
+  .header {
+    border-bottom: 3px double var(--ink);
+    padding-bottom: 32px;
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--ink);
+  }
+
+  .eyebrow {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 900;
+    font-size: clamp(28px, 5vw, 42px);
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .meta {
+    display: flex;
+    gap: 16px;
+    margin-top: 20px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .meta span::before {
+    content: '◆';
+    color: var(--accent);
+    margin-right: 6px;
+  }
+
+  /* セクション */
+  .section {
+    margin-bottom: 56px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .section-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--accent);
+    font-weight: 400;
+  }
+
+  .section-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .section-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  /* フィールド */
+  .field {
+    margin-bottom: 24px;
+  }
+
+  /* 筐体カード（動的追加） */
+  .machines-intro {
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    background: var(--paper-warm);
+    border-left: 3px solid var(--accent);
+    border-radius: 0;
+  }
+
+  .machines-intro-text {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  .machines-intro-text strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .machine-card {
+    border: 2px solid var(--ink);
+    background: white;
+    margin-bottom: 20px;
+    position: relative;
+    transition: all 0.2s;
+  }
+
+  .machine-card.collapsed .machine-card-body {
+    display: none;
+  }
+
+  .machine-card.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+  }
+
+  .machine-card.complete {
+    border-color: var(--success);
+  }
+
+  .machine-card.complete .machine-card-header {
+    background: #e8f5ee;
+  }
+
+  .machine-card.incomplete .machine-status::before {
+    content: '入力中';
+    background: #fef5e7;
+    color: #9c5f00;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    margin-left: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .machine-card.complete .machine-status::before {
+    content: '✓ 完了';
+    background: var(--success);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    margin-left: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .machine-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    background: var(--paper-warm);
+    border-bottom: 2px solid var(--ink);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+
+  .machine-card.collapsed .machine-card-header {
+    border-bottom: none;
+  }
+
+  .machine-card-title {
+    display: flex;
+    align-items: center;
+  }
+
+  .machine-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .machine-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .machine-toggle,
+  .machine-delete {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px 10px;
+    font-size: 14px;
+    color: var(--ink);
+    transition: all 0.15s;
+    line-height: 1;
+  }
+
+  .machine-toggle:hover,
+  .machine-delete:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .machine-delete {
+    color: #c77700;
+  }
+
+  .machine-card[data-index="1"] .machine-delete {
+    display: none;
+  }
+
+  .toggle-icon {
+    display: inline-block;
+    transition: transform 0.2s;
+    font-size: 10px;
+  }
+
+  .machine-card-body {
+    padding: 20px 18px 18px;
+  }
+
+  .machine-card-body .field:last-child {
+    margin-bottom: 0;
+  }
+
+  /* 追加ボタン */
+  .machines-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .add-machine-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 16px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    background: white;
+    border: 1.5px dashed var(--ink);
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .add-machine-btn:hover:not(:disabled) {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    border-style: solid;
+  }
+
+  .add-machine-btn.primary {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .add-machine-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .add-icon {
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1;
+  }
+
+  .field-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .required {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    letter-spacing: 0.05em;
+  }
+
+  .field-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 15px;
+    background: white;
+    border: 1.5px solid var(--ink);
+    border-radius: 0;
+    color: var(--ink);
+    transition: all 0.2s;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 4px 4px 0 0 var(--accent);
+    transform: translate(-2px, -2px);
+  }
+
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23111318' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 40px;
+    cursor: pointer;
+  }
+
+  /* ラジオ・チェックボックスカード */
+  .radio-group {
+    display: grid;
+    gap: 10px;
+  }
+
+  .radio-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: white;
+    border: 1.5px solid var(--ink);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .radio-card:hover {
+    background: var(--paper-warm);
+  }
+
+  .radio-card input[type="radio"],
+  .radio-card input[type="checkbox"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border: 1.5px solid var(--ink);
+    margin-top: 2px;
+    cursor: pointer;
+    position: relative;
+    background: white;
+  }
+
+  .radio-card input[type="radio"] {
+    border-radius: 50%;
+  }
+
+  .radio-card input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: var(--accent);
+    border-radius: 50%;
+  }
+
+  .radio-card input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .radio-card:has(input:checked) {
+    background: var(--paper-warm);
+    border-color: var(--accent);
+    box-shadow: 3px 3px 0 0 var(--accent);
+  }
+
+  .radio-card-content {
+    flex: 1;
+  }
+
+  .radio-card-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .radio-card-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .price-tag {
+    display: inline-block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 2px 8px;
+    margin-left: 6px;
+  }
+
+  .price-tag.free {
+    background: var(--success);
+  }
+
+  .spec-chip {
+    display: inline-block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 3px 8px;
+    margin: 4px 4px 0 0;
+  }
+
+  .spec-chip b {
+    color: var(--gold);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  /* ラッピングなし筐体色チップ（視覚的に判別しやすく） */
+  .radio-card .spec-chip.wrap-32 { background: #2a2d36; color: #fff; }
+  .radio-card .spec-chip.wrap-49 { background: #e8a5b5; color: #3d1f2a; }
+  .radio-card .spec-chip.wrap-shibaura { background: #ffffff; color: #2a2d36; border: 1px solid var(--ink); }
+  .radio-card .spec-chip.wrap-49 b,
+  .radio-card .spec-chip.wrap-shibaura b { color: inherit; }
+
+  .wrap-notice {
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: #fef5e7;
+    border: 1px solid #f0c877;
+    border-left: 4px solid #c77700;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  .wrap-notice strong {
+    color: #9c5f00;
+    font-weight: 700;
+  }
+
+  /* 免責事項 */
+  .disclaimer {
+    background: white;
+    border: 1.5px solid var(--ink);
+    padding: 20px 22px;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .disclaimer-number {
+    position: absolute;
+    top: -10px;
+    left: 16px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    padding: 2px 10px;
+  }
+
+  .disclaimer-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    padding-top: 4px;
+  }
+
+  .disclaimer-body {
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+  }
+
+  .disclaimer-body strong {
+    background: linear-gradient(transparent 60%, rgba(230, 57, 70, 0.25) 60%);
+    font-weight: 700;
+  }
+
+  .disclaimer-list {
+    list-style: none;
+    margin: 10px 0 4px;
+    padding: 12px 14px 12px 16px;
+    background: var(--paper-warm);
+    border-left: 3px solid var(--ink);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .disclaimer-list li {
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .disclaimer-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 8px;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  /* コイン機構比較（CHECK 01） */
+  .coin-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 14px 0 8px;
+  }
+
+  .coin-compare-item {
+    padding: 12px 14px;
+    border: 1.5px solid var(--ink);
+    background: var(--paper-warm);
+  }
+
+  .coin-compare-item.coin-32 {
+    background: #fef5e7;
+    border-color: #c77700;
+  }
+
+  .coin-compare-item.coin-49 {
+    background: #e8f5ee;
+    border-color: var(--success);
+  }
+
+  .coin-compare-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed currentColor;
+  }
+
+  .coin-compare-badge {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 2px 8px;
+  }
+
+  .coin-compare-type {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .coin-32 .coin-compare-type { color: #c77700; }
+  .coin-49 .coin-compare-type { color: var(--success); }
+
+  .coin-compare-body {
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+
+  .coin-note {
+    display: inline-block;
+    margin-top: 4px;
+    font-size: 11px;
+    color: #c77700;
+    font-weight: 700;
+  }
+
+  .coin-note.good {
+    color: var(--success);
+  }
+
+  /* ラストワン賞排出ロジック（CHECK 02） */
+  .lastone-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 14px 0 8px;
+  }
+
+  .lastone-row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--paper-warm);
+    border-left: 3px solid var(--ink);
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .lastone-row.ok {
+    background: #e8f5ee;
+    border-left-color: var(--success);
+  }
+
+  .lastone-row.ng {
+    background: #fef5e7;
+    border-left-color: #c77700;
+  }
+
+  .lastone-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: var(--ink);
+    align-self: start;
+    font-weight: 700;
+  }
+
+  .lastone-row.ok .lastone-label { color: var(--success); }
+  .lastone-row.ng .lastone-label { color: #c77700; }
+
+  .lastone-text strong { font-weight: 700; }
+  .lastone-text u { text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 2px; }
+
+  .disclaimer-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--paper-warm);
+    border: 1px dashed var(--ink);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+
+  .disclaimer-check:has(input:checked) {
+    background: var(--accent);
+    color: white;
+    border-style: solid;
+    border-color: var(--accent);
+  }
+
+  .disclaimer-check input[type="checkbox"] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    border: 1.5px solid currentColor;
+    cursor: pointer;
+    position: relative;
+    background: transparent;
+  }
+
+  .disclaimer-check input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* 送信ボタン */
+  .submit-section {
+    margin-top: 56px;
+    padding-top: 32px;
+    border-top: 3px double var(--ink);
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    background: var(--paper-warm);
+    border-left: 4px solid var(--accent);
+    font-size: 13px;
+  }
+
+  .progress-info strong {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: var(--accent);
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 20px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    background: var(--ink);
+    color: var(--paper);
+    border: 2px solid var(--ink);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit-btn:hover:not(:disabled) {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: translate(-3px, -3px);
+    box-shadow: 6px 6px 0 0 var(--ink);
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .submit-note {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+
+  /* 完了画面 */
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 80px 20px;
+  }
+
+  .success-screen.show {
+    display: block;
+    animation: fadeUp 0.6s ease;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .success-mark {
+    width: 80px;
+    height: 80px;
+    border: 3px solid var(--success);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    font-size: 40px;
+    color: var(--success);
+  }
+
+  .success-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 28px;
+    font-weight: 900;
+    margin-bottom: 16px;
+  }
+
+  .success-message {
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .success-orderid {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 10px 20px;
+    background: var(--paper-warm);
+    border: 1.5px solid var(--ink);
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.1em;
+  }
+
+  .success-orderid strong {
+    color: var(--ink);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-left: 8px;
+  }
+
+  /* フッター */
+  .footer {
+    text-align: center;
+    padding: 40px 20px 20px;
+    border-top: 1px solid var(--ink);
+    margin-top: 60px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* エラー表示 */
+  .error-msg {
+    color: var(--accent);
+    font-size: 12px;
+    margin-top: 6px;
+    display: none;
+  }
+
+  .error-msg.show {
+    display: block;
+  }
+
+  /* ローディング */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 19, 24, 0.85);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    color: var(--paper);
+  }
+
+  .loading-overlay.show {
+    display: flex;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--paper);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 24px 16px 60px; }
+    .section-header { flex-wrap: wrap; }
+    .section-desc { margin-left: 0; width: 100%; }
+    .meta { flex-wrap: wrap; }
+    .coin-compare { grid-template-columns: 1fr; }
+    .lastone-row { grid-template-columns: 80px 1fr; gap: 8px; }
+    .machines-actions { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ヘッダー -->
+  <header class="header">
+    <div class="eyebrow">ORDER SPECIFICATION</div>
+    <h1>トレカ自販機<br>発注仕様 確認フォーム</h1>
+    <p class="subtitle">
+      ご契約前の発注仕様と免責事項のご確認をお願いいたします。<br>
+      詳細なご連絡先情報は契約書にてあらためて伺います。
+    </p>
+    <div class="meta">
+      <span>ALL FIELDS REQUIRED</span>
+      <span>EST. 3 MIN</span>
+    </div>
+  </header>
+
+  <form id="orderForm">
+
+    <!-- SECTION 01: ご連絡先 -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-number">01</div>
+        <div class="section-title">ご連絡先</div>
+        <div class="section-desc">最低限の情報のみ</div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">
+          法人名または事業者名
+          <span class="required">必須</span>
+        </label>
+        <div class="field-hint">例：株式会社○○ / ○○トレカ</div>
+        <input type="text" name="company" required>
+      </div>
+
+      <div class="field">
+        <label class="field-label">
+          担当者名
+          <span class="required">必須</span>
+        </label>
+        <div class="field-hint">例：山田太郎</div>
+        <input type="text" name="person" required>
+      </div>
+
+      <div class="field">
+        <label class="field-label">
+          メールアドレス
+          <span class="required">必須</span>
+        </label>
+        <div class="field-hint">発注確認のご連絡先として使用します</div>
+        <input type="email" name="email" required>
+      </div>
+    </section>
+
+    <!-- SECTION 02: 発注仕様 -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-number">02</div>
+        <div class="section-title">発注仕様</div>
+        <div class="section-desc">筐体ごとに仕様を指定</div>
+      </div>
+
+      <div class="machines-intro">
+        <p class="machines-intro-text">
+          <strong>複数台ご発注の場合は「筐体を追加」から筐体単位で仕様を指定してください。</strong><br>
+          同じ仕様で追加する場合は「同じ仕様で複製」が便利です。
+        </p>
+      </div>
+
+      <!-- 筐体カード挿入先 -->
+      <div id="machinesContainer"></div>
+
+      <!-- 追加ボタン群 -->
+      <div class="machines-actions">
+        <button type="button" class="add-machine-btn primary" id="addMachineBtn">
+          <span class="add-icon">＋</span>
+          <span>別仕様で筐体を追加</span>
+        </button>
+        <button type="button" class="add-machine-btn secondary" id="duplicateMachineBtn">
+          <span class="add-icon">⎘</span>
+          <span>直前の仕様で複製して追加</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 筐体カードのテンプレート -->
+    <template id="machineTemplate">
+      <div class="machine-card" data-index="">
+        <div class="machine-card-header">
+          <div class="machine-card-title">
+            <span class="machine-num">筐体 #1</span>
+            <span class="machine-status"></span>
+          </div>
+          <div class="machine-card-actions">
+            <button type="button" class="machine-toggle" aria-label="折りたたむ">
+              <span class="toggle-icon">▼</span>
+            </button>
+            <button type="button" class="machine-delete" aria-label="削除">🗑</button>
+          </div>
+        </div>
+
+        <div class="machine-card-body">
+
+          <div class="field">
+            <label class="field-label">
+              筐体タイプ
+              <span class="required">必須</span>
+            </label>
+            <div class="field-hint">収納数は標準仕様での目安です。全機種 新紙幣対応済み。</div>
+            <div class="radio-group">
+              <label class="radio-card">
+                <input type="radio" data-field="machine" value="32インチタッチディスプレイ自販機" required>
+                <div class="radio-card-content">
+                  <div class="radio-card-title">32インチ タッチディスプレイ自販機</div>
+                  <div class="radio-card-desc">
+                    <span class="spec-chip">収納 3列×5段×18件 = <b>270個</b></span>
+                    <span class="spec-chip">H1700 × W650 × D380mm / 70kg</span>
+                  </div>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" data-field="machine" value="49インチタッチディスプレイ自販機">
+                <div class="radio-card-content">
+                  <div class="radio-card-title">49インチ タッチディスプレイ自販機</div>
+                  <div class="radio-card-desc">
+                    <span class="spec-chip">収納 10列×6段×15件 = <b>900個</b></span>
+                    <span class="spec-chip">H1955 × W1290 × L850mm / 350kg</span>
+                  </div>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" data-field="machine" value="芝浦自販機SHN-AT5">
+                <div class="radio-card-content">
+                  <div class="radio-card-title">芝浦自販機 SHN-AT5</div>
+                  <div class="radio-card-desc">
+                    <span class="spec-chip">W800 × D496 × H1840mm / 148kg</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">
+              オリジナルラッピング
+              <span class="required">必須</span>
+            </label>
+            <div class="field-hint">※ラッピングデザイン費用は別途となります</div>
+            <div class="radio-group">
+              <label class="radio-card">
+                <input type="radio" data-field="wrapping" value="国内プレミアムラッピング" required>
+                <div class="radio-card-content">
+                  <div class="radio-card-title">国内プレミアムラッピング<span class="price-tag">+¥100,000</span></div>
+                  <div class="radio-card-desc">高品質な国内ラッピング施工</div>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" data-field="wrapping" value="ノーマルラッピング">
+                <div class="radio-card-content">
+                  <div class="radio-card-title">ノーマルラッピング<span class="price-tag free">無料</span></div>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" data-field="wrapping" value="ラッピングなし">
+                <div class="radio-card-content">
+                  <div class="radio-card-title">ラッピングなし<span class="price-tag free">無料</span></div>
+                  <div class="radio-card-desc">
+                    <span class="spec-chip wrap-32">32型：マットブラック</span>
+                    <span class="spec-chip wrap-49">49型：<b>ピンク（合板色）</b></span>
+                    <span class="spec-chip wrap-shibaura">芝浦：ツヤありホワイト</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+            <div class="wrap-notice">
+              <strong>⚠ 49型をラッピングなしでご注文の場合</strong><br>
+              筐体がピンクの合板色で納品されます。店舗の雰囲気に合わない場合は、ノーマルラッピング（無料）またはプレミアムラッピングをご検討ください。
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">
+              電子決済対応
+              <span class="required">必須</span>
+            </label>
+            <div class="radio-group">
+              <label class="radio-card">
+                <input type="radio" data-field="payment" value="対応希望" required>
+                <div class="radio-card-content"><div class="radio-card-title">対応を希望する</div></div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" data-field="payment" value="対応希望しない">
+                <div class="radio-card-content"><div class="radio-card-title">対応を希望しない</div></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">
+              紙幣お釣り対応
+              <span class="required">必須</span>
+            </label>
+            <div class="field-hint">※32型・49型の場合のみオプション対応</div>
+            <div class="radio-group">
+              <label class="radio-card">
+                <input type="radio" data-field="changeBill" value="対応希望" required>
+                <div class="radio-card-content">
+                  <div class="radio-card-title">対応を希望する<span class="price-tag">+¥60,000</span></div>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" data-field="changeBill" value="対応希望しない">
+                <div class="radio-card-content"><div class="radio-card-title">対応を希望しない</div></div>
+              </label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">
+              SIMレンタル
+              <span class="required">必須</span>
+            </label>
+            <div class="radio-group">
+              <label class="radio-card">
+                <input type="radio" data-field="sim" value="レンタル希望" required>
+                <div class="radio-card-content">
+                  <div class="radio-card-title">レンタルを希望する</div>
+                  <div class="radio-card-desc">1枚あたり 事務手数料¥2,000 + 月額¥1,000</div>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" data-field="sim" value="不要">
+                <div class="radio-card-content"><div class="radio-card-title">レンタルは不要</div></div>
+              </label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </template>
+
+    <!-- SECTION 03: 免責事項 -->
+    <section class="section">
+      <div class="section-header">
+        <div class="section-number">03</div>
+        <div class="section-title">ご確認事項・免責事項</div>
+        <div class="section-desc">全項目のご確認が必要です</div>
+      </div>
+
+      <div class="disclaimer">
+        <div class="disclaimer-number">CHECK 01</div>
+        <h3 class="disclaimer-title">コイン機構：循環型 / 非循環型の違いについて</h3>
+        <p class="disclaimer-body">
+          筐体によってコイン機構が異なります。<strong>運営コストや現金補充頻度に直結する重要な違い</strong>ですので、必ずご確認ください。
+        </p>
+
+        <div class="coin-compare">
+          <div class="coin-compare-item coin-32">
+            <div class="coin-compare-head">
+              <span class="coin-compare-badge">32型</span>
+              <span class="coin-compare-type">非循環型</span>
+            </div>
+            <p class="coin-compare-body">
+              お客様が投入されたコインは<strong>売上コイン回収BOX</strong>へ入り、お釣りは別途用意された<strong>100円玉専用お釣りBOX</strong>から排出される機構です。
+              <br><br>
+              <span class="coin-note">⚠ 都度、100円玉の補充作業が必要になります。</span>
+            </p>
+          </div>
+          <div class="coin-compare-item coin-49">
+            <div class="coin-compare-head">
+              <span class="coin-compare-badge">49型</span>
+              <span class="coin-compare-type">循環型</span>
+            </div>
+            <p class="coin-compare-body">
+              お客様が投入したコインが、そのまま次のお客様への<strong>お釣りとして再利用</strong>される機構です。
+              <br><br>
+              <span class="coin-note good">✓ お釣り補充の手間が大幅に軽減されます。</span>
+            </p>
+          </div>
+        </div>
+
+        <p class="disclaimer-body" style="margin-top:14px;">
+          加えて32型では基本仕様上、<strong>お釣りは100円硬貨のみでの返却</strong>となります。<br>
+          例）10,000円投入 → 5,000円商品購入 → <strong>100円 × 50枚</strong>のお釣りが返却されます。
+        </p>
+        <label class="disclaimer-check">
+          <input type="checkbox" name="check1" required>
+          <span>上記について理解し、承知しました</span>
+        </label>
+      </div>
+
+      <div class="disclaimer">
+        <div class="disclaimer-number">CHECK 02</div>
+        <h3 class="disclaimer-title">ラストワン賞／排出ロジックについて</h3>
+        <p class="disclaimer-body">
+          自販機の排出機構は以下の仕様となっており、<strong>キャンペーン設計に影響</strong>するため必ずご確認ください。
+        </p>
+
+        <div class="lastone-box">
+          <div class="lastone-row">
+            <div class="lastone-label">基本排出</div>
+            <div class="lastone-text">
+              <strong>購入ボタンNo = レーン番号</strong>で対応しており、ディスプレイで選択した番号のレーン手前から順に排出されます。
+            </div>
+          </div>
+          <div class="lastone-row ok">
+            <div class="lastone-label">✓ 可能</div>
+            <div class="lastone-text">
+              <strong>段数単位でのランダム排出</strong>が可能なため、<u>段数でのラストワン賞</u>（例：最上段の最後の1枚）は設計できます。
+            </div>
+          </div>
+          <div class="lastone-row ng">
+            <div class="lastone-label">✕ 不可</div>
+            <div class="lastone-text">
+              <strong>全レーンを横断するラストワン賞</strong>（例：自販機内の最後の1枚）は、構造上実装できません。
+            </div>
+          </div>
+        </div>
+
+        <p class="disclaimer-body" style="margin-top:14px; font-size:12px;">
+          ラストワン賞を運営に組み込みたい場合は、<strong>「どの段の最後」</strong>という段単位での設計にしていただく必要があります。
+        </p>
+        <label class="disclaimer-check">
+          <input type="checkbox" name="check2" required>
+          <span>上記について理解し、承知しました</span>
+        </label>
+      </div>
+
+      <div class="disclaimer">
+        <div class="disclaimer-number">CHECK 03</div>
+        <h3 class="disclaimer-title">通信環境に起因する釣銭トラブルに関する免責</h3>
+        <p class="disclaimer-body">
+          通信環境が不安定な場所でのご利用時、<strong>購入完了後に釣銭が正常に排出されない場合</strong>がまれに発生します。
+          このようなトラブルに対しては、<strong>弊社では責任を負いかねる場合</strong>がございます。
+          通信環境が安定した場所でのご利用を推奨いたします。
+        </p>
+        <label class="disclaimer-check">
+          <input type="checkbox" name="check3" required>
+          <span>上記について理解し、承知しました</span>
+        </label>
+      </div>
+
+      <div class="disclaimer">
+        <div class="disclaimer-number">CHECK 04</div>
+        <h3 class="disclaimer-title">商品詰まりについて</h3>
+        <p class="disclaimer-body">
+          自販機の構造上、稀に商品が出口で詰まる、排出不良が発生するといった事象が生じる場合がございます。
+          これらの現象は商品の形状・重なり方・設置環境等に起因するもので、使用上起こり得る事象としてご理解・ご了承をお願いいたします。
+        </p>
+        <label class="disclaimer-check">
+          <input type="checkbox" name="check4" required>
+          <span>上記について理解し、承知しました</span>
+        </label>
+      </div>
+
+      <div class="disclaimer">
+        <div class="disclaimer-number">CHECK 05</div>
+        <h3 class="disclaimer-title">メーカー保証について</h3>
+        <p class="disclaimer-body">
+          商品購入日から起算して<strong>メーカー保証期間は1年間</strong>となります。保証期間内に限り、不具合に対する部品交換や工賃等は無償で対応いたします。保証期間を過ぎた場合、または保証対象外の不具合については有償対応となります。
+        </p>
+        <p class="disclaimer-body" style="margin-top:10px;">
+          保証対象は通常使用における<strong>製品の自然故障や不具合</strong>に限られ、以下のケースは保証対象外です：
+        </p>
+        <ul class="disclaimer-list">
+          <li>お客様または第三者による破損・改造・誤操作</li>
+          <li>天災や事故などによる損傷</li>
+          <li>通信環境・電源環境の不備に起因する障害</li>
+        </ul>
+        <label class="disclaimer-check">
+          <input type="checkbox" name="check5" required>
+          <span>上記について理解し、承知しました</span>
+        </label>
+      </div>
+
+      <div class="disclaimer">
+        <div class="disclaimer-number">CHECK 06</div>
+        <h3 class="disclaimer-title">納品後検品のお願い</h3>
+        <p class="disclaimer-body">
+          納品完了後<strong>3日以内</strong>に必ず商品の検品をお願いいたします。検品時には、注文内容との相違の有無、また稼働に支障をきたす初期不良がないかをご確認ください。
+          <strong>3日を経過した後の返品・交換は一切お受けできません</strong>。万が一不具合が生じた場合は、メーカー保証の範囲内での対応となります。
+        </p>
+        <label class="disclaimer-check">
+          <input type="checkbox" name="check6" required>
+          <span>上記について理解し、承知しました</span>
+        </label>
+      </div>
+
+      <div class="disclaimer">
+        <div class="disclaimer-number">CHECK 07</div>
+        <h3 class="disclaimer-title">その他 免責事項</h3>
+        <p class="disclaimer-body">
+          以下の事象について、販売元は一切の責任を負いかねますので、あらかじめご了承ください。
+        </p>
+        <ul class="disclaimer-list">
+          <li>ご購入後の盗難、破損、事故、水没、火災等による損害</li>
+          <li>通信環境に起因する不具合（地下・電波障害エリア等による通信不良や決済エラー）</li>
+          <li>想定外の使用方法や設置環境によって発生した封入物の詰まり・排出不良およびそれに関連した顧客トラブル</li>
+          <li>コイン投入口や釣銭機構の一時的な不具合や誤作動</li>
+        </ul>
+        <label class="disclaimer-check">
+          <input type="checkbox" name="check7" required>
+          <span>上記について理解し、承知しました</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- 送信 -->
+    <div class="submit-section">
+      <div class="progress-info">
+        <span>入力進捗</span>
+        <span><strong id="progressCount">0</strong> / <span id="progressTotal">15</span> 項目完了</span>
+      </div>
+      <button type="submit" class="submit-btn" id="submitBtn">発注仕様を送信する</button>
+      <p class="submit-note">送信後、担当者より折り返しご連絡いたします</p>
+    </div>
+
+  </form>
+
+  <!-- 完了画面 -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-mark">✓</div>
+    <h2 class="success-title">送信が完了しました</h2>
+    <p class="success-message">
+      発注仕様のご確認、誠にありがとうございます。<br>
+      内容を確認のうえ、担当者より折り返しご連絡いたします。<br>
+      今しばらくお待ちください。
+    </p>
+    <div class="success-orderid">
+      受注ID：<strong id="successOrderId">-</strong>
+    </div>
+  </div>
+
+  <footer class="footer">
+    © Palette Group / Vending Machine Order Form
+  </footer>
+
+</div>
+
+<!-- ローディング -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div>送信中...</div>
+</div>
+
+<script>
+  // ⚠️ GASデプロイ後、ここにWebアプリURLを設定してください
+  const GAS_ENDPOINT = 'YOUR_GAS_WEB_APP_URL_HERE';
+
+  const form = document.getElementById('orderForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const progressCount = document.getElementById('progressCount');
+  const progressTotal = document.getElementById('progressTotal');
+  const successScreen = document.getElementById('successScreen');
+  const loadingOverlay = document.getElementById('loadingOverlay');
+  const machinesContainer = document.getElementById('machinesContainer');
+  const machineTemplate = document.getElementById('machineTemplate');
+  const addMachineBtn = document.getElementById('addMachineBtn');
+  const duplicateMachineBtn = document.getElementById('duplicateMachineBtn');
+
+  // 筐体管理の状態
+  let machineCounter = 0;       // 通し番号（削除しても連番維持）
+  const MAX_MACHINES = 20;      // 最大筐体数
+
+  // 筐体1台あたりの必須フィールド
+  const MACHINE_FIELDS = ['machine', 'wrapping', 'payment', 'changeBill', 'sim'];
+
+  /**
+   * 新しい筐体カードを追加
+   * @param {Object} copyFrom - 複製元の筐体カードのデータ（任意）
+   */
+  function addMachine(copyFrom = null) {
+    const machineCards = machinesContainer.querySelectorAll('.machine-card');
+    if (machineCards.length >= MAX_MACHINES) {
+      alert(`筐体は最大${MAX_MACHINES}台まで登録できます。`);
+      return;
+    }
+
+    machineCounter++;
+    const index = machineCounter;
+
+    const clone = machineTemplate.content.cloneNode(true);
+    const card = clone.querySelector('.machine-card');
+    card.dataset.index = index;
+    card.classList.add('incomplete');
+
+    // 筐体番号を設定
+    card.querySelector('.machine-num').textContent = `筐体 #${machineCards.length + 1}`;
+
+    // name属性をインデックス付きに変更
+    card.querySelectorAll('input[type="radio"]').forEach(input => {
+      const field = input.dataset.field;
+      input.name = `${field}_${index}`;
+    });
+
+    // 折りたたみボタン
+    const toggleBtn = card.querySelector('.machine-toggle');
+    const header = card.querySelector('.machine-card-header');
+    const handleToggle = (e) => {
+      // ボタンクリック時のみ、またはヘッダー自体のクリック
+      if (e.target.closest('.machine-delete')) return;
+      card.classList.toggle('collapsed');
+    };
+    toggleBtn.addEventListener('click', handleToggle);
+    header.addEventListener('click', handleToggle);
+
+    // 削除ボタン
+    const deleteBtn = card.querySelector('.machine-delete');
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm('この筐体の仕様を削除しますか？')) {
+        card.remove();
+        renumberMachines();
+        updateProgress();
+      }
+    });
+
+    // 追加直後にカード内のradioが変化したら進捗更新＆完了状態更新
+    card.addEventListener('change', () => {
+      updateMachineStatus(card);
+      updateProgress();
+    });
+
+    machinesContainer.appendChild(clone);
+
+    // 複製モードの場合、前の筐体と同じ選択肢を復元
+    if (copyFrom) {
+      MACHINE_FIELDS.forEach(field => {
+        const value = copyFrom[field];
+        if (value) {
+          const radio = card.querySelector(`input[data-field="${field}"][value="${CSS.escape(value)}"]`);
+          if (radio) radio.checked = true;
+        }
+      });
+    }
+
+    renumberMachines();
+    updateMachineStatus(card);
+    updateProgress();
+
+    // 追加したカードへスクロール
+    setTimeout(() => {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  }
+
+  /**
+   * 筐体番号を振り直す（削除後など）
+   */
+  function renumberMachines() {
+    const cards = machinesContainer.querySelectorAll('.machine-card');
+    cards.forEach((card, i) => {
+      card.querySelector('.machine-num').textContent = `筐体 #${i + 1}`;
+      card.dataset.position = i + 1;
+
+      // 1枚目は削除ボタン非表示
+      const deleteBtn = card.querySelector('.machine-delete');
+      if (i === 0) {
+        deleteBtn.style.display = 'none';
+      } else {
+        deleteBtn.style.display = '';
+      }
+    });
+
+    // 筐体が複数になったら複製ボタン有効化
+    duplicateMachineBtn.disabled = cards.length === 0;
+  }
+
+  /**
+   * 筐体カードの入力完了状態を更新
+   */
+  function updateMachineStatus(card) {
+    const complete = MACHINE_FIELDS.every(field => {
+      const index = card.dataset.index;
+      return card.querySelector(`input[name="${field}_${index}"]:checked`);
+    });
+    card.classList.toggle('complete', complete);
+    card.classList.toggle('incomplete', !complete);
+  }
+
+  /**
+   * 最後の筐体の値を取得（複製用）
+   */
+  function getLastMachineValues() {
+    const cards = machinesContainer.querySelectorAll('.machine-card');
+    if (cards.length === 0) return null;
+
+    const lastCard = cards[cards.length - 1];
+    const index = lastCard.dataset.index;
+    const values = {};
+    MACHINE_FIELDS.forEach(field => {
+      const checked = lastCard.querySelector(`input[name="${field}_${index}"]:checked`);
+      if (checked) values[field] = checked.value;
+    });
+    return values;
+  }
+
+  /**
+   * 全筐体の仕様をデータ化
+   */
+  function collectMachinesData() {
+    const cards = machinesContainer.querySelectorAll('.machine-card');
+    return Array.from(cards).map((card, i) => {
+      const index = card.dataset.index;
+      const machineData = { no: i + 1 };
+      MACHINE_FIELDS.forEach(field => {
+        const checked = card.querySelector(`input[name="${field}_${index}"]:checked`);
+        machineData[field] = checked ? checked.value : '';
+      });
+      return machineData;
+    });
+  }
+
+  /**
+   * 進捗カウント（連絡先3 + 筐体ごとに5項目 + 免責7 = 動的に計算）
+   */
+  function updateProgress() {
+    let completed = 0;
+    let total = 3; // 連絡先3項目
+
+    // 連絡先
+    ['company', 'person', 'email'].forEach(name => {
+      const input = form.querySelector(`input[name="${name}"]`);
+      if (input && input.value.trim()) completed++;
+    });
+
+    // 筐体ごとに5項目
+    const cards = machinesContainer.querySelectorAll('.machine-card');
+    cards.forEach(card => {
+      const index = card.dataset.index;
+      MACHINE_FIELDS.forEach(field => {
+        total++;
+        if (card.querySelector(`input[name="${field}_${index}"]:checked`)) {
+          completed++;
+        }
+      });
+    });
+
+    // 免責事項7項目
+    total += 7;
+    for (let i = 1; i <= 7; i++) {
+      const cb = form.querySelector(`input[name="check${i}"]`);
+      if (cb && cb.checked) completed++;
+    }
+
+    progressCount.textContent = completed;
+    if (progressTotal) progressTotal.textContent = total;
+  }
+
+  // イベントバインディング
+  addMachineBtn.addEventListener('click', () => addMachine());
+  duplicateMachineBtn.addEventListener('click', () => {
+    const lastValues = getLastMachineValues();
+    addMachine(lastValues);
+  });
+
+  form.addEventListener('input', updateProgress);
+  form.addEventListener('change', updateProgress);
+
+  // 送信
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // 筐体が最低1台あり、全て完了しているか確認
+    const cards = machinesContainer.querySelectorAll('.machine-card');
+    if (cards.length === 0) {
+      alert('筐体を1台以上ご指定ください。');
+      return;
+    }
+
+    const incompleteCards = Array.from(cards).filter(card =>
+      card.classList.contains('incomplete')
+    );
+    if (incompleteCards.length > 0) {
+      alert(`筐体 #${Array.from(cards).indexOf(incompleteCards[0]) + 1} の仕様が未完了です。全ての項目をご入力ください。`);
+      incompleteCards[0].classList.remove('collapsed');
+      incompleteCards[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const formData = new FormData(form);
+    const machines = collectMachinesData();
+    const orderId = 'ORD-' + new Date().toISOString().replace(/[-:T.]/g, '').slice(0, 14) + '-' + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+
+    const data = {
+      orderId: orderId,
+      timestamp: new Date().toISOString(),
+      company: formData.get('company'),
+      person: formData.get('person'),
+      email: formData.get('email'),
+      machineCount: machines.length,
+      machines: machines,
+      check1: formData.get('check1') ? '確認済' : '',
+      check2: formData.get('check2') ? '確認済' : '',
+      check3: formData.get('check3') ? '確認済' : '',
+      check4: formData.get('check4') ? '確認済' : '',
+      check5: formData.get('check5') ? '確認済' : '',
+      check6: formData.get('check6') ? '確認済' : '',
+      check7: formData.get('check7') ? '確認済' : ''
+    };
+
+    loadingOverlay.classList.add('show');
+
+    try {
+      await fetch(GAS_ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      loadingOverlay.classList.remove('show');
+      form.style.display = 'none';
+      successScreen.classList.add('show');
+      document.getElementById('successOrderId').textContent = orderId;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      loadingOverlay.classList.remove('show');
+      alert('送信中にエラーが発生しました。お手数ですが、もう一度お試しください。');
+      console.error(err);
+    }
+  });
+
+  // 初期化：最初の筐体カードを1枚追加
+  addMachine();
+  updateProgress();
+</script>
+
+</body>
+</html>
