@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEGAオリパ LINE運用 進め方ご説明資料</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Serif+JP:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1A1A1A;
+    --ink-soft: #5A5A5A;
+    --bg: #FAF8F3;
+    --bg-2: #F0EDE4;
+    --line: #06C755;
+    --line-dark: #00B900;
+    --accent: #D4A017;
+    --accent-soft: #F4E4A8;
+    --navy: #1B3A5C;
+    --border: #1A1A1A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.85;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ==================== Header ==================== */
+  .header {
+    padding: 56px 0 40px;
+    border-bottom: 3px solid var(--ink);
+    margin-bottom: 56px;
+    position: relative;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 120px;
+    height: 3px;
+    background: var(--line);
+  }
+  .header-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--line-dark);
+    margin-bottom: 16px;
+  }
+  .header h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 900;
+    font-size: clamp(28px, 5vw, 40px);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+    color: var(--navy);
+  }
+  .header h1 .accent {
+    color: var(--accent);
+  }
+  .header-sub {
+    font-size: 15px;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+  .header-meta {
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .header-meta strong { color: var(--ink); }
+
+  /* ==================== Section ==================== */
+  section {
+    margin-bottom: 72px;
+  }
+  .section-num {
+    display: inline-block;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--bg);
+    background: var(--navy);
+    padding: 4px 12px;
+    margin-bottom: 16px;
+    letter-spacing: 0.1em;
+  }
+  h2 {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 900;
+    font-size: 26px;
+    line-height: 1.4;
+    margin-bottom: 12px;
+    color: var(--navy);
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 12px;
+  }
+  .section-lede {
+    font-size: 16px;
+    color: var(--ink-soft);
+    margin-bottom: 32px;
+    font-weight: 500;
+  }
+  h3 {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 700;
+    font-size: 19px;
+    margin: 32px 0 12px;
+    color: var(--navy);
+    padding-left: 14px;
+    border-left: 4px solid var(--accent);
+  }
+  p { margin-bottom: 16px; font-size: 15px; }
+  p strong { background: linear-gradient(transparent 60%, var(--accent-soft) 60%); padding: 0 2px; font-weight: 700; }
+
+  /* ==================== Why box ==================== */
+  .why-box {
+    background: var(--bg-2);
+    border-left: 4px solid var(--line);
+    padding: 24px 28px;
+    margin: 32px 0;
+  }
+  .why-box-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--line-dark);
+    margin-bottom: 8px;
+  }
+  .why-box p { margin-bottom: 0; font-size: 15px; line-height: 1.85; }
+
+  /* ==================== Phase steps ==================== */
+  .phases {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 32px 0;
+  }
+  .phase {
+    background: #fff;
+    border: 2px solid var(--ink);
+    padding: 24px 28px;
+    position: relative;
+    box-shadow: 6px 6px 0 var(--navy);
+    transition: transform 0.2s ease;
+  }
+  .phase:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--navy); }
+  .phase-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .phase-num {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 900;
+    font-size: 32px;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .phase-num::before { content: 'STEP '; font-size: 11px; color: var(--ink-soft); display: block; letter-spacing: 0.15em; margin-bottom: 4px; font-family: 'Noto Sans JP'; font-weight: 700;}
+  .phase-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--navy);
+    flex: 1;
+    min-width: 200px;
+  }
+  .phase-period {
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--navy);
+    padding: 4px 10px;
+    letter-spacing: 0.1em;
+  }
+  .phase-body {
+    font-size: 14.5px;
+    color: var(--ink);
+    line-height: 1.85;
+    border-top: 1px dashed var(--ink-soft);
+    padding-top: 14px;
+  }
+  .phase-body ul {
+    list-style: none;
+    margin-top: 8px;
+  }
+  .phase-body ul li {
+    padding-left: 20px;
+    position: relative;
+    margin-bottom: 6px;
+    font-size: 14px;
+  }
+  .phase-body ul li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  /* ==================== Funnel simple ==================== */
+  .funnel-simple {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 32px 0;
+  }
+  .fs-row {
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    gap: 12px;
+    align-items: stretch;
+  }
+  .fs-num {
+    background: var(--navy);
+    color: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 700;
+    font-size: 18px;
+  }
+  .fs-bar {
+    padding: 14px 20px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .fs-bar strong {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .fs-bar span {
+    font-size: 12.5px;
+    opacity: 0.95;
+  }
+  .fs-row:nth-child(1) .fs-bar { background: #2E6DA4; width: 100%; }
+  .fs-row:nth-child(2) .fs-bar { background: #2E6DA4; width: 90%; }
+  .fs-row:nth-child(3) .fs-bar { background: var(--line-dark); width: 75%; }
+  .fs-row:nth-child(4) .fs-bar { background: #2E6DA4; width: 60%; }
+  .fs-row:nth-child(5) .fs-bar { background: var(--accent); color: var(--ink); width: 45%; }
+  .fs-row:nth-child(6) .fs-bar { background: #2E6DA4; width: 32%; }
+  .fs-row:nth-child(7) .fs-bar { background: var(--accent); color: var(--ink); width: 22%; }
+
+  /* ==================== Watch points ==================== */
+  .watch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+    margin: 24px 0;
+  }
+  .watch-card {
+    background: #fff;
+    border: 1.5px solid var(--ink);
+    padding: 18px;
+    position: relative;
+  }
+  .watch-card-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--line-dark);
+    margin-bottom: 6px;
+  }
+  .watch-card-name {
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--navy);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+  .watch-card-desc {
+    font-size: 13px;
+    color: var(--ink-soft);
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .watch-card-target {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink);
+    border-top: 1px dashed var(--ink-soft);
+    padding-top: 8px;
+  }
+  .watch-card-target strong {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 18px;
+    color: var(--accent);
+    margin-left: 8px;
+  }
+
+  /* ==================== Compare table ==================== */
+  .compare {
+    margin: 24px 0;
+    border: 2px solid var(--ink);
+  }
+  .compare-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .compare-row.head {
+    background: var(--navy);
+    color: var(--bg);
+  }
+  .compare-row > div {
+    padding: 16px 20px;
+    border-right: 1px solid var(--ink);
+    font-size: 14px;
+  }
+  .compare-row > div:last-child { border-right: none; }
+  .compare-row.head > div { font-family: 'Noto Serif JP', serif; font-weight: 700; font-size: 15px; }
+  .compare-row.body { border-top: 1px solid var(--ink); background: #fff; }
+  .compare-row.body > div:first-child { background: var(--bg-2); }
+  .compare-row.body strong { color: var(--accent); font-weight: 700; }
+
+  /* ==================== Decision box ==================== */
+  .decision-box {
+    background: var(--navy);
+    color: var(--bg);
+    padding: 36px 32px;
+    margin: 48px 0;
+    position: relative;
+  }
+  .decision-box::before {
+    content: '?';
+    position: absolute;
+    top: 12px;
+    right: 24px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 80px;
+    font-weight: 900;
+    color: var(--accent);
+    opacity: 0.25;
+    line-height: 1;
+  }
+  .decision-box h3 {
+    color: var(--accent);
+    border: none;
+    padding: 0;
+    margin: 0 0 16px;
+    font-size: 22px;
+  }
+  .decision-box p { color: var(--bg); font-size: 15px; }
+  .decision-list {
+    list-style: none;
+    margin-top: 16px;
+  }
+  .decision-list li {
+    padding: 10px 0 10px 28px;
+    position: relative;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    font-size: 14.5px;
+  }
+  .decision-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 18px;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--accent);
+  }
+  .decision-list li:last-child { border-bottom: 1px solid rgba(255,255,255,0.15); }
+  .decision-list li strong { color: var(--accent); }
+
+  /* ==================== Footer ==================== */
+  .footer {
+    border-top: 3px solid var(--ink);
+    margin-top: 64px;
+    padding: 32px 0 64px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .footer strong { color: var(--ink); }
+
+  @media (max-width: 600px) {
+    .container { padding: 0 16px; }
+    .header { padding: 40px 0 32px; }
+    .phase { padding: 20px; box-shadow: 4px 4px 0 var(--navy); }
+    .compare-row { grid-template-columns: 1fr; }
+    .compare-row > div { border-right: none; border-bottom: 1px solid var(--ink); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header class="header">
+    <div class="header-eyebrow">MEGA ORIPA × LINE PROJECT</div>
+    <h1>LINE運用 <span class="accent">進め方</span><br>ご説明資料</h1>
+    <p class="header-sub">フェーズ1 ／ 全体の流れと、何を見ながら進めるかのご説明</p>
+    <div class="header-meta">
+      <span><strong>対象</strong> MEGAオリパ様</span>
+      <span><strong>時期</strong> 2026年4月</span>
+      <span><strong>担当</strong> 合同会社369</span>
+    </div>
+  </header>
+
+  <!-- 01: ゴール -->
+  <section>
+    <span class="section-num">01</span>
+    <h2>このプロジェクトのゴール</h2>
+    <p class="section-lede">「LINEを売上のエンジンにする」ための土台づくり。</p>
+
+    <p>LINEの友だちを増やすことだけがゴールではありません。<strong>「友だちになってくれた方が、ちゃんとファンになって、長くガチャを楽しんでくれる」</strong>──ここまで持っていくのがこのプロジェクトの最終目的です。</p>
+
+    <p>そのために、いきなり配信を頑張るのではなく、まずは<strong>「お客様の動きをきちんと見られるようにする」</strong>ことから始めます。誰がいつ友だちになって、いつ初めて課金して、その後どう遊んでくれているか──ここが見えるようになって初めて、効果のある配信や施策が打てるようになります。</p>
+
+    <div class="why-box">
+      <div class="why-box-label">なぜ、この順番なのか</div>
+      <p>他社さんの多くは「新発売の告知」だけをLINEで配信しています。それでも一定の効果は出ますが、お客様一人ひとりの好みに合わせた配信ができていません。MEGAオリパ様は、最初に土台をしっかり作っておくことで、半年後・1年後に他社が真似できない運用ができる状態を目指します。</p>
+    </div>
+  </section>
+
+  <!-- 02: 全体の流れ -->
+  <section>
+    <span class="section-num">02</span>
+    <h2>全体の流れ（4ステップ）</h2>
+    <p class="section-lede">最初の3ヶ月で土台を作り、4ヶ月目以降は様子を見ながら育てていきます。</p>
+
+    <div class="phases">
+
+      <div class="phase">
+        <div class="phase-head">
+          <div class="phase-num">01</div>
+          <div class="phase-title">設計・ルール決め</div>
+          <div class="phase-period">1ヶ月目</div>
+        </div>
+        <div class="phase-body">
+          どういう情報を集めるか、お客様をどう分類するか、どこを目標値にするかを決めます。家を建てる前の設計図づくりにあたります。
+          <ul>
+            <li>友だち追加してもらう「きっかけ」の設計</li>
+            <li>お客様を分類するためのルール決め（好みの傾向・課金規模 など）</li>
+            <li>どの数字を毎月見るかの確定</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-head">
+          <div class="phase-num">02</div>
+          <div class="phase-title">仕組みづくり</div>
+          <div class="phase-period">2ヶ月目</div>
+        </div>
+        <div class="phase-body">
+          MEGAオリパ本体とLINEがちゃんと連動する仕組みを作ります。お客様が動いたら、その情報がLINE側にも届くようにする工事です。
+          <ul>
+            <li>サイト側にLINE連携ボタンの設置</li>
+            <li>連携時のポイント付与の仕組み</li>
+            <li>友だち追加時のあいさつメッセージ・アンケート</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-head">
+          <div class="phase-num">03</div>
+          <div class="phase-title">運用開始</div>
+          <div class="phase-period">3ヶ月目〜</div>
+        </div>
+        <div class="phase-body">
+          いよいよ運用を始めます。最初は欲張らず、新発売ガチャの定期配信を中心に、データを集めることに集中します。
+          <ul>
+            <li>新発売ガチャの週1〜2回配信</li>
+            <li>友だち追加してくれた方への自動メッセージ</li>
+            <li>毎週の数字チェック・月1の振り返り</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="phase-head">
+          <div class="phase-num">04</div>
+          <div class="phase-title">拡張フェーズ</div>
+          <div class="phase-period">7ヶ月目以降</div>
+        </div>
+        <div class="phase-body">
+          3〜4ヶ月分のデータが溜まったところで、本格的なセグメント配信（=お客様のタイプ別に違う内容を送る配信）を始めます。
+          <ul>
+            <li>お客様のタイプ別の配信</li>
+            <li>休眠ユーザー向けの掘り起こし</li>
+            <li>VIPユーザー向けの特別配信</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 03: お客様の流れ -->
+  <section>
+    <span class="section-num">03</span>
+    <h2>お客様がたどる7つの段階</h2>
+    <p class="section-lede">お客様は最初の訪問から「ファン化」まで、こういう順番で進んでいきます。各段階でどれくらい次に進んでくれているかを毎月チェックします。</p>
+
+    <div class="funnel-simple">
+      <div class="fs-row"><div class="fs-num">1</div><div class="fs-bar"><strong>サイトに訪問</strong><span>広告やSNSから来ていただく</span></div></div>
+      <div class="fs-row"><div class="fs-num">2</div><div class="fs-bar"><strong>会員登録</strong><span>メールアドレス等で登録</span></div></div>
+      <div class="fs-row"><div class="fs-num">3</div><div class="fs-bar"><strong>LINE友だち追加 ★最重要</strong><span>ここでようやく繋がりができる</span></div></div>
+      <div class="fs-row"><div class="fs-num">4</div><div class="fs-bar"><strong>初めてのガチャ</strong><span>無料分・低額分でも体験してもらう</span></div></div>
+      <div class="fs-row"><div class="fs-num">5</div><div class="fs-bar"><strong>初めての課金 ★最重要</strong><span>ここで売上が立ち始める</span></div></div>
+      <div class="fs-row"><div class="fs-num">6</div><div class="fs-bar"><strong>2回目以降の利用</strong><span>1週間以内にまた来てくれるか</span></div></div>
+      <div class="fs-row"><div class="fs-num">7</div><div class="fs-bar"><strong>翌月も課金 ★最重要</strong><span>「ファン」になってくれた状態</span></div></div>
+    </div>
+
+    <p style="font-size:13px; color:var(--ink-soft); margin-top:16px;">
+      ※ ★が付いた3つの段階が特に大事です。ここで「次の段階に進んでくれる人がどれくらいいるか」をしっかり見ていきます。
+    </p>
+  </section>
+
+  <!-- 04: 何を見るか -->
+  <section>
+    <span class="section-num">04</span>
+    <h2>毎月チェックする数字</h2>
+    <p class="section-lede">細かい指標は12個ありますが、その中でも特に大事な6つをご説明します。これだけ見ていれば運用は問題なく進められます。</p>
+
+    <div class="watch-grid">
+
+      <div class="watch-card">
+        <div class="watch-card-tag">CHECK 01</div>
+        <div class="watch-card-name">LINE友だち追加率</div>
+        <div class="watch-card-desc">会員登録した方のうち、LINEまで繋がってくれた方の割合。</div>
+        <div class="watch-card-target">目標 <strong>30%</strong></div>
+      </div>
+
+      <div class="watch-card">
+        <div class="watch-card-tag">CHECK 02</div>
+        <div class="watch-card-name">初回課金到達率</div>
+        <div class="watch-card-desc">LINE友だちになってから1週間以内に初めて課金してくれた方の割合。</div>
+        <div class="watch-card-target">目標 <strong>28%</strong></div>
+      </div>
+
+      <div class="watch-card">
+        <div class="watch-card-tag">CHECK 03</div>
+        <div class="watch-card-name">初回課金までの日数</div>
+        <div class="watch-card-desc">友だち追加から初課金までの平均的な日数。短いほど良い。</div>
+        <div class="watch-card-target">目標 <strong>2日以内</strong></div>
+      </div>
+
+      <div class="watch-card">
+        <div class="watch-card-tag">CHECK 04</div>
+        <div class="watch-card-name">1週間後の再訪率</div>
+        <div class="watch-card-desc">友だち追加から1週間後に、もう一度ガチャを回しに来てくれた方の割合。</div>
+        <div class="watch-card-target">目標 <strong>45%</strong></div>
+      </div>
+
+      <div class="watch-card">
+        <div class="watch-card-tag">CHECK 05</div>
+        <div class="watch-card-name">翌月も課金率</div>
+        <div class="watch-card-desc">初課金してくれた方が、翌月もまた課金してくれた割合。ファン化の判定。</div>
+        <div class="watch-card-target">目標 <strong>60%</strong></div>
+      </div>
+
+      <div class="watch-card">
+        <div class="watch-card-tag">CHECK 06</div>
+        <div class="watch-card-name">ブロック率</div>
+        <div class="watch-card-desc">配信が嫌でLINEをブロックしてしまった方の割合。配信のしすぎを防ぐ目安。</div>
+        <div class="watch-card-target">上限 <strong>5%以下</strong></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 05: やること・やらないこと -->
+  <section>
+    <span class="section-num">05</span>
+    <h2>フェーズ1で「やること／やらないこと」</h2>
+    <p class="section-lede">最初から全部やろうとすると必ず失敗します。優先順位をはっきり決めます。</p>
+
+    <div class="compare">
+      <div class="compare-row head">
+        <div>✓ フェーズ1でやること</div>
+        <div>✗ フェーズ1ではやらないこと</div>
+      </div>
+      <div class="compare-row body">
+        <div>LINE友だち追加の導線づくり</div>
+        <div>複雑な分岐シナリオ配信</div>
+      </div>
+      <div class="compare-row body">
+        <div>友だち追加時のあいさつ・アンケート</div>
+        <div>カゴ落ち（買い物途中で離脱した方への）リマインド</div>
+      </div>
+      <div class="compare-row body">
+        <div>新発売ガチャの定期配信</div>
+        <div>休眠ユーザーの掘り起こし配信</div>
+      </div>
+      <div class="compare-row body">
+        <div>毎月の数字チェック体制</div>
+        <div>誕生日・記念日配信</div>
+      </div>
+      <div class="compare-row body">
+        <div>お客様のタイプ別タグ付け（裏側で蓄積）</div>
+        <div>タイプ別のセグメント配信</div>
+      </div>
+    </div>
+
+    <div class="why-box">
+      <div class="why-box-label">「やらないこと」の理由</div>
+      <p>右側の項目は<strong>フェーズ2（7ヶ月目以降）で必ずやります</strong>。今やらないのは「データが足りないから」です。お客様がどう動くかのデータが3〜4ヶ月分溜まる前に細かい配信を組んでも、効果が出ないどころか、的外れな配信でブロックされるリスクが高くなります。</p>
+    </div>
+  </section>
+
+  <!-- 06: 運用の見方 -->
+  <section>
+    <span class="section-num">06</span>
+    <h2>運用が始まってからの動き方</h2>
+
+    <h3>毎週やること</h3>
+    <p>主要な数字（友だち追加数・課金数・ブロック率など）をざっとチェックします。10分程度の確認です。</p>
+
+    <h3>毎月やること</h3>
+    <p>月次レポートを共有します。先月との比較、目標との差、気づいたことをまとめてお渡しします。</p>
+
+    <h3>四半期ごとにやること</h3>
+    <p>3ヶ月に1回、目標値そのものの見直しをします。実際のデータが溜まった上で「現実的に狙える数字」に調整していきます。</p>
+
+    <h3>もし数字が悪かったら</h3>
+    <p>ここが大事なポイントです。<strong>「友だち追加〜初回課金」の数字が目標を大きく下回った場合、配信内容を変えるのではなく、サイト側の連携ボタンや初回体験を見直します。</strong>配信ではなく入り口の問題であることがほとんどだからです。</p>
+  </section>
+
+  <!-- 07: ご確認 -->
+  <section>
+    <div class="decision-box">
+      <h3>ご確認いただきたいポイント</h3>
+      <p>大枠でこの方向で進めて問題なければ、設定を開始させていただきます。以下4点だけ、ご認識合わせをお願いします。</p>
+      <ul class="decision-list">
+        <li><strong>進め方</strong> ／ まずは「土台づくり」を3ヶ月、その後「育成」のステップで進める</li>
+        <li><strong>初期は控えめ</strong> ／ 配信は新発売告知中心。凝ったシナリオは後回し</li>
+        <li><strong>見る数字</strong> ／ ご紹介した6つの数字を毎月チェックする運用にする</li>
+        <li><strong>判断基準</strong> ／ 数字が悪い時は配信ではなく「入り口」を改善する考え方で運用</li>
+      </ul>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div><strong>MEGAオリパ × LINE PROJECT</strong> ／ 進め方ご説明資料</div>
+    <div>2026.04 ／ 合同会社369</div>
+  </footer>
+
+</div>
+
+</body>
+</html>
