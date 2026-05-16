@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gallery 151 | 提携企業向け企画書</title>
+    <meta
+      name="description"
+      content="Gallery 151の提携企業向け企画書。富裕層向けクレジットカードブランド、プライベートバンク、旅行会社向けの協業構想を整理した資料です。"
+    />
+    <style>
+      :root {
+        --bg: #0b0b0c;
+        --panel: rgba(19, 19, 21, 0.84);
+        --panel-strong: rgba(28, 28, 31, 0.92);
+        --line: rgba(216, 188, 124, 0.22);
+        --gold: #d8bc7c;
+        --gold-bright: #f1deb4;
+        --text: #f5f1e8;
+        --muted: rgba(245, 241, 232, 0.76);
+        --shadow: 0 30px 70px rgba(0, 0, 0, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(136, 114, 69, 0.18), transparent 28%),
+          linear-gradient(180deg, #121214 0%, #080809 100%);
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+        background-size: 120px 120px;
+        mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.6), transparent 78%);
+      }
+
+      .shell {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0 72px;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 18px 0 22px;
+        backdrop-filter: blur(14px);
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .brand img {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        object-fit: cover;
+        border: 1px solid rgba(216, 188, 124, 0.36);
+        box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .brand-copy strong,
+      .hero h1,
+      h2,
+      h3 {
+        font-weight: 400;
+      }
+
+      .brand-copy strong {
+        display: block;
+        font-size: 1rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      .brand-copy span,
+      .hero p,
+      .section-intro,
+      .lead,
+      li {
+        color: var(--muted);
+        line-height: 1.9;
+      }
+
+      .back-link {
+        color: var(--gold-bright);
+        text-decoration: none;
+        letter-spacing: 0.08em;
+      }
+
+      .hero,
+      .section,
+      .summary-card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 30px;
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+        gap: 28px;
+        padding: 36px;
+        margin-bottom: 26px;
+      }
+
+      .eyebrow {
+        margin: 0 0 18px;
+        color: var(--gold);
+        text-transform: uppercase;
+        letter-spacing: 0.22em;
+        font-size: 0.74rem;
+      }
+
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(2.4rem, 5vw, 4.8rem);
+        line-height: 1.05;
+      }
+
+      .hero p {
+        margin: 22px 0 0;
+        font-size: 1.04rem;
+      }
+
+      .hero-side {
+        display: grid;
+        gap: 16px;
+        align-content: start;
+      }
+
+      .summary-card {
+        padding: 22px;
+        background:
+          linear-gradient(135deg, rgba(216, 188, 124, 0.12), transparent 30%),
+          var(--panel-strong);
+      }
+
+      .summary-card strong {
+        display: block;
+        margin-bottom: 10px;
+        color: var(--gold-bright);
+        font-size: 0.9rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .summary-card span {
+        color: var(--text);
+        line-height: 1.8;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+      }
+
+      .section {
+        padding: 30px;
+      }
+
+      h2 {
+        margin: 0 0 16px;
+        font-size: 2rem;
+      }
+
+      h3 {
+        margin: 24px 0 10px;
+        font-size: 1.28rem;
+        color: var(--gold-bright);
+      }
+
+      .section-intro,
+      .lead {
+        margin: 0;
+      }
+
+      ul {
+        margin: 16px 0 0;
+        padding-left: 20px;
+      }
+
+      .full {
+        margin-top: 24px;
+      }
+
+      .footer-note {
+        margin-top: 24px;
+        text-align: center;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      @media (max-width: 900px) {
+        .hero,
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .shell {
+          width: min(100% - 20px, 1180px);
+        }
+
+        .topbar {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .hero,
+        .section {
+          padding: 24px;
+          border-radius: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <a class="brand" href="index.html">
+          <img
+            src="Gemini_Generated_Image_gjkp2agjkp2agjkp.png"
+            alt="Gallery 151 logo"
+          />
+          <div class="brand-copy">
+            <strong>Gallery 151</strong>
+            <span>提携企業向け企画書</span>
+          </div>
+        </a>
+        <a class="back-link" href="index.html">サイトトップへ戻る</a>
+      </header>
+
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Partnership Proposal</p>
+          <h1>富裕層顧客向けに、日本・東京の非公開ギャラリー体験を提供する協業企画</h1>
+          <p>
+            Gallery 151は、日本・東京を拠点とする完全予約制のプライベートギャラリーです。
+            高級ポケモンカード、アニメ原画、文化的価値の高い希少コレクティブルを軸に、
+            海外富裕層に向けた上質で機密性の高い購買体験を提供します。
+          </p>
+        </div>
+        <div class="hero-side">
+          <div class="summary-card">
+            <strong>主要提携先</strong>
+            <span>富裕層向けクレジットカードブランド / プライベートバンク / 富裕層向け旅行会社</span>
+          </div>
+          <div class="summary-card">
+            <strong>提供価値</strong>
+            <span>限定体験、顧客ロイヤルティ向上、差別化された日本文化資産提案、収益機会の創出</span>
+          </div>
+          <div class="summary-card">
+            <strong>拠点</strong>
+            <span>Tokyo, Japan ・ 完全予約制 ・ 非公開住所</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="grid">
+        <section class="section">
+          <h2>1. 事業概要</h2>
+          <p class="section-intro">
+            Gallery 151は、一般的な小売店舗ではなく、国際的な富裕層コレクター向けに設計された
+            プライベートギャラリーです。取り扱い領域は高級ポケモンカード、アニメ原画・セル画・制作資料、
+            文化的価値の高い希少コレクティブルです。
+          </p>
+          <h3>特徴</h3>
+          <ul>
+            <li>東京拠点の完全予約制ギャラリー</li>
+            <li>所在地詳細は審査後に個別案内</li>
+            <li>英語対応、輸出調整、物流支援まで一貫対応</li>
+            <li>来歴、真贋、コンディションを重視した提案</li>
+          </ul>
+        </section>
+
+        <section class="section">
+          <h2>2. 想定顧客</h2>
+          <p class="section-intro">
+            主な対象は、北米・中南米・欧州・中東・アジアの富裕層コレクター、投資家、経営者層です。
+            美術品や時計、ワイン等と並行して、ポケモンカードやアニメ原画を文化資産として収集する層を想定します。
+          </p>
+          <h3>顧客ニーズ</h3>
+          <ul>
+            <li>日本国内で信頼できる高額コレクティブル購入先を探している</li>
+            <li>公開市場に出回らない希少品にアクセスしたい</li>
+            <li>日本滞在中に安全かつ非公開で作品を閲覧したい</li>
+            <li>真贋、輸出、配送まで一括で任せたい</li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="grid full">
+        <section class="section">
+          <h2>3. 提携先別の構想</h2>
+
+          <h3>富裕層向けクレジットカードブランド</h3>
+          <p class="lead">
+            ブラックカード会員や上位会員向けの限定ベネフィットとして、Gallery 151の非公開ビューイングや
+            東京滞在時の特別アポイントを提供します。
+          </p>
+
+          <h3>プライベートバンク</h3>
+          <p class="lead">
+            超富裕層顧客に対する非金融サービス、文化資産提案、ライフスタイル価値提案として活用し、
+            バンカー同席のクローズド商談にも対応します。
+          </p>
+
+          <h3>富裕層向け旅行会社</h3>
+          <p class="lead">
+            訪日旅程の中に、通常公開されない特別な文化体験としてGallery 151を組み込み、
+            観光を超えたラグジュアリー体験を設計します。
+          </p>
+        </section>
+
+        <section class="section">
+          <h2>4. 提携スキーム</h2>
+          <ul>
+            <li>顧客紹介提携: 成約時の紹介フィー設計</li>
+            <li>共同体験提供: 限定内覧会、VIPビューイング、招待制イベント</li>
+            <li>共同キュレーション: 提携先顧客属性に応じた個別提案</li>
+            <li>訪日導線連携: 事前提案から来日アポイント、購入、輸出配送まで一貫設計</li>
+          </ul>
+
+          <h3>提携先メリット</h3>
+          <ul>
+            <li>富裕層顧客向けの差別化された提案軸を獲得できる</li>
+            <li>限定性と機密性を備えた新しい体験価値を提供できる</li>
+            <li>日本文化資産を活用した高付加価値提案が可能になる</li>
+            <li>収益機会と顧客ロイヤルティ向上を同時に狙える</li>
+          </ul>
+        </section>
+      </div>
+
+      <section class="section full">
+        <h2>5. 運営方針と進め方</h2>
+        <h3>運営方針</h3>
+        <ul>
+          <li>完全予約制での閲覧・商談対応</li>
+          <li>ギャラリー住所は非公開、信頼確認後に共有</li>
+          <li>顧客情報、在庫情報、商談情報を厳格管理</li>
+          <li>高額商材にふさわしい透明性と説明責任を前提に運営</li>
+        </ul>
+
+        <h3>提携開始までの流れ</h3>
+        <ul>
+          <li>初回打ち合わせ</li>
+          <li>顧客属性と提携目的のすり合わせ</li>
+          <li>紹介条件、イベント設計、フィー体系の整理</li>
+          <li>テスト導入</li>
+          <li>実績確認後の正式提携</li>
+        </ul>
+      </section>
+
+      <p class="footer-note">
+        問い合わせ先: private@gallery151.jp ・ Gallery 151 ・ Tokyo, Japan
+      </p>
+    </div>
+  </body>
+</html>
