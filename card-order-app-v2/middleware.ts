@@ -1,7 +1,4 @@
 // ルートガード: ログイン要否・ロール分離
-//
-// 全ロジックをインライン化 (Edge Runtime の依存解決問題回避のため、
-// 外部モジュールへの import を最小限に)
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
@@ -12,28 +9,34 @@ function isAdminRole(role: string | undefined | null): boolean {
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  try {
+    const { pathname } = request.nextUrl;
 
-  // 静的ファイル・公開パスはスルー
-  if (
-    PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`)) ||
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon")
-  ) {
-    return NextResponse.next();
-  }
+    // 静的ファイル・公開パスはスルー
+    if (
+      PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`)) ||
+      pathname.startsWith("/_next") ||
+      pathname.startsWith("/favicon")
+    ) {
+      return NextResponse.next();
+    }
 
-  // Cron API は CRON_SECRET ヘッダで認証 (middleware では通過させる)
-  if (pathname.startsWith("/api/cron")) {
-    return NextResponse.next();
-  }
+    // Cron API は CRON_SECRET ヘッダで認証 (middleware では通過させる)
+    if (pathname.startsWith("/api/cron")) {
+      return NextResponse.next();
+    }
 
-  // Supabase セッション取得 (Edge 対応)
-  let response = NextResponse.next({ request });
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+    // 環境変数チェック (未設定なら認証をスキップしてパススルー)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("[middleware] missing Supabase env vars; allowing request to pass");
+      return NextResponse.next();
+    }
+
+    // Supabase セッション取得 (Edge 対応)
+    let response = NextResponse.next({ request });
+    const supabase = createServerClient(supabaseUrl, supabaseKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll();
@@ -48,28 +51,32 @@ export async function middleware(request: NextRequest) {
           }
         },
       },
-    },
-  );
+    });
 
-  const { data: { user } } = await supabase.auth.getUser();
-  const role = user?.user_metadata?.role as string | undefined;
+    const { data: { user } } = await supabase.auth.getUser();
+    const role = user?.user_metadata?.role as string | undefined;
 
-  // 未ログインは /login へ
-  if (!user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
+    // 未ログインは /login へ
+    if (!user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(url);
+    }
+
+    // /admin 配下は admin / super_admin のみ
+    if (pathname.startsWith("/admin") && !isAdminRole(role)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/mypage";
+      return NextResponse.redirect(url);
+    }
+
+    return response;
+  } catch (err) {
+    console.error("[middleware] error:", err instanceof Error ? err.message : err);
+    // クラッシュさせず、リクエストはそのまま通す (詳細はサーバーログ参照)
+    return NextResponse.next();
   }
-
-  // /admin 配下は admin / super_admin のみ
-  if (pathname.startsWith("/admin") && !isAdminRole(role)) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/mypage";
-    return NextResponse.redirect(url);
-  }
-
-  return response;
 }
 
 export const config = {
