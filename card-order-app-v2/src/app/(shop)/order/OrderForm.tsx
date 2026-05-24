@@ -1,0 +1,443 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import Image from "next/image";
+import type { Product, Shop, OrderUnit, ProductCategory } from "@/types/database";
+import { getListedRate, formatRate, formatYen } from "@/lib/rebate";
+import { validateOrderQty, calcCartSubtotal } from "@/lib/orders";
+
+interface CartItem {
+  product: Product;
+  unit: OrderUnit;
+  qty: number;
+  qtyInBox: number;
+}
+
+interface Props {
+  products: Product[];
+  shop: Shop | null;
+}
+
+type CategoryFilter = "all" | ProductCategory;
+type SortKey = "deadline" | "price_asc" | "price_desc" | "newest";
+
+const CATEGORY_LABEL: Record<ProductCategory, string> = {
+  pokemon:  "ポケモン",
+  onepiece: "ワンピース",
+  other:    "その他",
+};
+
+export function OrderForm({ products, shop }: Props) {
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [consent, setConsent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  // フィルタ・検索・ソート
+  const [category, setCategory] = useState<CategoryFilter>("all");
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortKey>("deadline");
+
+  const subtotal = useMemo(
+    () =>
+      calcCartSubtotal(
+        cart.map((c) => ({
+          unitPrice: c.product.price ?? 0,
+          listedRate: getListedRate(c.product, shop),
+          qtyInBox: c.qtyInBox,
+        })),
+      ),
+    [cart, shop],
+  );
+
+  // 表示用商品リスト (フィルタ + ソート)
+  const visibleProducts = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const filtered = products.filter((p) => {
+      if (category !== "all" && p.category !== category) return false;
+      if (q) {
+        const hay = `${p.title} ${p.full_name ?? ""} ${p.model_number ?? ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    const sorted = [...filtered];
+    switch (sort) {
+      case "deadline":
+        sorted.sort((a, b) => {
+          if (!a.order_deadline) return 1;
+          if (!b.order_deadline) return -1;
+          return a.order_deadline.localeCompare(b.order_deadline);
+        });
+        break;
+      case "price_asc":
+        sorted.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+        break;
+      case "price_desc":
+        sorted.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+        break;
+      case "newest":
+        sorted.sort((a, b) => b.created_at.localeCompare(a.created_at));
+        break;
+    }
+    return sorted;
+  }, [products, category, query, sort]);
+
+  const categoryCounts = useMemo(() => {
+    const counts = { all: products.length, pokemon: 0, onepiece: 0, other: 0 };
+    for (const p of products) counts[p.category]++;
+    return counts;
+  }, [products]);
+
+  const addToCart = (product: Product, unit: OrderUnit, qtyRaw: number) => {
+    const result = validateOrderQty({ product, orderUnit: unit, qty: qtyRaw });
+    if (!result.ok) {
+      setMessage(result.error ?? "入力に誤りがあります");
+      return;
+    }
+    setMessage(null);
+    setCart((prev) => [
+      ...prev.filter((c) => c.product.id !== product.id),
+      { product, unit, qty: qtyRaw, qtyInBox: result.qtyInBox },
+    ]);
+  };
+
+  const removeItem = (productId: string) =>
+    setCart((prev) => prev.filter((c) => c.product.id !== productId));
+
+  const handleSubmit = async () => {
+    if (!consent) {
+      setMessage("免責事項への同意が必要です");
+      return;
+    }
+    if (cart.length === 0) {
+      setMessage("カートが空です");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: cart.map((c) => ({
+            productId: c.product.id,
+            unit: c.unit,
+            qty: c.qty,
+          })),
+          consentAgreedAt: new Date().toISOString(),
+        }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      setCart([]);
+      setConsent(false);
+      setConfirmOpen(false);
+      setMessage("発注リクエストを送信しました。担当者からの連絡をお待ちください。");
+    } catch (e) {
+      setMessage(`送信に失敗しました: ${e instanceof Error ? e.message : "不明なエラー"}`);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* 商品リスト */}
+      <div className="lg:col-span-2 space-y-4">
+        {/* 検索 + カテゴリタブ + ソート */}
+        <div className="card p-4 space-y-3">
+          <div className="relative">
+            <input
+              type="search"
+              placeholder="商品名・型番で検索"
+              className="input pl-9"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 justify-between">
+            <div className="flex flex-wrap gap-1 text-xs">
+              <TabButton active={category === "all"}      onClick={() => setCategory("all")}>
+                すべて ({categoryCounts.all})
+              </TabButton>
+              <TabButton active={category === "pokemon"}  onClick={() => setCategory("pokemon")}>
+                ポケモン ({categoryCounts.pokemon})
+              </TabButton>
+              <TabButton active={category === "onepiece"} onClick={() => setCategory("onepiece")}>
+                ワンピース ({categoryCounts.onepiece})
+              </TabButton>
+              <TabButton active={category === "other"}    onClick={() => setCategory("other")}>
+                その他 ({categoryCounts.other})
+              </TabButton>
+            </div>
+            <select
+              className="text-xs border border-slate-300 rounded px-2 py-1 bg-white"
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+            >
+              <option value="deadline">締切日が近い順</option>
+              <option value="newest">新着順</option>
+              <option value="price_asc">価格が安い順</option>
+              <option value="price_desc">価格が高い順</option>
+            </select>
+          </div>
+          <p className="text-xs text-slate-500">
+            {visibleProducts.length} 件表示中 / 全 {products.length} 件
+          </p>
+        </div>
+
+        {visibleProducts.length === 0 && (
+          <div className="card p-6 text-center text-slate-500">
+            {products.length === 0 ? "現在受付中の商品はありません。" : "条件に一致する商品がありません。"}
+          </div>
+        )}
+        {visibleProducts.map((p) => (
+          <ProductCard
+            key={p.id}
+            product={p}
+            listedRate={getListedRate(p, shop)}
+            onAdd={addToCart}
+          />
+        ))}
+      </div>
+
+      {/* カート */}
+      <aside className="card p-5 h-fit lg:sticky lg:top-4 space-y-4">
+        <h2 className="font-semibold">カート ({cart.length})</h2>
+        {cart.length === 0 ? (
+          <p className="text-sm text-slate-500">カートは空です</p>
+        ) : (
+          <ul className="space-y-3">
+            {cart.map((c) => (
+              <li key={c.product.id} className="text-sm border-b border-slate-100 pb-2">
+                <div className="font-medium">{c.product.title}</div>
+                <div className="text-slate-500">
+                  {c.qty}{c.unit} = {c.qtyInBox} BOX
+                </div>
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-xs text-slate-600">
+                    {formatYen(Math.floor((c.product.price ?? 0) * c.qtyInBox * getListedRate(c.product, shop)))}
+                  </span>
+                  <button
+                    type="button"
+                    className="text-xs text-red-600 hover:underline"
+                    onClick={() => removeItem(c.product.id)}
+                  >
+                    削除
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="flex justify-between text-sm">
+          <span>小計 (税抜・リベート前)</span>
+          <span className="font-bold">{formatYen(subtotal)}</span>
+        </div>
+        <label className="flex items-start gap-2 text-xs text-slate-600">
+          <input
+            type="checkbox"
+            checked={consent}
+            onChange={(e) => setConsent(e.target.checked)}
+            className="mt-0.5"
+          />
+          <span>免責事項・キャンセル不可規約に同意します。</span>
+        </label>
+        <button
+          type="button"
+          className="btn-primary w-full"
+          disabled={cart.length === 0 || !consent || submitting}
+          onClick={() => setConfirmOpen(true)}
+        >
+          リクエスト送信
+        </button>
+        {message && <p className="text-xs text-slate-600">{message}</p>}
+      </aside>
+
+      {confirmOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="card p-6 max-w-md w-full space-y-4">
+            <h3 className="font-bold">発注内容の最終確認</h3>
+            <ul className="text-sm space-y-1">
+              {cart.map((c) => (
+                <li key={c.product.id} className="flex justify-between">
+                  <span>{c.product.title}</span>
+                  <span>{c.qty}{c.unit} ({c.qtyInBox}BOX)</span>
+                </li>
+              ))}
+            </ul>
+            <div className="flex justify-between text-sm border-t pt-2">
+              <span>小計</span>
+              <span className="font-bold">{formatYen(subtotal)}</span>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button type="button" className="btn-secondary" onClick={() => setConfirmOpen(false)} disabled={submitting}>
+                戻る
+              </button>
+              <button type="button" className="btn-primary" onClick={handleSubmit} disabled={submitting}>
+                {submitting ? "送信中…" : "送信する"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`px-3 py-1 rounded-full border transition ${
+        active
+          ? "bg-brand-600 text-white border-brand-600"
+          : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** YYYY-MM-DD 形式の日付から残日数を計算 */
+function daysUntil(dateStr: string | null): number | null {
+  if (!dateStr) return null;
+  const target = new Date(dateStr);
+  if (Number.isNaN(target.getTime())) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  target.setHours(0, 0, 0, 0);
+  return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function DeadlineBadge({ deadline }: { deadline: string | null }) {
+  const days = daysUntil(deadline);
+  if (days == null) return null;
+  let tone = "bg-slate-100 text-slate-700";
+  let label = `締切 ${deadline}`;
+  if (days < 0) {
+    tone = "bg-rose-100 text-rose-700";
+    label = `締切超過 (${Math.abs(days)} 日前)`;
+  } else if (days === 0) {
+    tone = "bg-rose-100 text-rose-700";
+    label = "本日締切";
+  } else if (days <= 3) {
+    tone = "bg-amber-100 text-amber-800";
+    label = `あと ${days} 日`;
+  } else if (days <= 7) {
+    tone = "bg-yellow-50 text-yellow-800 border border-yellow-200";
+    label = `あと ${days} 日`;
+  } else {
+    label = `締切 ${deadline}`;
+  }
+  return (
+    <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded ${tone}`}>
+      {label}
+    </span>
+  );
+}
+
+function ProductCard({
+  product,
+  listedRate,
+  onAdd,
+}: {
+  product: Product;
+  listedRate: number;
+  onAdd: (p: Product, unit: OrderUnit, qty: number) => void;
+}) {
+  const [unit, setUnit] = useState<OrderUnit>("BOX");
+  const [qty, setQty] = useState<number>(product.min_order_box);
+  const available = (product.planned_qty ?? 0) - product.ordered_qty;
+  const flowBadge = product.flow_type === "cut" ? "カット割" : "配分品";
+
+  return (
+    <div className="card p-4 sm:p-5">
+      <div className="flex flex-col sm:flex-row gap-4">
+        {/* 画像 */}
+        <div className="sm:w-32 flex-shrink-0">
+          <div className="relative w-full aspect-square bg-slate-100 rounded overflow-hidden">
+            {product.image_url ? (
+              <Image
+                src={product.image_url}
+                alt={product.title}
+                fill
+                sizes="128px"
+                className="object-contain"
+                unoptimized
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs text-center px-2">
+                画像なし
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 商品情報 */}
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <span className="badge bg-slate-100 text-slate-700">{flowBadge}</span>
+            <DeadlineBadge deadline={product.order_deadline} />
+          </div>
+          <h3 className="font-semibold leading-snug">{product.title}</h3>
+          {product.full_name && product.full_name !== product.title && (
+            <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{product.full_name}</p>
+          )}
+          {product.model_number && (
+            <p className="text-xs text-slate-500 mt-1">型番: {product.model_number}</p>
+          )}
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm">
+            <span>定価 <span className="font-medium">{formatYen(product.price ?? 0)}</span></span>
+            <span className="text-brand-700">案内掛け率 <span className="font-bold">{formatRate(listedRate)}</span></span>
+          </div>
+          <p className="text-xs text-slate-500 mt-1">
+            残 {available} BOX / {product.planned_qty ?? 0} BOX (1CT = {product.ct_to_box} BOX)
+          </p>
+          {product.notes && (
+            <p className="text-xs text-slate-500 mt-1 line-clamp-2">{product.notes}</p>
+          )}
+        </div>
+
+        {/* 注文操作 */}
+        <div className="flex flex-row sm:flex-col items-end sm:items-stretch gap-2 sm:w-40 flex-shrink-0">
+          <div className="flex gap-1 text-xs">
+            {(["BOX", "CT"] as OrderUnit[]).map((u) => (
+              <button
+                key={u}
+                type="button"
+                className={`px-2 py-1 rounded border ${unit === u ? "bg-brand-600 text-white border-brand-600" : "bg-white border-slate-300"}`}
+                onClick={() => setUnit(u)}
+              >
+                {u}
+              </button>
+            ))}
+          </div>
+          <input
+            type="number"
+            min={1}
+            className="input w-24 sm:w-full text-right"
+            value={qty}
+            onChange={(e) => setQty(parseInt(e.target.value || "0", 10))}
+          />
+          <button
+            type="button"
+            className="btn-primary text-sm whitespace-nowrap"
+            disabled={available <= 0}
+            onClick={() => onAdd(product, unit, qty)}
+          >
+            カートに追加
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

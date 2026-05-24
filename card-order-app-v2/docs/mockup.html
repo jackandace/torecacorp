@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<title>トレカ商事カンパニー システム画面モックアップ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          50: "#eef6ff", 100: "#d8eaff",
+          500: "#2563eb", 600: "#1d4ed8", 700: "#1e40af",
+        },
+      },
+      fontFamily: {
+        sans: ["-apple-system","BlinkMacSystemFont","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Meiryo","sans-serif"],
+      },
+    },
+  },
+};
+</script>
+<style>
+  body { font-feature-settings: "palt"; }
+  .scrn { scroll-margin-top: 70px; }
+  .frame { @apply border border-slate-200 rounded-xl bg-white shadow-sm overflow-hidden; }
+  pre { white-space: pre-wrap; word-break: break-all; }
+</style>
+</head>
+<body class="bg-slate-100 text-slate-900">
+
+<!-- ====================== Top Nav ====================== -->
+<header class="sticky top-0 z-50 bg-slate-900 text-slate-100 shadow">
+  <div class="max-w-7xl mx-auto px-4 h-14 flex items-center gap-4">
+    <div class="font-bold">トレカ商事カンパニー モックアップ</div>
+    <span class="text-xs text-slate-400">v2 / 全 18 画面</span>
+  </div>
+  <div class="max-w-7xl mx-auto px-4 pb-3 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+    <a href="#shop-login"        class="hover:underline">ログイン</a>
+    <a href="#shop-order"        class="hover:underline">発注フォーム</a>
+    <a href="#shop-mypage"       class="hover:underline">マイページ</a>
+    <span class="text-slate-500">|</span>
+    <a href="#adm-dashboard"     class="hover:underline">ダッシュボード</a>
+    <a href="#adm-inventory"     class="hover:underline">在庫一覧</a>
+    <a href="#adm-product"       class="hover:underline">商品詳細</a>
+    <a href="#adm-orders"        class="hover:underline">発注一覧</a>
+    <a href="#adm-order-detail"  class="hover:underline">発注詳細</a>
+    <a href="#adm-shops"         class="hover:underline">顧客一覧</a>
+    <a href="#adm-shop-detail"   class="hover:underline">顧客詳細</a>
+    <a href="#adm-billing"       class="hover:underline">請求一覧</a>
+    <a href="#adm-billing-new"   class="hover:underline">請求発行</a>
+    <a href="#adm-billing-detail" class="hover:underline">請求詳細</a>
+    <a href="#adm-rebate"        class="hover:underline">リベート</a>
+    <a href="#adm-noti"          class="hover:underline">通知</a>
+    <a href="#adm-template"      class="hover:underline">テンプレ</a>
+    <a href="#adm-reports"       class="hover:underline">レポート</a>
+    <a href="#adm-audit"         class="hover:underline">監査</a>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 py-8 space-y-12">
+
+<!-- ========================================================== -->
+<!-- ショップ側                                                  -->
+<!-- ========================================================== -->
+<section>
+  <h2 class="text-xs tracking-widest text-slate-500 uppercase mb-2">SHOP — 加盟ショップ画面</h2>
+</section>
+
+<!-- ─────────── 1. ログイン ─────────── -->
+<article id="shop-login" class="scrn space-y-2">
+  <div class="flex items-end justify-between">
+    <h3 class="text-lg font-bold">1. ログイン <code class="text-xs font-mono text-slate-500">/login</code></h3>
+    <span class="text-xs text-slate-500">メール + パスワード認証</span>
+  </div>
+  <div class="frame">
+    <div class="min-h-[480px] bg-slate-50 flex items-center justify-center px-4 py-8">
+      <div class="w-full max-w-md rounded-lg border border-slate-200 bg-white shadow-sm p-8">
+        <div class="mb-6 text-center">
+          <h1 class="text-xl font-bold">トレカ商事カンパニー</h1>
+          <p class="text-sm text-slate-500 mt-1">受発注・請求管理システム</p>
+        </div>
+        <form class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">メールアドレス</label>
+            <input type="email" value="shop@cardking.jp" class="w-full rounded-md border-slate-300 shadow-sm focus:border-brand-500 text-sm border px-3 py-2" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">パスワード</label>
+            <input type="password" value="••••••••" class="w-full rounded-md border-slate-300 shadow-sm focus:border-brand-500 text-sm border px-3 py-2" />
+          </div>
+          <button type="button" class="w-full rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-brand-700">
+            ログイン
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ─────────── 2. 発注フォーム ─────────── -->
+<article id="shop-order" class="scrn space-y-2">
+  <div class="flex items-end justify-between">
+    <h3 class="text-lg font-bold">2. 発注フォーム <code class="text-xs font-mono text-slate-500">/order</code></h3>
+    <span class="text-xs text-slate-500">商品選択 → カート → 免責同意 → リクエスト送信</span>
+  </div>
+  <div class="frame">
+    <header class="bg-white border-b border-slate-200">
+      <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+        <span class="font-bold">トレカ商事 | ショップ</span>
+        <nav class="flex items-center gap-6 text-sm">
+          <span class="text-brand-600 font-semibold">発注</span>
+          <span class="text-slate-600">マイページ</span>
+          <span class="text-slate-500 text-xs">ログアウト</span>
+        </nav>
+      </div>
+    </header>
+    <main class="max-w-6xl mx-auto px-4 py-8">
+      <h1 class="text-2xl font-bold mb-2">発注フォーム</h1>
+      <p class="text-sm text-slate-500 mb-6">BOX 単位は最低 12 BOX、CT 単位は 1 CT 以上で発注できます。</p>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-4">
+          <!-- 商品カード -->
+          <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-5">
+            <div class="flex justify-between items-start gap-4">
+              <div>
+                <h3 class="font-semibold">ポケモンカード151 強化拡張パック</h3>
+                <p class="text-xs text-slate-500">型番: PK-SV2A-J</p>
+                <p class="text-sm mt-2">定価 ¥6,000 / 案内掛け率 <span class="font-medium text-brand-700">84%</span></p>
+                <p class="text-xs text-slate-500">残 132 BOX (1CT = 12BOX)</p>
+              </div>
+              <div class="text-right space-y-2">
+                <div class="flex gap-1 text-xs">
+                  <button class="px-2 py-1 rounded border bg-brand-600 text-white border-brand-600">BOX</button>
+                  <button class="px-2 py-1 rounded border bg-white border-slate-300">CT</button>
+                </div>
+                <input type="number" value="12" class="w-24 text-right border border-slate-300 rounded px-2 py-1 text-sm" />
+                <button class="rounded-md bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white">カートに追加</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-lg border border-slate-200 bg-white shadow-sm p-5">
+            <div class="flex justify-between items-start gap-4">
+              <div>
+                <h3 class="font-semibold">ワンピースカードゲーム 二つの伝説</h3>
+                <p class="text-xs text-slate-500">型番: OP-OP08</p>
+                <p class="text-sm mt-2">定価 ¥5,500 / 案内掛け率 <span class="font-medium text-brand-700">84%</span></p>
+                <p class="text-xs text-slate-500">残 84 BOX</p>
+              </div>
+              <div class="text-right space-y-2">
+                <div class="flex gap-1 text-xs">
+                  <button class="px-2 py-1 rounded border bg-white border-slate-300">BOX</button>
+                  <button class="px-2 py-1 rounded border bg-brand-600 text-white border-brand-600">CT</button>
+                </div>
+                <input type="number" value="1" class="w-24 text-right border border-slate-300 rounded px-2 py-1 text-sm" />
+                <button class="rounded-md bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white">カートに追加</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- カート -->
+        <aside class="rounded-lg border border-slate-200 bg-white shadow-sm p-5 h-fit space-y-4">
+          <h2 class="font-semibold">カート</h2>
+          <ul class="space-y-3">
+            <li class="text-sm border-b border-slate-100 pb-2">
+              <div class="font-medium">ポケモンカード151</div>
+              <div class="text-slate-500">12 BOX = 12 BOX</div>
+              <button class="text-xs text-red-600 hover:underline">削除</button>
+            </li>
+            <li class="text-sm border-b border-slate-100 pb-2">
+              <div class="font-medium">ワンピース 二つの伝説</div>
+              <div class="text-slate-500">1 CT = 12 BOX</div>
+              <button class="text-xs text-red-600 hover:underline">削除</button>
+            </li>
+          </ul>
+          <div class="flex justify-between text-sm">
+            <span>小計 (税抜・リベート前)</span>
+            <span class="font-bold">¥115,920</span>
+          </div>
+          <label class="flex items-start gap-2 text-xs text-slate-600">
+            <input type="checkbox" checked class="mt-0.5" />
+            <span>免責事項・キャンセル不可規約に同意します。</span>
+          </label>
+          <button class="w-full rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white">
+            リクエスト送信
+          </button>
+        </aside>
+      </div>
+    </main>
+  </div>
+</article>
+
+<!-- ─────────── 3. マイページ ─────────── -->
+<article id="shop-mypage" class="scrn space-y-2">
+  <div class="flex items-end justify-between">
+    <h3 class="text-lg font-bold">3. マイページ <code class="text-xs font-mono text-slate-500">/mypage</code></h3>
+    <span class="text-xs text-slate-500">ランク / 次ランクまで / 発注履歴 / 請求書</span>
+  </div>
+  <div class="frame">
+    <header class="bg-white border-b border-slate-200">
+      <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+        <span class="font-bold">トレカ商事 | ショップ</span>
+        <nav class="flex items-center gap-6 text-sm">
+          <span class="text-slate-600">発注</span>
+          <span class="text-brand-600 font-semibold">マイページ</span>
+          <span class="text-slate-500 text-xs">ログアウト</span>
+        </nav>
+      </div>
+    </header>
+    <main class="max-w-6xl mx-auto px-4 py-8 space-y-8">
+      <section>
+        <h1 class="text-2xl font-bold mb-4">マイページ</h1>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="rounded-lg border border-slate-200 bg-white p-5">
+            <p class="text-xs text-slate-500">現在のランク</p>
+            <p class="text-2xl font-bold mt-1">ゴールド</p>
+            <p class="text-xs text-slate-500 mt-1">リベート率 7%</p>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-white p-5">
+            <p class="text-xs text-slate-500">今月の発注額</p>
+            <p class="text-2xl font-bold mt-1">¥687,420</p>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-white p-5">
+            <p class="text-xs text-slate-500">次ランクまで</p>
+            <p class="text-2xl font-bold mt-1">¥312,580</p>
+            <p class="text-xs text-slate-500 mt-1">プラチナ まで</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="text-lg font-semibold mb-3">直近の発注</h2>
+        <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-slate-600">
+              <tr>
+                <th class="text-left px-3 py-2">日時</th><th class="text-left px-3 py-2">商品</th>
+                <th class="text-right px-3 py-2">数量</th><th class="text-left px-3 py-2">ステータス</th>
+                <th class="text-left px-3 py-2">発送</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-t border-slate-100"><td class="px-3 py-2">2026-05-22 14:33</td><td class="px-3 py-2">ポケモンカード151</td><td class="px-3 py-2 text-right">12BOX</td><td class="px-3 py-2"><span class="text-emerald-700">確定</span></td><td class="px-3 py-2">配送中</td></tr>
+              <tr class="border-t border-slate-100"><td class="px-3 py-2">2026-05-20 09:12</td><td class="px-3 py-2">ワンピース 二つの伝説</td><td class="px-3 py-2 text-right">1CT</td><td class="px-3 py-2"><span class="text-amber-700">仮確定</span></td><td class="px-3 py-2">準備中</td></tr>
+              <tr class="border-t border-slate-100"><td class="px-3 py-2">2026-05-18 17:05</td><td class="px-3 py-2">ワンピース ロマンスドーン</td><td class="px-3 py-2 text-right">24BOX</td><td class="px-3 py-2"><span class="text-slate-600">リクエスト</span></td><td class="px-3 py-2">未出荷</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="text-lg font-semibold mb-3">請求書</h2>
+        <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-slate-600">
+              <tr>
+                <th class="text-left px-3 py-2">請求書番号</th><th class="text-left px-3 py-2">発行日</th>
+                <th class="text-right px-3 py-2">合計</th><th class="text-left px-3 py-2">ステータス</th>
+                <th class="text-left px-3 py-2">PDF</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-t border-slate-100"><td class="px-3 py-2">INV-202605-0024</td><td class="px-3 py-2">2026-05-23 10:00</td><td class="px-3 py-2 text-right">¥687,420</td><td class="px-3 py-2"><span class="text-rose-700">未入金</span></td><td class="px-3 py-2"><a class="text-brand-600 hover:underline">DL</a></td></tr>
+              <tr class="border-t border-slate-100"><td class="px-3 py-2">INV-202604-0019</td><td class="px-3 py-2">2026-04-25 10:00</td><td class="px-3 py-2 text-right">¥523,800</td><td class="px-3 py-2"><span class="text-emerald-700">入金済み</span></td><td class="px-3 py-2"><a class="text-brand-600 hover:underline">DL</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</article>
+
+<!-- ========================================================== -->
+<!-- 管理者側                                                    -->
+<!-- ========================================================== -->
+<section class="pt-4">
+  <h2 class="text-xs tracking-widest text-slate-500 uppercase mb-2">ADMIN — 社内管理画面</h2>
+</section>
+
+<!-- 共通サイドバー HTML を関数化のかわりに各画面に直書き -->
+
+<!-- ─────────── 4. ダッシュボード ─────────── -->
+<article id="adm-dashboard" class="scrn space-y-2">
+  <div class="flex items-end justify-between">
+    <h3 class="text-lg font-bold">4. ダッシュボード <code class="text-xs font-mono text-slate-500">/admin</code></h3>
+    <span class="text-xs text-slate-500">今月受注 / 要承認 / 入金待ち / 稼働ショップ</span>
+  </div>
+  <div class="frame">
+    <div class="flex min-h-[520px]">
+      <aside class="w-56 bg-slate-900 text-slate-100">
+        <div class="px-4 h-14 flex items-center font-bold border-b border-slate-800">トレカ商事 | 管理</div>
+        <nav class="py-4 text-sm">
+          <a class="block px-4 py-2 bg-slate-800">ダッシュボード</a>
+          <a class="block px-4 py-2 hover:bg-slate-800">在庫管理</a>
+          <a class="block px-4 py-2 hover:bg-slate-800">発注管理</a>
+          <a class="block px-4 py-2 hover:bg-slate-800">顧客管理</a>
+          <a class="block px-4 py-2 hover:bg-slate-800">請求・入金</a>
+          <a class="block px-4 py-2 hover:bg-slate-800">リベート管理 <span class="text-xs text-amber-400">●</span></a>
+          <a class="block px-4 py-2 hover:bg-slate-800">通知センター</a>
+          <a class="block px-4 py-2 hover:bg-slate-800">販売店調査</a>
+          <a class="block px-4 py-2 hover:bg-slate-800">レポート</a>
+          <a class="block px-4 py-2 hover:bg-slate-800">監査ログ <span class="text-xs text-amber-400">●</span></a>
+        </nav>
+      </aside>
+      <main class="flex-1 bg-slate-50 p-8 space-y-6">
+        <h1 class="text-2xl font-bold">ダッシュボード</h1>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="rounded-lg border border-slate-200 bg-white p-5">
+            <p class="text-xs text-slate-500">今月の受注額</p>
+            <p class="text-2xl font-bold mt-1">¥8,452,180</p>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-white p-5">
+            <p class="text-xs text-slate-500">要承認件数</p>
+            <p class="text-2xl font-bold mt-1 text-amber-600">7 件</p>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-white p-5">
+            <p class="text-xs text-slate-500">入金待ち</p>
+            <p class="text-2xl font-bold mt-1 text-amber-600">12 件</p>
+          </div>
+          <div class="rounded-lg border border-slate-200 bg-white p-5">
+            <p class="text-xs text-slate-500">稼働ショップ</p>
+            <p class="text-2xl font-bold mt-1">38 社</p>
+          </div>
+        </div>
+        <p class="text-sm text-slate-500">※ 詳細な集計は<a class="text-brand-600 hover:underline">レポート</a>から。</p>
+      </main>
+    </div>
+  </div>
+</article>
+
+<!-- ─────────── 5. 在庫管理 ─────────── -->
+<article id="adm-inventory" class="scrn space-y-2">
+  <div class="flex items-end justify-between">
+    <h3 class="text-lg font-bold">5. 在庫管理 <code class="text-xs font-mono text-slate-500">/admin/inventory</code></h3>
+    <span class="text-xs text-slate-500">商品一覧 + Excel 取込 + 新規登録</span>
+  </div>
+  <div class="frame">
+    <div class="flex min-h-[560px]">
+      <aside class="w-56 bg-slate-900 text-slate-100 text-sm">
+        <div class="px-4 h-14 flex items-center font-bold border-b border-slate-800">トレカ商事 | 管理</div>
+        <div class="py-4 space-y-1">
+          <a class="block px-4 py-2 hover:bg-slate-800">ダッシュボード</a>
+          <a class="block px-4 py-2 bg-slate-800">在庫管理</a>
+          <a class="block px-4 py-2 hover:bg-slate-800">発注管理</a>
+          <a class="block px-4 py-2 hover:bg-slate-800">顧客管理</a>
+        </div>
+      </aside>
+      <main class="flex-1 bg-slate-50 p-8 space-y-6">
+        <div class="flex items-center justify-between">
+          <h1 class="text-2xl font-bold">在庫管理</h1>
+          <div class="flex gap-2">
+            <a class="rounded-md bg-white border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Excel取込</a>
+            <a class="rounded-md bg-brand-600 px-4 py-2 text-sm font-semibold text-white">新規登録</a>
+          </div>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-slate-600">
+              <tr>
+                <th class="text-left px-3 py-2">商品名</th><th class="text-left px-3 py-2">型番</th>
+                <th class="text-left px-3 py-2">カテゴリ</th>
+                <th class="text-right px-3 py-2">定価</th><th class="text-right px-3 py-2">実掛け</th>
+                <th class="text-right px-3 py-2">案内掛け</th><th class="text-right px-3 py-2">在庫(BOX)</th>
+                <th class="text-left px-3 py-2">フロー</th><th class="text-left px-3 py-2">公開</th><th class="text-left px-3 py-2">ステータス</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-t border-slate-100 hover:bg-slate-50">
+                <td class="px-3 py-2"><a class="text-brand-600 hover:underline">ポケモンカード151</a></td>
+                <td class="px-3 py-2 text-slate-500">PK-SV2A-J</td>
+                <td class="px-3 py-2">pokemon</td>
+                <td class="px-3 py-2 text-right">¥6,000</td>
+                <td class="px-3 py-2 text-right">74%</td>
+                <td class="px-3 py-2 text-right font-medium">84%</td>
+                <td class="px-3 py-2 text-right">132 / 204</td>
+                <td class="px-3 py-2">配分</td>
+                <td class="px-3 py-2">公開</td>
+                <td class="px-3 py-2">受付中</td>
+              </tr>
+              <tr class="border-t border-slate-100 hover:bg-slate-50">
+                <td class="px-3 py-2"><a class="text-brand-600 hover:underline">ワンピース 二つの伝説</a></td>
+                <td class="px-3 py-2 text-slate-500">OP-OP08</td>
+                <td class="px-3 py-2">onepiece</td>
+                <td class="px-3 py-2 text-right">¥5,500</td>
+                <td class="px-3 py-2 text-right">74%</td>
+                <td class="px-3 py-2 text-right font-medium">84%</td>
+                <td class="px-3 py-2 text-right">84 / 120</td>
+                <td class="px-3 py-2">カット割</td>
+                <td class="px-3 py-2">公開</td>
+                <td class="px-3 py-2">受付中</td>
+              </tr>
+              <tr class="border-t border-slate-100 hover:bg-slate-50">
+                <td class="px-3 py-2"><a class="text-brand-600 hover:underline">遊戯王 25周年記念パック</a></td>
+                <td class="px-3 py-2 text-slate-500">YGO-25TH</td>
+                <td class="px-3 py-2">other</td>
+                <td class="px-3 py-2 text-right">¥4,400</td>
+                <td class="px-3 py-2 text-right">77%</td>
+                <td class="px-3 py-2 text-right font-medium">87%</td>
+                <td class="px-3 py-2 text-right">0 / 60</td>
+                <td class="px-3 py-2">配分</td>
+                <td class="px-3 py-2 text-slate-400">非公開</td>
+                <td class="px-3 py-2 text-slate-500">受付停止</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+</article>
+
+<!-- ─────────── 6. 商品詳細 ─────────── -->
+<article id="adm-product" class="scrn space-y-2">
+  <div class="flex items-end justify-between">
+    <h3 class="text-lg font-bold">6. 商品詳細 / 編集 <code class="text-xs font-mono text-slate-500">/admin/inventory/[id]</code></h3>
+    <span class="text-xs text-slate-500">フィールド一括編集 + 画像アップ + 論理削除</span>
+  </div>
+  <div class="frame bg-slate-50 p-8">
+    <div class="space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <a class="text-sm text-brand-600 hover:underline">← 在庫一覧</a>
+          <h1 class="text-2xl font-bold mt-1">ポケモンカード151</h1>
+          <p class="text-sm text-slate-500">型番: PK-SV2A-J</p>
+        </div>
+        <div class="text-right text-sm">
+          <div>在庫 132 BOX / 204 BOX</div>
+          <div class="text-slate-500">実 74% → 案内 84%</div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+          <section class="rounded-lg border border-slate-200 bg-white p-5 space-y-4">
+            <h2 class="font-semibold">商品情報</h2>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div><label class="text-xs text-slate-600">商品名</label><input value="ポケモンカード151 強化拡張パック" class="border rounded px-2 py-1 w-full" /></div>
+              <div><label class="text-xs text-slate-600">フル商品名</label><input value="ポケモンカードゲーム スカーレット&バイオレット 強化拡張パック ポケモンカード151" class="border rounded px-2 py-1 w-full" /></div>
+              <div><label class="text-xs text-slate-600">型番</label><input value="PK-SV2A-J" class="border rounded px-2 py-1 w-full" /></div>
+              <div><label class="text-xs text-slate-600">カテゴリ</label><select class="border rounded px-2 py-1 w-full"><option>pokemon</option></select></div>
+              <div><label class="text-xs text-slate-600">実掛け率</label><input value="0.74" class="border rounded px-2 py-1 w-full text-right" /></div>
+              <div><label class="text-xs text-slate-600">上乗せ率</label><input value="0.10" class="border rounded px-2 py-1 w-full text-right" /><p class="text-xs text-slate-500 mt-1">案内掛け率 = 84%</p></div>
+              <div><label class="text-xs text-slate-600">定価 (円)</label><input value="6000" class="border rounded px-2 py-1 w-full text-right" /></div>
+              <div><label class="text-xs text-slate-600">発注可能数 (BOX)</label><input value="204" class="border rounded px-2 py-1 w-full text-right" /></div>
+              <div><label class="text-xs text-slate-600">1 CT あたり BOX</label><input value="12" class="border rounded px-2 py-1 w-full text-right" /></div>
+              <div><label class="text-xs text-slate-600">最低発注数 (BOX)</label><input value="12" class="border rounded px-2 py-1 w-full text-right" /></div>
+              <div><label class="text-xs text-slate-600">フロー</label><select class="border rounded px-2 py-1 w-full"><option>配分確定品 (haibun)</option></select></div>
+              <div><label class="text-xs text-slate-600">受付状態</label><select class="border rounded px-2 py-1 w-full"><option>受付中</option></select></div>
+              <div class="col-span-2"><label class="text-xs text-slate-600">備考</label><textarea rows="2" class="border rounded px-2 py-1 w-full">納期 5/30 厳守。配分品。</textarea></div>
+              <label class="flex items-center gap-2"><input type="checkbox" checked /> ショップに公開する</label>
+              <label class="flex items-center gap-2"><input type="checkbox" checked /> 承認済み</label>
+            </div>
+            <div class="flex items-center justify-between">
+              <button class="rounded-md bg-brand-600 text-white px-4 py-2 text-sm font-semibold">保存</button>
+              <button class="text-xs text-red-600 hover:underline">論理削除</button>
+            </div>
+          </section>
+        </div>
+        <aside class="space-y-4">
+          <section class="rounded-lg border border-slate-200 bg-white p-5">
+            <h2 class="font-semibold mb-3">商品画像</h2>
+            <div class="aspect-square bg-gradient-to-br from-yellow-100 via-red-100 to-blue-100 rounded flex items-center justify-center text-slate-500 text-xs">[ 800px webp 縮小プレビュー ]</div>
+            <input type="file" class="mt-3 text-xs" />
+            <p class="text-xs text-slate-500 mt-2">アップロード時に幅 800px へ自動リサイズ・WebP 化されます。</p>
+          </section>
+          <section class="rounded-lg border border-slate-200 bg-white p-5 text-sm space-y-2">
+            <h2 class="font-semibold">メタ情報</h2>
+            <div class="text-slate-500 text-xs">価格</div><div>¥6,000</div>
+            <div class="text-slate-500 text-xs">締切</div><div>2026-05-29</div>
+            <div class="text-slate-500 text-xs">最終更新</div><div>2026-05-23 10:15</div>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </div>
+</article>
+
+<!-- ─────────── 7. 発注一覧 ─────────── -->
+<article id="adm-orders" class="scrn space-y-2">
+  <h3 class="text-lg font-bold">7. 発注一覧 <code class="text-xs font-mono text-slate-500">/admin/orders</code></h3>
+  <div class="frame bg-slate-50 p-8">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-bold">発注管理</h1>
+      <a class="rounded-md bg-white border border-slate-300 px-3 py-1.5 text-xs">CSVエクスポート</a>
+    </div>
+    <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-slate-600">
+          <tr>
+            <th class="text-left px-3 py-2">日時</th><th class="text-left px-3 py-2">ショップ</th>
+            <th class="text-left px-3 py-2">商品</th><th class="text-left px-3 py-2">フロー</th>
+            <th class="text-right px-3 py-2">数量</th><th class="text-right px-3 py-2">金額</th>
+            <th class="text-left px-3 py-2">ステータス</th><th class="text-left px-3 py-2">発送</th>
+            <th class="text-left px-3 py-2"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-t border-slate-100"><td class="px-3 py-2">05-23 14:33</td><td class="px-3 py-2">カードキング新宿店</td><td class="px-3 py-2">ポケモン151</td><td class="px-3 py-2">配分</td><td class="px-3 py-2 text-right">12BOX</td><td class="px-3 py-2 text-right">¥56,448</td><td class="px-3 py-2"><span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded">仮確定</span></td><td class="px-3 py-2">準備中</td><td class="px-3 py-2"><a class="text-brand-600 hover:underline text-xs">詳細</a></td></tr>
+          <tr class="border-t border-slate-100"><td class="px-3 py-2">05-23 10:01</td><td class="px-3 py-2">ホビーステーション渋谷</td><td class="px-3 py-2">ワンピース 二つの伝説</td><td class="px-3 py-2">カット割</td><td class="px-3 py-2 text-right">2CT</td><td class="px-3 py-2 text-right">—</td><td class="px-3 py-2"><span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded">リクエスト</span></td><td class="px-3 py-2">未出荷</td><td class="px-3 py-2"><a class="text-brand-600 hover:underline text-xs">詳細</a></td></tr>
+          <tr class="border-t border-slate-100"><td class="px-3 py-2">05-22 18:24</td><td class="px-3 py-2">トレカマート大阪</td><td class="px-3 py-2">ポケモン151</td><td class="px-3 py-2">配分</td><td class="px-3 py-2 text-right">24BOX</td><td class="px-3 py-2 text-right">¥112,896</td><td class="px-3 py-2"><span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded">確定</span></td><td class="px-3 py-2">配送中</td><td class="px-3 py-2"><a class="text-brand-600 hover:underline text-xs">詳細</a></td></tr>
+          <tr class="border-t border-slate-100"><td class="px-3 py-2">05-20 09:12</td><td class="px-3 py-2">カードキング新宿店</td><td class="px-3 py-2">ワンピース 二つの伝説</td><td class="px-3 py-2">カット割</td><td class="px-3 py-2 text-right">1CT</td><td class="px-3 py-2 text-right">¥51,744</td><td class="px-3 py-2"><span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded">確定</span></td><td class="px-3 py-2">完了</td><td class="px-3 py-2"><a class="text-brand-600 hover:underline text-xs">詳細</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</article>
+
+<!-- ─────────── 8. 発注詳細 ─────────── -->
+<article id="adm-order-detail" class="scrn space-y-2">
+  <h3 class="text-lg font-bold">8. 発注詳細・承認 <code class="text-xs font-mono text-slate-500">/admin/orders/[id]</code></h3>
+  <div class="frame bg-slate-50 p-8">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <a class="text-sm text-brand-600 hover:underline">← 発注一覧</a>
+        <h1 class="text-2xl font-bold mt-1">発注詳細</h1>
+      </div>
+      <span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded">ID: 4f7b1a8e</span>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-4">
+        <section class="rounded-lg border border-slate-200 bg-white p-5">
+          <h2 class="font-semibold mb-3">基本情報</h2>
+          <dl class="grid grid-cols-2 gap-y-2 text-sm">
+            <dt class="text-slate-500">ショップ</dt><dd>カードキング新宿店 (ゴールド)</dd>
+            <dt class="text-slate-500">商品</dt><dd>ポケモンカード151 (PK-SV2A-J)</dd>
+            <dt class="text-slate-500">フロー</dt><dd>カット割</dd>
+            <dt class="text-slate-500">希望数量</dt><dd>2 CT (24 BOX 換算)</dd>
+            <dt class="text-slate-500">仮確定 / 確定</dt><dd>12 / —</dd>
+            <dt class="text-slate-500">定価</dt><dd>¥6,000</dd>
+            <dt class="text-slate-500">案内掛け率</dt><dd>84%</dd>
+            <dt class="text-slate-500">リベート率</dt><dd>7%</dd>
+            <dt class="text-slate-500">免責同意</dt><dd>2026-05-23 14:33</dd>
+            <dt class="text-slate-500">管理メモ</dt><dd>希望数量に対し配分品の在庫が不足、12BOXまで</dd>
+          </dl>
+        </section>
+        <section class="rounded-lg border border-slate-200 bg-white p-5">
+          <h2 class="font-semibold mb-3">金額試算 (確定数量ベース)</h2>
+          <div class="grid grid-cols-2 gap-y-1 text-sm max-w-md">
+            <div class="text-slate-500">小計</div><div class="text-right">¥60,480</div>
+            <div class="text-slate-500">リベート (7%)</div><div class="text-right text-emerald-600">-¥4,233</div>
+            <div class="text-slate-500">課税対象額</div><div class="text-right">¥56,247</div>
+            <div class="text-slate-500">消費税</div><div class="text-right">¥5,624</div>
+            <div class="text-slate-500 font-bold border-t pt-1">合計</div><div class="text-right font-bold border-t pt-1">¥61,871</div>
+          </div>
+        </section>
+      </div>
+      <aside class="space-y-4">
+        <div class="rounded-lg border border-slate-200 bg-white p-5 space-y-3 text-sm">
+          <h2 class="font-semibold">ステータス更新</h2>
+          <div class="text-xs text-slate-500">現在: <span class="font-medium text-slate-800">仮確定</span> / カット割</div>
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">次のステータス</label>
+            <select class="w-full border rounded px-2 py-1"><option>確定</option><option>キャンセル</option></select>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">確定数量 (BOX)</label>
+            <input type="number" value="12" class="w-full border rounded px-2 py-1" />
+            <p class="text-xs text-slate-500 mt-1">仮確定: 12 BOX</p>
+          </div>
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">管理メモ</label>
+            <textarea rows="3" class="w-full border rounded px-2 py-1">配分済</textarea>
+          </div>
+          <button class="w-full rounded bg-brand-600 text-white py-2 text-sm font-semibold">確定 に更新</button>
+        </div>
+        <div class="rounded-lg border border-slate-200 bg-white p-5 space-y-3 text-sm">
+          <h2 class="font-semibold">発送ステータス</h2>
+          <div class="text-xs text-slate-500">現在: <span class="font-medium text-slate-800">準備中</span></div>
+          <select class="w-full border rounded px-2 py-1"><option>出荷済</option></select>
+          <input placeholder="追跡番号" value="YMT-23194-002" class="w-full border rounded px-2 py-1" />
+          <button class="w-full rounded bg-white border border-slate-300 py-2 text-sm">発送情報を更新</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</article>
+
+<!-- ─────────── 9. 顧客一覧 ─────────── -->
+<article id="adm-shops" class="scrn space-y-2">
+  <h3 class="text-lg font-bold">9. 顧客一覧 <code class="text-xs font-mono text-slate-500">/admin/shops</code></h3>
+  <div class="frame bg-slate-50 p-8">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-bold">顧客管理</h1>
+      <div class="flex gap-2">
+        <a class="rounded bg-white border border-slate-300 px-3 py-1.5 text-xs">CSV取込</a>
+        <a class="rounded bg-white border border-slate-300 px-3 py-1.5 text-xs">CSV出力</a>
+        <a class="rounded bg-brand-600 text-white px-3 py-1.5 text-xs font-semibold">新規ショップ登録</a>
+      </div>
+    </div>
+    <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-slate-600">
+          <tr>
+            <th class="text-left px-3 py-2">会社名</th><th class="text-left px-3 py-2">担当</th>
+            <th class="text-left px-3 py-2">メール</th><th class="text-left px-3 py-2">ランク</th>
+            <th class="text-left px-3 py-2">ステータス</th><th class="text-left px-3 py-2">宣誓書</th>
+            <th class="text-left px-3 py-2">登録日</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-t border-slate-100"><td class="px-3 py-2 font-medium">カードキング新宿店</td><td class="px-3 py-2">山田 太郎</td><td class="px-3 py-2 text-slate-500">shinjuku@cardking.jp</td><td class="px-3 py-2"><span class="text-yellow-700">ゴールド</span></td><td class="px-3 py-2">active</td><td class="px-3 py-2 text-xs">失効: 2027-03-31</td><td class="px-3 py-2 text-xs">2025-04-01</td><td class="px-3 py-2"><a class="text-brand-600 hover:underline text-xs">詳細</a></td></tr>
+          <tr class="border-t border-slate-100"><td class="px-3 py-2 font-medium">ホビーステーション渋谷</td><td class="px-3 py-2">佐藤 花子</td><td class="px-3 py-2 text-slate-500">shibuya@hobby.jp</td><td class="px-3 py-2"><span class="text-slate-700">プラチナ</span></td><td class="px-3 py-2">active</td><td class="px-3 py-2 text-xs">失効: 2026-06-15 <span class="text-rose-600">●</span></td><td class="px-3 py-2 text-xs">2024-08-20</td><td class="px-3 py-2"><a class="text-brand-600 hover:underline text-xs">詳細</a></td></tr>
+          <tr class="border-t border-slate-100"><td class="px-3 py-2 font-medium">トレカマート大阪</td><td class="px-3 py-2">鈴木 三郎</td><td class="px-3 py-2 text-slate-500">osaka@trecamart.jp</td><td class="px-3 py-2"><span class="text-zinc-700">シルバー</span></td><td class="px-3 py-2">active</td><td class="px-3 py-2 text-xs">失効: 2026-12-31</td><td class="px-3 py-2 text-xs">2025-01-15</td><td class="px-3 py-2"><a class="text-brand-600 hover:underline text-xs">詳細</a></td></tr>
+          <tr class="border-t border-slate-100"><td class="px-3 py-2 font-medium">トレカ専門店 名古屋</td><td class="px-3 py-2">高橋 健</td><td class="px-3 py-2 text-slate-500">info@treca-nagoya.jp</td><td class="px-3 py-2"><span class="text-amber-700">ブロンズ</span></td><td class="px-3 py-2"><span class="text-amber-600">pending</span></td><td class="px-3 py-2 text-xs text-slate-400">未提出</td><td class="px-3 py-2 text-xs">2026-05-20</td><td class="px-3 py-2"><a class="text-brand-600 hover:underline text-xs">詳細</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</article>
+
+<!-- ─────────── 10. 顧客詳細 ─────────── -->
+<article id="adm-shop-detail" class="scrn space-y-2">
+  <h3 class="text-lg font-bold">10. 顧客詳細 <code class="text-xs font-mono text-slate-500">/admin/shops/[id]</code></h3>
+  <div class="frame bg-slate-50 p-8">
+    <div class="flex items-center justify-between mb-4">
+      <div><a class="text-sm text-brand-600 hover:underline">← 顧客一覧</a><h1 class="text-2xl font-bold mt-1">カードキング新宿店</h1></div>
+      <div class="text-right text-sm text-slate-500">
+        <div>ランク: <span class="font-medium text-slate-800">ゴールド</span></div>
+        <div>累計発注: 142 件</div>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-6">
+        <section class="rounded-lg border border-slate-200 bg-white p-5 space-y-4">
+          <h2 class="font-semibold">基本情報の編集</h2>
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div><label class="text-xs text-slate-600">会社名</label><input value="カードキング新宿店" class="w-full border rounded px-2 py-1" /></div>
+            <div><label class="text-xs text-slate-600">担当</label><input value="山田 太郎" class="w-full border rounded px-2 py-1" /></div>
+            <div><label class="text-xs text-slate-600">メール</label><input value="shinjuku@cardking.jp" class="w-full border rounded px-2 py-1" /></div>
+            <div><label class="text-xs text-slate-600">電話</label><input value="03-1234-5678" class="w-full border rounded px-2 py-1" /></div>
+            <div class="col-span-2"><label class="text-xs text-slate-600">住所</label><input value="東京都新宿区新宿3-1-2 カードビル3F" class="w-full border rounded px-2 py-1" /></div>
+            <div><label class="text-xs text-slate-600">ステータス</label><select class="w-full border rounded px-2 py-1"><option>active</option></select></div>
+            <div><label class="text-xs text-slate-600">ランク</label><select class="w-full border rounded px-2 py-1"><option>ゴールド</option></select></div>
+            <div><label class="text-xs text-slate-600">個別掛け率 (空欄でデフォルト)</label><input placeholder="例: 0.82" class="w-full border rounded px-2 py-1" /></div>
+          </div>
+          <button class="rounded bg-brand-600 text-white px-4 py-2 text-sm font-semibold">保存</button>
+        </section>
+        <section class="rounded-lg border border-slate-200 bg-white p-5">
+          <h2 class="font-semibold mb-3">ランク変動履歴</h2>
+          <table class="w-full text-sm">
+            <thead class="text-slate-600"><tr><th class="text-left">月</th><th class="text-right">発注額</th><th class="text-left">変動</th><th class="text-right">リベート</th></tr></thead>
+            <tbody>
+              <tr class="border-t border-slate-100"><td>2026-05</td><td class="text-right">¥687,420</td><td>ゴールド → ゴールド</td><td class="text-right">7%</td></tr>
+              <tr class="border-t border-slate-100"><td>2026-04</td><td class="text-right">¥523,800</td><td>シルバー → ゴールド</td><td class="text-right">5% → 7%</td></tr>
+              <tr class="border-t border-slate-100"><td>2026-03</td><td class="text-right">¥289,500</td><td>シルバー → シルバー</td><td class="text-right">5%</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+      <aside class="space-y-4">
+        <section class="rounded-lg border border-slate-200 bg-white p-5 text-sm space-y-2">
+          <h2 class="font-semibold">宣誓書</h2>
+          <div class="text-xs text-slate-600">提出日: 2026-03-31 14:00</div>
+          <div class="text-xs text-slate-600">失効日: 2027-03-31</div>
+          <a class="text-xs text-brand-600 hover:underline">提出済み PDF をダウンロード</a>
+          <div class="border-t pt-3 space-y-2">
+            <p class="text-xs text-slate-600">新しい宣誓書を再登録</p>
+            <input type="file" class="text-xs" />
+            <button class="w-full rounded bg-white border border-slate-300 py-1.5 text-xs">アップロード</button>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</article>
+
+<!-- ─────────── 11. 請求一覧 ─────────── -->
+<article id="adm-billing" class="scrn space-y-2">
+  <h3 class="text-lg font-bold">11. 請求・入金一覧 <code class="text-xs font-mono text-slate-500">/admin/billing</code></h3>
+  <div class="frame bg-slate-50 p-8">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-bold">請求・入金管理</h1>
+      <div class="flex gap-2">
+        <a class="rounded bg-brand-600 text-white px-3 py-1.5 text-xs font-semibold">請求書発行</a>
+        <a class="rounded bg-white border border-slate-300 px-3 py-1.5 text-xs">CSV出力</a>
+      </div>
+    </div>
+    <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-slate-600">
+          <tr>
+            <th class="text-left px-3 py-2">請求書番号</th><th class="text-left px-3 py-2">ショップ</th>
+            <th class="text-left px-3 py-2">発行日</th>
+            <th class="text-right px-3 py-2">小計</th><th class="text-right px-3 py-2">リベート</th>
+            <th class="text-right px-3 py-2">税</th><th class="text-right px-3 py-2">合計</th>
+            <th class="text-left px-3 py-2">入金</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-t border-slate-100"><td class="px-3 py-2">INV-202605-0024</td><td class="px-3 py-2">カードキング新宿店</td><td class="px-3 py-2 text-xs">05-23 10:00</td><td class="px-3 py-2 text-right">¥687,420</td><td class="px-3 py-2 text-right text-emerald-600">-¥48,120</td><td class="px-3 py-2 text-right">¥63,930</td><td class="px-3 py-2 text-right font-bold">¥703,230</td><td class="px-3 py-2"><span class="bg-rose-100 text-rose-800 text-xs px-2 py-0.5 rounded">未入金</span></td><td class="px-3 py-2"><a class="text-brand-600 hover:underline text-xs">消込</a></td></tr>
+          <tr class="border-t border-slate-100"><td class="px-3 py-2">INV-202605-0023</td><td class="px-3 py-2">ホビーステーション渋谷</td><td class="px-3 py-2 text-xs">05-23 10:00</td><td class="px-3 py-2 text-right">¥1,240,800</td><td class="px-3 py-2 text-right text-emerald-600">-¥124,080</td><td class="px-3 py-2 text-right">¥111,672</td><td class="px-3 py-2 text-right font-bold">¥1,228,392</td><td class="px-3 py-2"><span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded">一部入金</span></td><td class="px-3 py-2"><a class="text-brand-600 hover:underline text-xs">消込</a></td></tr>
+          <tr class="border-t border-slate-100"><td class="px-3 py-2">INV-202604-0019</td><td class="px-3 py-2">カードキング新宿店</td><td class="px-3 py-2 text-xs">04-25 10:00</td><td class="px-3 py-2 text-right">¥523,800</td><td class="px-3 py-2 text-right text-emerald-600">-¥26,190</td><td class="px-3 py-2 text-right">¥49,761</td><td class="px-3 py-2 text-right font-bold">¥547,371</td><td class="px-3 py-2"><span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded">入金済み</span></td><td class="px-3 py-2"><a class="text-brand-600 hover:underline text-xs">消込</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</article>
+
+<!-- ─────────── 12. 請求書発行ウィザード ─────────── -->
+<article id="adm-billing-new" class="scrn space-y-2">
+  <h3 class="text-lg font-bold">12. 請求書発行ウィザード <code class="text-xs font-mono text-slate-500">/admin/billing/new</code></h3>
+  <div class="frame bg-slate-50 p-8">
+    <h1 class="text-2xl font-bold mb-6">請求書を発行</h1>
+    <div class="space-y-6">
+      <section class="rounded-lg border border-slate-200 bg-white p-5 space-y-3">
+        <h2 class="font-semibold">ステップ 1: ショップ選択</h2>
+        <select class="border rounded px-2 py-1 max-w-md w-full"><option>カードキング新宿店 (ゴールド)</option></select>
+      </section>
+      <section class="rounded-lg border border-slate-200 bg-white p-5 space-y-3">
+        <h2 class="font-semibold">ステップ 2: 発注を選択</h2>
+        <table class="w-full text-sm">
+          <thead class="text-slate-600"><tr><th></th><th class="text-left">商品</th><th class="text-right">確定</th><th class="text-right">単価</th><th class="text-right">案内</th><th class="text-right">リベート</th><th class="text-right">小計</th><th class="text-right">合計</th></tr></thead>
+          <tbody>
+            <tr class="border-t border-slate-100"><td><input type="checkbox" checked /></td><td>ポケモン151</td><td class="text-right">12</td><td class="text-right">¥6,000</td><td class="text-right">84%</td><td class="text-right">7%</td><td class="text-right">¥60,480</td><td class="text-right font-medium">¥61,871</td></tr>
+            <tr class="border-t border-slate-100"><td><input type="checkbox" checked /></td><td>ワンピース 二つの伝説</td><td class="text-right">24</td><td class="text-right">¥5,500</td><td class="text-right">84%</td><td class="text-right">7%</td><td class="text-right">¥110,880</td><td class="text-right font-medium">¥113,431</td></tr>
+            <tr class="border-t border-slate-100 text-slate-400"><td><input type="checkbox" disabled /></td><td>ワンピース ロマンスドーン <span class="text-xs text-amber-600">(請求済)</span></td><td class="text-right">12</td><td class="text-right">¥4,000</td><td class="text-right">84%</td><td class="text-right">7%</td><td class="text-right">¥40,320</td><td class="text-right">¥41,247</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="rounded-lg border border-slate-200 bg-white p-5 space-y-3">
+        <h2 class="font-semibold">ステップ 3: 請求内容の確認</h2>
+        <div class="grid grid-cols-2 gap-y-1 text-sm max-w-md">
+          <div class="text-slate-500">小計</div><div class="text-right">¥171,360</div>
+          <div class="text-slate-500">リベート割引</div><div class="text-right text-emerald-600">-¥11,995</div>
+          <div class="text-slate-500">課税対象額</div><div class="text-right">¥159,365</div>
+          <div class="text-slate-500">消費税</div><div class="text-right">¥15,936</div>
+          <div class="font-bold border-t pt-1">請求合計 (税込)</div><div class="text-right font-bold border-t pt-1">¥175,301</div>
+        </div>
+        <div class="flex items-center gap-3">
+          <label class="text-sm">支払期限:</label>
+          <input type="date" value="2026-06-30" class="border rounded px-2 py-1 w-44" />
+        </div>
+        <button class="rounded bg-brand-600 text-white px-4 py-2 text-sm font-semibold">請求書を発行</button>
+      </section>
+    </div>
+  </div>
+</article>
+
+<!-- ─────────── 13. 請求書詳細・入金消込 ─────────── -->
+<article id="adm-billing-detail" class="scrn space-y-2">
+  <h3 class="text-lg font-bold">13. 請求書詳細 / 入金消込 / PDF・領収書 <code class="text-xs font-mono text-slate-500">/admin/billing/[id]</code></h3>
+  <div class="frame bg-slate-50 p-8">
+    <div class="flex items-center justify-between mb-4">
+      <div><a class="text-sm text-brand-600 hover:underline">← 請求一覧</a><h1 class="text-2xl font-bold mt-1">INV-202605-0024</h1></div>
+      <div class="flex gap-2">
+        <a class="rounded bg-white border border-slate-300 px-3 py-1.5 text-xs">PDF を開く</a>
+        <button class="rounded bg-brand-600 text-white px-3 py-1.5 text-xs font-semibold">PDF を生成 / 再生成</button>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-4">
+        <section class="rounded-lg border border-slate-200 bg-white p-5">
+          <h2 class="font-semibold mb-3">請求情報</h2>
+          <dl class="grid grid-cols-2 gap-y-2 text-sm">
+            <dt class="text-slate-500">請求先</dt><dd>カードキング新宿店 (ゴールド)</dd>
+            <dt class="text-slate-500">住所</dt><dd>東京都新宿区新宿3-1-2 カードビル3F</dd>
+            <dt class="text-slate-500">発行日</dt><dd>2026-05-23 10:00</dd>
+            <dt class="text-slate-500">支払期限</dt><dd>2026-06-30</dd>
+            <dt class="text-slate-500">発行時ランク</dt><dd>ゴールド</dd>
+            <dt class="text-slate-500">適用リベート率</dt><dd>7%</dd>
+          </dl>
+        </section>
+        <section class="rounded-lg border border-slate-200 bg-white p-5">
+          <h2 class="font-semibold mb-3">明細</h2>
+          <table class="w-full text-sm">
+            <thead class="text-slate-600"><tr><th class="text-left">商品</th><th class="text-right">数量</th><th class="text-right">単価</th><th class="text-right">掛け率</th><th class="text-right">小計</th></tr></thead>
+            <tbody>
+              <tr class="border-t border-slate-100"><td>ポケモン151 <span class="text-xs text-slate-500">(PK-SV2A-J)</span></td><td class="text-right">12</td><td class="text-right">¥6,000</td><td class="text-right">84%</td><td class="text-right">¥61,871</td></tr>
+              <tr class="border-t border-slate-100"><td>ワンピース 二つの伝説 <span class="text-xs text-slate-500">(OP-OP08)</span></td><td class="text-right">24</td><td class="text-right">¥5,500</td><td class="text-right">84%</td><td class="text-right">¥113,431</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+      <aside class="space-y-4">
+        <section class="rounded-lg border border-slate-200 bg-white p-5 space-y-2 text-sm">
+          <h2 class="font-semibold">金額</h2>
+          <div class="flex justify-between"><span>小計</span><span>¥687,420</span></div>
+          <div class="flex justify-between text-emerald-600"><span>リベート</span><span>-¥48,120</span></div>
+          <div class="flex justify-between"><span>課税対象額</span><span>¥639,300</span></div>
+          <div class="flex justify-between"><span>消費税</span><span>¥63,930</span></div>
+          <div class="flex justify-between font-bold border-t pt-2"><span>合計 (税込)</span><span>¥703,230</span></div>
+          <div class="flex justify-between text-slate-700"><span>入金済</span><span>¥0</span></div>
+          <div class="flex justify-between font-bold text-rose-600"><span>残額</span><span>¥703,230</span></div>
+          <div class="text-xs text-slate-500 pt-2">状態: 未入金</div>
+        </section>
+        <section class="rounded-lg border border-slate-200 bg-white p-5 space-y-3 text-sm">
+          <h2 class="font-semibold">入金記録</h2>
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">入金額 (残: ¥703,230)</label>
+            <input type="number" value="703230" class="w-full border rounded px-2 py-1" />
+          </div>
+          <div>
+            <label class="block text-xs text-slate-600 mb-1">入金日</label>
+            <input type="date" value="2026-06-15" class="w-full border rounded px-2 py-1" />
+          </div>
+          <button class="w-full rounded bg-brand-600 text-white py-2 text-sm font-semibold">入金を記録</button>
+        </section>
+      </aside>
+    </div>
+  </div>
+</article>
+
+<!-- ─────────── 14. リベート管理 ─────────── -->
+<article id="adm-rebate" class="scrn space-y-2">
+  <h3 class="text-lg font-bold">14. リベート・ランク管理 <code class="text-xs font-mono text-slate-500">/admin/rebate</code></h3>
+  <div class="frame bg-slate-50 p-8 space-y-6">
+    <h1 class="text-2xl font-bold">リベート・ランク管理</h1>
+    <section>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-semibold">ランク閾値・リベート率</h2>
+        <button class="rounded bg-white border border-slate-300 px-3 py-1 text-xs">月次ランク更新を手動実行</button>
+      </div>
+      <div class="rounded-lg border border-slate-200 bg-white p-5">
+        <table class="w-full text-sm">
+          <thead class="text-slate-600"><tr><th class="text-left">ランク</th><th class="text-right">昇格基準 (円)</th><th class="text-right">リベート率 (0〜1)</th></tr></thead>
+          <tbody>
+            <tr class="border-t border-slate-100"><td class="py-2">プラチナ</td><td class="text-right py-2"><input value="1000000" class="border rounded w-32 px-2 py-1 text-right" /></td><td class="text-right py-2"><input value="0.10" class="border rounded w-24 px-2 py-1 text-right" /></td></tr>
+            <tr class="border-t border-slate-100"><td class="py-2">ゴールド</td><td class="text-right py-2"><input value="500000" class="border rounded w-32 px-2 py-1 text-right" /></td><td class="text-right py-2"><input value="0.07" class="border rounded w-24 px-2 py-1 text-right" /></td></tr>
+            <tr class="border-t border-slate-100"><td class="py-2">シルバー</td><td class="text-right py-2"><input value="200000" class="border rounded w-32 px-2 py-1 text-right" /></td><td class="text-right py-2"><input value="0.05" class="border rounded w-24 px-2 py-1 text-right" /></td></tr>
+            <tr class="border-t border-slate-100"><td class="py-2">ブロンズ</td><td class="text-right py-2"><input value="100000" class="border rounded w-32 px-2 py-1 text-right" /></td><td class="text-right py-2"><input value="0.03" class="border rounded w-24 px-2 py-1 text-right" /></td></tr>
+            <tr class="border-t border-slate-100"><td class="py-2">スタンダード</td><td class="text-right py-2"><input value="0" class="border rounded w-32 px-2 py-1 text-right" /></td><td class="text-right py-2"><input value="0" class="border rounded w-24 px-2 py-1 text-right" /></td></tr>
+          </tbody>
+        </table>
+        <button class="mt-3 rounded bg-brand-600 text-white px-4 py-2 text-sm font-semibold">保存</button>
+      </div>
+    </section>
+    <section>
+      <h2 class="font-semibold mb-3">最近のランク変動</h2>
+      <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-slate-600"><tr><th class="text-left px-3 py-2">変更日</th><th class="text-left px-3 py-2">ショップ</th><th class="text-left px-3 py-2">評価月</th><th class="text-left px-3 py-2">変動</th><th class="text-right px-3 py-2">発注額</th><th class="text-right px-3 py-2">適用リベート</th></tr></thead>
+          <tbody>
+            <tr class="border-t border-slate-100"><td class="px-3 py-2 text-xs">2026-05-01</td><td class="px-3 py-2">カードキング新宿店</td><td class="px-3 py-2 text-xs">2026-04</td><td class="px-3 py-2">シルバー → ゴールド</td><td class="px-3 py-2 text-right">¥523,800</td><td class="px-3 py-2 text-right">7%</td></tr>
+            <tr class="border-t border-slate-100"><td class="px-3 py-2 text-xs">2026-05-01</td><td class="px-3 py-2">ホビーステーション渋谷</td><td class="px-3 py-2 text-xs">2026-04</td><td class="px-3 py-2">ゴールド → プラチナ</td><td class="px-3 py-2 text-right">¥1,234,000</td><td class="px-3 py-2 text-right">10%</td></tr>
+            <tr class="border-t border-slate-100"><td class="px-3 py-2 text-xs">2026-04-01</td><td class="px-3 py-2">トレカマート大阪</td><td class="px-3 py-2 text-xs">2026-03</td><td class="px-3 py-2">ゴールド → シルバー</td><td class="px-3 py-2 text-right">¥180,000</td><td class="px-3 py-2 text-right">5%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</article>
+
+<!-- ─────────── 15. 通知センター ─────────── -->
+<article id="adm-noti" class="scrn space-y-2">
+  <h3 class="text-lg font-bold">15. 通知センター <code class="text-xs font-mono text-slate-500">/admin/notifications</code></h3>
+  <div class="frame bg-slate-50 p-8 space-y-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold">通知センター</h1>
+      <div class="flex gap-2">
+        <a class="rounded bg-white border border-slate-300 px-3 py-1.5 text-xs">テンプレート編集</a>
+        <a class="rounded bg-brand-600 text-white px-3 py-1.5 text-xs font-semibold">手動送信</a>
+      </div>
+    </div>
+    <section>
+      <h2 class="font-semibold mb-3">送信ログ (直近)</h2>
+      <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-slate-600"><tr><th class="text-left px-3 py-2">日時</th><th class="text-left px-3 py-2">ショップ</th><th class="text-left px-3 py-2">件名</th><th class="text-left px-3 py-2">状態</th></tr></thead>
+          <tbody>
+            <tr class="border-t border-slate-100"><td class="px-3 py-2 text-xs">05-23 10:01</td><td class="px-3 py-2">カードキング新宿店</td><td class="px-3 py-2">【トレカ商事】請求書を発行しました (INV-202605-0024)</td><td class="px-3 py-2"><span class="text-emerald-700 text-xs">sent</span></td></tr>
+            <tr class="border-t border-slate-100"><td class="px-3 py-2 text-xs">05-22 18:30</td><td class="px-3 py-2">トレカマート大阪</td><td class="px-3 py-2">【トレカ商事】商品を発送しました</td><td class="px-3 py-2"><span class="text-emerald-700 text-xs">sent</span></td></tr>
+            <tr class="border-t border-slate-100"><td class="px-3 py-2 text-xs">05-22 14:35</td><td class="px-3 py-2">カードキング新宿店</td><td class="px-3 py-2">【トレカ商事】発注リクエストを受け付けました</td><td class="px-3 py-2"><span class="text-emerald-700 text-xs">sent</span></td></tr>
+            <tr class="border-t border-slate-100"><td class="px-3 py-2 text-xs">05-01 09:00</td><td class="px-3 py-2">ホビーステーション渋谷</td><td class="px-3 py-2">【トレカ商事】会員ランクが変更されました</td><td class="px-3 py-2"><span class="text-emerald-700 text-xs">sent</span></td></tr>
+            <tr class="border-t border-slate-100"><td class="px-3 py-2 text-xs">05-15 00:01</td><td class="px-3 py-2">ホビーステーション渋谷</td><td class="px-3 py-2">【トレカ商事】宣誓書の更新が必要です</td><td class="px-3 py-2"><span class="text-rose-700 text-xs">failed</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</article>
+
+<!-- ─────────── 16. テンプレート編集 ─────────── -->
+<article id="adm-template" class="scrn space-y-2">
+  <h3 class="text-lg font-bold">16. テンプレート編集 + プレビュー <code class="text-xs font-mono text-slate-500">/admin/notifications/templates/[code]</code></h3>
+  <div class="frame bg-slate-50 p-8">
+    <a class="text-sm text-brand-600 hover:underline">← テンプレート一覧</a>
+    <h1 class="text-2xl font-bold mt-1">請求書発行通知</h1>
+    <p class="text-xs text-slate-500 mt-1 mb-4">コード: <span class="font-mono">invoice_issued</span></p>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <section class="rounded-lg border border-slate-200 bg-white p-5 space-y-3 text-sm">
+        <h2 class="font-semibold">編集</h2>
+        <div><label class="text-xs text-slate-600">件名</label><input value="【トレカ商事】請求書を発行しました ({{invoice_number}})" class="w-full border rounded px-2 py-1" /></div>
+        <div><label class="text-xs text-slate-600">本文 (HTML)</label><textarea rows="8" class="w-full border rounded px-2 py-1 font-mono text-xs">&lt;p&gt;{{company_name}} 様&lt;/p&gt;
+&lt;p&gt;請求書を発行しました。&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;請求書番号: {{invoice_number}}&lt;/li&gt;
+  &lt;li&gt;請求合計: ¥{{total_amount}}&lt;/li&gt;
+  &lt;li&gt;支払期限: {{due_date}}&lt;/li&gt;
+&lt;/ul&gt;</textarea></div>
+        <div>
+          <p class="text-xs text-slate-600 mb-1">利用可能な変数:</p>
+          <div class="flex flex-wrap gap-1">
+            <code class="text-xs bg-slate-100 px-2 py-0.5 rounded">{{company_name}}</code>
+            <code class="text-xs bg-slate-100 px-2 py-0.5 rounded">{{invoice_number}}</code>
+            <code class="text-xs bg-slate-100 px-2 py-0.5 rounded">{{total_amount}}</code>
+            <code class="text-xs bg-slate-100 px-2 py-0.5 rounded">{{due_date}}</code>
+          </div>
+        </div>
+        <button class="rounded bg-brand-600 text-white px-4 py-2 text-sm font-semibold">保存</button>
+      </section>
+      <section class="rounded-lg border border-slate-200 bg-white p-5 space-y-3 text-sm">
+        <h2 class="font-semibold">プレビュー (サンプル値での差し込み)</h2>
+        <div><div class="text-xs text-slate-500">件名</div><div class="font-medium">【トレカ商事】請求書を発行しました (INV-202605-0001)</div></div>
+        <div>
+          <div class="text-xs text-slate-500 mb-1">本文</div>
+          <div class="border border-slate-200 rounded p-3 bg-white text-sm">
+            <p>サンプル商店 様</p>
+            <p>請求書を発行しました。</p>
+            <ul class="list-disc list-inside">
+              <li>請求書番号: INV-202605-0001</li>
+              <li>請求合計: ¥1,234,567</li>
+              <li>支払期限: 2026-06-30</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</article>
+
+<!-- ─────────── 17. レポート ─────────── -->
+<article id="adm-reports" class="scrn space-y-2">
+  <h3 class="text-lg font-bold">17. レポート <code class="text-xs font-mono text-slate-500">/admin/reports</code></h3>
+  <div class="frame bg-slate-50 p-8 space-y-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-bold">レポート (今月)</h1>
+      <a class="rounded bg-white border border-slate-300 px-3 py-1.5 text-xs">CSV エクスポート</a>
+    </div>
+    <div class="rounded-lg border border-slate-200 bg-white p-3 flex gap-1">
+      <button class="px-3 py-1 rounded text-xs bg-brand-600 text-white">今月</button>
+      <button class="px-3 py-1 rounded text-xs bg-white border border-slate-300">先月</button>
+      <button class="px-3 py-1 rounded text-xs bg-white border border-slate-300">今年</button>
+      <button class="px-3 py-1 rounded text-xs bg-white border border-slate-300">カスタム</button>
+    </div>
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="rounded-lg border border-slate-200 bg-white p-5"><p class="text-xs text-slate-500">売上 (税込)</p><p class="text-2xl font-bold mt-1">¥8,452,180</p></div>
+      <div class="rounded-lg border border-slate-200 bg-white p-5"><p class="text-xs text-slate-500">リベート還付</p><p class="text-2xl font-bold mt-1 text-emerald-600">-¥528,432</p></div>
+      <div class="rounded-lg border border-slate-200 bg-white p-5"><p class="text-xs text-slate-500">発注件数</p><p class="text-2xl font-bold mt-1">142 件</p></div>
+      <div class="rounded-lg border border-slate-200 bg-white p-5"><p class="text-xs text-slate-500">アクティブ顧客</p><p class="text-2xl font-bold mt-1">28 社</p></div>
+    </section>
+    <section>
+      <h2 class="font-semibold mb-3">ショップ別</h2>
+      <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-slate-600"><tr><th class="text-left px-3 py-2">ショップ</th><th class="text-right px-3 py-2">件数</th><th class="text-right px-3 py-2">売上</th><th class="text-right px-3 py-2">リベート</th></tr></thead>
+          <tbody>
+            <tr class="border-t border-slate-100"><td class="px-3 py-2">ホビーステーション渋谷</td><td class="px-3 py-2 text-right">18</td><td class="px-3 py-2 text-right">¥2,148,392</td><td class="px-3 py-2 text-right text-emerald-600">-¥214,839</td></tr>
+            <tr class="border-t border-slate-100"><td class="px-3 py-2">カードキング新宿店</td><td class="px-3 py-2 text-right">12</td><td class="px-3 py-2 text-right">¥687,420</td><td class="px-3 py-2 text-right text-emerald-600">-¥48,120</td></tr>
+            <tr class="border-t border-slate-100"><td class="px-3 py-2">トレカマート大阪</td><td class="px-3 py-2 text-right">8</td><td class="px-3 py-2 text-right">¥412,300</td><td class="px-3 py-2 text-right text-emerald-600">-¥20,615</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <section>
+      <h2 class="font-semibold mb-3">商品別</h2>
+      <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-50 text-slate-600"><tr><th class="text-left px-3 py-2">商品</th><th class="text-left px-3 py-2">カテゴリ</th><th class="text-right px-3 py-2">件数</th><th class="text-right px-3 py-2">確定 BOX</th><th class="text-right px-3 py-2">売上</th></tr></thead>
+          <tbody>
+            <tr class="border-t border-slate-100"><td class="px-3 py-2">ポケモンカード151</td><td class="px-3 py-2">pokemon</td><td class="px-3 py-2 text-right">38</td><td class="px-3 py-2 text-right">456</td><td class="px-3 py-2 text-right">¥2,571,840</td></tr>
+            <tr class="border-t border-slate-100"><td class="px-3 py-2">ワンピース 二つの伝説</td><td class="px-3 py-2">onepiece</td><td class="px-3 py-2 text-right">29</td><td class="px-3 py-2 text-right">348</td><td class="px-3 py-2 text-right">¥1,793,664</td></tr>
+            <tr class="border-t border-slate-100"><td class="px-3 py-2">ワンピース ロマンスドーン</td><td class="px-3 py-2">onepiece</td><td class="px-3 py-2 text-right">22</td><td class="px-3 py-2 text-right">264</td><td class="px-3 py-2 text-right">¥1,012,032</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</article>
+
+<!-- ─────────── 18. 監査ログ ─────────── -->
+<article id="adm-audit" class="scrn space-y-2">
+  <h3 class="text-lg font-bold">18. 監査ログ <code class="text-xs font-mono text-slate-500">/admin/audit</code> <span class="text-xs text-slate-500">(super_admin 限定)</span></h3>
+  <div class="frame bg-slate-50 p-8 space-y-4">
+    <div>
+      <h1 class="text-2xl font-bold">監査ログ</h1>
+      <p class="text-xs text-slate-500 mt-1">全 1,247 件 / ページ 1 / 25</p>
+    </div>
+    <form class="rounded-lg border border-slate-200 bg-white p-4 grid grid-cols-5 gap-3 text-xs">
+      <div><label class="block text-slate-600 mb-1">アクション</label><select class="w-full border rounded px-2 py-1"><option>— すべて —</option><option>update_order_status</option></select></div>
+      <div><label class="block text-slate-600 mb-1">対象テーブル</label><select class="w-full border rounded px-2 py-1"><option>— すべて —</option><option>orders</option></select></div>
+      <div><label class="block text-slate-600 mb-1">期間 from</label><input type="date" class="w-full border rounded px-2 py-1" /></div>
+      <div><label class="block text-slate-600 mb-1">期間 to</label><input type="date" class="w-full border rounded px-2 py-1" /></div>
+      <div class="flex items-end gap-2"><button class="rounded bg-brand-600 text-white px-3 py-1">適用</button></div>
+    </form>
+    <div class="rounded-lg border border-slate-200 bg-white overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 text-slate-600"><tr><th class="text-left px-3 py-2">日時</th><th class="text-left px-3 py-2">アクション</th><th class="text-left px-3 py-2">対象</th><th class="text-left px-3 py-2">対象 ID</th><th class="text-left px-3 py-2">変更</th></tr></thead>
+        <tbody>
+          <tr class="border-t border-slate-100 align-top">
+            <td class="px-3 py-2 text-xs">2026-05-23 10:01</td>
+            <td class="px-3 py-2 font-mono text-xs">issue_invoice</td>
+            <td class="px-3 py-2">invoices</td>
+            <td class="px-3 py-2 text-xs font-mono text-slate-500">a8c4f2e1</td>
+            <td class="px-3 py-2"><a class="text-xs text-brand-600 cursor-pointer">展開</a></td>
+          </tr>
+          <tr class="border-t border-slate-100 align-top">
+            <td class="px-3 py-2 text-xs">2026-05-23 09:45</td>
+            <td class="px-3 py-2 font-mono text-xs">update_order_status</td>
+            <td class="px-3 py-2">orders</td>
+            <td class="px-3 py-2 text-xs font-mono text-slate-500">4f7b1a8e</td>
+            <td class="px-3 py-2">
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div><div class="text-slate-500">before</div><pre class="bg-slate-50 p-2 rounded">{"status":"仮確定"}</pre></div>
+                <div><div class="text-slate-500">after</div><pre class="bg-slate-50 p-2 rounded">{"status":"確定","confirmed_qty":12}</pre></div>
+              </div>
+            </td>
+          </tr>
+          <tr class="border-t border-slate-100 align-top">
+            <td class="px-3 py-2 text-xs">2026-05-23 08:00</td>
+            <td class="px-3 py-2 font-mono text-xs">update_rank_settings</td>
+            <td class="px-3 py-2">rank_settings</td>
+            <td class="px-3 py-2 text-xs text-slate-500">—</td>
+            <td class="px-3 py-2"><a class="text-xs text-brand-600 cursor-pointer">展開</a></td>
+          </tr>
+          <tr class="border-t border-slate-100 align-top">
+            <td class="px-3 py-2 text-xs">2026-05-01 00:00</td>
+            <td class="px-3 py-2 font-mono text-xs">create_shop</td>
+            <td class="px-3 py-2">shops</td>
+            <td class="px-3 py-2 text-xs font-mono text-slate-500">e2d918fc</td>
+            <td class="px-3 py-2"><a class="text-xs text-brand-600 cursor-pointer">展開</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</article>
+
+</main>
+
+<footer class="text-center text-xs text-slate-500 py-8">
+  トレカ商事カンパニー システム画面モックアップ / 全 18 画面 / 実装は <code>card-order-app-v2/</code> 参照
+</footer>
+
+</body>
+</html>

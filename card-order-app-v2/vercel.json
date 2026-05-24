@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/rank-update",
+      "schedule": "0 0 1 * *"
+    },
+    {
+      "path": "/api/cron/apply-rank-settings",
+      "schedule": "1 0 1 * *"
+    },
+    {
+      "path": "/api/cron/oath-expiry",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

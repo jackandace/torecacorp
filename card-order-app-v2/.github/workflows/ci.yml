@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "card-order-app-v2/**"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    paths:
+      - "card-order-app-v2/**"
+      - ".github/workflows/ci.yml"
+
+defaults:
+  run:
+    working-directory: card-order-app-v2
+
+jobs:
+  verify:
+    name: type-check / lint / test / build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: card-order-app-v2/package-lock.json
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Type-check
+        run: npm run type-check
+
+      - name: Lint
+        run: npm run lint -- --max-warnings=0
+
+      - name: Test
+        run: npm test
+
+      - name: Build (placeholder env)
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
+          RESEND_API_KEY: re_placeholder
+          RESEND_FROM_EMAIL: noreply@torecacorp.jp
+          CRON_SECRET: ci-secret
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          INVOICE_ISSUER_NAME: PALETTE GROUP トレカ商事カンパニー
+          INVOICE_REGISTRATION_NUMBER: T0000000000000
+        run: npm run build
