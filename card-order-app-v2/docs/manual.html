@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>トレカ商事 操作マニュアル</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  body { font-feature-settings: "palt"; }
+  .prose h1 { @apply text-3xl font-bold mt-8 mb-4 text-slate-900 pb-2 border-b-2 border-slate-300; }
+  .prose h2 { @apply text-2xl font-bold mt-8 mb-3 text-slate-800; }
+  .prose h3 { @apply text-xl font-semibold mt-6 mb-2 text-slate-700; }
+  .prose h4 { @apply text-lg font-semibold mt-4 mb-2 text-slate-700; }
+  .prose p { @apply my-3 leading-relaxed; }
+  .prose ul { @apply list-disc list-outside ml-6 my-3 space-y-1; }
+  .prose ol { @apply list-decimal list-outside ml-6 my-3 space-y-1; }
+  .prose li { @apply leading-relaxed; }
+  .prose code { @apply bg-slate-100 text-rose-700 px-1.5 py-0.5 rounded text-sm font-mono; }
+  .prose pre { @apply bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto my-4; }
+  .prose pre code { @apply bg-transparent text-slate-100 p-0; }
+  .prose table { @apply w-full my-4 border-collapse; }
+  .prose th, .prose td { @apply border border-slate-300 px-3 py-2 text-left; }
+  .prose th { @apply bg-slate-100 font-semibold; }
+  .prose tr:nth-child(even) td { @apply bg-slate-50; }
+  .prose blockquote { @apply border-l-4 border-blue-400 bg-blue-50 pl-4 py-2 my-4 text-slate-700; }
+  .prose a { @apply text-blue-600 hover:underline; }
+  .prose hr { @apply my-8 border-slate-300; }
+  .prose strong { @apply text-slate-900 font-bold; }
+  /* TOC アンカー余白 */
+  .prose h2, .prose h3 { scroll-margin-top: 80px; }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+<header class="sticky top-0 z-40 bg-slate-900 text-slate-100 shadow">
+  <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
+    <div class="font-bold">トレカ商事 操作マニュアル</div>
+    <nav class="flex gap-2 text-sm">
+      <button onclick="loadManual('shop')" id="btn-shop"  class="px-3 py-1 rounded-md bg-blue-600 text-white">ショップ向け</button>
+      <button onclick="loadManual('admin')" id="btn-admin" class="px-3 py-1 rounded-md bg-slate-700 text-slate-200">管理者向け</button>
+    </nav>
+  </div>
+</header>
+
+<div class="max-w-5xl mx-auto px-4 sm:px-8 py-8">
+  <article id="content" class="prose bg-white rounded-lg shadow-sm p-6 sm:p-10 min-h-[60vh]">
+    <p class="text-slate-500">読み込み中…</p>
+  </article>
+</div>
+
+<script>
+  const MANUALS = {
+    shop:  "MANUAL_SHOP.md",
+    admin: "MANUAL_ADMIN.md",
+  };
+
+  async function loadManual(kind) {
+    document.getElementById("btn-shop").className  = kind === "shop"  ? "px-3 py-1 rounded-md bg-blue-600 text-white" : "px-3 py-1 rounded-md bg-slate-700 text-slate-200";
+    document.getElementById("btn-admin").className = kind === "admin" ? "px-3 py-1 rounded-md bg-blue-600 text-white" : "px-3 py-1 rounded-md bg-slate-700 text-slate-200";
+    const url = MANUALS[kind];
+    try {
+      const res = await fetch(url);
+      const md = await res.text();
+      document.getElementById("content").innerHTML = marked.parse(md);
+      window.scrollTo({ top: 0 });
+      window.location.hash = kind;
+    } catch (e) {
+      document.getElementById("content").innerHTML = `<p style="color:red">読み込み失敗: ${url} は同じフォルダにありますか？</p><p style="color:#666">file:// で開いている場合、CORS エラーになることがあります。Vercel デプロイ後の URL から開くか、簡易サーバー (例: <code>python3 -m http.server</code>) を立ててアクセスしてください。</p>`;
+    }
+  }
+
+  // URL ハッシュで初期表示切替
+  const initial = location.hash === "#admin" ? "admin" : "shop";
+  loadManual(initial);
+</script>
+
+</body>
+</html>
