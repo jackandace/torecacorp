@@ -4,73 +4,226 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>トレカ商事 操作マニュアル</title>
-<script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
-  body { font-feature-settings: "palt"; }
-  .prose h1 { @apply text-3xl font-bold mt-8 mb-4 text-slate-900 pb-2 border-b-2 border-slate-300; }
-  .prose h2 { @apply text-2xl font-bold mt-8 mb-3 text-slate-800; }
-  .prose h3 { @apply text-xl font-semibold mt-6 mb-2 text-slate-700; }
-  .prose h4 { @apply text-lg font-semibold mt-4 mb-2 text-slate-700; }
-  .prose p { @apply my-3 leading-relaxed; }
-  .prose ul { @apply list-disc list-outside ml-6 my-3 space-y-1; }
-  .prose ol { @apply list-decimal list-outside ml-6 my-3 space-y-1; }
-  .prose li { @apply leading-relaxed; }
-  .prose code { @apply bg-slate-100 text-rose-700 px-1.5 py-0.5 rounded text-sm font-mono; }
-  .prose pre { @apply bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto my-4; }
-  .prose pre code { @apply bg-transparent text-slate-100 p-0; }
-  .prose table { @apply w-full my-4 border-collapse; }
-  .prose th, .prose td { @apply border border-slate-300 px-3 py-2 text-left; }
-  .prose th { @apply bg-slate-100 font-semibold; }
-  .prose tr:nth-child(even) td { @apply bg-slate-50; }
-  .prose blockquote { @apply border-l-4 border-blue-400 bg-blue-50 pl-4 py-2 my-4 text-slate-700; }
-  .prose a { @apply text-blue-600 hover:underline; }
-  .prose hr { @apply my-8 border-slate-300; }
-  .prose strong { @apply text-slate-900 font-bold; }
-  /* TOC アンカー余白 */
-  .prose h2, .prose h3 { scroll-margin-top: 80px; }
+  :root {
+    --bg: #f8fafc;
+    --paper: #ffffff;
+    --text: #1f2937;
+    --muted: #64748b;
+    --accent: #2563eb;
+    --accent-dark: #1d4ed8;
+    --rule: #e2e8f0;
+    --rule-strong: #cbd5e1;
+    --code-bg: #f1f5f9;
+    --code-text: #be185d;
+    --pre-bg: #0f172a;
+    --pre-text: #f1f5f9;
+    --quote-bg: #eff6ff;
+    --quote-border: #3b82f6;
+    --table-header: #f8fafc;
+    --table-stripe: #f8fafc;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Meiryo", sans-serif;
+    font-feature-settings: "palt";
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ヘッダー */
+  header.topbar {
+    position: sticky; top: 0; z-index: 40;
+    background: #0f172a; color: #f1f5f9;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .topbar-inner {
+    max-width: 960px; margin: 0 auto;
+    padding: 0 16px; height: 56px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .topbar-title { font-weight: 700; font-size: 16px; }
+  .topbar-nav { display: flex; gap: 8px; }
+  .tab-button {
+    border: 0; cursor: pointer; padding: 6px 14px; border-radius: 6px;
+    font-size: 14px; font-weight: 500;
+    background: #334155; color: #cbd5e1;
+    transition: background .2s;
+  }
+  .tab-button:hover { background: #475569; }
+  .tab-button.active { background: var(--accent); color: white; }
+
+  /* コンテナ */
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 16px 80px;
+  }
+  article.paper {
+    background: var(--paper);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+    padding: 32px;
+    min-height: 60vh;
+  }
+  @media (min-width: 640px) {
+    article.paper { padding: 56px; }
+  }
+
+  /* タイポグラフィ */
+  article h1 {
+    font-size: 32px; font-weight: 800; line-height: 1.3;
+    margin: 0 0 24px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid var(--rule-strong);
+    color: #0f172a;
+  }
+  article h2 {
+    font-size: 24px; font-weight: 700; line-height: 1.35;
+    margin: 40px 0 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--rule);
+    color: #0f172a;
+    scroll-margin-top: 80px;
+  }
+  article h3 {
+    font-size: 19px; font-weight: 700; line-height: 1.4;
+    margin: 28px 0 12px;
+    color: #1e293b;
+    scroll-margin-top: 80px;
+  }
+  article h4 {
+    font-size: 16px; font-weight: 700;
+    margin: 20px 0 10px;
+    color: #334155;
+  }
+  article p { margin: 12px 0; }
+  article ul, article ol {
+    margin: 12px 0; padding-left: 28px;
+  }
+  article li { margin: 4px 0; }
+  article ul ul, article ol ol { margin: 4px 0; }
+  article strong { color: #0f172a; font-weight: 700; }
+  article a { color: var(--accent); text-decoration: none; }
+  article a:hover { color: var(--accent-dark); text-decoration: underline; }
+  article hr {
+    border: 0; height: 1px; background: var(--rule);
+    margin: 32px 0;
+  }
+
+  /* code */
+  article code {
+    background: var(--code-bg); color: var(--code-text);
+    padding: 2px 6px; border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
+    font-size: 0.92em;
+  }
+  article pre {
+    background: var(--pre-bg); color: var(--pre-text);
+    padding: 16px; border-radius: 8px;
+    overflow-x: auto; margin: 16px 0;
+    line-height: 1.5;
+  }
+  article pre code {
+    background: transparent; color: inherit;
+    padding: 0; font-size: 13px;
+  }
+
+  /* テーブル */
+  article table {
+    width: 100%; margin: 16px 0;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  article th, article td {
+    border: 1px solid var(--rule);
+    padding: 10px 14px; text-align: left;
+    vertical-align: top;
+  }
+  article th {
+    background: #f1f5f9;
+    font-weight: 700; color: #0f172a;
+  }
+  article tbody tr:nth-child(even) td {
+    background: var(--table-stripe);
+  }
+
+  /* 引用 (blockquote) */
+  article blockquote {
+    margin: 16px 0;
+    padding: 12px 16px;
+    background: var(--quote-bg);
+    border-left: 4px solid var(--quote-border);
+    color: #1e293b;
+    border-radius: 0 4px 4px 0;
+  }
+  article blockquote p { margin: 4px 0; }
+
+  /* 目次見出しの下リスト調整 */
+  article h2#目次 + ol,
+  article h2:first-of-type + ol { font-size: 15px; }
+
+  /* レスポンシブ */
+  @media (max-width: 640px) {
+    article h1 { font-size: 26px; }
+    article h2 { font-size: 21px; }
+    article h3 { font-size: 17px; }
+    article { font-size: 15px; }
+    article pre { font-size: 12px; }
+    article table { font-size: 13px; }
+    article th, article td { padding: 8px 10px; }
+  }
 </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body>
 
-<header class="sticky top-0 z-40 bg-slate-900 text-slate-100 shadow">
-  <div class="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-    <div class="font-bold">トレカ商事 操作マニュアル</div>
-    <nav class="flex gap-2 text-sm">
-      <button onclick="loadManual('shop')" id="btn-shop"  class="px-3 py-1 rounded-md bg-blue-600 text-white">ショップ向け</button>
-      <button onclick="loadManual('admin')" id="btn-admin" class="px-3 py-1 rounded-md bg-slate-700 text-slate-200">管理者向け</button>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-title">トレカ商事 操作マニュアル</div>
+    <nav class="topbar-nav">
+      <button onclick="loadManual('shop')"  id="btn-shop"  class="tab-button active">ショップ向け</button>
+      <button onclick="loadManual('admin')" id="btn-admin" class="tab-button">管理者向け</button>
     </nav>
   </div>
 </header>
 
-<div class="max-w-5xl mx-auto px-4 sm:px-8 py-8">
-  <article id="content" class="prose bg-white rounded-lg shadow-sm p-6 sm:p-10 min-h-[60vh]">
-    <p class="text-slate-500">読み込み中…</p>
+<main>
+  <article id="content" class="paper">
+    <p style="color:#64748b">読み込み中…</p>
   </article>
-</div>
+</main>
 
 <script>
-  const MANUALS = {
-    shop:  "MANUAL_SHOP.md",
-    admin: "MANUAL_ADMIN.md",
+  const MANUAL_URLS = {
+    shop:  "/manuals/shop.md",
+    admin: "/manuals/admin.md",
   };
 
+  marked.setOptions({
+    gfm: true,
+    breaks: false,
+    headerIds: true,
+    mangle: false,
+  });
+
   async function loadManual(kind) {
-    document.getElementById("btn-shop").className  = kind === "shop"  ? "px-3 py-1 rounded-md bg-blue-600 text-white" : "px-3 py-1 rounded-md bg-slate-700 text-slate-200";
-    document.getElementById("btn-admin").className = kind === "admin" ? "px-3 py-1 rounded-md bg-blue-600 text-white" : "px-3 py-1 rounded-md bg-slate-700 text-slate-200";
-    const url = MANUALS[kind];
+    document.getElementById("btn-shop").classList.toggle("active", kind === "shop");
+    document.getElementById("btn-admin").classList.toggle("active", kind === "admin");
     try {
-      const res = await fetch(url);
+      const res = await fetch(MANUAL_URLS[kind]);
       const md = await res.text();
       document.getElementById("content").innerHTML = marked.parse(md);
       window.scrollTo({ top: 0 });
       window.location.hash = kind;
     } catch (e) {
-      document.getElementById("content").innerHTML = `<p style="color:red">読み込み失敗: ${url} は同じフォルダにありますか？</p><p style="color:#666">file:// で開いている場合、CORS エラーになることがあります。Vercel デプロイ後の URL から開くか、簡易サーバー (例: <code>python3 -m http.server</code>) を立ててアクセスしてください。</p>`;
+      document.getElementById("content").innerHTML = `<p style="color:#dc2626">読み込み失敗: ${MANUAL_URLS[kind]}</p>`;
     }
   }
 
-  // URL ハッシュで初期表示切替
   const initial = location.hash === "#admin" ? "admin" : "shop";
   loadManual(initial);
 </script>
