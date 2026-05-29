@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>チケットガチャ実装 画面想定 / toraオリパ様</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root{
+    --blue:#2563eb; --blue-d:#1d4ed8; --green:#85c596; --green-d:#6cb37e;
+    --line:#e5e7eb; --tx:#1f2937; --tx2:#6b7280; --tx3:#9ca3af;
+    --bg:#f4f5f7; --side:#fbfbfc; --new:#e11d48; --newbg:#fde8ec;
+  }
+  body{ font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",sans-serif;
+    color:var(--tx); background:var(--bg); line-height:1.5; }
+  /* shell */
+  .shell{ display:flex; min-height:100vh; }
+  .side{ width:210px; background:var(--side); border-right:1px solid var(--line); flex-shrink:0; padding:14px 0; }
+  .brand{ display:flex; align-items:center; gap:8px; padding:6px 18px 16px; font-weight:600; font-size:15px; }
+  .brand .db{ width:22px;height:22px;border-radius:6px;background:#2dd4bf;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;}
+  .nav a{ display:block; padding:8px 18px; font-size:13.5px; color:#374151; text-decoration:none; }
+  .nav a:hover{ background:#f1f2f4; }
+  .nav .grp{ padding:14px 18px 4px; font-size:11.5px; color:var(--tx3); letter-spacing:.04em; }
+  .nav a.sub{ padding-left:34px; font-size:13px; color:#4b5563; }
+  .nav a.active{ background:#eef2ff; color:var(--blue); border-right:2px solid var(--blue); font-weight:600; }
+  .nav a.newitem{ color:var(--new); font-weight:600; }
+  .main{ flex:1; min-width:0; }
+  .topbar{ height:54px; border-bottom:1px solid var(--line); background:#fff; display:flex; align-items:center; justify-content:flex-end; padding:0 22px; gap:16px; font-size:13px; color:#374151; }
+  .content{ padding:22px 26px 60px; }
+  /* tabs */
+  .tabs{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+  .tabs button{ border:1px solid var(--line); background:#fff; padding:8px 14px; border-radius:8px; font-size:13px; cursor:pointer; color:#374151; font-family:inherit; }
+  .tabs button.on{ background:#111827; color:#fff; border-color:#111827; }
+  .panel{ display:none; }
+  .panel.on{ display:block; }
+  /* common */
+  .crumb{ font-size:12px; color:var(--tx2); margin-bottom:6px; }
+  h1{ font-size:22px; font-weight:700; margin-bottom:18px; }
+  h2{ font-size:16px; font-weight:600; margin-bottom:14px; }
+  h3{ font-size:14px; font-weight:600; margin:18px 0 8px; }
+  .card{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px 22px; margin-bottom:18px; }
+  .btn{ border:none; border-radius:8px; padding:8px 14px; font-size:13px; cursor:pointer; font-family:inherit; }
+  .btn-blue{ background:var(--blue); color:#fff; } .btn-blue:hover{ background:var(--blue-d); }
+  .btn-green{ background:var(--green); color:#fff; } .btn-green:hover{ background:var(--green-d); }
+  .btn-ghost{ background:#fff; border:1px solid var(--line); color:#374151; }
+  .row-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  thead th{ text-align:left; color:var(--tx2); font-weight:500; font-size:12.5px; padding:10px 10px; border-bottom:1px solid var(--line); }
+  tbody td{ padding:14px 10px; border-bottom:1px solid #f0f1f3; vertical-align:middle; }
+  .chip{ width:34px;height:34px;border-radius:8px;background:#f3f4f6;display:inline-flex;align-items:center;justify-content:center;font-size:16px; }
+  .toggle{ width:38px;height:22px;border-radius:11px;background:var(--green);position:relative;display:inline-block; }
+  .toggle::after{ content:"";position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#fff; }
+  .iconbtn{ width:32px;height:32px;border:1px solid var(--line);border-radius:7px;background:#fff;cursor:pointer;font-size:13px;color:#6b7280; }
+  .iconbtn.del{ color:#ef4444;border-color:#fecaca; }
+  /* form */
+  label.fl{ display:block; font-size:12.5px; color:#374151; margin:0 0 6px; }
+  input.f, select.f{ width:100%; height:38px; border:1px solid var(--line); border-radius:8px; padding:0 12px; font-size:13.5px; font-family:inherit; background:#fff; color:var(--tx); }
+  .field{ margin-bottom:16px; }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .grid3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+  /* badges */
+  .new{ display:inline-block; background:var(--newbg); color:var(--new); font-size:11px; font-weight:700; padding:2px 8px; border-radius:6px; margin-left:8px; vertical-align:middle; }
+  .exist{ display:inline-block; background:#f1f2f4; color:#6b7280; font-size:11px; font-weight:600; padding:2px 8px; border-radius:6px; margin-left:8px; vertical-align:middle; }
+  .legend{ background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 16px; font-size:12.5px; color:#4b5563; margin-bottom:18px; display:flex; gap:20px; flex-wrap:wrap; align-items:center;}
+  .dot{ display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle; }
+  .note{ font-size:12px; color:var(--tx2); margin-top:6px; }
+  .hl{ outline:2px solid var(--new); outline-offset:2px; border-radius:6px; }
+  .pill{ display:inline-block;background:#f3f4f6;border-radius:6px;padding:3px 10px;font-size:12px;color:#374151; }
+  .selopt{ background:#a855f7;color:#fff; }
+  /* dropdown mock */
+  .ddmock{ border:1px solid var(--line); border-radius:10px; max-width:420px; overflow:hidden; }
+  .ddmock div{ padding:11px 14px; font-size:13.5px; border-bottom:1px solid #f0f1f3; }
+  .ddmock div:last-child{ border-bottom:none; }
+  /* phone */
+  .phonewrap{ background:#eceef1; border-radius:16px; padding:24px; display:flex; gap:26px; flex-wrap:wrap; }
+  .phone{ width:300px; background:#fff; border-radius:22px; border:8px solid #1f2937; overflow:hidden; }
+  .ph-head{ height:46px; display:flex; align-items:center; justify-content:flex-end; gap:8px; padding:0 12px; border-bottom:1px solid var(--line); }
+  .ph-coin{ background:#f3f4f6;border-radius:14px;padding:5px 10px;font-size:12px;font-weight:600;display:flex;gap:5px;align-items:center; }
+  .ph-tk{ background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:5px 9px;font-size:12px;font-weight:600;color:#c2410c;display:flex;gap:5px;align-items:center; }
+  .ph-body{ padding:14px; }
+  .mp-row{ display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid #f0f1f3; font-size:13px; }
+  .mp-ic{ width:30px;height:30px;border-radius:8px;background:#fff7ed;display:flex;align-items:center;justify-content:center;font-size:15px;margin-right:8px; }
+  .exp{ font-size:11px;color:#9ca3af; }
+  .exp.soon{ color:#dc2626; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <!-- sidebar -->
+  <aside class="side">
+    <div class="brand"><span class="db">&#9974;</span> tora-oripa console</div>
+    <nav class="nav">
+      <div class="grp">オリパ</div>
+      <a href="#">一覧</a>
+      <a href="#">カテゴリー</a>
+      <a href="#">カードデータベース</a>
+      <a href="#">配送</a>
+      <a href="#">イベント</a>
+      <div class="grp">宝箱</div>
+      <a href="#" class="sub">宝箱タイプ</a>
+      <a href="#" class="sub">宝箱マイルストーン</a>
+      <div class="grp" style="color:var(--new)">チケット <span class="new">新設</span></div>
+      <a href="#" class="sub newitem" id="navType">チケット種別</a>
+      <a href="#">課金アイテム</a>
+      <a href="#">ポイント利用ログ</a>
+      <a href="#">ユーザー</a>
+      <a href="#">ガチャ演出</a>
+      <a href="#">クーポン</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="topbar"><span>&#9789;</span><span>new-admin@toraoripa.com</span></div>
+    <div class="content">
+
+      <div class="legend">
+        <strong style="color:#111827;">凡例</strong>
+        <span><span class="dot" style="background:var(--new)"></span>今回追加・変更</span>
+        <span><span class="dot" style="background:#9ca3af"></span>既存（実装済み）</span>
+        <span style="color:#6b7280;">— 刀根さん確認用 画面想定 / toraオリパ様 チケットガチャ実装</span>
+      </div>
+
+      <div class="tabs">
+        <button class="on" data-t="t1">1. チケット種別マスタ</button>
+        <button data-t="t2">2. 種別 新規作成</button>
+        <button data-t="t3">3. ガチャ消費設定</button>
+        <button data-t="t4">4. 景品でのチケット付与</button>
+        <button data-t="t5">5. ユーザー画面</button>
+      </div>
+
+      <!-- 1. ticket type master -->
+      <section class="panel on" id="t1">
+        <div class="crumb">チケット / チケット種別</div>
+        <div class="row-head">
+          <h1 style="margin:0;">チケット種別一覧 <span class="new">新規画面</span></h1>
+          <button class="btn btn-blue">+ 新規作成</button>
+        </div>
+        <div class="card" style="padding:0;">
+          <table>
+            <thead><tr>
+              <th style="width:50px;">ID</th><th>名前</th><th style="width:90px;">アイコン</th>
+              <th style="width:130px;">失効期間</th><th style="width:90px;">表示順</th>
+              <th style="width:80px;">有効</th><th style="width:100px;">操作</th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td>TP（標準チケット）<span class="exist">既存TP流用</span></td>
+                <td><span class="chip">&#127915;</span></td>
+                <td>30日</td><td>1</td>
+                <td><span class="toggle"></span></td>
+                <td><button class="iconbtn">&#9998;</button> <button class="iconbtn del">&#128465;</button></td>
+              </tr>
+              <tr style="opacity:.55;">
+                <td>2</td>
+                <td>ピカチュウチケット<span class="pill" style="margin-left:8px;">将来例</span></td>
+                <td><span class="chip">&#9889;</span></td>
+                <td>14日</td><td>2</td>
+                <td><span class="toggle"></span></td>
+                <td><button class="iconbtn">&#9998;</button> <button class="iconbtn del">&#128465;</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">宝箱タイプ一覧と同じ構造。v1は ID:1（現TP相当）のみ登録して運用。チケットの種類を増やすときは、ここに行を追加するだけで拡張できる（スキーマ変更不要）。各ガチャ・各景品はこの「種別ID」を参照する。</p>
+      </section>
+
+      <!-- 2. create type -->
+      <section class="panel" id="t2">
+        <div class="crumb">チケット / チケット種別 / 新規作成</div>
+        <h1>チケット種別の作成・編集 <span class="new">新規画面</span></h1>
+        <div class="card" style="max-width:560px;">
+          <div class="field"><label class="fl">名前</label><input class="f" value="TP（標準チケット）"></div>
+          <div class="field"><label class="fl">アイコン画像</label><input class="f" type="file"></div>
+          <div class="grid2">
+            <div class="field hl"><label class="fl">失効期間（日）<span class="new">新規</span></label><input class="f" value="30"></div>
+            <div class="field"><label class="fl">表示順</label><input class="f" value="1"></div>
+          </div>
+          <div class="field"><label class="fl">有効</label><span class="toggle"></span></div>
+          <div style="text-align:right; margin-top:8px;"><button class="btn btn-ghost">キャンセル</button> <button class="btn btn-blue">保存</button></div>
+        </div>
+        <p class="note">失効期間は種別ごとに設定。取得から「失効期間」経過で失効（取得ロット単位・FIFO消費）。暫定値は30日。</p>
+      </section>
+
+      <!-- 3. gacha consumption -->
+      <section class="panel" id="t3">
+        <div class="crumb">オリパ / ガチャ作成</div>
+        <h1>ガチャ作成 — 消費設定</h1>
+        <div class="card" style="max-width:560px;">
+          <h3 style="margin-top:0;">消費種別 <span class="exist">既存</span></h3>
+          <p class="note" style="margin-bottom:10px;">現在のドロップダウン（実装済み）。TP系の選択肢はすでに存在する。</p>
+          <div class="ddmock">
+            <div style="color:#9ca3af;">選択してください</div>
+            <div>ポイント</div>
+            <div class="selopt">TP &nbsp;<span style="opacity:.85;">&#10003; TPのみガチャ</span></div>
+            <div>コインとTP &nbsp;<span style="color:#6b7280;">（= TP+コインガチャ）</span></div>
+            <div>課金額消費</div>
+            <div>コインと宝箱</div>
+          </div>
+
+          <div class="field hl" style="margin-top:22px;">
+            <label class="fl">対象チケット種別 <span class="new">追加</span></label>
+            <select class="f">
+              <option>TP（標準チケット）</option>
+              <option>ピカチュウチケット（将来例）</option>
+            </select>
+            <p class="note">消費種別が「TP」または「コインとTP」のときに表示。どの種別のチケットで回せるガチャかを指定する。これによって種別ごとの専用ガチャが作れる。</p>
+          </div>
+          <div class="field" style="max-width:240px;">
+            <label class="fl">1回あたり消費（TP / コイン）</label>
+            <div style="display:flex; gap:8px;"><input class="f" value="1" style="width:90px;"><input class="f" value="100" style="width:120px;"></div>
+            <p class="note">消費レートはガチャ単位で設定可能。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. prize grant -->
+      <section class="panel" id="t4">
+        <div class="crumb">オリパ / ガチャ作成 / 景品</div>
+        <h1>景品でのチケット付与（軸A・軸B）</h1>
+
+        <div class="card hl">
+          <h2 style="margin:0 0 4px;">軸B：チケット排出設定（ガチャ単位）<span class="new">追加</span></h2>
+          <p class="note" style="margin-bottom:14px;">ガチャ全体でのチケット排出上限を決め、付与箇所は事前確定でランダム選出（隠しキリ番景品の仕組みに近い形）。</p>
+          <div class="grid3">
+            <div><label class="fl">対象チケット種別</label><select class="f"><option>TP（標準チケット）</option></select></div>
+            <div><label class="fl">排出上限（総枚数）</label><input class="f" value="50"></div>
+            <div><label class="fl">付与方式</label><select class="f"><option>ランダム（事前確定）</option></select></div>
+          </div>
+          <p class="note" style="margin-top:12px;">併用ロジック：ランダム分配数 ＝ 排出上限 −（軸Aで個別指定された確定付与の合計）。A確定分はこの上限に内包し、合計が上限を超えない。</p>
+        </div>
+
+        <div class="card">
+          <div class="row-head"><h2 style="margin:0;">Sランク 通常景品 <span class="exist">既存画面</span></h2><span class="pill">合計 3 枚</span></div>
+          <table>
+            <thead><tr>
+              <th>カード</th><th style="width:80px;">状態</th><th style="width:90px;">交換ポイント</th><th style="width:60px;">個数</th>
+              <th style="width:110px;background:var(--newbg);color:var(--new);">付与種別</th>
+              <th style="width:90px;background:var(--newbg);color:var(--new);">付与枚数</th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td>リザードン PSA10</td><td>普通</td><td>1000</td><td>1</td>
+                <td><select class="f" style="height:34px;"><option>TP</option><option>なし</option></select></td>
+                <td><input class="f" style="height:34px;width:70px;" value="1"></td>
+              </tr>
+              <tr>
+                <td>ピカチュウ PSA10</td><td>普通</td><td>1000</td><td>1</td>
+                <td><select class="f" style="height:34px;"><option>なし</option><option>TP</option></select></td>
+                <td><input class="f" style="height:34px;width:70px;" value="0"></td>
+              </tr>
+              <tr>
+                <td><input class="f" style="height:34px;" placeholder="カード名を入力"></td>
+                <td><select class="f" style="height:34px;"><option>普通</option></select></td>
+                <td><input class="f" style="height:34px;width:80px;" value="1000"></td>
+                <td><input class="f" style="height:34px;width:50px;" value="1"></td>
+                <td><select class="f" style="height:34px;"><option>なし</option></select></td>
+                <td style="display:flex;gap:6px;"><input class="f" style="height:34px;width:60px;" value="0"><button class="btn btn-green" style="height:34px;">追加</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="note" style="margin-top:12px;"><strong style="color:var(--new);">軸A（追加列）</strong>：通常景品の各行に「付与種別／付与枚数」を追加。指定景品の当選時に、その景品＋チケットを確定付与する。</p>
+        </div>
+      </section>
+
+      <!-- 5. user screens -->
+      <section class="panel" id="t5">
+        <h1>ユーザー画面 — チケット保有・失効日</h1>
+        <div class="phonewrap">
+          <div class="phone">
+            <div class="ph-head">
+              <span class="ph-coin">&#128062; 237,829</span>
+              <span class="ph-tk">&#127915; 3</span>
+            </div>
+            <div class="ph-body">
+              <div style="font-size:11px;color:#9ca3af;">ヘッダー</div>
+              <p class="note" style="margin:6px 0 0;">現TP保有アイコン箇所を流用し、保有チケット数を表示。<span style="color:var(--new);">タップで保有確認へ。</span></p>
+            </div>
+          </div>
+
+          <div class="phone">
+            <div class="ph-head"><span class="ph-coin">&#128062; 237,829</span><span class="ph-tk">&#127915; 3</span></div>
+            <div class="ph-body">
+              <div style="font-weight:700;font-size:14px;margin-bottom:4px;">チケット保有 <span class="new">追加</span></div>
+              <div class="mp-row">
+                <span style="display:flex;align-items:center;"><span class="mp-ic">&#127915;</span>TP（標準チケット）</span>
+                <span style="font-weight:700;">3 枚</span>
+              </div>
+              <div style="font-size:12px;color:#6b7280;margin:14px 0 4px;">失効予定（取得ロット別）</div>
+              <div class="mp-row"><span>1枚</span><span class="exp soon">6/2 失効（あと4日）</span></div>
+              <div class="mp-row"><span>2枚</span><span class="exp">6/24 失効</span></div>
+              <p class="note" style="margin-top:12px;">マイページに種別別の保有数と、取得ロット別の失効日を表示（失効日の表示は必須）。既存の「ポイント失効期限の確認」と同じ枠組みで実装できる見込み。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+<script>
+  const tabs=document.querySelectorAll('.tabs button');
+  const panels=document.querySelectorAll('.panel');
+  tabs.forEach(b=>b.addEventListener('click',()=>{
+    tabs.forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    panels.forEach(p=>p.classList.remove('on'));
+    document.getElementById(b.dataset.t).classList.add('on');
+    const nav=document.getElementById('navType');
+    nav.classList.toggle('active', b.dataset.t==='t1');
+  }));
+  document.getElementById('navType').classList.add('active');
+</script>
+</body>
+</html>
