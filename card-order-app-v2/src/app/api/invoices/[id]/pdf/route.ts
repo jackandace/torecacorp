@@ -28,29 +28,8 @@ export async function POST(_request: NextRequest, { params }: { params: { id: st
     .maybeSingle();
   if (!invoice) return NextResponse.json({ error: "not found" }, { status: 404 });
 
-  const shop = invoice.shops as {
-    id: string;
-    company_name: string;
-    contact_name: string;
-    email: string;
-    phone: string | null;
-    address: string | null;
-    delivery_address: string | null;
-    current_rank: import("@/types/database").RankCode;
-    rank_locked_until: string | null;
-    rate_override: number | null;
-    status: import("@/types/database").ShopStatus;
-    oath_signed_at: string | null;
-    oath_expires_at: string | null;
-    user_id: string | null;
-    business_type: import("@/types/database").BusinessType | null;
-    opened_at: string | null;
-    business_doc_url: string | null;
-    lifetime_amount: number;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
-  };
+  // shops(*) の join 結果。Shop 型のフィールド追加に追従するため unknown 経由でキャスト
+  const shop = invoice.shops as unknown as import("@/types/database").Shop;
 
   const { data: items } = await supabase
     .from("invoice_items")

@@ -6,7 +6,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-const PUBLIC_PATHS = ["/login", "/forgot-password", "/reset-password", "/api/health"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/forgot-password",
+  "/reset-password",
+  "/register",        // 新規登録 (トークン検証は API 側で実施)
+  "/terms",           // 利用注意事項・免責事項
+  "/api/register",    // 登録 API (トークン制) + 既存ショップ向けリンク送付
+  "/api/health",
+];
 
 function isAdminRole(role: unknown): boolean {
   return role === "admin" || role === "super_admin";

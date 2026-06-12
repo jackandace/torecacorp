@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import { createClient } from "@/lib/supabase/client";
 import type { Product, Shop, OrderUnit, ProductCategory } from "@/types/database";
 import { getListedRate, formatRate, formatYen } from "@/lib/rebate";
 import { validateOrderQty, calcCartSubtotal } from "@/lib/orders";
@@ -27,7 +28,7 @@ const CATEGORY_LABEL: Record<ProductCategory, string> = {
   other:    "その他",
 };
 
-export function OrderForm({ products, shop }: Props) {
+export function OrderForm({ products: initialProducts, shop }: Props) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -38,6 +39,47 @@ export function OrderForm({ products, shop }: Props) {
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("deadline");
+
+  // リアルタイム在庫: Supabase Realtime で products の変更を購読し、
+  // 他ショップの発注確定・管理者の在庫更新を画面リロードなしで反映する。
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [live, setLive] = useState(false);
+
+  useEffect(() => {
+    setProducts(initialProducts);
+  }, [initialProducts]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel("products-stock")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "products" },
+        (payload) => {
+          if (payload.eventType === "DELETE") {
+            const oldId = (payload.old as { id?: string }).id;
+            if (oldId) setProducts((prev) => prev.filter((p) => p.id !== oldId));
+            return;
+          }
+          const next = payload.new as Product;
+          setProducts((prev) => {
+            const exists = prev.some((p) => p.id === next.id);
+            // 非公開化・受付停止・論理削除されたら一覧から除去
+            if (!next.is_visible || next.status !== "受付中" || next.deleted_at) {
+              return prev.filter((p) => p.id !== next.id);
+            }
+            if (exists) return prev.map((p) => (p.id === next.id ? { ...p, ...next } : p));
+            return [next, ...prev]; // 新規公開された商品
+          });
+        },
+      )
+      .subscribe((status) => setLive(status === "SUBSCRIBED"));
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const subtotal = useMemo(
     () =>
@@ -50,6 +92,21 @@ export function OrderForm({ products, shop }: Props) {
       ),
     [cart, shop],
   );
+
+  // リアルタイム在庫とカートの突合: カート投入後に在庫が減って足りなくなった商品を警告
+  const stockConflicts = useMemo(() => {
+    const conflicts = new Map<string, number>(); // productId → 現在の残数
+    for (const item of cart) {
+      const current = products.find((p) => p.id === item.product.id);
+      if (!current) {
+        conflicts.set(item.product.id, 0); // 受付終了
+        continue;
+      }
+      const available = (current.planned_qty ?? 0) - current.ordered_qty;
+      if (available < item.qtyInBox) conflicts.set(item.product.id, available);
+    }
+    return conflicts;
+  }, [cart, products]);
 
   // 表示用商品リスト (フィルタ + ソート)
   const visibleProducts = useMemo(() => {
@@ -187,8 +244,17 @@ export function OrderForm({ products, shop }: Props) {
               <option value="price_desc">価格が高い順</option>
             </select>
           </div>
-          <p className="text-xs text-slate-500">
-            {visibleProducts.length} 件表示中 / 全 {products.length} 件
+          <p className="text-xs text-slate-500 flex items-center gap-2">
+            <span>{visibleProducts.length} 件表示中 / 全 {products.length} 件</span>
+            {live && (
+              <span className="inline-flex items-center gap-1 text-emerald-600">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                </span>
+                在庫リアルタイム更新中
+              </span>
+            )}
           </p>
         </div>
 
@@ -214,26 +280,34 @@ export function OrderForm({ products, shop }: Props) {
           <p className="text-sm text-slate-500">カートは空です</p>
         ) : (
           <ul className="space-y-3">
-            {cart.map((c) => (
-              <li key={c.product.id} className="text-sm border-b border-slate-100 pb-2">
-                <div className="font-medium">{c.product.title}</div>
-                <div className="text-slate-500">
-                  {c.qty}{c.unit} = {c.qtyInBox} BOX
-                </div>
-                <div className="flex justify-between items-center mt-1">
-                  <span className="text-xs text-slate-600">
-                    {formatYen(Math.floor((c.product.price ?? 0) * c.qtyInBox * getListedRate(c.product, shop)))}
-                  </span>
-                  <button
-                    type="button"
-                    className="text-xs text-red-600 hover:underline"
-                    onClick={() => removeItem(c.product.id)}
-                  >
-                    削除
-                  </button>
-                </div>
-              </li>
-            ))}
+            {cart.map((c) => {
+              const conflict = stockConflicts.get(c.product.id);
+              return (
+                <li key={c.product.id} className="text-sm border-b border-slate-100 pb-2">
+                  <div className="font-medium">{c.product.title}</div>
+                  <div className="text-slate-500">
+                    {c.qty}{c.unit} = {c.qtyInBox} BOX
+                  </div>
+                  {conflict !== undefined && (
+                    <div className="text-xs text-rose-700 bg-rose-50 rounded px-2 py-1 mt-1">
+                      ⚠ 在庫が変動しました (残 {conflict} BOX)。数量を調整してください。
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="text-xs text-slate-600">
+                      {formatYen(Math.floor((c.product.price ?? 0) * c.qtyInBox * getListedRate(c.product, shop)))}
+                    </span>
+                    <button
+                      type="button"
+                      className="text-xs text-red-600 hover:underline"
+                      onClick={() => removeItem(c.product.id)}
+                    >
+                      削除
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
         <div className="flex justify-between text-sm">
@@ -252,10 +326,10 @@ export function OrderForm({ products, shop }: Props) {
         <button
           type="button"
           className="btn-primary w-full"
-          disabled={cart.length === 0 || !consent || submitting}
+          disabled={cart.length === 0 || !consent || submitting || stockConflicts.size > 0}
           onClick={() => setConfirmOpen(true)}
         >
-          リクエスト送信
+          {stockConflicts.size > 0 ? "在庫変動あり (数量を調整してください)" : "リクエスト送信"}
         </button>
         {message && <p className="text-xs text-slate-600">{message}</p>}
       </aside>

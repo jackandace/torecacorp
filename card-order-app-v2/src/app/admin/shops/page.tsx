@@ -17,10 +17,11 @@ export default async function ShopsAdminPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">顧客管理</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <a href="/admin/shops/invites" className="btn-primary">招待リンク発行</a>
           <a href="/admin/shops/import" className="btn-secondary">CSV取込</a>
           <a href="/api/shops/export" className="btn-secondary">CSV出力</a>
-          <a href="/admin/shops/new" className="btn-primary">新規ショップ登録</a>
+          <a href="/admin/shops/new" className="btn-secondary">手動登録</a>
         </div>
       </div>
       <div className="card overflow-hidden">

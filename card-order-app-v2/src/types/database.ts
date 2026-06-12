@@ -56,9 +56,24 @@ export type Shop = {
   opened_at: string | null;
   business_doc_url: string | null;
   lifetime_amount: number;
+  // 015 migration で追加
+  terms_agreed_at: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+};
+
+export type RegistrationInvite = {
+  id: string;
+  token: string;
+  email: string | null;
+  company_name: string | null;
+  note: string | null;
+  expires_at: string;
+  used_at: string | null;
+  used_by_shop_id: string | null;
+  created_by: string | null;
+  created_at: string;
 };
 
 export type RankSetting = {
@@ -377,6 +392,7 @@ export type Database = {
         FK<"inquiry_messages_inquiry_id_fkey", ["inquiry_id"], "inquiries", ["id"]>,
       ]>;
       faqs:                   TableDef<Faq>;
+      registration_invites:   TableDef<RegistrationInvite>;
     };
     Views: { [_ in never]: never };
     Functions: {
