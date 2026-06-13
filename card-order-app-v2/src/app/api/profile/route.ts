@@ -1,20 +1,16 @@
 // ショップ自身のプロフィール更新 API
 //
-// shop ロールユーザーが自分の company_name / contact_name / phone / address /
-// delivery_address のみ変更可能。email / status / current_rank / rate_override
-// 等は変更不可 (admin のみ)。
+// なりすまし対策のため、直接変更できるのは担当者名・電話番号のみ。
+//   - 会社名・登録住所・メール: 変更不可 (admin のみ)
+//   - 配送先住所: /api/profile/change-request の承認フロー経由
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { writeAudit } from "@/lib/audit";
-import type { Shop } from "@/types/database";
 
 const Schema = z.object({
-  companyName: z.string().min(1),
-  contactName: z.string().min(1),
-  phone: z.string().nullable(),
-  address: z.string().nullable(),
-  deliveryAddress: z.string().nullable(),
+  contactName: z.string().min(1).max(100),
+  phone: z.string().max(30).nullable(),
   lastUpdatedAt: z.string(),
 });
 
@@ -30,7 +26,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "invalid" }, { status: 400 });
   }
 
-  // 自分のショップを特定
   const { data: shop } = await supabase
     .from("shops")
     .select("*")
@@ -39,17 +34,12 @@ export async function PATCH(request: NextRequest) {
     .maybeSingle();
   if (!shop) return NextResponse.json({ error: "shop not found" }, { status: 404 });
 
-  const update: Partial<Shop> = {
-    company_name: body.companyName,
-    contact_name: body.contactName,
-    phone: body.phone,
-    address: body.address,
-    delivery_address: body.deliveryAddress,
-  };
-
   const { data: updated, error } = await supabase
     .from("shops")
-    .update(update)
+    .update({
+      contact_name: body.contactName,
+      phone: body.phone,
+    })
     .eq("id", shop.id)
     .eq("updated_at", body.lastUpdatedAt)
     .select("*")
@@ -65,19 +55,11 @@ export async function PATCH(request: NextRequest) {
 
   await writeAudit(supabase, {
     shopId: shop.id,
-    action: "shop_self_update_profile",
+    action: "shop_self_update_contact",
     targetTable: "shops",
     targetId: shop.id,
-    before: {
-      company_name: shop.company_name,
-      contact_name: shop.contact_name,
-      phone: shop.phone,
-    },
-    after: {
-      company_name: updated.company_name,
-      contact_name: updated.contact_name,
-      phone: updated.phone,
-    },
+    before: { contact_name: shop.contact_name, phone: shop.phone },
+    after: { contact_name: updated.contact_name, phone: updated.phone },
   });
 
   return NextResponse.json({ ok: true });

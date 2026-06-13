@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function OrderPage() {
   const supabase = createClient();
+  const today = new Date().toISOString().slice(0, 10);
 
   const [{ data: products }, { data: shop }] = await Promise.all([
     supabase
@@ -13,6 +14,8 @@ export default async function OrderPage() {
       .select("*")
       .eq("is_visible", true)
       .eq("status", "受付中")
+      // 発注締切が過ぎた商品は出さない (締切なしは表示)
+      .or(`order_deadline.is.null,order_deadline.gte.${today}`)
       .is("deleted_at", null)
       .order("created_at", { ascending: false }),
     supabase

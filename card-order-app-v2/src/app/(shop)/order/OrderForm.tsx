@@ -33,6 +33,7 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [completeOpen, setCompleteOpen] = useState(false); // 送信完了モーダル
   const [message, setMessage] = useState<string | null>(null);
 
   // フィルタ・検索・ソート
@@ -111,10 +112,13 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
   // 表示用商品リスト (フィルタ + ソート)
   const visibleProducts = useMemo(() => {
     const q = query.trim().toLowerCase();
+    const todayStr = new Date().toISOString().slice(0, 10);
     const filtered = products.filter((p) => {
+      // 締切が過ぎた商品は自動的に非表示
+      if (p.order_deadline && p.order_deadline < todayStr) return false;
       if (category !== "all" && p.category !== category) return false;
       if (q) {
-        const hay = `${p.title} ${p.full_name ?? ""} ${p.model_number ?? ""}`.toLowerCase();
+        const hay = `${p.series ?? ""} ${p.title} ${p.full_name ?? ""} ${p.model_number ?? ""}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
@@ -122,10 +126,13 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
     const sorted = [...filtered];
     switch (sort) {
       case "deadline":
+        // 締切日の昇順 (締切なしは最後)。同日中は商品名順
         sorted.sort((a, b) => {
+          if (!a.order_deadline && !b.order_deadline) return a.title.localeCompare(b.title, "ja");
           if (!a.order_deadline) return 1;
           if (!b.order_deadline) return -1;
-          return a.order_deadline.localeCompare(b.order_deadline);
+          const cmp = a.order_deadline.localeCompare(b.order_deadline);
+          return cmp !== 0 ? cmp : a.title.localeCompare(b.title, "ja");
         });
         break;
       case "price_asc":
@@ -135,7 +142,16 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
         sorted.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
         break;
       case "newest":
-        sorted.sort((a, b) => b.created_at.localeCompare(a.created_at));
+        // 掲載日時 (created_at) の降順。Excel 一括取込分は同時刻になるため、
+        // 同時刻の場合は締切が近い順 → 商品名順で安定ソート
+        sorted.sort((a, b) => {
+          const cmp = b.created_at.localeCompare(a.created_at);
+          if (cmp !== 0) return cmp;
+          const da = a.order_deadline ?? "9999-12-31";
+          const db = b.order_deadline ?? "9999-12-31";
+          const dcmp = da.localeCompare(db);
+          return dcmp !== 0 ? dcmp : a.title.localeCompare(b.title, "ja");
+        });
         break;
     }
     return sorted;
@@ -190,7 +206,7 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
       setCart([]);
       setConsent(false);
       setConfirmOpen(false);
-      setMessage("発注リクエストを送信しました。担当者からの連絡をお待ちください。");
+      setCompleteOpen(true); // 送信完了モーダルを表示
     } catch (e) {
       setMessage(`送信に失敗しました: ${e instanceof Error ? e.message : "不明なエラー"}`);
     } finally {
@@ -238,10 +254,10 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
               value={sort}
               onChange={(e) => setSort(e.target.value as SortKey)}
             >
-              <option value="deadline">締切日が近い順</option>
-              <option value="newest">新着順</option>
-              <option value="price_asc">価格が安い順</option>
-              <option value="price_desc">価格が高い順</option>
+              <option value="deadline">発注締切が近い順</option>
+              <option value="newest">掲載が新しい順</option>
+              <option value="price_asc">定価が安い順</option>
+              <option value="price_desc">定価が高い順</option>
             </select>
           </div>
           <p className="text-xs text-slate-500 flex items-center gap-2">
@@ -333,6 +349,36 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
         </button>
         {message && <p className="text-xs text-slate-600">{message}</p>}
       </aside>
+
+      {/* 送信完了モーダル */}
+      {completeOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="card p-8 max-w-md w-full text-center space-y-4">
+            <div className="mx-auto w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold">発注リクエストを送信しました</h3>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              担当者が内容を確認のうえ、数量確定のご連絡をいたします。<br />
+              進捗は発注履歴からいつでもご確認いただけます。
+            </p>
+            <div className="space-y-2 pt-2">
+              <a href="/mypage" className="btn-primary w-full block text-center">
+                発注履歴を確認する
+              </a>
+              <button
+                type="button"
+                className="btn-secondary w-full"
+                onClick={() => setCompleteOpen(false)}
+              >
+                続けて発注する
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {confirmOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -431,10 +477,11 @@ function ProductCard({
   const [unit, setUnit] = useState<OrderUnit>("BOX");
   const [qty, setQty] = useState<number>(product.min_order_box);
   const available = (product.planned_qty ?? 0) - product.ordered_qty;
+  const soldOut = available <= 0;
   const flowBadge = product.flow_type === "cut" ? "カット割" : "配分品";
 
   return (
-    <div className="card p-4 sm:p-5">
+    <div className={`card p-4 sm:p-5 relative ${soldOut ? "opacity-60" : ""}`}>
       <div className="flex flex-col sm:flex-row gap-4">
         {/* 画像 */}
         <div className="sm:w-32 flex-shrink-0">
@@ -445,12 +492,19 @@ function ProductCard({
                 alt={product.title}
                 fill
                 sizes="128px"
-                className="object-contain"
+                className={`object-contain ${soldOut ? "grayscale" : ""}`}
                 unoptimized
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs text-center px-2">
                 画像なし
+              </div>
+            )}
+            {soldOut && (
+              <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center">
+                <span className="bg-rose-600 text-white text-sm font-bold px-4 py-1.5 rounded -rotate-6 tracking-wider shadow-lg">
+                  SOLD OUT
+                </span>
               </div>
             )}
           </div>
@@ -460,7 +514,13 @@ function ProductCard({
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <span className="badge bg-slate-100 text-slate-700">{flowBadge}</span>
-            <DeadlineBadge deadline={product.order_deadline} />
+            {soldOut ? (
+              <span className="inline-flex items-center text-xs px-2 py-0.5 rounded bg-rose-600 text-white font-bold">
+                SOLD OUT
+              </span>
+            ) : (
+              <DeadlineBadge deadline={product.order_deadline} />
+            )}
           </div>
           <h3 className="font-semibold leading-snug">{product.title}</h3>
           {product.full_name && product.full_name !== product.title && (
@@ -473,22 +533,31 @@ function ProductCard({
             <span>定価 <span className="font-medium">{formatYen(product.price ?? 0)}</span></span>
             <span className="text-brand-700">案内掛け率 <span className="font-bold">{formatRate(listedRate)}</span></span>
           </div>
-          <p className="text-xs text-slate-500 mt-1">
-            残 {available} BOX / {product.planned_qty ?? 0} BOX (1CT = {product.ct_to_box} BOX)
+          <p className={`text-xs mt-1 ${soldOut ? "text-rose-600 font-semibold" : "text-slate-500"}`}>
+            {soldOut
+              ? "在庫切れ (再入荷時はメールでお知らせします)"
+              : `残 ${available} BOX / ${product.planned_qty ?? 0} BOX (1CT = ${product.ct_to_box} BOX)`}
           </p>
           {product.notes && (
             <p className="text-xs text-slate-500 mt-1 line-clamp-2">{product.notes}</p>
           )}
         </div>
 
-        {/* 注文操作 */}
+        {/* 注文操作 (在庫切れ時は全 UI を無効化) */}
         <div className="flex flex-row sm:flex-col items-end sm:items-stretch gap-2 sm:w-40 flex-shrink-0">
           <div className="flex gap-1 text-xs">
             {(["BOX", "CT"] as OrderUnit[]).map((u) => (
               <button
                 key={u}
                 type="button"
-                className={`px-2 py-1 rounded border ${unit === u ? "bg-brand-600 text-white border-brand-600" : "bg-white border-slate-300"}`}
+                disabled={soldOut}
+                className={`px-2 py-1 rounded border ${
+                  soldOut
+                    ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
+                    : unit === u
+                      ? "bg-brand-600 text-white border-brand-600"
+                      : "bg-white border-slate-300"
+                }`}
                 onClick={() => setUnit(u)}
               >
                 {u}
@@ -498,17 +567,22 @@ function ProductCard({
           <input
             type="number"
             min={1}
-            className="input w-24 sm:w-full text-right"
+            disabled={soldOut}
+            className="input w-24 sm:w-full text-right disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
             value={qty}
             onChange={(e) => setQty(parseInt(e.target.value || "0", 10))}
           />
           <button
             type="button"
-            className="btn-primary text-sm whitespace-nowrap"
-            disabled={available <= 0}
+            className={`text-sm whitespace-nowrap ${
+              soldOut
+                ? "inline-flex items-center justify-center rounded-md bg-slate-200 px-4 py-2 font-semibold text-slate-400 cursor-not-allowed"
+                : "btn-primary"
+            }`}
+            disabled={soldOut}
             onClick={() => onAdd(product, unit, qty)}
           >
-            カートに追加
+            {soldOut ? "売り切れ" : "カートに追加"}
           </button>
         </div>
       </div>

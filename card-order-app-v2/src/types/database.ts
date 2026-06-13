@@ -63,6 +63,24 @@ export type Shop = {
   deleted_at: string | null;
 };
 
+export type ChangeRequestField = "delivery_address" | "company_name" | "address";
+export type ChangeRequestStatus = "pending" | "approved" | "rejected";
+
+export type ShopChangeRequest = {
+  id: string;
+  shop_id: string;
+  field: ChangeRequestField;
+  current_value: string | null;
+  new_value: string;
+  reason: string | null;
+  status: ChangeRequestStatus;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  review_note: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type RegistrationInvite = {
   id: string;
   token: string;
@@ -393,6 +411,9 @@ export type Database = {
       ]>;
       faqs:                   TableDef<Faq>;
       registration_invites:   TableDef<RegistrationInvite>;
+      shop_change_requests:   TableDef<ShopChangeRequest, [
+        FK<"shop_change_requests_shop_id_fkey", ["shop_id"], "shops", ["id"]>,
+      ]>;
     };
     Views: { [_ in never]: never };
     Functions: {

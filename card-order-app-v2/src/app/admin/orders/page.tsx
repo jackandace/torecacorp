@@ -19,6 +19,7 @@ export default async function OrdersAdminPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">発注管理</h1>
         <div className="flex gap-2 text-xs">
+          <a href="/admin/orders/new" className="btn-primary">+ 手動登録 (システム外受注)</a>
           <a href="/api/orders/export" className="btn-secondary">CSVエクスポート</a>
         </div>
       </div>
