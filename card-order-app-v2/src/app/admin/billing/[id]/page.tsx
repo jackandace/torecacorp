@@ -38,13 +38,12 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
           <h1 className="text-2xl font-bold mt-1">{invoice.invoice_number}</h1>
         </div>
         <div className="flex gap-2">
-          {invoice.pdf_url && (
-            <a className="btn-secondary" href={invoice.pdf_url} target="_blank" rel="noreferrer">
-              PDF を開く
-            </a>
-          )}
+          {/* 都度署名し直す download ルート経由なのでリンクは失効しない。未生成なら自動生成 */}
+          <a className="btn-secondary" href={`/api/invoices/${invoice.id}/pdf/download`} target="_blank" rel="noreferrer">
+            PDF を開く
+          </a>
           <form action={`/api/invoices/${invoice.id}/pdf`} method="post">
-            <button className="btn-primary">PDF を生成 / 再生成</button>
+            <button className="btn-primary">PDF を再生成</button>
           </form>
           {invoice.status === "入金済み" && (
             <form action={`/api/invoices/${invoice.id}/receipt`} method="post">

@@ -19,6 +19,7 @@ const nextConfig = {
     // 確実に含める。これが無いと実行時に Font.register のファイルが見つからず失敗する。
     outputFileTracingIncludes: {
       "/api/invoices/[id]/pdf": ["./src/lib/pdf/fonts/**"],
+      "/api/invoices/[id]/pdf/download": ["./src/lib/pdf/fonts/**"],
       "/api/invoices/[id]/receipt": ["./src/lib/pdf/fonts/**"],
     },
   },

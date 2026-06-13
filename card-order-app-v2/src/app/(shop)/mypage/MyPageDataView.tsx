@@ -317,19 +317,15 @@ function InvoiceDetail({ invoice, shopRank }: { invoice: Invoice; shopRank: Rank
         </div>
       </div>
 
-      {invoice.pdf_url && (
-        <a
-          href={invoice.pdf_url}
-          target="_blank"
-          rel="noreferrer"
-          className="btn-primary w-full text-center"
-        >
-          PDF をダウンロード
-        </a>
-      )}
-      {!invoice.pdf_url && (
-        <p className="text-xs text-slate-500 text-center">PDF はまだ生成されていません。管理者にお問い合わせください。</p>
-      )}
+      {/* download ルートが都度署名＆未生成なら自動生成するため常に表示・失効しない */}
+      <a
+        href={`/api/invoices/${invoice.id}/pdf/download`}
+        target="_blank"
+        rel="noreferrer"
+        className="btn-primary w-full text-center"
+      >
+        PDF をダウンロード
+      </a>
       <p className="text-xs text-slate-500">
         ※ 表示ランク (現在: {RANK_LABEL[shopRank]}) は最新値で、発行時ランクとは異なる場合があります。
       </p>
