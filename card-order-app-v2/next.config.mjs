@@ -15,10 +15,6 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "10mb",
     },
-    // isomorphic-dompurify は内部で jsdom を動的 require するため、
-    // webpack でバンドルすると Vercel サーバーレス実行時に解決できず 500 になる。
-    // 外部パッケージ指定で node_modules から実行時解決させる (file tracing 対象)。
-    serverComponentsExternalPackages: ["isomorphic-dompurify"],
   },
 };
 
