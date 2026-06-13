@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getListedRate } from "@/lib/rebate";
 import { validateOrderQty } from "@/lib/orders";
 import { writeAudit } from "@/lib/audit";
-import { notifyShop } from "@/lib/notify";
+import { notifyShop, notifyOrderToStaff } from "@/lib/notify";
 
 const PayloadSchema = z.object({
   items: z
@@ -66,6 +66,7 @@ export async function POST(request: NextRequest) {
 
   // 各商品をバリデーション
   const created: string[] = [];
+  const createdItems: { series: string | null; title: string; qty: number; unit: string; qtyInBox: number }[] = [];
   const errors: { productId: string; error: string }[] = [];
 
   for (const item of body.items) {
@@ -110,6 +111,13 @@ export async function POST(request: NextRequest) {
       continue;
     }
     created.push(inserted.id);
+    createdItems.push({
+      series: product.series,
+      title: product.title,
+      qty: item.qty,
+      unit: item.unit,
+      qtyInBox: v.qtyInBox,
+    });
     await writeAudit(supabase, {
       shopId: shop.id,
       action: "create_order",
@@ -119,12 +127,9 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // 受領通知 (失敗してもメイン処理は続行)
+  // 通知 (失敗してもメイン処理は続行)
   if (created.length > 0) {
-    const { data: titles } = await supabase
-      .from("products")
-      .select("title")
-      .in("id", body.items.map((i) => i.productId));
+    // 1. ショップへの受領通知
     await notifyShop({
       supabase,
       shopId: shop.id,
@@ -132,8 +137,14 @@ export async function POST(request: NextRequest) {
       vars: {
         company_name: shop.company_name,
         order_count: created.length,
-        product_titles: (titles ?? []).map((t) => t.title).join(", "),
+        product_titles: createdItems.map((i) => i.title).join(", "),
       },
+    });
+    // 2. 社内 admin + 問屋担当へのリクエスト通知 (ORDER_NOTIFY_EMAILS 宛て)
+    await notifyOrderToStaff({
+      supabase,
+      shopName: shop.company_name,
+      items: createdItems,
     });
   }
 

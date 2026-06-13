@@ -14,7 +14,7 @@ function getClient(): Resend {
 }
 
 export interface SendInput {
-  to: string;
+  to: string | string[];
   subject: string;
   html: string;
   text?: string;

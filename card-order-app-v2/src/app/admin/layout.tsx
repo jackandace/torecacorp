@@ -19,6 +19,7 @@ const NAV = [
   { href: "/admin/faqs",             label: "FAQ" },
   { href: "/admin/staff",            label: "スタッフ", superOnly: true },
   { href: "/admin/audit",            label: "監査ログ", superOnly: true },
+  { href: "/admin/manual",           label: "操作マニュアル" },
 ];
 
 export default async function AdminLayout({

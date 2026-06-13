@@ -31,6 +31,7 @@ export default async function ShopLayout({
             <Link href="/inquiries" className="hover:text-brand-600 hidden sm:inline">お問い合わせ</Link>
             <Link href="/faq" className="hover:text-brand-600 hidden md:inline">FAQ</Link>
             <Link href="/notifications" className="hover:text-brand-600 hidden lg:inline">通知</Link>
+            <Link href="/manual" className="hover:text-brand-600 hidden lg:inline">マニュアル</Link>
             <Link href="/profile" className="hover:text-brand-600">プロフィール</Link>
             <LogoutButton />
           </nav>

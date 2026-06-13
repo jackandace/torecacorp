@@ -37,3 +37,26 @@
     @apply -mx-4 sm:mx-0 overflow-x-auto;
   }
 }
+
+/* マニュアル (Markdown レンダリング) のタイポグラフィ */
+.manual-prose { @apply text-slate-800 leading-relaxed; }
+.manual-prose h1 { @apply text-2xl sm:text-3xl font-bold mt-0 mb-5 pb-3 border-b-2 border-slate-300 text-slate-900; }
+.manual-prose h2 { @apply text-xl sm:text-2xl font-bold mt-10 mb-3 pb-1.5 border-b border-slate-200 text-slate-900; scroll-margin-top: 80px; }
+.manual-prose h3 { @apply text-lg font-semibold mt-7 mb-2 text-slate-800; scroll-margin-top: 80px; }
+.manual-prose h4 { @apply text-base font-semibold mt-5 mb-2 text-slate-700; }
+.manual-prose p { @apply my-3; }
+.manual-prose ul { @apply list-disc pl-6 my-3 space-y-1; }
+.manual-prose ol { @apply list-decimal pl-6 my-3 space-y-1; }
+.manual-prose li { @apply leading-relaxed; }
+.manual-prose strong { @apply font-bold text-slate-900; }
+.manual-prose a { @apply text-brand-600 hover:underline; }
+.manual-prose hr { @apply my-8 border-slate-200; }
+.manual-prose code { @apply bg-slate-100 text-rose-700 px-1.5 py-0.5 rounded text-[0.9em] font-mono; }
+.manual-prose pre { @apply bg-slate-900 text-slate-100 p-4 rounded-lg overflow-x-auto my-4 text-sm leading-relaxed; }
+.manual-prose pre code { @apply bg-transparent text-slate-100 p-0; }
+.manual-prose table { @apply w-full my-4 border-collapse text-sm; }
+.manual-prose th, .manual-prose td { @apply border border-slate-300 px-3 py-2 text-left align-top; }
+.manual-prose th { @apply bg-slate-100 font-bold text-slate-900; }
+.manual-prose tbody tr:nth-child(even) td { @apply bg-slate-50; }
+.manual-prose blockquote { @apply border-l-4 border-blue-400 bg-blue-50 pl-4 py-2 my-4 text-slate-700 rounded-r; }
+.manual-prose blockquote p { @apply my-1; }
