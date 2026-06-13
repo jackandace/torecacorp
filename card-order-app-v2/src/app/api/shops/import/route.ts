@@ -252,6 +252,20 @@ export async function POST(request: NextRequest) {
   const adminSb = createAdminClient();
   const seenEmails = new Set<string>();
 
+  // 既存 shops と Auth ユーザーをループ前に 1 回ずつ取得 (N+1 回避)
+  const targetEmails = [...new Set(rows.map((r) => r.email))];
+  const { data: existingShops } = await supabase
+    .from("shops")
+    .select("*")
+    .in("email", targetEmails)
+    .is("deleted_at", null);
+  const existingShopMap = new Map((existingShops ?? []).map((s) => [s.email, s]));
+
+  const { data: authList } = await adminSb.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  const authUserMap = new Map(
+    (authList?.users ?? []).map((u) => [u.email?.toLowerCase() ?? "", u.id]),
+  );
+
   for (const row of rows) {
     if (seenEmails.has(row.email)) {
       skipped.push({ title: `${row.company_name} (${row.email})`, reason: "同一ファイル内で email 重複" });
@@ -261,12 +275,7 @@ export async function POST(request: NextRequest) {
 
     const display = `${row.company_name} (${row.email})`;
 
-    const { data: existing } = await supabase
-      .from("shops")
-      .select("*")
-      .eq("email", row.email)
-      .is("deleted_at", null)
-      .maybeSingle();
+    const existing = existingShopMap.get(row.email);
 
     if (existing) {
       const changes: string[] = [];
@@ -297,32 +306,22 @@ export async function POST(request: NextRequest) {
       if (error) errors.push(`${display}: ${error.message}`);
       else updated.push({ title: display, changes });
     } else {
-      // Auth ユーザー作成。既に同じ email で auth ユーザーが存在する場合は
-      // (前回の取込失敗時の残骸など)、既存 ID を再利用する。
-      let userId: string | null = null;
-      const { data: authData, error: authErr } = await adminSb.auth.admin.createUser({
-        email: row.email,
-        email_confirm: false,
-        user_metadata: { role: "shop", company_name: row.company_name },
-      });
-      if (authErr) {
-        // 既に存在する場合 → 既存 ID を取得して紐付け
-        const msg = authErr.message.toLowerCase();
-        if (msg.includes("already") || msg.includes("registered")) {
-          const { data: list } = await adminSb.auth.admin.listUsers({ page: 1, perPage: 1000 });
-          const existingUser = list?.users.find((u) => u.email?.toLowerCase() === row.email);
-          if (existingUser) {
-            userId = existingUser.id;
-          } else {
-            errors.push(`${display}: Auth 既存ユーザー検索失敗`);
-            continue;
-          }
-        } else {
+      // 既に Auth ユーザーがあれば再利用、なければ作成
+      let userId: string | null = authUserMap.get(row.email) ?? null;
+      let createdNewAuth = false;
+      if (!userId) {
+        const { data: authData, error: authErr } = await adminSb.auth.admin.createUser({
+          email: row.email,
+          email_confirm: false,
+          user_metadata: { role: "shop", company_name: row.company_name },
+        });
+        if (authErr) {
           errors.push(`${display}: Auth 失敗 ${authErr.message}`);
           continue;
         }
-      } else {
         userId = authData.user?.id ?? null;
+        createdNewAuth = true;
+        if (userId) authUserMap.set(row.email, userId);
       }
       if (!userId) {
         errors.push(`${display}: Auth user ID 取得失敗`);
@@ -342,7 +341,7 @@ export async function POST(request: NextRequest) {
       });
       if (error) {
         // 新規 Auth を作った場合のみロールバック
-        if (!authErr) await adminSb.auth.admin.deleteUser(userId);
+        if (createdNewAuth) await adminSb.auth.admin.deleteUser(userId);
         errors.push(`${display}: ${error.message}`);
       } else {
         inserted.push(display);

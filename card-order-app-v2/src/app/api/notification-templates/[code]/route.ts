@@ -4,12 +4,13 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/auth";
 import { writeAudit } from "@/lib/audit";
+import { sanitizeHtml } from "@/lib/sanitize";
 import type { NotificationTemplate } from "@/types/database";
 
 const Schema = z.object({
-  subject: z.string().min(1),
-  bodyHtml: z.string().min(1),
-  bodyText: z.string().nullable(),
+  subject: z.string().min(1).max(300),
+  bodyHtml: z.string().min(1).max(20000),
+  bodyText: z.string().max(20000).nullable(),
   lastUpdatedAt: z.string(),
 });
 
@@ -32,9 +33,11 @@ export async function PATCH(request: NextRequest, { params }: { params: { code: 
     .maybeSingle();
   if (!before) return NextResponse.json({ error: "not found" }, { status: 404 });
 
+  // 保存前にサニタイズ (script/イベントハンドラ等を除去)。
+  // テンプレートは admin のみ編集可だが、漏洩アカウント経由の Stored XSS を防ぐ多層防御。
   const update: Partial<NotificationTemplate> = {
     subject: body.subject,
-    body_html: body.bodyHtml,
+    body_html: sanitizeHtml(body.bodyHtml),
     body_text: body.bodyText,
   };
 

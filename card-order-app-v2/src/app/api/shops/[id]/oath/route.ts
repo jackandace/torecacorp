@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdmin } from "@/lib/auth";
 import { writeAudit } from "@/lib/audit";
+import { isPdf } from "@/lib/file-validate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,14 +29,14 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   if (file.size > MAX_BYTES) {
     return NextResponse.json({ error: "PDF は 20MB 以下にしてください" }, { status: 413 });
   }
-  if (file.type !== "application/pdf") {
-    return NextResponse.json({ error: "PDF ファイルを選択してください" }, { status: 400 });
-  }
   if (!signedAt || !expiresAt) {
     return NextResponse.json({ error: "提出日 / 失効日が必要です" }, { status: 400 });
   }
 
   const buf = Buffer.from(await file.arrayBuffer());
+  if (!isPdf(buf)) {
+    return NextResponse.json({ error: "PDF ファイルを選択してください" }, { status: 400 });
+  }
   const path = `${params.id}/${Date.now()}.pdf`;
 
   const adminSb = createAdminClient();

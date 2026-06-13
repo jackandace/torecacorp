@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatJST } from "@/lib/dates";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 export const metadata = { title: "通知履歴 | トレカ商事" };
 export const dynamic = "force-dynamic";
@@ -81,7 +82,7 @@ export default async function NotificationsPage({ searchParams }: { searchParams
                 <summary className="text-brand-600 cursor-pointer">本文を表示</summary>
                 <div
                   className="mt-2 p-3 bg-slate-50 rounded text-slate-700 prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: n.body }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(n.body) }}
                 />
               </details>
               {n.error_detail && (

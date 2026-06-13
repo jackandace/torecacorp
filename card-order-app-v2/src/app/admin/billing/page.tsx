@@ -23,21 +23,36 @@ export default async function BillingPage({ searchParams }: { searchParams: Sear
   const statusFilter = searchParams.status ?? "all";
   const today = new Date().toISOString().slice(0, 10);
 
-  // 全体サマリ用 (フィルタに依存しない)
-  const { data: allInvoices } = await supabase
-    .from("invoices")
-    .select("total_amount, paid_amount, status, due_date, paid_at")
-    .is("deleted_at", null);
-
   let unpaidCount = 0, unpaidAmount = 0;       // 未入金 + 一部入金の残額
   let overdueCount = 0, overdueAmount = 0;     // うち期限超過
   let paidThisMonth = 0;                       // 今月入金額 (入金済みベース)
   const monthStart = firstDayOfMonth(new Date()).toISOString();
   const monthEnd = lastDayOfMonth(new Date()).toISOString();
 
-  for (const inv of allInvoices ?? []) {
+  // 全体サマリ用 (フィルタに依存しない)。
+  // 全件スキャンを避け、(1)未入金・一部入金 (2)今月入金分 のみを取得して
+  // 請求書が年々蓄積しても軽い状態を保つ。
+  const [{ data: openInvoices }, { data: paidInvoices }, { count: totalCount }] = await Promise.all([
+    supabase
+      .from("invoices")
+      .select("total_amount, paid_amount, due_date")
+      .neq("status", "入金済み")
+      .is("deleted_at", null),
+    supabase
+      .from("invoices")
+      .select("paid_amount")
+      .gte("paid_at", monthStart)
+      .lte("paid_at", monthEnd)
+      .is("deleted_at", null),
+    supabase
+      .from("invoices")
+      .select("id", { count: "exact", head: true })
+      .is("deleted_at", null),
+  ]);
+
+  for (const inv of openInvoices ?? []) {
     const remaining = inv.total_amount - inv.paid_amount;
-    if (inv.status !== "入金済み" && remaining > 0) {
+    if (remaining > 0) {
       unpaidCount++;
       unpaidAmount += remaining;
       if (inv.due_date && inv.due_date < today) {
@@ -45,9 +60,9 @@ export default async function BillingPage({ searchParams }: { searchParams: Sear
         overdueAmount += remaining;
       }
     }
-    if (inv.paid_at && inv.paid_at >= monthStart && inv.paid_at <= monthEnd) {
-      paidThisMonth += inv.paid_amount;
-    }
+  }
+  for (const inv of paidInvoices ?? []) {
+    paidThisMonth += inv.paid_amount;
   }
 
   // 一覧 (フィルタ適用)
@@ -98,7 +113,7 @@ export default async function BillingPage({ searchParams }: { searchParams: Sear
         />
         <SummaryCard
           label="発行済み請求書"
-          value={`${allInvoices?.length ?? 0} 件`}
+          value={`${totalCount ?? 0} 件`}
           sub="全期間"
           tone="neutral"
         />

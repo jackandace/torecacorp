@@ -11,7 +11,7 @@ import { writeAudit } from "@/lib/audit";
 import type { Invoice } from "@/types/database";
 
 const Schema = z.object({
-  amount: z.number().int().positive(),
+  amount: z.number().int().positive().max(1_000_000_000), // 上限 10 億円 (異常値ガード)
   paidAt: z.string().date(),
   lastUpdatedAt: z.string(),
 });

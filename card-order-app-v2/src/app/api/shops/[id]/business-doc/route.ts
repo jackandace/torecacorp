@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdmin } from "@/lib/auth";
 import { writeAudit } from "@/lib/audit";
+import { safeExtension } from "@/lib/file-validate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -20,14 +21,26 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   if (!(file instanceof File)) return NextResponse.json({ error: "file required" }, { status: 400 });
   if (file.size > MAX_BYTES) return NextResponse.json({ error: "20MB 以下にしてください" }, { status: 413 });
 
-  const ext = file.name.split(".").pop() ?? "pdf";
-  const path = `${params.id}/${Date.now()}.${ext}`;
   const buf = Buffer.from(await file.arrayBuffer());
+
+  // ファイル内容 (magic number) で PDF / 画像のみを許可。拡張子・MIME 偽装を弾く
+  const ext = safeExtension(buf);
+  if (!ext) {
+    return NextResponse.json(
+      { error: "PDF または画像 (JPEG/PNG/WebP) のみアップロードできます" },
+      { status: 400 },
+    );
+  }
+  const contentType =
+    ext === "pdf" ? "application/pdf" :
+    ext === "jpg" ? "image/jpeg" :
+    ext === "png" ? "image/png" : "image/webp";
+  const path = `${params.id}/${Date.now()}.${ext}`;
 
   const adminSb = createAdminClient();
   const { error: upErr } = await adminSb.storage
     .from("business-docs")
-    .upload(path, buf, { contentType: file.type || "application/octet-stream", upsert: false });
+    .upload(path, buf, { contentType, upsert: false });
   if (upErr) return NextResponse.json({ error: upErr.message }, { status: 500 });
 
   const { error: dbErr } = await supabase

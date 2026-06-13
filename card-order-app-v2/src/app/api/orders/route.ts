@@ -10,6 +10,7 @@ import { getListedRate } from "@/lib/rebate";
 import { validateOrderQty } from "@/lib/orders";
 import { writeAudit } from "@/lib/audit";
 import { notifyShop, notifyOrderToStaff } from "@/lib/notify";
+import type { Order } from "@/types/database";
 
 const PayloadSchema = z.object({
   items: z
@@ -64,18 +65,24 @@ export async function POST(request: NextRequest) {
     .maybeSingle();
   const rebateRate = rankSetting?.rebate_rate ?? 0;
 
-  // 各商品をバリデーション
+  // 対象商品をまとめて 1 回で取得 (N+1 回避)
+  const productIds = [...new Set(body.items.map((i) => i.productId))];
+  const { data: productList } = await supabase
+    .from("products")
+    .select("*")
+    .in("id", productIds)
+    .is("deleted_at", null);
+  const productMap = new Map((productList ?? []).map((p) => [p.id, p]));
+
+  // バリデーション → insert 行をまとめて構築
   const created: string[] = [];
   const createdItems: { series: string | null; title: string; qty: number; unit: string; qtyInBox: number }[] = [];
   const errors: { productId: string; error: string }[] = [];
+  const insertRows: Partial<Order>[] = [];
+  const rowMeta: { productId: string; series: string | null; title: string; qty: number; unit: string; qtyInBox: number }[] = [];
 
   for (const item of body.items) {
-    const { data: product } = await supabase
-      .from("products")
-      .select("*")
-      .eq("id", item.productId)
-      .is("deleted_at", null)
-      .maybeSingle();
+    const product = productMap.get(item.productId);
     if (!product) {
       errors.push({ productId: item.productId, error: "product not found" });
       continue;
@@ -85,46 +92,50 @@ export async function POST(request: NextRequest) {
       errors.push({ productId: item.productId, error: v.error ?? "invalid" });
       continue;
     }
-
-    const listedRate = getListedRate(product, shop);
-
-    const { data: inserted, error: insertErr } = await supabase
-      .from("orders")
-      .insert({
-        shop_id: shop.id,
-        product_id: product.id,
-        order_unit: item.unit,
-        requested_qty: item.qty,
-        requested_qty_box: v.qtyInBox,
-        listed_rate: listedRate,
-        rebate_rate: rebateRate,
-        unit_price: product.price ?? 0,
-        status: "リクエスト",
-        shipping_status: "未出荷",
-        consent_agreed_at: body.consentAgreedAt,
-      })
-      .select("id")
-      .single();
-
-    if (insertErr || !inserted) {
-      errors.push({ productId: item.productId, error: insertErr?.message ?? "insert failed" });
-      continue;
-    }
-    created.push(inserted.id);
-    createdItems.push({
+    insertRows.push({
+      shop_id: shop.id,
+      product_id: product.id,
+      order_unit: item.unit,
+      requested_qty: item.qty,
+      requested_qty_box: v.qtyInBox,
+      listed_rate: getListedRate(product, shop),
+      rebate_rate: rebateRate,
+      unit_price: product.price ?? 0,
+      status: "リクエスト",
+      shipping_status: "未出荷",
+      consent_agreed_at: body.consentAgreedAt,
+    } satisfies Partial<Order>);
+    rowMeta.push({
+      productId: product.id,
       series: product.series,
       title: product.title,
       qty: item.qty,
       unit: item.unit,
       qtyInBox: v.qtyInBox,
     });
-    await writeAudit(supabase, {
-      shopId: shop.id,
-      action: "create_order",
-      targetTable: "orders",
-      targetId: inserted.id,
-      after: { product_id: product.id, qty: item.qty, unit: item.unit },
-    });
+  }
+
+  // まとめて 1 回で insert
+  if (insertRows.length > 0) {
+    const { data: insertedRows, error: insertErr } = await supabase
+      .from("orders")
+      .insert(insertRows)
+      .select("id");
+    if (insertErr || !insertedRows) {
+      return NextResponse.json({ error: insertErr?.message ?? "insert failed" }, { status: 500 });
+    }
+    for (let i = 0; i < insertedRows.length; i++) {
+      created.push(insertedRows[i]!.id);
+      const m = rowMeta[i]!;
+      createdItems.push({ series: m.series, title: m.title, qty: m.qty, unit: m.unit, qtyInBox: m.qtyInBox });
+      await writeAudit(supabase, {
+        shopId: shop.id,
+        action: "create_order",
+        targetTable: "orders",
+        targetId: insertedRows[i]!.id,
+        after: { product_id: m.productId, qty: m.qty, unit: m.unit },
+      });
+    }
   }
 
   // 通知 (失敗してもメイン処理は続行)

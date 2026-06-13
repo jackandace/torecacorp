@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/oath-expiry",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/archive-old-data",
+      "schedule": "0 18 1 * *"
     }
   ]
 }

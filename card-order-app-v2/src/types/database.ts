@@ -421,6 +421,10 @@ export type Database = {
         Args: { p_product_id: string; p_delta: number };
         Returns: void;
       };
+      archive_old_data: {
+        Args: { months_old?: number };
+        Returns: Record<string, unknown>;
+      };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

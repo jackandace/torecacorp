@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdmin } from "@/lib/auth";
 import { writeAudit } from "@/lib/audit";
+import { isPdf } from "@/lib/file-validate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,8 +32,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   }
 
   const totalAmount = parseInt(totalAmountRaw, 10);
-  if (!Number.isFinite(totalAmount) || totalAmount < 0) {
-    return NextResponse.json({ error: "金額が不正" }, { status: 400 });
+  if (!Number.isFinite(totalAmount) || totalAmount < 0 || totalAmount > 1_000_000_000) {
+    return NextResponse.json({ error: "金額が不正です (0〜10億円)" }, { status: 400 });
   }
 
   // ショップ確認
@@ -44,9 +45,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     .maybeSingle();
   if (!shop) return NextResponse.json({ error: "shop not found" }, { status: 404 });
 
-  // PDF アップロード
-  const path = `${params.id}/${Date.now()}-${invoiceNumber.replace(/[^\w-]/g, "_")}.pdf`;
+  // PDF アップロード (内容を magic number で検証)
   const buf = Buffer.from(await file.arrayBuffer());
+  if (!isPdf(buf)) {
+    return NextResponse.json({ error: "PDF ファイルを選択してください" }, { status: 400 });
+  }
+  const path = `${params.id}/${Date.now()}-${invoiceNumber.replace(/[^\w-]/g, "_")}.pdf`;
   const adminSb = createAdminClient();
   const { error: upErr } = await adminSb.storage
     .from("legacy-invoices")

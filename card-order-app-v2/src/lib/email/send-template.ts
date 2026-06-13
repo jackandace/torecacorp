@@ -27,8 +27,9 @@ export async function sendTemplateEmail(args: {
     throw new Error(`template "${templateCode}" not found`);
   }
 
+  // 件名・テキスト本文は素のまま、HTML 本文は差し込み値を HTML エスケープ
   const subject = renderTemplate(tpl.subject, vars);
-  const bodyHtml = renderTemplate(tpl.body_html, vars);
+  const bodyHtml = renderTemplate(tpl.body_html, vars, true);
   const bodyText = tpl.body_text ? renderTemplate(tpl.body_text, vars) : undefined;
 
   const { data: logRow } = await supabase

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { NotificationTemplate } from "@/types/database";
 import { renderTemplate } from "@/lib/email/templates";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 interface Props {
   template: NotificationTemplate;
@@ -46,7 +47,7 @@ export function TemplateEditor({ template, availableVars }: Props) {
   }, [availableVars]);
 
   const previewSubject = renderTemplate(subject, sampleVars);
-  const previewHtml = renderTemplate(bodyHtml, sampleVars);
+  const previewHtml = sanitizeHtml(renderTemplate(bodyHtml, sampleVars, true));
 
   const handleSave = async () => {
     setBusy(true);
