@@ -15,6 +15,12 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: "10mb",
     },
+    // PDF 生成 (請求書/領収書) で使う日本語フォントを Vercel の関数バンドルへ
+    // 確実に含める。これが無いと実行時に Font.register のファイルが見つからず失敗する。
+    outputFileTracingIncludes: {
+      "/api/invoices/[id]/pdf": ["./src/lib/pdf/fonts/**"],
+      "/api/invoices/[id]/receipt": ["./src/lib/pdf/fonts/**"],
+    },
   },
 };
 

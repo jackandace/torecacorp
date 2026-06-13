@@ -3,9 +3,12 @@
 // 入金済み (status='入金済み') の請求書に対して発行する。
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import type { Invoice, Shop } from "@/types/database";
+import { registerJpFont, JP_FONT_FAMILY } from "./fonts";
+
+registerJpFont();
 
 const styles = StyleSheet.create({
-  page: { padding: 40, fontSize: 11, fontFamily: "Helvetica" },
+  page: { padding: 40, fontSize: 11, fontFamily: JP_FONT_FAMILY },
   title: { fontSize: 22, marginBottom: 18, textAlign: "center", fontWeight: 700 },
   metaRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
   amountBox: {

@@ -12,6 +12,16 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(_request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    return await handlePost(_request, params);
+  } catch (e) {
+    // 生成失敗時に原因不明の 500 で終わらせず、実エラーを返す (Storage バケット欠落等の切り分け用)
+    const message = e instanceof Error ? e.message : "unknown";
+    return NextResponse.json({ error: "PDF 生成に失敗しました", detail: message }, { status: 500 });
+  }
+}
+
+async function handlePost(_request: NextRequest, params: { id: string }) {
   const supabase = createClient();
   const {
     data: { user },

@@ -14,9 +14,12 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import type { Invoice, Shop } from "@/types/database";
+import { registerJpFont, JP_FONT_FAMILY } from "./fonts";
+
+registerJpFont();
 
 const styles = StyleSheet.create({
-  page: { padding: 36, fontSize: 10, fontFamily: "Helvetica" },
+  page: { padding: 36, fontSize: 10, fontFamily: JP_FONT_FAMILY },
   title: { fontSize: 18, marginBottom: 16, textAlign: "center", fontWeight: 700 },
   row: { flexDirection: "row", justifyContent: "space-between", marginBottom: 6 },
   meta: { marginBottom: 12 },
