@@ -13,14 +13,59 @@ export function ResetPasswordForm() {
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  // null = 判定中, true = セッション確立, false = リンク無効
   const [sessionReady, setSessionReady] = useState<boolean | null>(null);
 
-  // Supabase はリンククリックで自動でセッション設定する
+  // メールリンクからのセッション確立は複数の経路がある:
+  //   1. PKCE フロー: ?code=xxx → exchangeCodeForSession
+  //   2. implicit フロー: #access_token=... → supabase-js が自動処理 (非同期)
+  //   3. onAuthStateChange の PASSWORD_RECOVERY / SIGNED_IN イベント
+  // 自動処理との競合 (race) を避けるため、イベント購読 + 猶予付きで判定する。
   useEffect(() => {
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSessionReady(!!session);
+    let settled = false;
+
+    const settle = (ok: boolean) => {
+      if (settled && ok === false) return; // 一度 OK になったら戻さない
+      settled = settled || ok;
+      setSessionReady((prev) => (prev === true ? true : ok));
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session || event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
+        settle(true);
+      }
     });
+
+    (async () => {
+      // PKCE (?code=) 形式
+      const url = new URL(window.location.href);
+      const code = url.searchParams.get("code");
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!error) {
+          settle(true);
+          return;
+        }
+      }
+
+      // 既にセッションがあるか
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        settle(true);
+        return;
+      }
+
+      // implicit フロー (#access_token) の自動処理を最大 3 秒待つ
+      setTimeout(async () => {
+        if (settled) return;
+        const { data: { session: s2 } } = await supabase.auth.getSession();
+        settle(!!s2);
+        if (!s2) setSessionReady(false);
+      }, 3000);
+    })();
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,15 +96,33 @@ export function ResetPasswordForm() {
     }
   };
 
+  // 判定中はスピナー的表示 (即「無効」と出さない)
+  if (sessionReady === null) {
+    return (
+      <div className="text-center py-8 text-sm text-slate-500">
+        リンクを確認しています…
+      </div>
+    );
+  }
+
   if (sessionReady === false) {
     return (
       <div className="space-y-4">
-        <div className="text-sm text-rose-700 bg-rose-50 p-3 rounded">
-          リンクが無効または期限切れです。再度パスワード再設定をリクエストしてください。
+        <div className="text-sm text-rose-700 bg-rose-50 p-4 rounded-lg leading-relaxed">
+          <p className="font-semibold mb-2">リンクが無効または期限切れです</p>
+          <p className="text-xs text-rose-600">
+            メールのリンクは 1 回のみ有効です。迷惑メールフォルダに入っていた場合、
+            メールソフトの安全確認機能によりリンクが先に使用されてしまうことがあります。
+            お手数ですが、下のボタンから再設定リンクをもう一度お送りください。
+          </p>
         </div>
-        <Link href="/forgot-password" className="btn-primary w-full">
+        <Link href="/forgot-password" className="btn-primary w-full text-center block">
           再設定リンクを送り直す
         </Link>
+        <p className="text-xs text-slate-500 text-center leading-relaxed">
+          再送したメールが再び迷惑メールフォルダに入った場合は、<br />
+          メールを開いて「迷惑メールではない」を押してから、リンクをクリックしてください。
+        </p>
       </div>
     );
   }
