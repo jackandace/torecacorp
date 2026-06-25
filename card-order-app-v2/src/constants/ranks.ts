@@ -9,6 +9,17 @@ export const RANK_ORDER: RankCode[] = [
   "platinum",
 ];
 
+/** ランクの序列インデックス (低=0 → 高) */
+export function rankIndex(rank: RankCode): number {
+  const i = RANK_ORDER.indexOf(rank);
+  return i < 0 ? 0 : i;
+}
+
+/** shopRank が minRank 以上か (商品の最低表示ランク判定に使用) */
+export function rankAtLeast(shopRank: RankCode, minRank: RankCode): boolean {
+  return rankIndex(shopRank) >= rankIndex(minRank);
+}
+
 export const RANK_LABEL: Record<RankCode, string> = {
   platinum: "プラチナ",
   gold:     "ゴールド",

@@ -25,6 +25,7 @@ const PatchSchema = z.object({
   status: z.enum(["受付中", "受付停止", "終了"]),
   orderDeadline: z.string().nullable(),
   notes: z.string().nullable(),
+  minRank: z.enum(["standard", "bronze", "silver", "gold", "platinum"]).nullable().optional(),
   lastUpdatedAt: z.string(),
 });
 
@@ -67,6 +68,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     status: body.status,
     order_deadline: body.orderDeadline,
     notes: body.notes,
+    min_rank: body.minRank ?? null,
   };
 
   const { data: updated, error } = await supabase

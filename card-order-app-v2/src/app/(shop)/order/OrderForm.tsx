@@ -71,7 +71,9 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
               return prev.filter((p) => p.id !== next.id);
             }
             if (exists) return prev.map((p) => (p.id === next.id ? { ...p, ...next } : p));
-            return [next, ...prev]; // 新規公開された商品
+            // 新規公開された商品はランク別/個別指名の表示判定をサーバ側で行う必要があり、
+            // クライアントでは可否を判定できないため一覧追加しない(次回再読込で反映)。
+            return prev;
           });
         },
       )

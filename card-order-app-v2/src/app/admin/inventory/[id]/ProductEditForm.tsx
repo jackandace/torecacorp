@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Product, ProductCategory, ProductStatus, FlowType } from "@/types/database";
+import type { Product, ProductCategory, ProductStatus, FlowType, RankCode } from "@/types/database";
 import { formatRate } from "@/lib/rebate";
+import { RANK_LABEL, RANK_ORDER } from "@/constants/ranks";
 
 export function ProductEditForm({ product }: { product: Product }) {
   const router = useRouter();
@@ -24,6 +25,7 @@ export function ProductEditForm({ product }: { product: Product }) {
   const [isApproved, setIsApproved] = useState(product.is_approved);
   const [status, setStatus] = useState<ProductStatus>(product.status);
   const [orderDeadline, setOrderDeadline] = useState(product.order_deadline ?? "");
+  const [minRank, setMinRank] = useState<RankCode | "">(product.min_rank ?? "");
   const [notes, setNotes] = useState(product.notes ?? "");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -53,6 +55,7 @@ export function ProductEditForm({ product }: { product: Product }) {
           isApproved,
           status,
           orderDeadline: orderDeadline || null,
+          minRank: minRank || null,
           notes: notes || null,
           lastUpdatedAt: product.updated_at,
         }),
@@ -203,6 +206,16 @@ export function ProductEditForm({ product }: { product: Product }) {
             value={orderDeadline}
             onChange={(e) => setOrderDeadline(e.target.value)}
           />
+        </div>
+        <div>
+          <label className="block text-xs text-slate-600 mb-1">最低表示ランク (再配分品の限定公開)</label>
+          <select className="input" value={minRank} onChange={(e) => setMinRank(e.target.value as RankCode | "")}>
+            <option value="">制限なし (全ランクに表示)</option>
+            {[...RANK_ORDER].reverse().map((r) => (
+              <option key={r} value={r}>{RANK_LABEL[r]}以上</option>
+            ))}
+          </select>
+          <p className="text-xs text-slate-500 mt-1">個別指名がある場合はランクより指名が優先されます</p>
         </div>
         <div className="md:col-span-2">
           <label className="block text-xs text-slate-600 mb-1">備考</label>

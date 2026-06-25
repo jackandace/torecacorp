@@ -134,9 +134,19 @@ export type Product = {
   order_deadline: string | null;
   status: ProductStatus;
   notes: string | null;
+  // 最低表示ランク (null=制限なし)。再配分品など限定公開で使用
+  min_rank: RankCode | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+};
+
+// 商品の個別指名公開 (このリストにあるショップにのみ表示。ランクより優先)
+export type ProductShopAccess = {
+  id: string;
+  product_id: string;
+  shop_id: string;
+  created_at: string;
 };
 
 export type Order = {
@@ -373,6 +383,10 @@ export type Database = {
         FK<"shop_rank_history_shop_id_fkey", ["shop_id"], "shops", ["id"]>,
       ]>;
       products:               TableDef<Product>;
+      product_shop_access:    TableDef<ProductShopAccess, [
+        FK<"product_shop_access_product_id_fkey", ["product_id"], "products", ["id"]>,
+        FK<"product_shop_access_shop_id_fkey",    ["shop_id"],    "shops",    ["id"]>,
+      ]>;
       orders:                 TableDef<Order, [
         FK<"orders_shop_id_fkey",    ["shop_id"],    "shops",    ["id"]>,
         FK<"orders_product_id_fkey", ["product_id"], "products", ["id"]>,

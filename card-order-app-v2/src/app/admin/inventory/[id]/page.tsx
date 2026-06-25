@@ -5,6 +5,7 @@ import { formatJST } from "@/lib/dates";
 import { formatRate, formatYen } from "@/lib/rebate";
 import { ProductEditForm } from "./ProductEditForm";
 import { ImageUpload } from "./ImageUpload";
+import { ProductAccessManager } from "./ProductAccessManager";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,23 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
     .maybeSingle();
 
   if (!product) notFound();
+
+  // 個別指名公開の管理用データ (指名一覧 + 選択肢のショップ一覧)
+  const [{ data: accessRows }, { data: shopOptions }] = await Promise.all([
+    supabase
+      .from("product_shop_access")
+      .select("shop_id, shops(company_name)")
+      .eq("product_id", params.id),
+    supabase
+      .from("shops")
+      .select("id, company_name")
+      .is("deleted_at", null)
+      .order("company_name"),
+  ]);
+  const initialAccess = (accessRows ?? []).map((r) => ({
+    shopId: r.shop_id,
+    companyName: (r.shops as unknown as { company_name?: string } | null)?.company_name ?? "—",
+  }));
 
   const listed = product.actual_rate + product.rate_markup;
   const available = (product.planned_qty ?? 0) - product.ordered_qty;
@@ -43,6 +61,11 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <ProductEditForm product={product} />
+          <ProductAccessManager
+            productId={product.id}
+            initialAccess={initialAccess}
+            shops={shopOptions ?? []}
+          />
         </div>
 
         <aside className="space-y-4">
