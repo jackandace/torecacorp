@@ -103,6 +103,8 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
         conflicts.set(item.product.id, 0); // 受付終了
         continue;
       }
+      // カット品は在庫上限が無い(希望BOX受付)ため在庫競合チェックの対象外
+      if (current.flow_type === "cut") continue;
       const available = (current.planned_qty ?? 0) - current.ordered_qty;
       if (available < item.qtyInBox) conflicts.set(item.product.id, available);
     }
@@ -476,9 +478,11 @@ function ProductCard({
 }) {
   const [unit, setUnit] = useState<OrderUnit>("BOX");
   const [qty, setQty] = useState<number>(product.min_order_box);
+  const isCut = product.flow_type === "cut";
   const available = (product.planned_qty ?? 0) - product.ordered_qty;
-  const soldOut = available <= 0;
-  const flowBadge = product.flow_type === "cut" ? "カット割" : "配分品";
+  // カット品は在庫上限の概念が無く希望BOX数を受け付けるため SOLD OUT にしない
+  const soldOut = !isCut && available <= 0;
+  const flowBadge = isCut ? "カット割" : "配分品";
 
   return (
     <div className={`card p-4 sm:p-5 relative ${soldOut ? "opacity-60" : ""}`}>
@@ -533,11 +537,17 @@ function ProductCard({
             <span>定価 <span className="font-medium">{formatYen(product.price ?? 0)}</span></span>
             <span className="text-brand-700">案内掛け率 <span className="font-bold">{formatRate(listedRate)}</span></span>
           </div>
-          <p className={`text-xs mt-1 ${soldOut ? "text-rose-600 font-semibold" : "text-slate-500"}`}>
-            {soldOut
-              ? "在庫切れ (再入荷時はメールでお知らせします)"
-              : `残 ${available} BOX / ${product.planned_qty ?? 0} BOX (1CT = ${product.ct_to_box} BOX)`}
-          </p>
+          {isCut ? (
+            <p className="text-xs mt-1 text-amber-700">
+              希望BOX数で受付（カット後に配分確定）。発注時に保証金50%(前受金)、配分確定後に差額精算します。(1CT = {product.ct_to_box} BOX)
+            </p>
+          ) : (
+            <p className={`text-xs mt-1 ${soldOut ? "text-rose-600 font-semibold" : "text-slate-500"}`}>
+              {soldOut
+                ? "在庫切れ (再入荷時はメールでお知らせします)"
+                : `残 ${available} BOX / ${product.planned_qty ?? 0} BOX (1CT = ${product.ct_to_box} BOX)`}
+            </p>
+          )}
           {product.notes && (
             <p className="text-xs text-slate-500 mt-1 line-clamp-2">{product.notes}</p>
           )}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>課金限定ガチャ BT消費｜管理画面制御</title>
+<style>
+  :root{--line:#e3e8ef;--muted:#6b7785;--ink:#1f2733;--blue:#2f6fed;--bt:#3aa0ff;--bt-d:#1f7fe0}
+  *{box-sizing:border-box;font-family:-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+  body{margin:0;background:#f0f1f3;color:var(--ink)}
+  .topnote{background:#0e1726;color:#fff;padding:13px 18px;font-size:12.5px;line-height:1.6}.topnote b{color:#9fd0ff}
+  .wrap{padding:22px 16px}.cap{font-size:12px;color:#7a818a;text-align:center;margin:0 0 12px}
+  .console{display:flex;max-width:1080px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 6px 24px rgba(20,40,80,.06)}
+  .side{width:200px;border-right:1px solid var(--line);padding:14px 0;flex:none}
+  .brand{display:flex;align-items:center;gap:8px;padding:6px 16px 16px;font-weight:700;font-size:13px}
+  .blogo{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#5ab0f0,#2f6fed)}
+  .nav a{display:block;padding:9px 18px;color:#888;font-size:13px;text-decoration:none}
+  .nav a.active{color:var(--blue);background:#eef4ff;border-left:3px solid var(--blue);padding-left:15px;font-weight:600}
+  .main{flex:1;padding:24px 28px;min-width:0}.crumbs{font-size:12px;color:#9aa3af;margin-bottom:4px}
+  h2.apage{margin:0 0 14px;font-size:18px}
+  .field{margin:16px 0}.label{font-size:13px;font-weight:600;margin-bottom:6px}.hint{font-size:11px;color:#888;margin-bottom:6px}
+  .input{width:100%;max-width:520px;padding:9px 11px;border:1px solid var(--line);border-radius:6px;font-size:13px}
+  .hl{outline:2px dashed var(--bt);outline-offset:8px;border-radius:10px;background:#f5fbff;border:1px solid #d8ecff;padding:16px}
+  .badge-new{display:inline-block;background:#e6f3ff;color:#1f7fe0;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;margin-left:8px}
+  .radio-row{display:flex;gap:10px;flex-wrap:wrap;max-width:520px}
+  .radio{flex:1;min-width:200px;border:2px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px}
+  .radio.sel{border-color:var(--bt);background:#eef7ff}
+  .radio .dot{width:18px;height:18px;border-radius:50%;border:2px solid #c4ccd6;flex:none}.radio.sel .dot{border-color:var(--bt);background:radial-gradient(circle,#fff 30%,var(--bt) 34%)}
+  .radio .t{font-weight:700;font-size:14px}.radio .s{font-size:11px;color:#888}
+  .unit{font-size:12px;color:var(--bt-d);font-weight:700;margin-left:6px}
+  .save{margin-top:16px;background:var(--blue);color:#fff;border:none;padding:10px 22px;border-radius:6px;font-weight:700;cursor:pointer}
+  .small{font-size:11px;color:#888;line-height:1.6;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="topnote"><b>課金限定ガチャ BT消費タイプ｜管理画面制御</b> — オリパ編集の「消費タイプ＝課金消費」で消費リソース（コイン/BT）を選択可能に。仕様: req-1-bt-consumption-gacha.md</div>
+<div class="wrap">
+  <p class="cap">オリパ編集：消費タイプ＝課金消費。消費リソースをコイン/BTから選択（BT選択時は消費量＝BT数）。</p>
+  <div class="console">
+    <div class="side">
+      <div class="brand"><span class="blogo"></span> stg-novagacha console</div>
+      <nav class="nav"><a class="active">オリパ</a><a>カードデータベース</a><a>課金アイテム</a><a>ユーザー</a><a>ガチャ演出</a></nav>
+    </div>
+    <div class="main">
+      <div class="crumbs">オリパ ／ 一覧 ／ 編集</div>
+      <h2 class="apage">オリパ編集 — 消費設定</h2>
+      <div class="field"><div class="label">消費タイプ</div>
+        <select class="input"><option>課金消費</option><option>ポイント</option><option>バッテリー</option></select>
+        <div class="hint">「課金消費」＝設定額を課金すると抽選権が付与される既存タイプ。</div>
+      </div>
+      <div class="hl">
+        <div class="label">消費リソース（課金消費時に回す際の消費）<span class="badge-new">NEW</span></div>
+        <div class="hint">既定はコイン。BTを選ぶと「消費量」はBT数として扱われます。</div>
+        <div class="radio-row">
+          <div class="radio" id="rc" onclick="pick('coin')"><span class="dot"></span><div><div class="t">🪙 コイン</div><div class="s">従来通り。コインを消費して抽選</div></div></div>
+          <div class="radio sel" id="rb" onclick="pick('bt')"><span class="dot"></span><div><div class="t">🔋 BT（バッテリー）</div><div class="s">特殊アイテムBTを消費して抽選</div></div></div>
+        </div>
+        <div class="field" style="margin-bottom:0;margin-top:14px"><div class="label">消費量 <span class="unit" id="u">（BT数）</span></div>
+          <input class="input" id="amt" style="max-width:160px" value="5"></div>
+      </div>
+      <div class="field"><div class="label">1回あたりの必要課金額（円）</div>
+        <div class="hint">この額を課金するごとに抽選権を1つ付与（従来ロジックのまま）。</div>
+        <input class="input" style="max-width:160px" value="1000"></div>
+      <div class="small">※連続抽選（10連/100連）は 消費量×回数 をまとめて消費。BTに失効期限がある場合は先に失効するBTから消費。</div>
+      <button class="save">保存する</button>
+    </div>
+  </div>
+</div>
+<script>
+function pick(r){document.getElementById('rc').classList.toggle('sel',r==='coin');document.getElementById('rb').classList.toggle('sel',r==='bt');
+document.getElementById('u').textContent=r==='bt'?'（BT数）':'（コイン数）';document.getElementById('amt').value=r==='bt'?'5':'10000';}
+</script>
+</body>
+</html>

@@ -28,7 +28,7 @@ export default async function ShopLayout({
           <nav className="flex items-center gap-3 sm:gap-5 text-sm">
             <Link href="/order" className="hover:text-brand-600">発注</Link>
             <Link href="/mypage" className="hover:text-brand-600">マイページ</Link>
-            <Link href="/inquiries" className="hover:text-brand-600 hidden sm:inline">お問い合わせ</Link>
+            <Link href="/inquiries" className="hover:text-brand-600">お問い合わせ</Link>
             <Link href="/faq" className="hover:text-brand-600 hidden md:inline">FAQ</Link>
             <Link href="/notifications" className="hover:text-brand-600 hidden lg:inline">通知</Link>
             <Link href="/manual" className="hover:text-brand-600 hidden lg:inline">マニュアル</Link>

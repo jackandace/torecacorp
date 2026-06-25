@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>対抗戦レイド｜管理画面制御</title>
+<style>
+  :root{--line:#e3e8ef;--muted:#6b7785;--ink:#1f2733}
+  *{box-sizing:border-box;font-family:-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+  body{margin:0;background:#f0f1f3;color:var(--ink)}
+  .topnote{background:#0e1726;color:#fff;padding:13px 18px;font-size:12.5px;line-height:1.6}.topnote b{color:#d4a4ff}
+  .wrap{padding:22px 16px}.cap{font-size:12px;color:#7a818a;text-align:center;margin:0 0 12px}
+  .console{display:flex;max-width:1080px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 6px 24px rgba(20,40,80,.06)}
+  .side{width:200px;border-right:1px solid var(--line);padding:14px 0;flex:none}
+  .brand{display:flex;align-items:center;gap:8px;padding:6px 16px 16px;font-weight:700;font-size:13px}
+  .blogo{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#5ab0f0,#2f6fed)}
+  .nav a{display:block;padding:9px 18px;color:#888;font-size:13px;text-decoration:none}
+  .nav a.active{color:#2f6fed;background:#eef4ff;border-left:3px solid #2f6fed;padding-left:15px;font-weight:600}
+  .main{flex:1;padding:24px 28px;min-width:0}.crumbs{font-size:12px;color:#9aa3af;margin-bottom:4px}
+  h2.apage{margin:0 0 16px;font-size:18px}
+  .pbox{border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:16px}.pbox b{font-size:14px}
+  .label{font-size:13px;font-weight:600;margin:14px 0 6px}.label:first-of-type{margin-top:6px}
+  .input{padding:9px 11px;border:1px solid var(--line);border-radius:6px;font-size:13px;width:100%}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line)}th{color:#888;font-weight:600}
+  td input{border:1px solid var(--line);border-radius:6px;padding:6px;width:110px}
+  .add{color:#2f6fed;font-weight:700;cursor:pointer}
+  .save{margin-top:10px;background:#2f6fed;color:#fff;border:none;padding:10px 22px;border-radius:6px;font-weight:700;cursor:pointer}
+  .small{font-size:11px;color:#888;line-height:1.6;margin-top:8px}
+  .newbadge{display:inline-block;background:#eafaf4;color:#0f9d6e;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;margin-left:8px}
+</style>
+</head>
+<body>
+<div class="topnote"><b>対抗戦（レイド）｜管理画面制御</b> — 新規「イベント」メニュー。ボスHP・ダメージ係数・貢献ティア・報酬ガチャを設定。仕様: req-3-taikousen-raid.md</div>
+<div class="wrap">
+  <p class="cap">管理：ボス／ダメージ係数／攻撃モード／貢献ティア（境界＆解放回数）／報酬ガチャ</p>
+  <div class="console">
+    <div class="side">
+      <div class="brand"><span class="blogo"></span> stg-novagacha console</div>
+      <nav class="nav"><a>配送</a><a>オリパ</a><a>カードデータベース</a><a class="active">イベント <span class="newbadge">NEW</span></a><a>ユーザー</a><a>ガチャ演出</a></nav>
+    </div>
+    <div class="main">
+      <div class="crumbs">イベント ／ 新規作成</div>
+      <h2 class="apage">イベント編集 — 対抗戦（レイド）「守護獣ノヴァ」</h2>
+      <div class="pbox">
+        <b>ボス / ダメージ</b>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div><div class="label">ボス名</div><input class="input" value="守護獣ノヴァ"></div>
+          <div><div class="label">最大HP</div><input class="input" value="5000000"></div>
+          <div><div class="label">ダメージ係数（コイン→ダメージ）</div><input class="input" value="1.0"></div>
+        </div>
+        <div class="label">攻撃モード</div>
+        <select class="input" style="max-width:300px"><option>レイド専用ガチャ消費（景品も排出）</option><option>直接攻撃（コイン消費のみ）</option></select>
+        <div style="display:flex;gap:16px;margin-top:6px"><div><div class="label">開始</div><input class="input" value="2026-06-11 00:00"></div><div><div class="label">終了</div><input class="input" value="2026-06-15 23:59"></div></div>
+      </div>
+      <div class="pbox">
+        <b>貢献ティア（討伐時の高還元ガチャ解放）</b>
+        <table>
+          <tr><th>ティア</th><th>必要ダメージ（以上）</th><th>解放回数</th></tr>
+          <tr><td>Gold</td><td><input value="100000"></td><td><input value="10"></td></tr>
+          <tr><td>Silver</td><td><input value="50000"></td><td><input value="5"></td></tr>
+          <tr><td>Bronze</td><td><input value="10000"></td><td><input value="1"></td></tr>
+          <tr><td colspan="3" class="add">＋ ティアを追加</td></tr>
+        </table>
+        <div class="label">報酬（高還元）ガチャ</div>
+        <select class="input" style="max-width:320px"><option>還元率107% スペシャルガチャ</option><option>還元率100%OVER ガチャ</option></select>
+        <div class="small">解放は回数制（残り回数を消費）。HP減算はオーバーキルをクランプ（マイナスにしない）。未討伐終了時の扱いは要設定。</div>
+      </div>
+      <button class="save">保存して公開</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

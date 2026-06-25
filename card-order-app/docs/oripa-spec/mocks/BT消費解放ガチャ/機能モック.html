@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BT消費解放ガチャ｜機能モック</title>
+<style>
+  :root{--ink:#1f2733;--muted:#6b7785;--line:#e3e8ef;--bg:#f5f7fa;--green:#16b88a;--yellow:#f5b500;--bt:#3aa0ff;--bt-d:#1f7fe0}
+  *{box-sizing:border-box;font-family:-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+  body{margin:0;background:#06040f;color:var(--ink)}
+  .topnote{background:#0e1726;color:#fff;padding:13px 18px;font-size:12.5px;line-height:1.6}.topnote b{color:#9fd0ff}
+  .tabs{display:flex;gap:8px;padding:12px 18px;background:#13111f;border-bottom:1px solid #2a2545;flex-wrap:wrap}
+  .mt{padding:7px 14px;border:1px solid #2a2545;border-radius:999px;cursor:pointer;font-size:12.5px;background:#1b1830;color:#b9c6e0}.mt.active{background:var(--bt-d);color:#fff;border-color:var(--bt-d)}
+  .screen{display:none;padding:22px 16px}.screen.show{display:block}
+  .cap{font-size:12px;color:#8a93b0;text-align:center;margin:0 0 12px}
+  .phone{max-width:390px;margin:0 auto;background:#fff;border-radius:26px;border:1px solid var(--line);overflow:hidden;box-shadow:0 10px 40px rgba(20,40,80,.18);position:relative}
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .applogo{font-weight:800;color:var(--green);font-size:18px}
+  .wpill{display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:3px 9px 3px 4px;font-size:12px;font-weight:700}
+  .wc{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;background:var(--bt)}
+  .applbody{padding:16px;background:var(--bg)}
+  .gcard{background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+  .ghero{height:155px;background:linear-gradient(135deg,#7b54e0,#c0392b);position:relative;display:flex;align-items:flex-end;padding:12px;color:#fff}
+  .ghero .lockmask{position:absolute;inset:0;background:rgba(15,20,35,.55);display:flex;align-items:center;justify-content:center;font-size:44px}
+  .gtag{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.45);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;z-index:2}
+  .rrtag{position:absolute;top:12px;right:12px;background:linear-gradient(135deg,#ffd54a,#f5a300);color:#5a3d00;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800;z-index:2}
+  .gtitle{font-size:18px;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,.4);z-index:2}
+  .gbody{padding:16px}
+  .lockinfo{display:flex;align-items:center;gap:10px;background:#fff3e0;border:1px solid #ffd9a8;border-radius:12px;padding:12px;font-size:14px;font-weight:700;color:#9a5b00;margin-bottom:12px}
+  .lockinfo .bt-ic{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--bt),var(--bt-d));color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+  .bigbtn{width:100%;border:none;border-radius:12px;padding:14px;font-weight:800;font-size:15px;color:#fff;cursor:pointer}
+  .bigbtn.unlock{background:linear-gradient(135deg,var(--bt),var(--bt-d))}.bigbtn.coin{background:linear-gradient(135deg,#ffb43a,#f59000)}
+  .unlocked-badge{display:inline-flex;gap:6px;align-items:center;background:#e7f8f0;color:#0f9d6e;border:1px solid #b7ead4;font-size:12px;font-weight:800;border-radius:8px;padding:5px 10px;margin-bottom:12px}
+  .balance{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
+  .overlay{position:absolute;inset:0;background:rgba(15,20,35,.5);display:flex;align-items:center;justify-content:center;padding:18px}
+  .dialog{background:#fff;border-radius:18px;width:100%;max-width:320px;padding:22px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+  .dialog h3{margin:0 0 6px;font-size:16px}.note{font-size:11px;color:var(--muted);line-height:1.5}
+  .dlg-bt{display:flex;align-items:center;justify-content:center;gap:8px;font-size:22px;font-weight:800;color:var(--bt-d);margin:14px 0 6px}
+  .dlg-bal{font-size:13px;color:var(--muted);margin-bottom:18px}.dlg-bal b{color:var(--ink)}
+  .dlg-btns{display:flex;gap:10px}.dlg-btns button{flex:1;border-radius:10px;padding:12px;font-weight:700;font-size:14px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--muted)}.dlg-btns .ok{border:none;background:linear-gradient(135deg,var(--bt),var(--bt-d));color:#fff}
+  .dlg-warn{background:#fff3f3;border:1px solid #ffd4d4;color:#c0392b;font-size:12px;border-radius:10px;padding:10px;margin:6px 0 14px}
+</style>
+</head>
+<body>
+<div class="topnote"><b>BT消費解放ガチャ｜機能モック（ユーザー画面）</b> — BT消費で解放→以降は通常コインガチャ。解放は永続。仕様: req-2-bt-unlock-gacha.md</div>
+<div class="tabs">
+  <div class="mt active" onclick="show(0,this)">ロック中</div>
+  <div class="mt" onclick="show(1,this)">解放 確認ダイアログ</div>
+  <div class="mt" onclick="show(2,this)">BT不足</div>
+  <div class="mt" onclick="show(3,this)">解放後</div>
+</div>
+
+<div class="screen show">
+  <p class="cap">ロック中は「🔒 BT N個で解放」表示＋解放ボタン（抽選ボタンは出さない）。招待コードブロックと同じ枠の考え方。</p>
+  <div class="phone">
+    <div class="appbar"><div class="applogo">NOVA</div><div class="wpill"><span class="wc">🔋</span>24</div></div>
+    <div class="applbody"><div class="gcard">
+      <div class="ghero"><div class="lockmask">🔒</div><span class="gtag">課金消費</span><span class="rrtag">還元率100%OVER</span><span class="gtitle">幻のSSRオリパ</span></div>
+      <div class="gbody"><div class="lockinfo"><span class="bt-ic">🔋</span><div>BT <b>10</b> 個で解放</div></div>
+        <button class="bigbtn unlock" onclick="show(1,document.querySelectorAll('.mt')[1])">🔋 BTで解放する</button>
+        <div class="balance">保有BT: <b>24</b></div></div>
+    </div></div>
+  </div>
+</div>
+
+<div class="screen">
+  <p class="cap">解放ボタン→確認ダイアログ「BT N個を使用しますか？」→確定でBT消費・解放。</p>
+  <div class="phone">
+    <div class="appbar"><div class="applogo">NOVA</div><div class="wpill"><span class="wc">🔋</span>24</div></div>
+    <div class="applbody"><div class="gcard">
+      <div class="ghero"><div class="lockmask">🔒</div><span class="gtag">課金消費</span><span class="rrtag">還元率100%OVER</span><span class="gtitle">幻のSSRオリパ</span></div>
+      <div class="gbody"><div class="lockinfo"><span class="bt-ic">🔋</span><div>BT <b>10</b> 個で解放</div></div><button class="bigbtn unlock">🔋 BTで解放する</button></div>
+    </div></div>
+    <div class="overlay"><div class="dialog">
+      <h3>このガチャを解放しますか？</h3><div class="note">解放すると以降はコインで回せます（永続）</div>
+      <div class="dlg-bt">🔋 BT 10 個 を使用</div><div class="dlg-bal">保有BT: <b>24</b> → <b>14</b></div>
+      <div class="dlg-btns"><button>キャンセル</button><button class="ok" onclick="show(3,document.querySelectorAll('.mt')[3])">解放する</button></div>
+    </div></div>
+  </div>
+</div>
+
+<div class="screen">
+  <p class="cap">BT不足時は解放不可。ダイアログで不足数を表示。</p>
+  <div class="phone">
+    <div class="appbar"><div class="applogo">NOVA</div><div class="wpill"><span class="wc">🔋</span>4</div></div>
+    <div class="applbody"><div class="gcard">
+      <div class="ghero"><div class="lockmask">🔒</div><span class="gtag">課金消費</span><span class="rrtag">還元率100%OVER</span><span class="gtitle">幻のSSRオリパ</span></div>
+      <div class="gbody"><div class="lockinfo"><span class="bt-ic">🔋</span><div>BT <b>10</b> 個で解放</div></div><button class="bigbtn unlock">🔋 BTで解放する</button></div>
+    </div></div>
+    <div class="overlay"><div class="dialog">
+      <h3>このガチャを解放しますか？</h3><div class="dlg-bt">🔋 BT 10 個 を使用</div>
+      <div class="dlg-warn">⚠️ BTが不足しています（保有 4 / 必要 10）</div>
+      <div class="dlg-btns"><button>キャンセル</button><button class="ok" style="opacity:.5;cursor:not-allowed">解放する</button></div>
+    </div></div>
+  </div>
+</div>
+
+<div class="screen">
+  <p class="cap">解放後は錠前・解放ボタンが消え、通常のコイン抽選に切替。「✅ 解放済み」。状態は永続。</p>
+  <div class="phone">
+    <div class="appbar"><div class="applogo">NOVA</div><div class="wpill"><span class="wc">🔋</span>14</div></div>
+    <div class="applbody"><div class="gcard">
+      <div class="ghero"><span class="gtag">課金消費</span><span class="rrtag">還元率100%OVER</span><span class="gtitle">幻のSSRオリパ</span></div>
+      <div class="gbody"><div class="unlocked-badge">✅ 解放済み</div><button class="bigbtn coin">🪙 10,000 コインで回す</button><div class="balance">保有コイン: <b>52,000</b></div></div>
+    </div></div>
+  </div>
+</div>
+<script>function show(i,el){document.querySelectorAll('.screen').forEach((s,n)=>s.classList.toggle('show',n===i));document.querySelectorAll('.mt').forEach(t=>t.classList.remove('active'));if(el)el.classList.add('active');window.scrollTo(0,0);}</script>
+</body>
+</html>

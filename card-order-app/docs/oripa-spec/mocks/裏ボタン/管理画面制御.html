@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>裏ボタン｜管理画面制御</title>
+<style>
+  :root{--line:#e3e8ef;--muted:#6b7785;--ink:#1f2733;--blue:#2f6fed}
+  *{box-sizing:border-box;font-family:-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+  body{margin:0;background:#f0f1f3;color:var(--ink)}
+  .topnote{background:#0e1726;color:#fff;padding:13px 18px;font-size:12.5px;line-height:1.6}.topnote b{color:#ff9ee6}
+  .wrap{padding:22px 16px}.cap{font-size:12px;color:#7a818a;text-align:center;margin:0 0 12px}
+  .console{display:flex;max-width:1080px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 6px 24px rgba(20,40,80,.06)}
+  .side{width:200px;border-right:1px solid var(--line);padding:14px 0;flex:none}
+  .brand{display:flex;align-items:center;gap:8px;padding:6px 16px 16px;font-weight:700;font-size:13px}
+  .blogo{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#5ab0f0,#2f6fed)}
+  .nav a{display:block;padding:9px 18px;color:#888;font-size:13px;text-decoration:none}
+  .nav a.active{color:var(--blue);background:#eef4ff;border-left:3px solid var(--blue);padding-left:15px;font-weight:600}
+  .main{flex:1;padding:24px 28px;min-width:0}.crumbs{font-size:12px;color:#9aa3af;margin-bottom:4px}
+  h2.apage{margin:0 0 14px;font-size:18px}
+  .hl{outline:2px dashed #b14bff;outline-offset:8px;border-radius:10px;background:#faf6ff;border:1px solid #ece0ff;padding:18px;margin-top:14px}
+  .label{font-size:13px;font-weight:600;margin:14px 0 6px}.label:first-of-type{margin-top:4px}
+  .input,select.input{padding:9px 11px;border:1px solid var(--line);border-radius:6px;font-size:13px}
+  .badge-new{display:inline-block;background:#f3e8ff;color:#7b3bff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;margin-left:8px}
+  .row{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-end}
+  .toggle{width:46px;height:26px;border-radius:999px;background:var(--blue);position:relative;display:inline-block;vertical-align:middle}.toggle:after{content:"";position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:23px}
+  .save{margin-top:16px;background:var(--blue);color:#fff;border:none;padding:10px 22px;border-radius:6px;font-weight:700;cursor:pointer}
+  .small{font-size:11px;color:#888;line-height:1.6;margin-top:8px}
+  .note2{font-size:12px;color:#555;background:#f6f8fb;border:1px solid var(--line);border-radius:8px;padding:12px;margin-top:14px}
+</style>
+</head>
+<body>
+<div class="topnote"><b>裏ボタン｜管理画面制御</b> — オリパ編集に「裏ボタン演出」設定を追加（＋確定音はガチャ演出マスタで管理）。仕様: req-5-gacha-ura-button.md</div>
+<div class="wrap">
+  <p class="cap">オリパ編集：裏ボタン演出 ON/OFF・対象賞ランク・出現確率・タップ毎確率・確定音選択</p>
+  <div class="console">
+    <div class="side">
+      <div class="brand"><span class="blogo"></span> stg-novagacha console</div>
+      <nav class="nav"><a class="active">オリパ</a><a>ガチャ演出</a><a>カードデータベース</a><a>課金アイテム</a><a>ユーザー</a></nav>
+    </div>
+    <div class="main">
+      <div class="crumbs">オリパ ／ 一覧 ／ 編集</div>
+      <h2 class="apage">オリパ編集 — ガチャ演出設定</h2>
+      <div class="hl">
+        <div class="label" style="margin-top:0">裏ボタン演出 <span class="badge-new">NEW</span> <span class="toggle" style="margin-left:8px"></span> ON</div>
+        <div class="row">
+          <div><div class="label">対象賞ランク（これ以上で確定音対象）</div>
+            <select class="input"><option>A賞以上</option><option>SS賞のみ</option><option>S賞以上</option><option>B賞以上</option></select></div>
+          <div><div class="label">出現確率（%）</div><input class="input" style="width:90px" value="30"></div>
+          <div><div class="label">タップ毎の確率（1 / N）</div><input class="input" style="width:90px" value="10"></div>
+        </div>
+        <div class="label">確定音（「ガチャ演出」マスタで管理。動画と同様に音源を登録）</div>
+        <select class="input" style="min-width:240px"><option>確定音A（デフォルト）</option><option>確定音B（激アツ）</option><option>＋ 音源を追加（ガチャ演出へ）</option></select>
+        <div class="small">
+          ・確定音は当選時のみ。ハズレ・閾値未満では鳴らない（誤示唆防止）。<br>
+          ・対象当選のうち「出現確率%」でアーム → アーム時はタップ毎に1/Nで発火。<br>
+          ・発火時はGOGOランプ点灯（マナーモード対策）。当落・アーム判定はサーバ確定。
+        </div>
+      </div>
+      <div class="note2">
+        ※ 賞ランク（S/A/B/C/D/その他）と「当たり演出」は<b>既存のオリパ編集</b>に存在。裏ボタンはその下に設定ブロックを追加する想定。<br>
+        ※ 確定音（音源）は<b>「ガチャ演出」一覧</b>（動画マスタ）に音源として追加管理。
+      </div>
+      <button class="save">保存する</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

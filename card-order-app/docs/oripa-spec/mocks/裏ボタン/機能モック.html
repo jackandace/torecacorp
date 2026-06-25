@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>裏ボタン｜機能モック</title>
+<style>
+  :root{--bg:#0b0a22;--neon:#ff3bd0;--neon2:#b14bff;--cyan:#36e0ff;--yellow:#ffd83a;--ink:#f3ecff;--muted:#9b8fce;--gold:#ffcf3a;--green:#16b88a;--line:#2a2545}
+  *{box-sizing:border-box;font-family:-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+  body{margin:0;background:#06040f;color:#1f2733}
+  .topnote{background:#0e1726;color:#fff;padding:13px 18px;font-size:12.5px;line-height:1.6}.topnote b{color:#ff9ee6}
+  .tabs{display:flex;gap:8px;padding:12px 18px;background:#13111f;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .mt{padding:7px 14px;border:1px solid var(--line);border-radius:999px;cursor:pointer;font-size:12.5px;background:#1b1830;color:#b9aee0}.mt.active{background:var(--neon2);color:#fff;border-color:var(--neon2)}
+  .screen{display:none;padding:22px 16px}.screen.show{display:block}
+  .cap{font-size:12px;color:#8a82b0;text-align:center;margin:0 0 12px}
+  .phone{width:300px;margin:0 auto;background:var(--bg);border-radius:22px;border:1px solid #2a1850;overflow:hidden;box-shadow:0 12px 50px rgba(160,40,255,.3);position:relative;color:var(--ink)}
+  .stage{position:relative;height:560px;background:radial-gradient(120% 60% at 50% 30%,#241452,#0b0a22 70%);overflow:hidden}
+  .skip{position:absolute;top:12px;right:14px;color:#fff;font-size:12px;font-weight:700;z-index:6}
+  .sbar{position:absolute;top:70px;bottom:120px;width:14px;border-radius:7px;background:repeating-linear-gradient(0deg,var(--yellow) 0 14px,#9a7a14 14px 20px);box-shadow:0 0 14px var(--yellow)}.sbar.l{left:36px}.sbar.r{right:36px}
+  .tube{position:absolute;top:60px;bottom:120px;left:50%;transform:translateX(-50%);width:120px;border:3px solid var(--neon);border-radius:60px/44px;box-shadow:0 0 22px var(--neon),inset 0 0 22px #ff3bd066;background:linear-gradient(180deg,#162a55,#0e0a2a);overflow:hidden}
+  .reel{position:absolute;left:8px;right:8px;height:30px;border-radius:8px;background:linear-gradient(90deg,var(--cyan),#7ad);box-shadow:0 0 12px var(--cyan);opacity:.85}.reel.r1{top:62%}.reel.r2{top:74%;background:linear-gradient(90deg,#7ad,#b14bff)}
+  .startbtn{position:absolute;top:48%;left:50%;transform:translate(-50%,-50%);background:#0d0d18;border:1px solid #ffffff33;color:#fff;font-size:13px;padding:8px 14px;border-radius:999px;z-index:6}
+  .taparea{position:absolute;top:60px;bottom:160px;left:36px;right:36px;border:2px dashed #ff3bd0aa;border-radius:14px;background:#ff3bd018;display:flex;align-items:center;justify-content:center;z-index:5}.taparea .l{background:var(--neon);color:#fff;font-weight:800;font-size:12px;padding:5px 12px;border-radius:8px}
+  .lamp{position:absolute;bottom:44px;left:50%;transform:translateX(-50%);z-index:7;text-align:center}
+  .lampcore{width:70px;height:46px;clip-path:polygon(50% 0,61% 35%,100% 35%,68% 57%,80% 100%,50% 72%,20% 100%,32% 57%,0 35%,39% 35%);background:#33204a;display:flex;align-items:center;justify-content:center;font-weight:900;color:#5a4a7a;font-size:11px;margin:0 auto}
+  .lamp.on .lampcore{background:radial-gradient(circle,#fff,var(--yellow) 50%,#ff7a3a);color:#7a3b00;box-shadow:0 0 26px var(--yellow),0 0 50px #ff7a3a}
+  .lampcap{font-size:10px;color:var(--muted);margin-top:3px}.lamp.on .lampcap{color:var(--gold);font-weight:800}
+  .winsound{position:absolute;bottom:120px;left:50%;transform:translateX(-50%);z-index:7;color:var(--gold);font-weight:900;font-size:14px;text-shadow:0 0 10px rgba(255,207,58,.7)}
+  .badge-add{display:inline-block;background:#ff3bd0;color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:5px;margin-left:6px}
+  /* mypage */
+  .mp{width:320px;margin:0 auto;background:#fff;border-radius:18px;border:1px solid #e3e8ef;overflow:hidden;color:#1f2733}
+  .mphd{background:#0d0722;color:var(--cyan);font-weight:900;padding:12px 14px}
+  .mpbody{padding:8px 16px 16px}
+  .setrow{display:flex;align-items:center;justify-content:space-between;padding:14px 4px;border-bottom:1px solid #f0f0f0}
+  .setrow .t{font-weight:700;font-size:14px}.setrow .s{font-size:11px;color:#888;margin-top:3px}
+  .toggle{width:46px;height:26px;border-radius:999px;background:var(--green);position:relative;flex:none}.toggle:after{content:"";position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:23px}.toggle.off{background:#cdd4dd}.toggle.off:after{left:3px}
+</style>
+</head>
+<body>
+<div class="topnote"><b>裏ボタン｜機能モック（ユーザー画面）</b> — 演出中タップ→当選時のみ確定音＋GOGOランプ。仕様: req-5-gacha-ura-button.md</div>
+<div class="tabs">
+  <div class="mt active" onclick="show(0,this)">演出画面（裏ボタン）</div>
+  <div class="mt" onclick="show(1,this)">確定音発火（ランプ点灯）</div>
+  <div class="mt" onclick="show(2,this)">マイページ 演出モード設定</div>
+</div>
+
+<div class="screen show">
+  <p class="cap">演出中に透明タップエリアを重ねる（見た目では当落不明）。下部GOGOランプは消灯。</p>
+  <div class="phone"><div class="stage">
+    <div class="skip">スキップ ▶▶</div><div class="sbar l"></div><div class="sbar r"></div>
+    <div class="tube"><div class="reel r1"></div><div class="reel r2"></div></div>
+    <div class="startbtn">タップして演出を開始</div>
+    <div class="taparea"><span class="l">タップエリア<span class="badge-add">裏ボタン</span></span></div>
+    <div class="lamp"><div class="lampcore">GOGO</div><div class="lampcap">CHANCEランプ（消灯）</div></div>
+  </div></div>
+</div>
+
+<div class="screen">
+  <p class="cap">当選（A賞以上）かつ抽選的中時：確定音＋GOGOランプ点灯（消音/マナーモードでも視認）。</p>
+  <div class="phone"><div class="stage">
+    <div class="skip">スキップ ▶▶</div><div class="sbar l"></div><div class="sbar r"></div>
+    <div class="tube"><div class="reel r1"></div><div class="reel r2"></div></div>
+    <div class="taparea" style="border-color:#ffd83a;background:rgba(255,216,58,.12)"><span class="l" style="background:var(--gold);color:#5a3b00">的中！</span></div>
+    <div class="winsound">♪ 確定音 ♪</div>
+    <div class="lamp on"><div class="lampcore">GOGO</div><div class="lampcap">CHANCE 点灯！</div></div>
+  </div></div>
+</div>
+
+<div class="screen">
+  <p class="cap">マイページに「演出モード設定」。OFFで裏ボタン演出（タップエリア・確定音・ランプ）を無効化。</p>
+  <div class="mp">
+    <div class="mphd">マイページ ／ 設定</div>
+    <div class="mpbody">
+      <div class="setrow"><div><div class="t">演出モード</div><div class="s">裏ボタン演出（確定音・ランプ）を使用する</div></div><span class="toggle"></span></div>
+      <div class="setrow"><div><div class="t">サウンド</div><div class="s">演出音を再生する</div></div><span class="toggle"></span></div>
+      <div class="setrow"><div><div class="t">演出スキップ既定</div><div class="s">常にスキップする</div></div><span class="toggle off"></span></div>
+    </div>
+  </div>
+</div>
+<script>function show(i,el){document.querySelectorAll('.screen').forEach((s,n)=>s.classList.toggle('show',n===i));document.querySelectorAll('.mt').forEach(t=>t.classList.remove('active'));el.classList.add('active');window.scrollTo(0,0);}</script>
+</body>
+</html>

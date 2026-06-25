@@ -167,6 +167,7 @@ export default async function MyPage({ searchParams }: { searchParams: SearchPar
 
       <div className="flex items-center justify-center gap-3 flex-wrap">
         <Link href="/order" className="btn-primary">発注ページへ</Link>
+        <Link href="/inquiries" className="btn-secondary">お問い合わせ / チャット</Link>
         <Link href="/notifications" className="btn-secondary">通知履歴</Link>
         <a href="/api/profile/orders/export" className="btn-secondary text-xs">発注履歴 CSV</a>
       </div>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BT消費解放ガチャ｜管理画面制御</title>
+<style>
+  :root{--line:#e3e8ef;--muted:#6b7785;--ink:#1f2733;--blue:#2f6fed;--bt:#3aa0ff}
+  *{box-sizing:border-box;font-family:-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+  body{margin:0;background:#f0f1f3;color:var(--ink)}
+  .topnote{background:#0e1726;color:#fff;padding:13px 18px;font-size:12.5px;line-height:1.6}.topnote b{color:#9fd0ff}
+  .wrap{padding:22px 16px}.cap{font-size:12px;color:#7a818a;text-align:center;margin:0 0 12px}
+  .console{display:flex;max-width:1080px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 6px 24px rgba(20,40,80,.06)}
+  .side{width:200px;border-right:1px solid var(--line);padding:14px 0;flex:none}
+  .brand{display:flex;align-items:center;gap:8px;padding:6px 16px 16px;font-weight:700;font-size:13px}
+  .blogo{width:24px;height:24px;border-radius:6px;background:linear-gradient(135deg,#5ab0f0,#2f6fed)}
+  .nav a{display:block;padding:9px 18px;color:#888;font-size:13px;text-decoration:none}
+  .nav a.active{color:var(--blue);background:#eef4ff;border-left:3px solid var(--blue);padding-left:15px;font-weight:600}
+  .main{flex:1;padding:24px 28px;min-width:0}.crumbs{font-size:12px;color:#9aa3af;margin-bottom:4px}
+  h2.apage{margin:0 0 14px;font-size:18px}
+  .label{font-size:13px;font-weight:600;margin:14px 0 6px}.label:first-of-type{margin-top:6px}
+  .input{padding:9px 11px;border:1px solid var(--line);border-radius:6px;font-size:13px}
+  .hl{outline:2px dashed var(--bt);outline-offset:8px;border-radius:10px;background:#f5fbff;border:1px solid #d8ecff;padding:18px;margin-top:14px}
+  .badge-new{display:inline-block;background:#e6f3ff;color:#1f7fe0;font-size:10px;font-weight:800;padding:2px 7px;border-radius:6px;margin-left:8px}
+  .row{display:flex;align-items:center;gap:12px;margin:10px 0 12px}
+  .toggle{width:46px;height:26px;border-radius:999px;background:var(--blue);position:relative;display:inline-block}.toggle:after{content:"";position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:23px}
+  .save{margin-top:16px;background:var(--blue);color:#fff;border:none;padding:10px 22px;border-radius:6px;font-weight:700;cursor:pointer}
+  .small{font-size:11px;color:#888;line-height:1.6;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="topnote"><b>BT消費解放ガチャ｜管理画面制御</b> — オリパ編集に「BTロック ON/OFF・必要BT数」を追加。仕様: req-2-bt-unlock-gacha.md</div>
+<div class="wrap">
+  <p class="cap">オリパ編集：BTロックのON/OFFと解放に必要なBT数を設定（ガチャ別）。</p>
+  <div class="console">
+    <div class="side">
+      <div class="brand"><span class="blogo"></span> stg-novagacha console</div>
+      <nav class="nav"><a class="active">オリパ</a><a>カードデータベース</a><a>課金アイテム</a><a>ユーザー</a><a>ガチャ演出</a></nav>
+    </div>
+    <div class="main">
+      <div class="crumbs">オリパ ／ 一覧 ／ 編集</div>
+      <h2 class="apage">オリパ編集 — 還元率100%OVER ガチャ</h2>
+      <div class="label" style="margin-top:0">オリパ名</div><input class="input" style="width:100%" value="還元率100%OVER ガチャ">
+      <div class="hl">
+        <div class="label" style="margin-top:0">BTロック設定 <span class="badge-new">NEW</span></div>
+        <div class="row"><span class="toggle"></span><b>BTロック ON</b><span class="small" style="margin:0">ロック中はコインで回せません</span></div>
+        <div class="label">解放に必要なBT数</div>
+        <div class="row"><input class="input" style="width:140px" value="10"><b>BT</b></div>
+        <div class="small">ユーザーがBTを消費して解放すると、以降はコインで通常通り回せます（解放は永続・再ロックなし）。<br>還元率100%OVER等の特別ガチャへのアクセス制御（イベントチケット的運用）。</div>
+      </div>
+      <button class="save">保存する</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

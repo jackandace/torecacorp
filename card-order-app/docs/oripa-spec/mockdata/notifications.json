@@ -1,0 +1,156 @@
+{
+  "_comment": "02-a 通知機能 mockデータ（2026-06-16 (2) 改訂）。オリパワン準拠の3タブ：personal=あなたへの通知 / charge=チャージ / broadcast=お知らせ。ブランドはGRIM。",
+  "unread_count": 6,
+  "unread_breakdown": { "personal": 4, "charge": 0, "broadcast": 2 },
+  "retention": { "personal_charge_days": 31, "broadcast": "long_term" },
+
+  "personal": {
+    "_comment": "① あなたへの通知。アクション時に自動送信。is_read で既読管理。保持31日。",
+    "items": [
+      {
+        "id": "ntf_0041",
+        "tab": "personal", "type": "shipping",
+        "title": null,
+        "body": "商品を発送しました（追跡番号: 4567-8901-2345 / ヤマト運輸）",
+        "link": { "type": "shipment", "ref": "shp_2031" },
+        "metadata": { "tracking_no": "4567-8901-2345", "carrier": "ヤマト運輸", "order_id": "ord_8842" },
+        "is_read": false,
+        "created_at": "2026-06-16T09:42:00+09:00"
+      },
+      {
+        "id": "ntf_0040",
+        "tab": "personal", "type": "rank_up",
+        "title": null,
+        "body": "ゴールドに昇格しました！ 500ランクポイントを獲得（ポイント還元率 3% → 5%）",
+        "link": { "type": "rank", "ref": null },
+        "metadata": { "from_rank": "シルバー", "new_rank": "ゴールド", "granted_points": 500, "point_rate_before": 3, "point_rate_after": 5 },
+        "is_read": false,
+        "created_at": "2026-06-15T20:10:00+09:00"
+      },
+      {
+        "id": "ntf_0039",
+        "tab": "personal", "type": "point_granted",
+        "title": null,
+        "body": "500ポイントを付与しました（ログインボーナス）",
+        "link": { "type": "wallet", "ref": null },
+        "metadata": { "amount": 500, "reason": "ログインボーナス" },
+        "is_read": false,
+        "created_at": "2026-06-15T08:00:00+09:00"
+      },
+      {
+        "id": "ntf_0038",
+        "tab": "personal", "type": "coin_expiry",
+        "title": null,
+        "body": "198コインの有効期限が明日切れます",
+        "link": { "type": "wallet", "ref": null },
+        "metadata": { "amount": 198, "expire_at": "2026-06-16T23:59:00+09:00" },
+        "is_read": false,
+        "created_at": "2026-06-15T10:04:00+09:00"
+      },
+      {
+        "id": "ntf_0037",
+        "tab": "personal", "type": "invite_bonus",
+        "title": null,
+        "body": "お友達の登録が完了し、招待特典として1,000ポイントを付与しました",
+        "link": { "type": "wallet", "ref": null },
+        "metadata": { "reward": "1,000ポイント", "invitee": "user_90233" },
+        "is_read": true,
+        "read_at": "2026-06-13T19:35:00+09:00",
+        "created_at": "2026-06-13T19:30:00+09:00"
+      },
+      {
+        "id": "ntf_0036",
+        "tab": "personal", "type": "individual",
+        "title": "【運営より】お問い合わせの件",
+        "body": "お問い合わせいただいた件について対応いたしました。マイページよりご確認ください。",
+        "link": { "type": "url", "ref": "/mypage" },
+        "metadata": { "sent_by_admin": true },
+        "is_read": true,
+        "read_at": "2026-06-12T11:00:00+09:00",
+        "created_at": "2026-06-12T10:50:00+09:00"
+      }
+    ],
+    "page": 1, "total_pages": 1
+  },
+
+  "charge": {
+    "_comment": "② チャージ。決済完了時に自動送信。課金時の詳細内容。",
+    "items": [
+      {
+        "id": "ntf_0035",
+        "tab": "charge", "type": "charge_complete",
+        "title": null,
+        "body": "クレジットカードで1,000コイン(1,030ランクポイント)をチャージしました",
+        "link": { "type": "purchase", "ref": "pay_77120" },
+        "metadata": { "amount_yen": 1000, "coins": 1000, "rank_points": 1030, "method": "クレジットカード", "payment_id": "pay_77120" },
+        "is_read": true,
+        "read_at": "2025-11-17T11:31:00+09:00",
+        "created_at": "2025-11-17T11:30:00+09:00"
+      }
+    ],
+    "page": 1, "total_pages": 1
+  },
+
+  "broadcast": {
+    "_comment": "③ お知らせ。管理画面から手動配信。詳細ページ /news/:id へ遷移（chevron）。既読は announcement_reads。長期保持。",
+    "items": [
+      {
+        "id": "61",
+        "type": "other",
+        "title": "メンテナンス終了のお知らせ",
+        "url": "/news/61",
+        "is_read": false,
+        "published_at": "2026-05-28T06:30:00+09:00"
+      },
+      {
+        "id": "60",
+        "type": "other",
+        "title": "メンテナンスのお知らせ：5月28日(木) 午前6:00〜6:30",
+        "url": "/news/60",
+        "is_read": false,
+        "published_at": "2026-05-27T18:00:00+09:00"
+      },
+      {
+        "id": "59",
+        "type": "other",
+        "title": "メンテナンス終了のお知らせ",
+        "url": "/news/59",
+        "is_read": true,
+        "published_at": "2026-05-14T05:30:00+09:00"
+      },
+      {
+        "id": "58",
+        "type": "other",
+        "title": "メンテナンスのお知らせ：5月14日(木) 午前5:00〜5:30",
+        "url": "/news/58",
+        "is_read": true,
+        "published_at": "2026-05-13T18:00:00+09:00"
+      },
+      {
+        "id": "57",
+        "type": "campaign",
+        "title": "GRIMが「ポケモンカードのオリパおすすめ研究所」様に紹介されました！",
+        "url": "/news/57",
+        "is_read": true,
+        "published_at": "2026-03-25T12:10:00+09:00"
+      },
+      {
+        "id": "56",
+        "type": "correction",
+        "title": "GRIM 利用規約改定のお知らせ【2026年3月17日最終改定】",
+        "url": "/news/56",
+        "is_read": true,
+        "published_at": "2026-03-24T17:11:00+09:00"
+      }
+    ],
+    "page": 1, "total_pages": 3
+  },
+
+  "admin_broadcast_history": [
+    { "id": "61", "type": "other", "title": "メンテナンス終了のお知らせ", "published_at": "2026-05-28T06:30:00+09:00", "audience_size": 12840, "read_rate": 0.66 },
+    { "id": "57", "type": "campaign", "title": "「ポケモンカードのオリパおすすめ研究所」紹介", "published_at": "2026-03-25T12:10:00+09:00", "audience_size": 9800, "read_rate": 0.78 }
+  ],
+  "admin_individual_history": [
+    { "id": "snd_410", "type": "individual", "to": "user_88213 (taro@example.com)", "title": "【運営より】お問い合わせの件", "sent_at": "2026-06-12T10:50:00+09:00", "is_read": true }
+  ]
+}

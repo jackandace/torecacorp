@@ -1,0 +1,80 @@
+{
+  "_comment": "02-b レインボーキー mockデータ。保有一覧・取得ログ・ドロップ演出・管理設定の表示確認用。",
+  "balance": 7,
+  "grants": [
+    {
+      "id": "rkg_120",
+      "count": 1,
+      "label": "幻のSSRオリパ / Dランクから排出",
+      "source_type": "gacha_drop",
+      "source_gacha": "幻のSSRオリパ",
+      "source_prize_rank": "D",
+      "badge": null,
+      "created_at": "2026-06-13T10:11:00+09:00"
+    },
+    {
+      "id": "rkg_119",
+      "count": 2,
+      "label": "夏祭りオリパ / 指定景品「花火UR」から排出",
+      "source_type": "prize_override",
+      "source_gacha": "夏祭りオリパ",
+      "source_prize_rank": "A",
+      "badge": "指定",
+      "created_at": "2026-06-12T21:03:00+09:00"
+    },
+    {
+      "id": "rkg_118",
+      "count": 1,
+      "label": "幻のSSRオリパ / Sランクから排出",
+      "source_type": "gacha_drop",
+      "source_gacha": "幻のSSRオリパ",
+      "source_prize_rank": "S",
+      "badge": null,
+      "created_at": "2026-06-11T18:40:00+09:00"
+    },
+    {
+      "id": "rkg_117",
+      "count": 5,
+      "label": "運営付与（おわび）",
+      "source_type": "manual",
+      "source_gacha": null,
+      "source_prize_rank": null,
+      "badge": "運営",
+      "created_at": "2026-06-10T12:00:00+09:00"
+    },
+    {
+      "id": "rkg_116",
+      "count": 1,
+      "label": "幻のSSRオリパ / Cランクから排出",
+      "source_type": "gacha_drop",
+      "source_gacha": "幻のSSRオリパ",
+      "source_prize_rank": "C",
+      "badge": null,
+      "created_at": "2026-06-09T20:22:00+09:00"
+    }
+  ],
+  "latest_drop_event": {
+    "_comment": "抽選直後にフロントへ返るドロップ情報（モーダル表示用）。",
+    "rainbow_drop_total": 2,
+    "rainbow_balance_after": 7,
+    "results": [
+      { "rank": "D", "card_id": "c1", "card_name": "ピカチュウ [C]", "rainbow_drop": { "count": 1 } },
+      { "rank": "S", "card_id": "c2", "card_name": "リザードンEX [SAR]", "rainbow_drop": { "count": 1 } },
+      { "rank": "C", "card_id": "c3", "card_name": "フシギダネ [U]", "rainbow_drop": null }
+    ]
+  },
+  "admin_gacha_drop_config_example": {
+    "_comment": "管理画面のガチャ別ドロップ設定サンプル。",
+    "gacha_id": "gacha_777",
+    "gacha_name": "幻のSSRオリパ",
+    "enabled": true,
+    "pool_limit": 100,
+    "pool_remaining": 63,
+    "keys_per_drop": 1,
+    "rate_by_rarity": { "S": 1.5, "A": 4, "B": 8, "C": 18, "D": 25, "OTHER": 25 },
+    "prize_overrides": [
+      { "prize_id": "p_ur_01", "card_name": "花火UR", "drop_mode": "always", "drop_rate": null, "drop_count": 2 },
+      { "prize_id": "p_sr_07", "card_name": "限定SR", "drop_mode": "rate", "drop_rate": 30, "drop_count": 1 }
+    ]
+  }
+}

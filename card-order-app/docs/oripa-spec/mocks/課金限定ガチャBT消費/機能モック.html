@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>課金限定ガチャ BT消費｜機能モック</title>
+<style>
+  :root{--ink:#1f2733;--muted:#6b7785;--line:#e3e8ef;--bg:#f5f7fa;--green:#16b88a;--yellow:#f5b500;--bt:#3aa0ff;--bt-d:#1f7fe0}
+  *{box-sizing:border-box;font-family:-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+  body{margin:0;background:#06040f;color:var(--ink)}
+  .topnote{background:#0e1726;color:#fff;padding:13px 18px;font-size:12.5px;line-height:1.6}.topnote b{color:#9fd0ff}
+  .tabs{display:flex;gap:8px;padding:12px 18px;background:#13111f;border-bottom:1px solid #2a2545;flex-wrap:wrap}
+  .mt{padding:7px 14px;border:1px solid #2a2545;border-radius:999px;cursor:pointer;font-size:12.5px;background:#1b1830;color:#b9c6e0}.mt.active{background:var(--bt-d);color:#fff;border-color:var(--bt-d)}
+  .screen{display:none;padding:22px 16px}.screen.show{display:block}
+  .cap{font-size:12px;color:#8a93b0;text-align:center;margin:0 0 12px}
+  .phone{max-width:390px;margin:0 auto;background:#fff;border-radius:26px;border:1px solid var(--line);overflow:hidden;box-shadow:0 10px 40px rgba(20,40,80,.18)}
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .applogo{font-weight:800;color:var(--green);font-size:18px}
+  .wallets{display:flex;gap:8px;align-items:center}
+  .wpill{display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:3px 9px 3px 4px;font-size:12px;font-weight:700}
+  .wc{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+  .applbody{padding:16px;background:var(--bg)}
+  .gcard{background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+  .ghero{height:150px;background:linear-gradient(135deg,#5b8def,#9b6bff);position:relative;display:flex;align-items:flex-end;padding:12px;color:#fff}
+  .gtag{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.4);padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700}
+  .gtitle{font-size:18px;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,.3)}
+  .gbody{padding:16px}
+  .resource{display:flex;align-items:center;gap:8px;background:#eef7ff;border:1px solid #cfe6ff;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+  .bt-ic{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--bt),var(--bt-d));display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex:none}
+  .drawbtns{display:flex;gap:8px;margin-top:6px}
+  .drawbtn{flex:1;border:none;border-radius:12px;padding:12px 6px;font-weight:800;color:#fff;background:linear-gradient(135deg,var(--bt),var(--bt-d));cursor:pointer;text-align:center;font-size:13px}
+  .drawbtn small{display:block;font-weight:600;opacity:.9;font-size:11px;margin-top:2px}
+  .drawbtn.dis{background:#cdd4dd;cursor:not-allowed}
+  .warn{display:flex;gap:8px;align-items:center;background:#fff3f3;border:1px solid #ffd4d4;color:#c0392b;font-size:12px;border-radius:10px;padding:10px;margin-top:10px}
+  .balance{font-size:12px;color:var(--muted);margin-top:10px;text-align:center}
+</style>
+</head>
+<body>
+<div class="topnote"><b>課金限定ガチャ BT消費タイプ｜機能モック（ユーザー画面）</b> — 課金で抽選権→BTを消費して回す。仕様: req-1-bt-consumption-gacha.md</div>
+<div class="tabs">
+  <div class="mt active" onclick="show(0,this)">BTで回す</div>
+  <div class="mt" onclick="show(1,this)">BT不足</div>
+</div>
+
+<div class="screen show">
+  <p class="cap">消費リソース=BTのガチャ。抽選ボタンが「🔋 N BTで回す」。残高はヘッダーBTピル参照。</p>
+  <div class="phone">
+    <div class="appbar"><div class="applogo">NOVA</div><div class="wallets">
+      <div class="wpill"><span class="wc" style="background:var(--yellow)">🪙</span>1,250</div>
+      <div class="wpill"><span class="wc" style="background:var(--bt)">🔋</span>24</div></div></div>
+    <div class="applbody"><div class="gcard">
+      <div class="ghero"><span class="gtag">課金消費 / BT</span><span class="gtitle">プレミアムBTオリパ</span></div>
+      <div class="gbody">
+        <div class="resource"><span class="bt-ic">🔋</span><div>このガチャは <b>BT（バッテリー）</b> を消費して回します</div></div>
+        <div class="drawbtns"><button class="drawbtn">1回<small>🔋 5 BT</small></button><button class="drawbtn">10連<small>🔋 50 BT</small></button><button class="drawbtn">100連<small>🔋 500 BT</small></button></div>
+        <div class="balance">保有BT: <b>24</b>　｜　抽選権: 12回ぶん（課金で付与）</div>
+      </div>
+    </div></div>
+  </div>
+</div>
+
+<div class="screen">
+  <p class="cap">保有BTが消費量に満たない場合はボタン非活性＋不足数を明示。連続抽選は事前にまとめて検証（部分消費なし）。</p>
+  <div class="phone">
+    <div class="appbar"><div class="applogo">NOVA</div><div class="wallets">
+      <div class="wpill"><span class="wc" style="background:var(--yellow)">🪙</span>1,250</div>
+      <div class="wpill"><span class="wc" style="background:var(--bt)">🔋</span>2</div></div></div>
+    <div class="applbody"><div class="gcard">
+      <div class="ghero"><span class="gtag">課金消費 / BT</span><span class="gtitle">プレミアムBTオリパ</span></div>
+      <div class="gbody">
+        <div class="resource"><span class="bt-ic">🔋</span><div>このガチャは <b>BT（バッテリー）</b> を消費して回します</div></div>
+        <div class="drawbtns"><button class="drawbtn dis">1回<small>🔋 5 BT</small></button><button class="drawbtn dis">10連<small>🔋 50 BT</small></button><button class="drawbtn dis">100連<small>🔋 500 BT</small></button></div>
+        <div class="warn">⚠️ BTが不足しています（保有: 2 / 必要: 5）</div>
+      </div>
+    </div></div>
+  </div>
+</div>
+<script>function show(i,el){document.querySelectorAll('.screen').forEach((s,n)=>s.classList.toggle('show',n===i));document.querySelectorAll('.mt').forEach(t=>t.classList.remove('active'));el.classList.add('active');window.scrollTo(0,0);}</script>
+</body>
+</html>

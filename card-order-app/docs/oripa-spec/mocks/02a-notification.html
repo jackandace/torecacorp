@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>02-a 通知機能 mock（GRIM / オリパワン準拠 3タブ）</title>
+<style>
+  :root{
+    --gold:#e0a52b;--gold-d:#b6841a;--ink:#222;--muted:#9aa0a8;--line:#ececec;--bg:#fff;
+    --crimson:#8b1620;--red:#e23b3b;--coin:#f0b429;--dark:#2b2b2b;--green:#16b88a;--blue:#2f6fed
+  }
+  *{box-sizing:border-box;font-family:-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+  body{margin:0;background:#f0f1f3;color:var(--ink)}
+  .topnote{background:#0e1726;color:#fff;padding:14px 20px;font-size:13px;line-height:1.6}
+  .topnote b{color:#ffd479}
+  .metatabs{display:flex;gap:8px;padding:14px 20px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;flex-wrap:wrap}
+  .mt{padding:8px 16px;border:1px solid var(--line);border-radius:999px;cursor:pointer;font-size:13px;background:#fff;color:var(--muted)}
+  .mt.active{background:var(--gold);color:#fff;border-color:var(--gold)}
+  .screen{display:none;padding:24px 20px}
+  .screen.show{display:block}
+  .cap{font-size:12px;color:#7a818a;margin:0 0 12px}
+
+  /* phone */
+  .phone{max-width:412px;margin:0 auto;background:#fff;border-radius:20px;border:1px solid #ddd;overflow:hidden;box-shadow:0 12px 44px rgba(20,30,60,.16);position:relative}
+  /* GRIM header */
+  .ghd{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #f0f0f0}
+  .crown{width:40px;height:40px;border-radius:9px;background:linear-gradient(145deg,#7a1018,#b13b2a);display:flex;align-items:center;justify-content:center;font-size:20px;flex:none;box-shadow:inset 0 0 0 2px #e6b94e}
+  .hspace{flex:1}
+  .kpill,.cpill{display:flex;align-items:center;gap:5px;border:1px solid #e7e7e7;border-radius:999px;padding:3px 6px 3px 4px;font-size:13px;font-weight:800;background:#fafafa}
+  .kic{width:24px;height:24px;border-radius:50%;background:conic-gradient(#ff5d5d,#ffb13d,#ffe24a,#4ad991,#4aa8ff,#9b6bff,#ff5d5d);display:flex;align-items:center;justify-content:center;font-size:12px}
+  .cic{width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe08a,#e0a52b);display:flex;align-items:center;justify-content:center;font-size:12px;color:#7a5500;font-weight:900}
+  .plus{width:22px;height:22px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px}
+  .bell{position:relative;font-size:22px;cursor:pointer;width:34px;text-align:center}
+  .bell .dot{position:absolute;top:-3px;right:0;width:11px;height:11px;border-radius:50%;background:var(--red);border:2px solid #fff}
+  .bell .num{position:absolute;top:-7px;right:-7px;background:var(--red);color:#fff;font-size:10px;font-weight:800;border-radius:999px;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid #fff}
+
+  /* tab nav (オリパワン風) */
+  .tabnav{display:flex;border-bottom:1px solid #eee;background:#fff}
+  .tn{flex:1;text-align:center;padding:14px 4px;font-size:14px;font-weight:700;color:#555;cursor:pointer;position:relative}
+  .tn.on{color:var(--gold-d)}
+  .tn.on:after{content:"";position:absolute;left:50%;transform:translateX(-50%);bottom:-1px;width:62%;height:3px;border-radius:3px;background:var(--gold)}
+  .tn .b{display:inline-block;background:var(--red);color:#fff;font-size:10px;font-weight:800;border-radius:999px;min-width:16px;height:16px;line-height:16px;padding:0 4px;margin-left:4px;vertical-align:top}
+
+  .page{padding:18px 18px 8px;min-height:430px;background:#fff}
+  .ptitle{font-size:22px;font-weight:800;margin:4px 2px 14px}
+
+  /* list */
+  .nrow{padding:14px 4px;border-bottom:1px solid #efefef;cursor:pointer}
+  .nrow .tm{font-size:12px;color:#9aa0a8;margin-bottom:7px}
+  .nrow .bd{font-size:15px;line-height:1.5;color:#2a2a2a}
+  .nrow.unread{position:relative}
+  .nrow.unread .bd{font-weight:700}
+  .nrow.unread:before{content:"";position:absolute;left:-10px;top:18px;width:7px;height:7px;border-radius:50%;background:var(--red)}
+  .nrow.link{display:flex;align-items:center;gap:10px}
+  .nrow.link>div{flex:1}
+  .nrow .chev{color:#c4c4c4;font-size:18px;flex:none}
+  .toolbar{display:flex;justify-content:flex-end;margin:-6px 2px 6px}
+  .readall{font-size:12px;color:var(--gold-d);font-weight:700;background:none;border:none;cursor:pointer}
+  .empty{display:flex;align-items:center;justify-content:center;color:#9aa0a8;font-size:15px;padding:120px 20px}
+  .rank b{color:var(--gold-d)}
+
+  /* pager */
+  .pager{display:flex;justify-content:center;padding:18px}
+  .pg{min-width:46px;height:46px;border:1px solid var(--gold);color:var(--gold-d);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700}
+
+  /* footer */
+  .gfoot{background:var(--dark);color:#cfcfcf;padding:22px 20px 28px;font-size:13px}
+  .gfoot h4{color:#fff;font-size:15px;margin:14px 0 10px}
+  .gfoot div{padding:7px 0}
+
+  /* home banner */
+  .notice{background:#6b6b6b;color:#fff;font-size:12px;padding:10px 14px;line-height:1.5}
+  .notice u{cursor:pointer}
+  .banner{margin:12px;border-radius:12px;height:120px;background:linear-gradient(120deg,#2a0d3a,#5a1d6e,#b0357a);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;text-align:center;font-size:15px;text-shadow:0 2px 6px rgba(0,0,0,.5);position:relative;overflow:hidden}
+  .banner .keys{position:absolute;font-size:40px;opacity:.5}
+  .cats{display:flex;gap:18px;padding:10px 16px;border-bottom:1px solid #eee;font-weight:700;color:#777}
+  .cats .ona{color:var(--gold-d);border-bottom:3px solid var(--gold);padding-bottom:6px}
+
+  /* admin */
+  .console{display:flex;max-width:1160px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 6px 24px rgba(20,40,80,.06)}
+  .side{width:200px;border-right:1px solid var(--line);padding:14px 0;flex:none}
+  .brand{display:flex;align-items:center;gap:8px;padding:6px 16px 16px;font-weight:700;font-size:14px}
+  .blogo{width:26px;height:26px;border-radius:7px;background:linear-gradient(145deg,#7a1018,#b13b2a);box-shadow:inset 0 0 0 2px #e6b94e}
+  .nav a{display:block;padding:9px 18px;color:#888;font-size:13px;text-decoration:none}
+  .nav a.active{color:var(--gold-d);background:#fdf6e6;border-left:3px solid var(--gold);padding-left:15px;font-weight:600}
+  .main{flex:1;padding:26px 30px;min-width:0}
+  h2.apage{margin:0 0 14px;font-size:17px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  .pbox{border:1px solid var(--line);border-radius:12px;padding:18px}
+  .label{font-size:13px;font-weight:600;margin:14px 0 6px}
+  .label:first-of-type{margin-top:8px}
+  .input,select.input,textarea.input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px}
+  textarea.input{min-height:70px;resize:vertical}
+  .row2{display:flex;gap:10px}.row2>*{flex:1}
+  .save{margin-top:16px;background:var(--gold);color:#fff;border:none;padding:11px 24px;border-radius:8px;font-weight:700;cursor:pointer}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
+  th{color:#888;font-weight:600}
+  .tagt{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:#f3f0e6;color:#8a6d1f}
+  .small{font-size:11px;color:#888;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="topnote">
+  <b>02-a｜通知機能（GRIM／オリパワン準拠の3タブ）</b> — ヘッダー🔔ベル＋赤丸バッジ。
+  タブ：<b>あなたへの通知 ／ チャージ ／ お知らせ</b>。①②自動送信・③管理から手動配信。保持：①②=1ヶ月／③=長期。
+  仕様書: <b>02-grim/a-notification.md</b>
+</div>
+<div class="metatabs">
+  <div class="mt active" onclick="show(0,this)">① ヘッダー＋ベル（GRIM）</div>
+  <div class="mt" onclick="show(1,this)">② あなたへの通知</div>
+  <div class="mt" onclick="show(2,this)">③ チャージ</div>
+  <div class="mt" onclick="show(3,this)">④ お知らせ</div>
+  <div class="mt" onclick="show(4,this)">⑤ 管理画面</div>
+</div>
+
+<!-- ① ヘッダー＋ベル -->
+<div class="screen show">
+  <p class="cap">＊GRIMヘッダー（王冠／レインボーキー🔑／コインG）に <b>🔔ベルを新設</b>。未読時は赤丸。押下で通知ページへ。<br>※マイページはフッターメニューにあるため、ヘッダーのプロフィールアイコンは廃止しスッキリさせた。</p>
+  <div class="phone">
+    <div class="ghd">
+      <div class="crown">👑</div>
+      <div class="hspace"></div>
+      <div class="kpill"><span class="kic">🔑</span>0</div>
+      <div class="cpill"><span class="cic">G</span>17,482<span class="plus">+</span></div>
+      <div class="bell" onclick="show(1,document.querySelectorAll('.mt')[1])">🔔<span class="num">6</span></div>
+      
+    </div>
+    <div class="notice">住所登録と電話番号認証が必須になりました。マイページの「お届け先登録・変更」から設定をお願いします。<u>確認する</u></div>
+    <div class="banner"><span class="keys" style="left:14px">🔑</span><span class="keys" style="right:14px">🔑</span>レインボーキー交換をしよう!!<br>ランクアップで獲得できる特別アイテム</div>
+    <div class="cats"><span class="ona">ポケモン</span><span>ワンピース</span><span>遊戯王</span></div>
+    <div style="padding:18px;text-align:center;color:#aaa;font-size:13px">（オリパガチャ一覧 …）</div>
+  </div>
+</div>
+
+<!-- ② あなたへの通知 -->
+<div class="screen">
+  <p class="cap">＊タブ①あなたへの通知。配送/ポイント付与/ランクアップ/招待特典/個別/コイン有効期限。未読は太字＋赤ドット。</p>
+  <div class="phone">
+    <div class="ghd"><div class="crown">👑</div><div class="hspace"></div><div class="kpill"><span class="kic">🔑</span>0</div><div class="cpill"><span class="cic">G</span>17,482<span class="plus">+</span></div><div class="bell">🔔<span class="num">6</span></div></div>
+    <div class="tabnav">
+      <div class="tn on">あなたへの通知<span class="b">4</span></div>
+      <div class="tn" onclick="show(2,document.querySelectorAll('.mt')[2])">チャージ</div>
+      <div class="tn" onclick="show(3,document.querySelectorAll('.mt')[3])">お知らせ<span class="b">2</span></div>
+    </div>
+    <div class="page">
+      <div class="ptitle">あなたへの通知</div>
+      <div class="toolbar"><button class="readall">すべて既読にする</button></div>
+      <div class="nrow unread"><div class="tm">2026年6月16日 09:42</div><div class="bd">商品を発送しました（追跡番号: 4567-8901-2345 / ヤマト運輸）</div></div>
+      <div class="nrow unread rank"><div class="tm">2026年6月15日 20:10</div><div class="bd">ゴールドに昇格しました！ <b>500ランクポイント</b>を獲得（ポイント還元率 3% → <b>5%</b>）</div></div>
+      <div class="nrow unread"><div class="tm">2026年6月15日 08:00</div><div class="bd">500ポイントを付与しました（ログインボーナス）</div></div>
+      <div class="nrow unread"><div class="tm">2026年6月15日 10:04</div><div class="bd">198コインの有効期限が明日切れます</div></div>
+      <div class="nrow"><div class="tm">2026年6月13日 19:30</div><div class="bd">お友達の登録が完了し、招待特典として1,000ポイントを付与しました</div></div>
+      <div class="nrow"><div class="tm">2026年6月12日 10:50</div><div class="bd">【運営より】お問い合わせの件について対応いたしました</div></div>
+      <div class="pager"><div class="pg">1</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ③ チャージ -->
+<div class="screen">
+  <p class="cap">＊タブ②チャージ。GRIM要件「課金時の詳細内容」を専用タブに（決済完了の明細）。</p>
+  <div class="phone">
+    <div class="ghd"><div class="crown">👑</div><div class="hspace"></div><div class="kpill"><span class="kic">🔑</span>0</div><div class="cpill"><span class="cic">G</span>17,482<span class="plus">+</span></div><div class="bell">🔔<span class="num">6</span></div></div>
+    <div class="tabnav">
+      <div class="tn" onclick="show(1,document.querySelectorAll('.mt')[1])">あなたへの通知<span class="b">4</span></div>
+      <div class="tn on">チャージ</div>
+      <div class="tn" onclick="show(3,document.querySelectorAll('.mt')[3])">お知らせ<span class="b">2</span></div>
+    </div>
+    <div class="page">
+      <div class="ptitle">チャージ</div>
+      <div class="nrow"><div class="tm">2025年11月17日 11:30</div><div class="bd">クレジットカードで1,000コイン(1,030ランクポイント)をチャージしました</div></div>
+      <div class="pager"><div class="pg">1</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ④ お知らせ -->
+<div class="screen">
+  <p class="cap">＊タブ③お知らせ（全体向け）。管理から手動配信。右端 `>` で詳細ページ（/news/:id）へ遷移。長期保持。</p>
+  <div class="phone">
+    <div class="ghd"><div class="crown">👑</div><div class="hspace"></div><div class="kpill"><span class="kic">🔑</span>0</div><div class="cpill"><span class="cic">G</span>17,482<span class="plus">+</span></div><div class="bell">🔔<span class="num">6</span></div></div>
+    <div class="tabnav">
+      <div class="tn" onclick="show(1,document.querySelectorAll('.mt')[1])">あなたへの通知<span class="b">4</span></div>
+      <div class="tn" onclick="show(2,document.querySelectorAll('.mt')[2])">チャージ</div>
+      <div class="tn on">お知らせ<span class="b">2</span></div>
+    </div>
+    <div class="page">
+      <div class="ptitle">お知らせ</div>
+      <div class="nrow link unread"><div><div class="tm">2026年5月28日 06:30</div><div class="bd">メンテナンス終了のお知らせ</div></div><span class="chev">›</span></div>
+      <div class="nrow link unread"><div><div class="tm">2026年5月27日 18:00</div><div class="bd">メンテナンスのお知らせ：5月28日(木) 午前6:00〜6:30</div></div><span class="chev">›</span></div>
+      <div class="nrow link"><div><div class="tm">2026年5月14日 05:30</div><div class="bd">メンテナンス終了のお知らせ</div></div><span class="chev">›</span></div>
+      <div class="nrow link"><div><div class="tm">2026年3月25日 12:10</div><div class="bd">GRIMが「ポケモンカードのオリパおすすめ研究所」様に紹介されました！</div></div><span class="chev">›</span></div>
+      <div class="nrow link"><div><div class="tm">2026年3月24日 17:11</div><div class="bd">GRIM 利用規約改定のお知らせ【2026年3月17日最終改定】</div></div><span class="chev">›</span></div>
+      <div class="pager"><div class="pg">1</div></div>
+    </div>
+    <div class="gfoot">
+      <h4>GRIMについて</h4><div>利用規約</div><div>プライバシーポリシー</div><div>特定商取引法に基づく表記</div><div>反社会的勢力に対する基本方針</div>
+      <h4>オリパカテゴリー</h4><div>ポケモンカードオリパ</div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ 管理画面 -->
+<div class="screen">
+  <p class="cap">＊管理画面。左=③お知らせ配信（任意タイミング・予約可・詳細ページ自動生成）＋履歴／右=①個別お知らせ（任意テキスト）。①②自動通知はシステム生成。</p>
+  <div class="console">
+    <div class="side">
+      <div class="brand"><span class="blogo"></span> GRIM console</div>
+      <nav class="nav"><a>オリパ</a><a>ユーザー</a><a class="active">通知 / お知らせ</a><a>決済ログ</a><a>配送</a><a>ランク設定</a></nav>
+    </div>
+    <div class="main">
+      <h2 class="apage">通知 / お知らせ</h2>
+      <div class="grid2">
+        <div class="pbox">
+          <b style="font-size:14px">③ お知らせを配信（全体向け）</b>
+          <div class="label">種別</div>
+          <select class="input"><option>キャンペーン情報</option><option>イベント情報</option><option>誤表記・訂正のお知らせ</option><option>その他お知らせ（メンテナンス等）</option></select>
+          <div class="label">タイトル</div>
+          <input class="input" value="メンテナンス終了のお知らせ">
+          <div class="label">本文（長文・画像可 → 詳細ページに表示）</div>
+          <textarea class="input">本日のメンテナンスは終了しました。ご協力ありがとうございました。</textarea>
+          <div class="row2">
+            <div><div class="label">配信日時</div><select class="input"><option>即時配信</option><option>予約配信</option></select></div>
+            <div><div class="label">表示終了（任意）</div><input class="input" placeholder="無期限"></div>
+          </div>
+          <button class="save">プレビュー → 配信</button>
+          <div style="margin-top:18px"><b style="font-size:13px">配信履歴</b></div>
+          <table>
+            <tr><th>配信日時</th><th>種別</th><th>配信数</th><th>開封率</th></tr>
+            <tr><td>5/28 06:30</td><td><span class="tagt">その他</span></td><td>12,840</td><td>66%</td></tr>
+            <tr><td>3/25 12:10</td><td><span class="tagt">キャンペーン</span></td><td>9,800</td><td>78%</td></tr>
+          </table>
+        </div>
+        <div class="pbox">
+          <b style="font-size:14px">① 個別のお知らせを送信（任意テキスト）</b>
+          <div class="label">宛先</div>
+          <select class="input"><option>セグメント：条件で絞り込み</option><option>個別ユーザー（ID/メール検索）</option><option>セグメント：全ユーザー</option><option>セグメント：ゴールド会員</option></select>
+          <input class="input" style="margin-top:8px" placeholder="user_88213 / taro@example.com（個別ユーザー指定時）">
+          <div class="label">絞り込み条件（セグメント）<span style="font-size:10px;background:#eafaf4;color:#0f9d6e;padding:2px 7px;border-radius:6px;margin-left:6px">NEW</span></div>
+          <div style="border:1px solid var(--line);border-radius:8px;padding:12px;font-size:13px;display:flex;flex-direction:column;gap:9px">
+            <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" checked> ガチャIDで絞り込み
+              <select class="input" style="flex:1;margin:0;padding:6px 8px"><option>幻のSSRオリパ（#79）</option><option>夏祭りオリパ（#61）</option><option>ガチャID/名称で検索…</option></select></label>
+            <div style="font-size:11px;color:#888;margin:-3px 0 0 24px">指定ガチャを利用（抽選）したことがあるユーザーが対象</div>
+            <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" checked> 直近ログイン
+              <input class="input" style="width:64px;margin:0;padding:6px 8px" value="30"> 日以内</label>
+            <div style="font-size:11px;color:#888;margin:-3px 0 0 24px">指定日数以内にログインしたアクティブユーザーが対象</div>
+            <div style="border-top:1px dashed var(--line);padding-top:8px;font-weight:700">推定対象: 約 1,240人 <span style="font-weight:400;color:#888;font-size:11px">（複数条件はAND。ランク等とも組合せ可）</span></div>
+          </div>
+          <div class="label">タイトル</div>
+          <input class="input" value="【運営より】お問い合わせの件">
+          <div class="label">本文（任意テキスト）</div>
+          <textarea class="input">お問い合わせいただいた件について対応いたしました。</textarea>
+          <div class="label">遷移先（任意）</div>
+          <select class="input"><option>マイページ</option><option>配送状況</option><option>指定URL</option><option>なし</option></select>
+          <button class="save">送信</button>
+          <div style="margin-top:18px" class="small">
+            ※「あなたへの通知」「チャージ」（配送・ポイント付与・ランクアップ・招待特典・課金詳細・コイン有効期限）は<br>
+            　各アクション時に <b>自動送信</b>。管理画面は送信履歴の閲覧が中心。<br>
+            ※ 保持期間：あなたへの通知/チャージ = <b>1ヶ月（31日）</b>、お知らせ = <b>長期保持</b>。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function show(i,el){
+    document.querySelectorAll('.screen').forEach((s,n)=>s.classList.toggle('show',n===i));
+    document.querySelectorAll('.mt').forEach(t=>t.classList.remove('active'));if(el)el.classList.add('active');
+    window.scrollTo(0,0);
+  }
+</script>
+</body>
+</html>

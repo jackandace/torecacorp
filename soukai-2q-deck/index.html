@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>トレカ商事カンパニー｜2026年度 2Q業績報告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet" />
+<style>
+/* =========================================================
+   トレカ商事カンパニー 総会資料  Design Master v1.0 準拠
+   配色・余白・タイポグラフィはすべてここ(CSS変数)で一括管理
+   ========================================================= */
+:root{
+  --primary:#0F2D6B;     /* ネイビー */
+  --secondary:#1F5FFF;   /* アクセントブルー */
+  --bg:#FFFFFF;
+  --gray:#F5F6F8;        /* ライトグレー */
+  --line:#E3E6EC;
+  --ink:#1A2233;         /* 本文 */
+  --ink-sub:#566070;     /* 補足テキスト（投影で読めるよう少し濃く） */
+  --success:#00A76F;
+  --warning:#FFB020;
+  --danger:#FF5630;
+
+  --slide-w:1280px;
+  --slide-h:720px;
+  --pad:64px;            /* スライド余白(大きめ) */
+
+  --font:"Noto Sans JP",-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN",sans-serif;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:#5b6172;font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;}
+
+/* ---- 画面表示時のビューア(中央寄せ・スクロール) ---- */
+.deck{display:flex;flex-direction:column;align-items:center;gap:28px;padding:40px 0 80px;}
+
+.slide{
+  position:relative;
+  width:var(--slide-w);
+  height:var(--slide-h);
+  background:var(--bg);
+  overflow:hidden;
+  box-shadow:0 12px 40px rgba(0,0,0,.28);
+  border-radius:6px;
+}
+
+/* スライド共通：タイトル→結論→図解→補足 の縦組み */
+.slide-inner{position:absolute;inset:0;padding:var(--pad);display:flex;flex-direction:column;}
+
+/* ヘッダ（ページ番号＋タイトル） */
+.s-head{display:flex;align-items:flex-start;gap:18px;margin-bottom:6px;}
+.s-no{
+  flex:0 0 auto;width:46px;height:46px;border-radius:10px;background:var(--primary);
+  color:#fff;font-weight:900;font-size:22px;display:flex;align-items:center;justify-content:center;
+}
+.s-title{font-size:30px;font-weight:900;color:var(--primary);letter-spacing:.02em;line-height:1.2;padding-top:4px;}
+.s-msg{font-size:18px;font-weight:500;color:var(--ink-sub);margin:4px 0 0 64px;}
+.s-msg.noindent{margin-left:0;}
+/* ページ番号（右下） */
+.s-page{position:absolute;right:30px;bottom:22px;font-size:13px;font-weight:700;color:#9aa3b2;z-index:6;letter-spacing:.04em;}
+.divider .s-page{color:rgba(255,255,255,.5);}
+
+/* フッタ */
+.s-foot{position:absolute;left:var(--pad);right:var(--pad);bottom:26px;display:flex;justify-content:space-between;align-items:center;
+  font-size:12px;color:var(--ink-sub);border-top:1px solid var(--line);padding-top:10px;}
+.s-foot .brand{font-weight:700;color:var(--primary);}
+.unit{font-size:12px;color:var(--ink-sub);position:absolute;right:64px;top:70px;}
+
+/* ============ 1. 表紙 ============ */
+.cover{background:linear-gradient(135deg,#0a2257 0%,#0F2D6B 55%,#143a86 100%);}
+.cover .slide-inner{padding:0;}
+.cover-left{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:88px;color:#fff;z-index:2;}
+.cover-logo{display:flex;align-items:center;gap:16px;margin-bottom:54px;}
+.cover-logo .mark{width:64px;height:64px;border:3px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;}
+.cover-logo .name{font-size:20px;font-weight:700;letter-spacing:.08em;}
+.cover h1{font-size:62px;font-weight:900;line-height:1.15;letter-spacing:.01em;}
+.cover h1 .fy{display:block;font-size:34px;font-weight:700;color:#9fc0ff;margin-bottom:8px;}
+.cover .sub{margin-top:34px;font-size:16px;color:#cdd9f2;line-height:1.9;}
+.cover .deco{position:absolute;right:-120px;top:-120px;width:520px;height:520px;border:64px solid rgba(255,255,255,.05);border-radius:50%;}
+.cover .deco2{position:absolute;right:90px;bottom:-160px;width:360px;height:360px;border:40px solid rgba(31,95,255,.18);border-radius:50%;}
+
+/* ============ 2. 事業紹介グリッド ============ */
+.biz-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:30px;flex:1;align-content:center;}
+.biz-tile{background:var(--gray);border-radius:14px;padding:24px 18px;display:flex;flex-direction:column;align-items:flex-start;gap:14px;}
+.biz-tile .ic{width:48px;height:48px;border-radius:12px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;}
+.biz-tile .nm{font-size:16px;font-weight:700;color:var(--ink);line-height:1.4;}
+.biz-note{text-align:center;font-size:16px;color:var(--ink-sub);font-weight:500;margin-top:8px;}
+
+/* ============ 3-6. 事業紹介 split ============ */
+.biz{display:flex;gap:48px;flex:1;align-items:center;margin-top:6px;}
+.photo{flex:0 0 440px;height:380px;border-radius:16px;background:var(--gray);border:2px dashed var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--ink-sub);}
+.photo .lbl{font-size:14px;font-weight:700;}
+.biz-body{flex:1;}
+.biz-body .lead{font-size:21px;font-weight:700;color:var(--primary);line-height:1.6;margin-bottom:24px;}
+.biz-ul{display:flex;flex-direction:column;gap:18px;}
+.biz-ul .li{display:flex;gap:14px;align-items:flex-start;font-size:18px;line-height:1.6;}
+.biz-ul .li .b{flex:0 0 auto;width:26px;height:26px;border-radius:8px;background:rgba(31,95,255,.12);color:var(--secondary);display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.biz-stat{margin-top:26px;display:inline-flex;align-items:baseline;gap:12px;background:var(--gray);border-radius:12px;padding:14px 22px;}
+.biz-stat .v{font-size:30px;font-weight:900;color:var(--primary);}
+.biz-stat .l{font-size:14px;color:var(--ink-sub);}
+.imgbox{position:relative;border-radius:16px;overflow:hidden;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;}
+.imgbox img{position:relative;z-index:2;width:100%;height:100%;object-fit:contain;display:block;}
+.imgbox .ph{position:absolute;z-index:1;inset:0;background:var(--gray);border:2px dashed var(--line);border-radius:16px;color:var(--ink-sub);font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;line-height:1.5;}
+.imgbox .ph small{font-size:11px;font-weight:500;opacity:.7;}
+.logo-wall{flex:0 0 440px;display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.logo-wall .lg{height:88px;border-radius:10px;background:var(--gray);border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:#aebbd6;font-weight:900;font-size:13px;}
+
+/* ============ KPIカード ============ */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:26px;flex:1;align-content:center;}
+.kpi{background:var(--gray);border-radius:14px;padding:26px 24px;display:flex;flex-direction:column;border-top:4px solid var(--primary);}
+.kpi .label{font-size:15px;color:var(--ink-sub);font-weight:700;}
+.kpi .val{font-size:48px;font-weight:900;color:var(--primary);line-height:1.1;margin-top:10px;letter-spacing:-.01em;}
+.kpi .val .u{font-size:18px;font-weight:700;color:var(--ink-sub);margin-left:4px;}
+.kpi .meta{margin-top:14px;font-size:13px;color:var(--ink-sub);line-height:1.7;}
+.kpi .badge{display:inline-block;margin-top:14px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:700;align-self:flex-start;}
+.kpi .badge.up{background:rgba(0,167,111,.12);color:var(--success);}
+.kpi .badge.down{background:rgba(255,86,48,.12);color:var(--danger);}
+.kpi .badge.flat{background:rgba(15,45,107,.10);color:var(--primary);}
+.kpi.neg .val{color:var(--danger);}
+
+/* ============ ドーナツ ============ */
+.split{display:flex;gap:48px;flex:1;align-items:center;margin-top:10px;}
+.donut-wrap{flex:0 0 380px;position:relative;display:flex;align-items:center;justify-content:center;}
+.donut-center{position:absolute;text-align:center;}
+.donut-center .big{font-size:46px;font-weight:900;color:var(--primary);line-height:1;}
+.donut-center .cap{font-size:14px;color:var(--ink-sub);font-weight:700;margin-bottom:6px;}
+.donut-center .u{font-size:16px;color:var(--ink-sub);}
+.legend{flex:1;display:flex;flex-direction:column;gap:14px;}
+.legend .row{display:flex;align-items:center;gap:14px;font-size:18px;}
+.legend .dot{width:16px;height:16px;border-radius:4px;flex:0 0 auto;}
+.legend .nm{flex:1;font-weight:500;}
+.legend .pct{font-weight:900;color:var(--primary);font-size:22px;}
+
+/* ============ ゲージ（達成率） ============ */
+.gauge-layout{display:flex;gap:56px;flex:1;align-items:center;}
+.gauge-wrap{flex:0 0 300px;position:relative;display:flex;align-items:center;justify-content:center;}
+.gauge-center{position:absolute;text-align:center;}
+.gauge-center .pct{font-size:58px;font-weight:900;color:var(--primary);line-height:1;}
+.gauge-center .cap{font-size:14px;color:var(--ink-sub);font-weight:700;}
+.gauge-bars{flex:1;display:flex;flex-direction:column;gap:30px;}
+.gbar .top{display:flex;justify-content:space-between;font-size:16px;margin-bottom:8px;color:var(--ink-sub);font-weight:700;}
+.gbar .top .v{font-size:26px;font-weight:900;color:var(--primary);}
+.gbar .track{height:26px;background:var(--gray);border-radius:8px;overflow:hidden;}
+.gbar .fill{height:100%;border-radius:8px;}
+.gbar .fill.target{background:var(--line);}
+.gbar .fill.actual{background:linear-gradient(90deg,var(--secondary),var(--primary));}
+.diff{margin-top:22px;font-size:18px;font-weight:700;}
+.diff .down{color:var(--danger);}
+.diff .up{color:#00875a;}
+
+/* ============ 前年比較棒 ============ */
+.cmp-row{display:flex;gap:60px;flex:1;align-items:flex-end;justify-content:center;padding:30px 40px 0;}
+.cmp-col{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.cmp-bars{display:flex;align-items:flex-end;gap:34px;height:340px;}
+.cmp-bar{width:88px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;}
+.cmp-bar .bar{width:100%;border-radius:8px 8px 0 0;}
+.cmp-bar .bar.prev{background:var(--line);}
+.cmp-bar .bar.cur{background:linear-gradient(180deg,var(--secondary),var(--primary));}
+.cmp-bar .v{font-size:24px;font-weight:900;color:var(--primary);margin-bottom:8px;}
+.cmp-bar .yr{font-size:13px;color:var(--ink-sub);margin-top:10px;font-weight:700;text-align:center;line-height:1.4;}
+.cmp-col .ttl{font-size:18px;font-weight:900;color:var(--primary);}
+.cmp-col .delta{font-size:15px;font-weight:700;padding:5px 14px;border-radius:999px;background:rgba(107,118,134,.14);color:var(--ink-sub);}
+.cmp-col .delta.good{background:rgba(0,167,111,.14);color:#00875a;}
+.cmp-col .delta.warn{background:rgba(255,176,32,.18);color:#b06f00;}
+.cmp-col .delta.bad{background:rgba(255,86,48,.12);color:var(--danger);}
+.cmp-bar .sub{font-size:11px;color:var(--ink-sub);margin-top:2px;}
+.yoy-body{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px;}
+.yoy-body .cmp-row{flex:none;padding-top:0;}
+.yoy-body .cmp-bars{height:190px;}
+.yoy-note{text-align:center;font-size:12px;color:#7a8699;line-height:1.5;}
+.yoy-op{display:flex;align-items:center;justify-content:center;gap:14px;background:rgba(0,167,111,.09);border:1px solid rgba(0,167,111,.35);border-radius:14px;padding:16px;font-size:22px;font-weight:900;color:var(--primary);}
+.yoy-op .lab{font-size:16px;color:var(--ink-sub);}
+.yoy-op .prev{color:var(--danger);}
+.yoy-op .cur{color:#00875a;}
+.yoy-op .arr{color:var(--ink-sub);}
+.yoy-op .tag{background:var(--success);color:#fff;border-radius:999px;padding:5px 16px;font-size:15px;}
+
+/* ============ 折れ線 ============ */
+.line-layout{display:flex;gap:40px;flex:1;align-items:center;}
+.line-wrap{flex:1;}
+.line-side{flex:0 0 230px;background:var(--gray);border-radius:14px;padding:28px;text-align:center;}
+.line-side .cap{font-size:14px;color:var(--ink-sub);font-weight:700;}
+.line-side .big{font-size:50px;font-weight:900;color:var(--primary);margin:6px 0;}
+.line-side .delta{display:inline-block;margin-top:8px;padding:6px 14px;border-radius:999px;background:rgba(0,167,111,.12);color:var(--success);font-weight:900;font-size:18px;}
+.line-legend{display:flex;gap:20px;justify-content:center;margin-top:8px;font-size:14px;color:var(--ink-sub);}
+.line-legend .it{display:flex;align-items:center;gap:8px;}
+.line-legend .ln{width:22px;height:4px;border-radius:2px;}
+
+/* ============ ハイライト ============ */
+.hl-list{display:flex;flex-direction:column;gap:16px;flex:1;justify-content:center;margin-top:10px;}
+.hl{display:flex;gap:20px;align-items:center;background:var(--gray);border-radius:14px;padding:20px 26px;border-left:4px solid var(--secondary);}
+.hl .ic{flex:0 0 auto;width:52px;height:52px;border-radius:12px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;}
+.hl .tx .t{font-size:20px;font-weight:900;color:var(--primary);}
+.hl .tx .d{font-size:14px;color:var(--ink-sub);margin-top:3px;}
+
+/* ============ 総評（レーダー） ============ */
+.radar-layout{display:flex;gap:50px;flex:1;align-items:center;justify-content:center;}
+.radar-note{flex:0 0 300px;display:flex;flex-direction:column;gap:14px;}
+.radar-note .it{background:var(--gray);border-radius:12px;padding:16px 20px;}
+.radar-note .it .k{font-size:15px;font-weight:900;color:var(--primary);}
+.radar-note .it .d{font-size:13px;color:var(--ink-sub);margin-top:4px;line-height:1.6;}
+
+/* ============ 課題カード ============ */
+.issue-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;flex:1;align-content:center;margin-top:10px;}
+.issue{background:var(--gray);border-radius:14px;padding:28px 24px;border-top:4px solid var(--warning);}
+.issue .ic{width:48px;height:48px;border-radius:12px;background:rgba(255,176,32,.15);color:var(--warning);display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+.issue .t{font-size:19px;font-weight:900;color:var(--primary);line-height:1.4;}
+.issue .d{font-size:14px;color:var(--ink-sub);margin-top:10px;line-height:1.7;}
+
+/* ============ 実行アクション ============ */
+.action-table{flex:1;display:flex;flex-direction:column;gap:16px;justify-content:center;margin-top:10px;}
+.act-row{display:flex;align-items:center;gap:24px;background:var(--gray);border-radius:14px;padding:20px 26px;}
+.act-row .issue-c{flex:0 0 280px;font-size:18px;font-weight:900;color:var(--primary);}
+.act-row .arrow{flex:0 0 auto;color:var(--secondary);font-size:24px;font-weight:900;}
+.act-row .measures{flex:1;display:flex;flex-direction:column;gap:8px;}
+.act-row .measures .m{font-size:16px;color:var(--ink);display:flex;gap:10px;align-items:center;}
+.act-row .measures .m .d{flex:0 0 auto;width:6px;height:6px;border-radius:50%;background:var(--secondary);}
+
+/* ============ テーブル（予測・着地） ============ */
+.tbl-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;}
+.ftable{width:100%;border-collapse:collapse;}
+.ftable th,.ftable td{padding:16px 20px;text-align:right;border-bottom:1px solid var(--line);}
+.ftable thead th{font-size:14px;color:var(--ink-sub);font-weight:700;background:var(--gray);border-bottom:2px solid var(--line);}
+.ftable th:first-child,.ftable td:first-child{text-align:left;font-weight:900;color:var(--primary);font-size:16px;}
+.ftable td{font-weight:900;color:var(--primary);font-size:24px;}
+.ftable td.neg{color:var(--danger);}
+.ftable td.rate{color:var(--secondary);}
+.ftable tfoot td{font-size:20px;}
+.tbl-note{margin-top:22px;font-size:15px;color:var(--ink-sub);text-align:center;background:var(--gray);border-radius:10px;padding:14px 18px;line-height:1.6;}
+
+/* ============ Before/After 図解 ============ */
+.ba-sub{text-align:center;font-size:17px;color:var(--ink-sub);font-weight:500;margin-top:6px;}
+.ba-layout{display:flex;align-items:center;justify-content:center;gap:34px;flex:1;}
+.ba-card{flex:1;max-width:380px;border-radius:16px;padding:34px;min-height:280px;display:flex;flex-direction:column;}
+.ba-card.before{background:var(--gray);border:2px solid var(--line);}
+.ba-card.after{background:var(--primary);color:#fff;}
+.ba-card .tag{font-size:14px;font-weight:900;letter-spacing:.1em;margin-bottom:18px;}
+.ba-card.before .tag{color:var(--ink-sub);}
+.ba-card.after .tag{color:#9fc0ff;}
+.ba-card .h{font-size:26px;font-weight:900;line-height:1.4;}
+.ba-card.before .h{color:var(--primary);}
+.ba-card .desc{margin-top:16px;font-size:15px;line-height:1.9;}
+.ba-card.before .desc{color:var(--ink-sub);}
+.ba-card.after .desc{color:#cdd9f2;}
+.ba-arrow{flex:0 0 auto;font-size:48px;color:var(--secondary);font-weight:900;}
+.ba-foot{text-align:center;font-size:15px;color:var(--ink-sub);margin-top:6px;font-weight:500;}
+
+/* ============ 目指す姿（数式） ============ */
+.eq-lead{text-align:center;font-size:24px;font-weight:900;color:var(--primary);margin-top:24px;}
+.eq{display:flex;align-items:center;justify-content:center;gap:22px;flex:1;}
+.eq-box{width:236px;min-height:210px;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;text-align:center;}
+.eq-box.a,.eq-box.b{background:var(--gray);border:2px solid var(--line);}
+.eq-box.r{background:var(--primary);color:#fff;}
+.eq-box .ic{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(31,95,255,.12);color:var(--secondary);}
+.eq-box.r .ic{background:rgba(255,255,255,.16);color:#fff;}
+.eq-box .t{font-size:22px;font-weight:900;color:var(--primary);}
+.eq-box.r .t{color:#fff;}
+.eq-box .s{font-size:13px;color:var(--ink-sub);}
+.eq-box.r .s{color:#cdd9f2;}
+.eq-op{font-size:40px;font-weight:900;color:var(--ink-sub);}
+.eq-foot{text-align:center;font-size:16px;color:var(--ink-sub);margin-top:2px;font-weight:500;}
+
+/* ============ 総括 ============ */
+.sum-list{display:flex;flex-direction:column;gap:16px;flex:1;justify-content:center;margin-top:6px;}
+.sum{display:flex;gap:18px;align-items:center;font-size:21px;}
+.sum .ic{flex:0 0 auto;width:40px;height:40px;border-radius:50%;background:rgba(0,167,111,.12);color:var(--success);display:flex;align-items:center;justify-content:center;}
+.sum .tx{font-weight:700;color:var(--ink);}
+.sum-banner{margin-top:18px;background:var(--primary);color:#fff;border-radius:14px;padding:22px;text-align:center;font-size:20px;font-weight:900;letter-spacing:.02em;}
+
+/* ============ 結論バッジ（達成度ラベル） ============ */
+.cbadge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;font-size:15px;font-weight:900;}
+.cbadge.good{background:rgba(0,167,111,.14);color:#00875a;}
+.cbadge.warn{background:rgba(255,176,32,.18);color:#b06f00;}
+.cbadge.bad{background:rgba(255,86,48,.14);color:#d83a18;}
+
+/* ============ 用語注釈 ============ */
+.s-terms{position:absolute;left:64px;right:64px;bottom:56px;font-size:13px;color:#7a8699;line-height:1.5;}
+
+/* 幅広バッジ（要約 / モデル などの非番号スライド用） */
+.s-no.wide{width:auto;padding:0 16px;font-size:16px;}
+
+/* ============ エグゼクティブサマリー ============ */
+.exec-pts{display:flex;flex-direction:column;gap:14px;margin-top:22px;}
+.exec-pt{display:flex;gap:18px;align-items:center;background:var(--gray);border-radius:14px;padding:20px 26px;}
+.exec-pt .n{flex:0 0 auto;width:40px;height:40px;border-radius:10px;background:var(--primary);color:#fff;font-weight:900;font-size:18px;display:flex;align-items:center;justify-content:center;}
+.exec-pt .tx{flex:1;}
+.exec-pt .tx .t{font-size:21px;font-weight:900;color:var(--primary);}
+.exec-pt .tx .d{font-size:14px;color:var(--ink-sub);margin-top:3px;}
+.exec-kpis{display:flex;gap:16px;margin-top:16px;}
+.exec-kpi{flex:1;background:var(--primary);color:#fff;border-radius:12px;padding:14px 16px;text-align:center;}
+.exec-kpi .l{font-size:12px;color:#9fc0ff;font-weight:700;}
+.exec-kpi .v{font-size:30px;font-weight:900;margin-top:4px;line-height:1;}
+.exec-kpi .u{font-size:12px;color:#cdd9f2;margin-top:2px;}
+
+/* ============ 章扉（セクション区切り） ============ */
+.divider{background:linear-gradient(135deg,#0a2257 0%,#0F2D6B 60%,#143a86 100%);color:#fff;}
+.divider .slide-inner{justify-content:center;}
+.divider .slide-inner>div{position:relative;z-index:2;}
+.dv-no{position:absolute;right:70px;top:50%;transform:translateY(-50%);font-size:260px;font-weight:900;color:rgba(255,255,255,.09);line-height:.8;z-index:1;}
+.dv-deco{position:absolute;right:-120px;top:-120px;width:480px;height:480px;border:60px solid rgba(255,255,255,.05);border-radius:50%;}
+.dv-deco2{position:absolute;left:-100px;bottom:-140px;width:320px;height:320px;border:36px solid rgba(31,95,255,.16);border-radius:50%;}
+.dv-label{font-size:15px;color:#9fc0ff;font-weight:700;letter-spacing:.28em;}
+.dv-title{font-size:54px;font-weight:900;margin-top:10px;}
+.dv-list{margin-top:28px;display:flex;flex-direction:column;gap:12px;}
+.dv-list .it{font-size:17px;color:#cdd9f2;display:flex;align-items:center;gap:12px;}
+.dv-list .it::before{content:"";width:7px;height:7px;border-radius:50%;background:#1F5FFF;display:inline-block;flex:0 0 auto;}
+
+/* ============ 収益モデル（お金の流れ図） ============ */
+.flow{display:flex;align-items:center;gap:18px;flex:1;margin-top:10px;}
+.flow-col{flex:1;display:flex;flex-direction:column;gap:14px;}
+.flow-arrow{flex:0 0 auto;color:var(--secondary);font-size:34px;font-weight:900;}
+.flow-box{background:var(--gray);border-radius:14px;padding:24px 20px;text-align:center;}
+.flow-box.tall{min-height:250px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.flow-box .h{font-weight:900;color:var(--primary);font-size:20px;}
+.flow-box .d{font-size:13px;color:var(--ink-sub);margin-top:8px;}
+.flow-box .chips{display:flex;flex-direction:column;gap:8px;width:100%;margin-top:16px;}
+.flow-box .chip{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-weight:700;color:var(--primary);}
+.rev-col{justify-content:center;}
+.rev{border-radius:12px;padding:16px 18px;color:#fff;}
+.rev .t{font-weight:900;font-size:18px;}
+.rev .s{font-size:12px;margin-top:4px;opacity:.92;}
+.rev.buy{background:#0F2D6B;}
+.rev.fee{background:#1F5FFF;}
+.rev.stock{background:#00A76F;}
+
+/* ============ 印刷(PDF)：1スライド=1ページ ============ */
+@page{size:1280px 720px;margin:0;}
+@media print{
+  html,body{background:#fff;}
+  .deck{gap:0;padding:0;}
+  .slide{box-shadow:none;border-radius:0;page-break-after:always;break-after:page;}
+  .slide:last-child{page-break-after:auto;}
+}
+</style>
+</head>
+<body>
+<div class="deck" id="deck"></div>
+
+<script>
+/* =========================================================
+   ★ ここを編集すれば全スライドに反映されます ★
+   数値・テキストはすべてこのDATAに集約。
+   グラフ（ドーナツ/ゲージ/棒/折れ線/レーダー）は自動描画。
+   ========================================================= */
+const DATA = {
+  company:"トレカ商事カンパニー",
+  group:"株式会社パレットグループ",
+  presenter:"鈴木",
+  date:"2026年6月26日",
+  fy:"2026年度 2Q",
+
+  /* ---- 章扉（セクション） ---- */
+  sections:[
+    {num:"01", label:"SECTION", title:"事業紹介", items:["トレカ商事とは／収益モデル","ネットオリパ事業／卸事業／トレジ自販機事業","クリエイティブ事業／開業支援事業"]},
+    {num:"02", label:"SECTION", title:"2Q 業績", items:["売上構成比・計上基準の変更","KPI・進捗・前年同期比較","問い合わせ推移・ハイライト・総評"]},
+    {num:"03", label:"SECTION", title:"課題と施策", items:["現状の課題・懸念事項","課題に対する実行アクション"]},
+    {num:"04", label:"SECTION", title:"将来戦略", items:["3Q・4Q見通し／今期着地予測","TGCペイメント／AI活用","目指す姿・総括"]},
+  ],
+
+  /* ---- エグゼクティブサマリー ---- */
+  exec:{
+    points:[
+      {bt:"good", t:"上半期売上 87.3百万円を計上", d:"2025/12〜2026/05（2Q累計）"},
+      {bt:"good", t:"粗利率71.7%・営業利益率56.0%の高収益体質", d:"粗利 62.6百万円"},
+      {bt:"good", t:"営業利益 48.9百万円の黒字を確保", d:"原価・固定費を抑制し利益を確保"},
+    ],
+    kpis:[
+      {l:"売上高", v:"87.3", u:"百万円"},
+      {l:"粗利", v:"62.6", u:"百万円"},
+      {l:"営業利益", v:"48.9", u:"百万円"},
+      {l:"営業利益率", v:"56.0", u:"%"},
+    ],
+  },
+
+  /* ---- 収益モデル図（お金の流れ） ---- */
+  revenue:{
+    customer:{h:"トレカ事業者・ユーザー", d:"ショップ／エンドユーザー"},
+    company:{h:"トレカ商事", chips:["トレジ自販機","オリパ基盤","卸・開業支援","保守・運用"]},
+    types:[
+      {cls:"buy", t:"物販売上", s:"自販機販売・卸販売"},
+      {cls:"fee", t:"手数料売上", s:"オリパ運用（手数料のみ計上）"},
+      {cls:"stock", t:"ストック収益", s:"保守・システム利用料"},
+    ],
+    note:"※ 手数料売上計上：取扱額(GMV)ではなく、当社の手数料収益のみを売上として計上",
+  },
+
+  /* ---- 月次業績推移（確定P/Lより・百万円） ---- */
+  monthly:{
+    months:["12月","1月","2月","3月","4月","5月"],
+    sales:[7.42,17.31,13.29,13.06,18.23,18.00],
+    gross:[4.39,13.29,10.14,9.41,12.19,13.14],
+    op:[1.83,10.69,7.80,6.88,10.12,11.53],
+    unit:"百万円",
+  },
+
+  /* ---- 2. 事業一覧 ---- */
+  services:{
+    items:[
+      {icon:"vending", name:"トレジ自販機 販売"},
+      {icon:"monitor", name:"トレジ自販機 運用"},
+      {icon:"code",    name:"ネットオリパ 開発"},
+      {icon:"yen",     name:"ネットオリパ 運用"},
+      {icon:"film",    name:"アニメーション制作"},
+      {icon:"cart",    name:"卸販売（卸価格）"},
+      {icon:"shield",  name:"保守・システム利用"},
+      {icon:"box",     name:"開業支援（什器等）"},
+    ],
+    note:"現在は「ネットオリパ事業」が売上の中心です",
+  },
+
+  /* ---- 3-7. 事業紹介（売上構成比の5分類と1対1で対応） ---- */
+  biz:[
+    {no:3, icon:"monitor", title:"ネットオリパ事業", msg:"システム提供から運用まで支援する売上の柱",
+     lead:"オンラインオリパのプラットフォームを開発・提供し、運用代行まで対応。",
+     bullets:["プラットフォームの開発・提供","運用代行までワンストップで支援","新規導入ショップが継続的に拡大"],
+     stat:{v:"54.5%", l:"売上構成比（ネットオリパ事業）"},
+     terms:["※ オリパ＝オンラインで購入するトレカくじ（オンラインくじ）"],
+     images:["img/oripa.svg"]},
+    {no:4, icon:"cart", title:"卸事業", msg:"人気トレカ・サプライを卸価格で安定供給",
+     lead:"トレカ・ホビーの仕入れサービス『トレホビ』で、ショップの品揃えを支える。",
+     bullets:["卸価格でのカード・サプライ供給","多種多様な商品ラインナップを提供","初期費用・月額利用料は無料"],
+     stat:{v:"28.1%", l:"売上構成比（卸事業）"},
+     images:["img/oroshi.png"]},
+    {no:5, icon:"vending", title:"トレジ自販機事業", msg:"店舗運営の省人化と売上向上を実現",
+     lead:"トレカを24時間販売できる自販機を、販売・運用の両面で提供。",
+     bullets:["無人販売で人件費を抑えつつ売上機会を最大化","販売データの可視化で在庫と品揃えを最適化","設置から運用までワンストップで支援"],
+     stat:{v:"12.2%", l:"売上構成比（トレジ自販機事業）"},
+     images:["img/jihanki.svg"]},
+    {no:6, icon:"film", title:"クリエイティブ事業", msg:"演出アニメーションで体験価値を高める",
+     lead:"オリパのガチャ演出など、自社制作のアニメーションでブランド体験を向上。",
+     bullets:["ガチャ演出アニメーションの制作","オリパ事業とのシナジーを創出","ブランド体験の質を高める"],
+     stat:{v:"3.0%", l:"売上構成比（クリエイティブ事業）"},
+     images:["img/anime.png"]},
+    {no:7, icon:"box", title:"開業支援事業", msg:"開業に必要なサービスを一括提供",
+     lead:"什器・備品の提供から仕入れまで、トレカ店の立ち上げをまとめて支援。",
+     bullets:["什器・備品・POS・ショーケース等を一括提供","店舗立ち上げをまとめて支援","開業後の運用フォローまで対応"],
+     stat:{v:"2.2%", l:"売上構成比（開業支援事業）"},
+     images:["img/kaigyo.png"]},
+  ],
+
+  /* ---- 7. 売上構成比（大分類） ---- */
+  mix:{
+    total:87.3, unit:"百万円", caption:"2Q累計売上（上半期）",
+    items:[
+      {name:"ネットオリパ事業（運用・開発）", pct:54.5, color:"#0F2D6B"},
+      {name:"卸事業（カード卸）", pct:28.1, color:"#1F5FFF"},
+      {name:"トレジ自販機事業（販売・運用）", pct:12.2, color:"#5b86e5"},
+      {name:"クリエイティブ事業（アニメ）", pct:3.0, color:"#9fb6e8"},
+      {name:"開業支援事業（什器備品）", pct:2.2, color:"#c7d3ec"},
+    ]
+  },
+
+  /* ---- 8. 計上基準変更 ---- */
+  basis:{
+    before:{tag:"BEFORE", h:"GMV計上", desc:"全ショップ枠の取扱額を売上計上。<br/>売上規模が大きく見える。"},
+    after:{tag:"AFTER", h:"手数料売上計上", desc:"弊社の手数料収益のみを計上。<br/>実態に即した利益重視の指標へ。"},
+    foot:"計上方法の変更により、前年や期初目標との単純比較にはご注意ください",
+  },
+
+  /* ---- 9. KPIサマリー ---- */
+  kpi:[
+    {label:"売上高", val:"87.3", unit:"百万円", meta:"上半期累計（25/12〜26/05）", badge:"2Q累計実績", dir:"flat"},
+    {label:"粗利", val:"62.6", unit:"百万円", meta:"粗利率 71.7%", badge:"高水準", dir:"up"},
+    {label:"営業利益", val:"48.9", unit:"百万円", meta:"営業利益率 56.0%", badge:"黒字確保", dir:"up"},
+    {label:"問い合わせ", val:"314", unit:"件", meta:"2Q累計（25/12〜26/05）", badge:"前年比 +105.2%", dir:"up"},
+  ],
+
+  /* ---- 10/11. 進捗ゲージ ---- */
+  salesProgress:{ rate:114, target:76.8, actual:87.3, diff:"+10.5", unit:"百万円" },
+  grossProgress:{ rate:156, target:40.0, actual:62.6, diff:"+22.6", unit:"百万円" },
+
+  /* ---- 12. 前年同期比較 ---- */
+  yoy:{
+    sales:{ prev:32.6, cur:87.3, delta:"前年比 +168%", tone:"good", prevNote:"手数料換算" },
+    gross:{ prev:15.1, cur:62.6, delta:"前年比 +314%", tone:"good" },
+    op:{ prev:"▲14.9", cur:"+48.9", tag:"黒字転換" },
+    unit:"百万円"
+  },
+
+  /* ---- 13. 問い合わせ推移 ---- */
+  inquiry:{
+    months:["12月","1月","2月","3月","4月","5月"],
+    y2025:[16,25,30,30,27,25],
+    y2026:[59,55,39,67,52,42],
+    total:"314", delta:"+105.2%", unit:"件"
+  },
+
+  /* ---- 14. 2Qハイライト ---- */
+  highlights:[
+    {icon:"chart",   title:"ネットオリパ運用の新規導入ショップが拡大", desc:"プラットフォーム利用ショップが着実に増加"},
+    {icon:"users",   title:"大型ショップとの運用契約を複数獲得", desc:"安定的なストック収益の基盤を強化"},
+    {icon:"vending", title:"自販機設置の大型案件が進行", desc:"設置台数の拡大により販売・運用が伸長"},
+    {icon:"shield",  title:"保守契約数が安定的に増加", desc:"継続課金による収益の底上げ"},
+  ],
+
+  /* ---- 15. 総評レーダー（5点満点・※暫定値） ---- */
+  radar:{
+    axes:[
+      {k:"売上", v:4.0, d:"上半期 売上87.3百万円"},
+      {k:"利益", v:4.5, d:"粗利率72%・営業益率56%の高収益"},
+      {k:"問い合わせ", v:5.0, d:"前年比+105%・需要が倍増"},
+      {k:"将来性", v:4.5, d:"新規導入・運用拡大が進行"},
+    ]
+  },
+
+  /* ---- 16. 課題 ---- */
+  issues:[
+    {title:"売上構成の偏り", desc:"ネットオリパ運用への依存度が高い"},
+    {title:"人材リソースの不足", desc:"エンジニア・CS・PMの負荷が増大"},
+    {title:"外部環境の変化リスク", desc:"法規制・カード市場の変動 等"},
+  ],
+
+  /* ---- 17. 実行アクション ---- */
+  actions:[
+    {issue:"売上構成の偏り", measures:["TGCペイメントの開発・展開を開始","新規サービスの拡大"]},
+    {issue:"人材リソースの不足", measures:["AI活用による業務効率化を推進","採用強化と育成体制の整備"]},
+    {issue:"外部環境の変化リスク", measures:["コンプライアンス体制の強化","市場・競合の情報収集を強化"]},
+  ],
+
+  /* ---- 18. 3Q・4Q見通し ---- */
+  forecast:{
+    unit:"百万円",
+    header:["区分","3Q（予測）","4Q（予測）","下期計（予測）"],
+    rows:[
+      {k:"売上高", vals:["58.0","62.0","120.0"]},
+      {k:"粗利",   vals:["40.0","43.0","83.0"]},
+    ],
+    note:"GMV拡大（直近比+1.5倍）・新規ショップ・入金サイクル改善・TGCペイメント導入により増収を見込む",
+  },
+
+  /* ---- 19. 今期着地予測 ---- */
+  landing:{
+    unit:"百万円",
+    header:["項目","予測着地","期初目標","達成率"],
+    rows:[
+      {k:"売上高", vals:["207.3","94.8","219%"]},
+      {k:"粗利",   vals:["145.6","81.2","179%"]},
+    ],
+    note:"上半期実績（売上87.3／粗利62.6）＋下期見通しによる着地。期初計画を大きく上回る見込み",
+  },
+
+  /* ---- 20. TGCペイメント ---- */
+  tgc:{
+    sub:"決済機能を内製化し、より外部市場の売上を取りにいく",
+    before:{tag:"現状", h:"自社サービス内に限定", desc:"自社サービス内での決済・収益化にとどまる。"},
+    after:{tag:"TGCペイメント", h:"外部市場へ展開", desc:"外部サービスへ決済機能を提供。<br/>多様な事業者の売上に参画する。"},
+  },
+
+  /* ---- 21. AI活用 ---- */
+  ai:{
+    sub:"AIで業務を包括代替し、固定費を圧縮する",
+    before:{tag:"現状", h:"人による対応に依存", desc:"CS・PM・QA・保守運用を人手で対応。<br/>規模拡大に伴い固定費が増加。"},
+    after:{tag:"AI活用後", h:"AIエージェントが代替", desc:"誰でも同じ品質で対応可能に。<br/>自動化・効率化で固定費を抑制。"},
+  },
+
+  /* ---- 22. 目指す姿 ---- */
+  aim:{
+    lead:"売上を伸ばす。しかし、固定費は上げない。",
+    boxes:[
+      {cls:"a", icon:"chart", t:"売上拡大", s:"多角化"},
+      {cls:"b", icon:"ai",    t:"固定費最適化", s:"AI活用"},
+      {cls:"r", icon:"yen",   t:"利益最大化", s:""},
+    ],
+    ops:["×","="],
+    foot:"持続的な成長と高収益体質を目指す",
+  },
+
+  /* ---- 23. 総括 ---- */
+  summary:{
+    items:[
+      "2Qは計画を上回り好調に進捗（売上114%・粗利156%）",
+      "課題に対して着実にアクションを実行中",
+      "下期は増収増益での着地を見込む",
+      "TGCペイメントとAI活用で長期的な成長基盤を構築",
+    ],
+    banner:"ご期待に応えられるよう、全力で取り組みます",
+  },
+};
+
+/* ===================== アイコン（シンプル線画） ===================== */
+const ICONS={
+  vending:'<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="8" y1="13" x2="11" y2="13"/><circle cx="15.5" cy="17" r="1.3"/>',
+  monitor:'<rect x="3" y="4" width="18" height="12" rx="2"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/>',
+  code:'<polyline points="8,7 3,12 8,17"/><polyline points="16,7 21,12 16,17"/>',
+  cart:'<circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.4 12h11l1.8-8H6"/>',
+  film:'<rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7.5" y1="4" x2="7.5" y2="20"/><line x1="16.5" y1="4" x2="16.5" y2="20"/>',
+  box:'<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><line x1="3" y1="7" x2="12" y2="11"/><line x1="21" y1="7" x2="12" y2="11"/><line x1="12" y1="11" x2="12" y2="21"/>',
+  shield:'<path d="M12 2l8 3v6c0 5-3.5 8-8 11-4.5-3-8-6-8-11V5z"/>',
+  users:'<circle cx="9" cy="8" r="3"/><path d="M3 21c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.5a3 3 0 010 6"/><path d="M21 21c0-2.5-1.4-4.6-3.4-5.5"/>',
+  yen:'<circle cx="12" cy="12" r="9"/><path d="M9 8l3 3.4L15 8M12 11.4V17M9.6 13.4h4.8M9.6 15.4h4.8"/>',
+  ai:'<rect x="6" y="6" width="12" height="12" rx="2"/><line x1="9" y1="2" x2="9" y2="6"/><line x1="15" y1="2" x2="15" y2="6"/><line x1="9" y1="18" x2="9" y2="22"/><line x1="15" y1="18" x2="15" y2="22"/><line x1="2" y1="9" x2="6" y2="9"/><line x1="18" y1="9" x2="22" y2="9"/><line x1="2" y1="15" x2="6" y2="15"/><line x1="18" y1="15" x2="22" y2="15"/>',
+  chart:'<line x1="3" y1="21" x2="21" y2="21"/><rect x="5" y="11" width="3" height="8"/><rect x="10.5" y="7" width="3" height="12"/><rect x="16" y="4" width="3" height="15"/>',
+  warn:'<path d="M12 3l9 16H3z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="16.8" r="0.8" fill="currentColor" stroke="none"/>',
+  check:'<polyline points="4,12 10,18 20,6"/>',
+  camera:'<rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="4"/><path d="M8.5 6l1.3-2h4.4l1.3 2"/>',
+};
+const icon=(n,size=24,sw=1.8)=>`<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||""}</svg>`;
+
+/* ===================== SVG描画ヘルパ ===================== */
+const NS="http://www.w3.org/2000/svg";
+const el=(t,a={},kids=[])=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);kids.forEach(c=>e.appendChild(c));return e;};
+const polar=(cx,cy,r,deg)=>{const a=(deg-90)*Math.PI/180;return[cx+r*Math.cos(a),cy+r*Math.sin(a)];};
+function arcPath(cx,cy,r,start,end){
+  const [x1,y1]=polar(cx,cy,r,end),[x2,y2]=polar(cx,cy,r,start);
+  const large=end-start<=180?0:1;
+  return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 0 ${x2} ${y2}`;
+}
+function donut(items,size=300,thick=46){
+  const r=(size-thick)/2, cx=size/2, cy=size/2;
+  const svg=el("svg",{viewBox:`0 0 ${size} ${size}`,width:size,height:size});
+  let acc=0;
+  items.forEach(it=>{
+    const start=acc/100*360, end=(acc+it.pct)/100*360; acc+=it.pct;
+    svg.appendChild(el("path",{d:arcPath(cx,cy,r,start,end),fill:"none",stroke:it.color,"stroke-width":thick}));
+  });
+  return svg;
+}
+function gauge(rate,size=300,thick=26,c1="#1F5FFF",c2="#0F2D6B",gid="g"){
+  const r=(size-thick)/2, cx=size/2, cy=size/2, id="grad-"+gid;
+  const svg=el("svg",{viewBox:`0 0 ${size} ${size}`,width:size,height:size});
+  svg.appendChild(el("circle",{cx,cy,r,fill:"none",stroke:"#EDEFF3","stroke-width":thick}));
+  const g=el("linearGradient",{id,x1:"0",y1:"0",x2:"1",y2:"1"});
+  g.appendChild(el("stop",{offset:"0%","stop-color":c1}));
+  g.appendChild(el("stop",{offset:"100%","stop-color":c2}));
+  svg.appendChild(el("defs",{},[g]));
+  const end=rate/100*360;
+  svg.appendChild(el("path",{d:arcPath(cx,cy,r,0,end>359.9?359.9:end),fill:"none",stroke:`url(#${id})`,"stroke-width":thick,"stroke-linecap":"round"}));
+  return svg;
+}
+function lineChart(labels,sA,sB,w=620,h=320,cA="#B8C2D4",cB="#0F2D6B"){
+  const padL=40,padB=34,padT=20,padR=14;
+  const max=Math.max(...sA,...sB)*1.1;
+  const iw=w-padL-padR, ih=h-padT-padB;
+  const X=i=>padL+iw*i/(labels.length-1);
+  const Y=v=>padT+ih*(1-v/max);
+  const svg=el("svg",{viewBox:`0 0 ${w} ${h}`,width:"100%"});
+  for(let gi=0;gi<=4;gi++){const y=padT+ih*gi/4;svg.appendChild(el("line",{x1:padL,y1:y,x2:w-padR,y2:y,stroke:"#E3E6EC","stroke-width":1}));}
+  const path=(s,color)=>{
+    let d=s.map((v,i)=>`${i?"L":"M"} ${X(i)} ${Y(v)}`).join(" ");
+    svg.appendChild(el("path",{d,fill:"none",stroke:color,"stroke-width":3.5,"stroke-linejoin":"round"}));
+    s.forEach((v,i)=>svg.appendChild(el("circle",{cx:X(i),cy:Y(v),r:4.5,fill:color})));
+  };
+  path(sA,cA); path(sB,cB);
+  labels.forEach((m,i)=>{const t=el("text",{x:X(i),y:h-10,"text-anchor":"middle","font-size":12,fill:"#6B7686"});t.textContent=m;svg.appendChild(t);});
+  return svg;
+}
+function radarChart(axes,size=360){
+  const cx=size/2,cy=size/2,r=size/2-46,max=5,n=axes.length;
+  const svg=el("svg",{viewBox:`0 0 ${size} ${size}`,width:size,height:size});
+  const pt=(i,rad)=>polar(cx,cy,rad,360*i/n);
+  for(let gi=1;gi<=max;gi++){
+    const rr=r*gi/max;
+    let d=axes.map((_,i)=>{const [x,y]=pt(i,rr);return `${i?"L":"M"} ${x} ${y}`;}).join(" ")+" Z";
+    svg.appendChild(el("path",{d,fill:"none",stroke:"#E3E6EC","stroke-width":1}));
+  }
+  axes.forEach((a,i)=>{
+    const [x,y]=pt(i,r);
+    svg.appendChild(el("line",{x1:cx,y1:cy,x2:x,y2:y,stroke:"#E3E6EC","stroke-width":1}));
+    const [lx,ly]=pt(i,r+24);
+    const t=el("text",{x:lx,y:ly+4,"text-anchor":"middle","font-size":15,"font-weight":700,fill:"#0F2D6B"});t.textContent=a.k;svg.appendChild(t);
+  });
+  let d=axes.map((a,i)=>{const [x,y]=pt(i,r*a.v/max);return `${i?"L":"M"} ${x} ${y}`;}).join(" ")+" Z";
+  svg.appendChild(el("path",{d,fill:"rgba(31,95,255,.18)",stroke:"#1F5FFF","stroke-width":2.5}));
+  axes.forEach((a,i)=>{const [x,y]=pt(i,r*a.v/max);svg.appendChild(el("circle",{cx:x,cy:y,r:4,fill:"#0F2D6B"}));});
+  return svg;
+}
+
+/* ===================== スライド土台 ===================== */
+const deck=document.getElementById("deck");
+let PAGE=0;
+function addSlide(cls,builder){
+  const s=document.createElement("div");
+  s.className="slide "+(cls||"");
+  builder(s);
+  PAGE++;
+  if(!/cover/.test(s.className)) s.insertAdjacentHTML("beforeend",`<div class="s-page">${PAGE}</div>`);
+  deck.appendChild(s);
+}
+/* head(a,title,msg)：a が商材アイコン名なら左上にアイコン、数値なら番号バッジは出さない（ページ番号は右下に集約） */
+const head=(a,title,msg)=>{
+  const ic = (typeof a==="string" && ICONS[a]) ? `<div class="s-no">${icon(a,26)}</div>` : "";
+  return `<div class="s-head">${ic}<div class="s-title">${title}</div></div><div class="s-msg${ic?"":" noindent"}">${msg}</div>`;
+};
+const foot=()=>`<div class="s-foot"><span class="brand">${DATA.company}</span><span>${DATA.group}｜${DATA.fy} 業績報告</span></div>`;
+const unit=u=>`<span class="unit">単位：${u}</span>`;
+const photoBox=()=>`<div class="photo"><span style="color:#aebbd6">${icon("camera",40,1.6)}</span><span class="lbl">写真スペース</span></div>`;
+/* 画像枠：ファイルがあれば表示、無ければ「画像未配置」プレースホルダにフォールバック */
+const imgBox=(src,h)=>`<div class="imgbox" style="${h}"><div class="ph">${icon("camera",30,1.6)}<span>画像未配置<br/><small>${src}</small></span></div><img src="${src}" loading="lazy" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'"/></div>`;
+function bizPhoto(p){
+  const a=p.images;
+  if(!a||!a.length) return photoBox();
+  if(a.length===1) return imgBox(a[0],"flex:0 0 440px;height:380px");
+  return `<div style="flex:0 0 440px;height:380px;display:flex;flex-direction:column;gap:14px">${a.map(s=>imgBox(s,"flex:1;min-height:0")).join("")}</div>`;
+}
+
+/* 達成度 → 配色＆結論ラベル（90%以上=順調 / 70-89%=要改善 / 70%未満=要対応） */
+const achv=(rate)=> rate>=100 ? {c1:"#1F5FFF",c2:"#0F2D6B",solid:"#1F5FFF",bt:"good",label:"計画を上回る"}
+  : rate>=90 ? {c1:"#1F5FFF",c2:"#0F2D6B",solid:"#1F5FFF",bt:"good",label:"ほぼ計画通り"}
+  : rate>=70 ? {c1:"#FFB020",c2:"#E0890B",solid:"#B06F00",bt:"warn",label:"目標未達・改善余地"}
+  : {c1:"#FF7452",c2:"#FF5630",solid:"#D83A18",bt:"bad",label:"要対応"};
+const cbadge=(bt,text)=>`<span class="cbadge ${bt}">${text}</span>`;
+const terms=(arr)=>`<div class="s-terms">${arr.join("　／　")}</div>`;
+
+/* 章扉 */
+function addDivider(sec){
+  addSlide("divider",s=>{
+    s.innerHTML=`<div class="dv-deco"></div><div class="dv-deco2"></div><div class="dv-no">${sec.num}</div>
+      <div class="slide-inner"><div>
+        <div class="dv-label">${sec.label} ${sec.num}</div>
+        <div class="dv-title">${sec.title}</div>
+        <div class="dv-list">${sec.items.map(i=>`<div class="it">${i}</div>`).join("")}</div>
+      </div></div>`;
+  });
+}
+/* エグゼクティブサマリー */
+function addExec(){
+  const d=DATA.exec;
+  const lab={good:"順調",warn:"要改善",bad:"要対応"};
+  const pts=d.points.map((p,i)=>`
+    <div class="exec-pt"><div class="n">${i+1}</div>
+      <div class="tx"><div class="t">${p.t}</div><div class="d">${p.d}</div></div>
+      ${cbadge(p.bt,lab[p.bt])}</div>`).join("");
+  const kpis=d.kpis.map(k=>`<div class="exec-kpi"><div class="l">${k.l}</div><div class="v">${k.v}</div><div class="u">${k.u}</div></div>`).join("");
+  addSlide("",s=>{
+    s.innerHTML=`<div class="slide-inner">
+      <div class="s-head"><div class="s-no wide">要約</div><div class="s-title">エグゼクティブサマリー</div></div>
+      <div class="s-msg">本日お伝えする3つの結論</div>
+      <div class="exec-pts">${pts}</div>
+      <div class="exec-kpis">${kpis}</div>
+      ${foot()}
+    </div>`;
+  });
+}
+/* 月次業績推移（確定P/L） */
+function addMonthly(){
+  const d=DATA.monthly;
+  addSlide("",s=>{
+    s.innerHTML=`<div class="slide-inner">
+      <div class="s-head"><div class="s-no wide">実績</div><div class="s-title">月次業績推移</div></div>
+      <div class="s-msg">上半期は黒字基調で着実に推移（確定値）</div>
+      ${unit(d.unit)}
+      <div class="line-layout">
+        <div class="line-wrap">
+          <div id="month-c"></div>
+          <div class="line-legend">
+            <span class="it"><span class="ln" style="background:#0F2D6B"></span>売上高</span>
+            <span class="it"><span class="ln" style="background:#1F5FFF"></span>粗利</span>
+          </div>
+        </div>
+        <div class="line-side">
+          <div class="cap">上半期累計 売上</div>
+          <div class="big">87.3</div>
+          <div class="cap">${d.unit}</div>
+          <div class="delta">営業利益 +48.9</div>
+        </div>
+      </div>
+      ${foot()}
+    </div>`;
+    s.querySelector("#month-c").appendChild(lineChart(d.months,d.gross,d.sales,640,330,"#1F5FFF","#0F2D6B"));
+  });
+}
+
+/* 収益モデル図 */
+function addRevenue(){
+  const d=DATA.revenue;
+  const chips=d.company.chips.map(c=>`<span class="chip">${c}</span>`).join("");
+  const types=d.types.map(t=>`<div class="rev ${t.cls}"><div class="t">${t.t}</div><div class="s">${t.s}</div></div>`).join("");
+  addSlide("",s=>{
+    s.innerHTML=`<div class="slide-inner">
+      <div class="s-head"><div class="s-no wide">モデル</div><div class="s-title">収益モデル</div></div>
+      <div class="s-msg">「誰が・何に対価を払い・どう売上になるか」</div>
+      <div class="flow">
+        <div class="flow-col"><div class="flow-box tall"><div class="h">${d.customer.h}</div><div class="d">${d.customer.d}</div></div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-col"><div class="flow-box tall"><div class="h">${d.company.h}</div><div class="chips">${chips}</div></div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-col rev-col">${types}</div>
+      </div>
+      <div class="tbl-note">${d.note}</div>
+      ${foot()}
+    </div>`;
+  });
+}
+
+/* ===== 共通：Before/After ===== */
+function baSlide(no,title,msg,d){
+  addSlide("",s=>{
+    s.innerHTML=`<div class="slide-inner">
+      ${head(no,title,msg)}
+      ${d.sub?`<div class="ba-sub">${d.sub}</div>`:""}
+      <div class="ba-layout">
+        <div class="ba-card before"><div class="tag">${d.before.tag}</div><div class="h">${d.before.h}</div><div class="desc">${d.before.desc}</div></div>
+        <div class="ba-arrow">→</div>
+        <div class="ba-card after"><div class="tag">${d.after.tag}</div><div class="h">${d.after.h}</div><div class="desc">${d.after.desc}</div></div>
+      </div>
+      ${d.foot?`<div class="ba-foot">${d.foot}</div>`:""}
+      ${foot()}
+    </div>`;
+  });
+}
+/* ===== 共通：テーブル（予測/着地） ===== */
+function tableSlide(no,title,msg,d){
+  const ncols=d.header.length;
+  const body=d.rows.map(r=>`<tr><td>${r.k}</td>${r.vals.map(v=>{
+    const cls=v.startsWith("▲")?"neg":(v.includes("%")?"rate":"");
+    return `<td class="${cls}">${v}</td>`;}).join("")}</tr>`).join("");
+  addSlide("",s=>{
+    s.innerHTML=`<div class="slide-inner">
+      ${head(no,title,msg)}
+      ${unit(d.unit)}
+      <div class="tbl-wrap">
+        <table class="ftable">
+          <thead><tr>${d.header.map(h=>`<th>${h}</th>`).join("")}</tr></thead>
+          <tbody>${body}</tbody>
+        </table>
+        <div class="tbl-note">${d.note}</div>
+      </div>
+      ${foot()}
+    </div>`;
+  });
+}
+
+/* ===================== 各スライド（1→23順） ===================== */
+
+/* 1. 表紙 */
+addSlide("cover",s=>{
+  s.innerHTML=`
+    <div class="deco"></div><div class="deco2"></div>
+    <div class="cover-left">
+      <div class="cover-logo"><div class="mark">ト</div><div class="name">${DATA.company}</div></div>
+      <h1><span class="fy">${DATA.group}　総会資料</span>${DATA.fy}<br/>業績報告</h1>
+      <div class="sub">${DATA.date}<br/>${DATA.group}　${DATA.company}　${DATA.presenter}</div>
+    </div>`;
+});
+
+/* エグゼクティブサマリー（表紙の直後） */
+addExec();
+
+/* 章扉① 事業紹介 */
+addDivider(DATA.sections[0]);
+
+/* 2. トレカ商事とは */
+addSlide("",s=>{
+  const tiles=DATA.services.items.map(it=>`
+    <div class="biz-tile"><div class="ic">${icon(it.icon,26)}</div><div class="nm">${it.name}</div></div>`).join("");
+  s.innerHTML=`<div class="slide-inner">
+    ${head(2,"トレカ商事とは","トレカ業界向けの総合支援企業")}
+    <div class="biz-grid">${tiles}</div>
+    <div class="biz-note">${DATA.services.note}</div>
+    ${terms(["※ トレジ＝トレカ自動販売機","オリパ＝オンラインで購入するトレカくじ"])}
+    ${foot()}
+  </div>`;
+});
+
+/* 収益モデル図（事業紹介の俯瞰） */
+addRevenue();
+
+/* 3-6. 事業紹介 */
+DATA.biz.forEach(p=>{
+  addSlide("",s=>{
+    const bullets=p.bullets.map(b=>`<div class="li"><span class="b">${icon("check",16,2.2)}</span><span>${b}</span></div>`).join("");
+    const left = p.layout==="logos"
+      ? `<div class="logo-wall">${Array.from({length:6},(_,i)=>`<div class="lg">LOGO</div>`).join("")}</div>`
+      : bizPhoto(p);
+    const stat = p.stat?`<div class="biz-stat"><span class="v">${p.stat.v}</span><span class="l">${p.stat.l}</span></div>`:"";
+    s.innerHTML=`<div class="slide-inner">
+      ${head(p.icon,p.title,p.msg)}
+      <div class="biz">
+        ${left}
+        <div class="biz-body">
+          <div class="lead">${p.lead}</div>
+          <div class="biz-ul">${bullets}</div>
+          ${stat}
+        </div>
+      </div>
+      ${p.terms?terms(p.terms):""}
+      ${foot()}
+    </div>`;
+  });
+});
+
+/* 章扉② 2Q業績 */
+addDivider(DATA.sections[1]);
+
+/* 7. 売上構成比（ドーナツ） */
+addSlide("",s=>{
+  s.innerHTML=`<div class="slide-inner">
+    ${head(8,"売上構成比（大分類）","売上の中心はネットオリパ事業")}
+    ${unit(DATA.mix.unit)}
+    <div class="split">
+      <div class="donut-wrap" id="donut-wrap">
+        <div class="donut-center"><div class="cap">${DATA.mix.caption}</div><div class="big">${DATA.mix.total}</div><div class="u">${DATA.mix.unit}</div></div>
+      </div>
+      <div class="legend">${DATA.mix.items.map(it=>`
+        <div class="row"><span class="dot" style="background:${it.color}"></span><span class="nm">${it.name}</span><span class="pct">${it.pct.toFixed(1)}%</span></div>`).join("")}
+      </div>
+    </div>
+    ${foot()}
+  </div>`;
+  s.querySelector("#donut-wrap").prepend(donut(DATA.mix.items,360,52));
+});
+
+/* 8. 計上基準の変更 */
+baSlide(9,"計上基準の変更","前年比較時は前提条件に注意",DATA.basis);
+
+/* 9. KPIサマリー */
+addSlide("",s=>{
+  const cards=DATA.kpi.map(k=>`
+    <div class="kpi ${k.neg?'neg':''}">
+      <div class="label">${k.label}</div>
+      <div class="val">${k.val}<span class="u">${k.unit}</span></div>
+      <div class="meta">${k.meta}</div>
+      <div class="badge ${k.dir}">${k.badge}</div>
+    </div>`).join("");
+  s.innerHTML=`<div class="slide-inner">
+    ${head(10,"2Q KPIサマリー","2Qは計画を上回り好調に進捗")}
+    ${unit("百万円・件")}
+    <div class="kpi-grid">${cards}</div>
+    ${foot()}
+  </div>`;
+});
+
+/* 月次業績推移（確定P/L・KPIサマリーの直後） */
+addMonthly();
+
+/* 10/11. 進捗ゲージ */
+function gaugeSlide(no,title,msg,d){
+  const a=achv(d.rate);
+  const mx=Math.max(d.actual,d.target);
+  const up=String(d.diff).startsWith("+");
+  addSlide("",s=>{
+    s.innerHTML=`<div class="slide-inner">
+      ${head(no,title,msg)}
+      ${unit(d.unit)}
+      <div class="gauge-layout">
+        <div class="gauge-wrap" id="gw-${no}"><div class="gauge-center"><div class="pct" style="color:${a.solid}">${d.rate}%</div><div class="cap">達成率</div></div></div>
+        <div class="gauge-bars">
+          <div class="gbar"><div class="top"><span>期初目標（上半期）</span><span class="v">${d.target}</span></div><div class="track"><div class="fill target" style="width:${(d.target/mx*100).toFixed(1)}%"></div></div></div>
+          <div class="gbar"><div class="top"><span>上半期実績</span><span class="v">${d.actual}</span></div><div class="track"><div class="fill actual" style="width:${(d.actual/mx*100).toFixed(1)}%;background:linear-gradient(90deg,${a.c1},${a.c2})"></div></div></div>
+          <div class="diff">目標差　<span class="${up?'up':'down'}">${d.diff} ${d.unit}</span>　${cbadge(a.bt,a.label)}</div>
+        </div>
+      </div>
+      ${foot()}
+    </div>`;
+    s.querySelector(`#gw-${no}`).prepend(gauge(d.rate,300,28,a.c1,a.c2,no));
+  });
+}
+gaugeSlide(11,"売上高 進捗（目標比）","売上は期初計画を上回り着地（達成率114%）",DATA.salesProgress);
+gaugeSlide(12,"粗利 進捗（目標比）","粗利は期初計画を大幅超過（達成率156%）",DATA.grossProgress);
+
+/* 12. 前年同期比較 */
+addSlide("",s=>{
+  const mk=(d,ttl)=>{
+    const max=Math.max(d.prev,d.cur), H=180;
+    return `<div class="cmp-col">
+      <div class="cmp-bars">
+        <div class="cmp-bar"><div class="v">${d.prev}</div><div class="bar prev" style="height:${d.prev/max*H}px"></div><div class="yr">2025年 2Q累計${d.prevNote?`<div class="sub">（${d.prevNote}）</div>`:""}</div></div>
+        <div class="cmp-bar"><div class="v">${d.cur}</div><div class="bar cur" style="height:${d.cur/max*H}px"></div><div class="yr">2026年 2Q累計</div></div>
+      </div>
+      <div class="ttl">${ttl}</div>
+      <div class="delta ${d.tone||""}">${d.delta}</div>
+    </div>`;
+  };
+  const op=DATA.yoy.op;
+  s.innerHTML=`<div class="slide-inner">
+    ${head(13,"前年同期比較（同一基準）","同一基準で売上2.7倍・粗利4.1倍に拡大")}
+    ${unit(DATA.yoy.unit)}
+    <div class="yoy-body">
+      <div class="cmp-row">${mk(DATA.yoy.sales,"売上高")}${mk(DATA.yoy.gross,"粗利")}</div>
+      <div class="yoy-op"><span class="lab">営業利益</span><span class="prev">${op.prev}</span><span class="arr">→</span><span class="cur">${op.cur}</span><span class="lab">百万円</span><span class="tag">${op.tag}</span></div>
+      <div class="yoy-note">※ 前年(FY2025同期 2024/12〜2025/05)は当期の計上ルール（手数料計上：オリパ運用 GMV→手数料）に引き直した値。粗利は基準非依存の実額。</div>
+    </div>
+    ${foot()}
+  </div>`;
+});
+
+/* 13. 問い合わせ推移 */
+addSlide("",s=>{
+  s.innerHTML=`<div class="slide-inner">
+    ${head(14,"問い合わせ数 推移","前年から需要が倍増（前年比+105.2%）")}
+    ${unit(DATA.inquiry.unit)}
+    <div class="line-layout">
+      <div class="line-wrap">
+        <div id="line-c"></div>
+        <div class="line-legend">
+          <span class="it"><span class="ln" style="background:#B8C2D4"></span>2025年</span>
+          <span class="it"><span class="ln" style="background:#0F2D6B"></span>2026年</span>
+        </div>
+      </div>
+      <div class="line-side">
+        <div class="cap">2Q累計（2026年）</div>
+        <div class="big">${DATA.inquiry.total}</div>
+        <div class="cap">${DATA.inquiry.unit}</div>
+        <div class="delta">前年比 ${DATA.inquiry.delta}</div>
+      </div>
+    </div>
+    ${foot()}
+  </div>`;
+  s.querySelector("#line-c").appendChild(lineChart(DATA.inquiry.months,DATA.inquiry.y2025,DATA.inquiry.y2026,640,330));
+});
+
+/* 14. 2Qハイライト */
+addSlide("",s=>{
+  const list=DATA.highlights.map(h=>`
+    <div class="hl"><div class="ic">${icon(h.icon,26)}</div><div class="tx"><div class="t">${h.title}</div><div class="d">${h.desc}</div></div></div>`).join("");
+  s.innerHTML=`<div class="slide-inner">
+    ${head(15,"2Qハイライト","主要成果の共有")}
+    <div class="hl-list">${list}</div>
+    ${foot()}
+  </div>`;
+});
+
+/* 15. 総評（レーダー） */
+addSlide("",s=>{
+  s.innerHTML=`<div class="slide-inner">
+    ${head(16,"総評","2Qは計画を上回り好調に進捗")}
+    <div class="radar-layout">
+      <div id="radar-c"></div>
+      <div class="radar-note">${DATA.radar.axes.map(a=>`
+        <div class="it"><div class="k">${a.k}　<span style="font-size:13px">${a.v} / 5.0</span></div><div class="d">${a.d}</div></div>`).join("")}
+      </div>
+    </div>
+    ${foot()}
+  </div>`;
+  s.querySelector("#radar-c").appendChild(radarChart(DATA.radar.axes,400));
+});
+
+/* 章扉③ 課題と施策 */
+addDivider(DATA.sections[2]);
+
+/* 16. 課題 */
+addSlide("",s=>{
+  const cards=DATA.issues.map(it=>`
+    <div class="issue"><div class="ic">${icon("warn",26)}</div><div class="t">${it.title}</div><div class="d">${it.desc}</div></div>`).join("");
+  s.innerHTML=`<div class="slide-inner">
+    ${head(17,"現状の課題・懸念事項","順調だが課題も存在する")}
+    <div class="issue-grid">${cards}</div>
+    ${foot()}
+  </div>`;
+});
+
+/* 17. 実行アクション */
+addSlide("",s=>{
+  const rows=DATA.actions.map(a=>`
+    <div class="act-row">
+      <div class="issue-c">${a.issue}</div>
+      <div class="arrow">→</div>
+      <div class="measures">${a.measures.map(m=>`<div class="m"><span class="d"></span>${m}</div>`).join("")}</div>
+    </div>`).join("");
+  s.innerHTML=`<div class="slide-inner">
+    ${head(18,"課題に対する実行アクション","課題に対する対応を実施中")}
+    <div class="action-table">${rows}</div>
+    ${foot()}
+  </div>`;
+});
+
+/* 章扉④ 将来戦略 */
+addDivider(DATA.sections[3]);
+
+/* 18. 3Q・4Q見通し */
+tableSlide(19,"3Q・4Q 見通し","下期で更なる成長を見込む",DATA.forecast);
+
+/* 19. 今期着地予測 */
+tableSlide(20,"今期着地予測サマリー","今期の着地見込み",DATA.landing);
+
+/* 20. TGCペイメント */
+baSlide(21,"TGCペイメント（決済サービス）","売上源の多角化",DATA.tgc);
+
+/* 21. AI活用 */
+baSlide(22,"AI活用による利益構造の改善","売上を伸ばしながら固定費を増やさない",DATA.ai);
+
+/* 22. 目指す姿 */
+addSlide("",s=>{
+  const boxes=DATA.aim.boxes;
+  let html="";
+  boxes.forEach((b,i)=>{
+    html+=`<div class="eq-box ${b.cls}"><div class="ic">${icon(b.icon,28)}</div><div class="t">${b.t}</div>${b.s?`<div class="s">${b.s}</div>`:""}</div>`;
+    if(i<DATA.aim.ops.length) html+=`<div class="eq-op">${DATA.aim.ops[i]}</div>`;
+  });
+  s.innerHTML=`<div class="slide-inner">
+    ${head(23,"目指す姿","売上拡大 × 固定費最適化")}
+    <div class="eq-lead">${DATA.aim.lead}</div>
+    <div class="eq">${html}</div>
+    <div class="eq-foot">${DATA.aim.foot}</div>
+    ${foot()}
+  </div>`;
+});
+
+/* 23. 総括 */
+addSlide("",s=>{
+  const list=DATA.summary.items.map(t=>`<div class="sum"><div class="ic">${icon("check",22,2.4)}</div><div class="tx">${t}</div></div>`).join("");
+  s.innerHTML=`<div class="slide-inner">
+    ${head(24,"総括","2Qの総括と今後")}
+    <div class="sum-list">${list}</div>
+    <div class="sum-banner">${DATA.summary.banner}</div>
+    ${foot()}
+  </div>`;
+});
+
+/* ---- プレビュー用：?slide=N で単一スライド表示（本番表示には影響なし） ---- */
+(()=>{
+  const n=new URLSearchParams(location.search).get("slide");
+  if(n===null)return;
+  [...document.querySelectorAll(".slide")].forEach((s,i)=>{ if(i!==+n) s.style.display="none"; });
+  deck.style.padding="0";
+})();
+</script>
+</body>
+</html>

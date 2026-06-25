@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>対抗戦レイド｜機能モック</title>
+<style>
+  :root{--bg:#0a0618;--line:#3a2470;--neon:#c04bff;--neon2:#7b3bff;--cyan:#36e0ff;--gold:#ffcf3a;--hp:#ff3b6b;--hp2:#ff7a3a;--ink:#f3ecff;--muted:#a08fce}
+  *{box-sizing:border-box;font-family:-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+  body{margin:0;background:#06040f;color:#1f2733}
+  .topnote{background:#0e1726;color:#fff;padding:13px 18px;font-size:12.5px;line-height:1.6}.topnote b{color:#d4a4ff}
+  .tabs{display:flex;gap:8px;padding:12px 18px;background:#13111f;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .mt{padding:7px 14px;border:1px solid var(--line);border-radius:999px;cursor:pointer;font-size:12.5px;background:#1b1830;color:#b9aee0}
+  .mt.active{background:var(--neon2);color:#fff;border-color:var(--neon2)}
+  .screen{display:none;padding:22px 16px}.screen.show{display:block}
+  .cap{font-size:12px;color:#8a82b0;text-align:center;margin:0 0 12px}
+  .phone{max-width:412px;margin:0 auto;background:var(--bg);border-radius:20px;border:1px solid #2a1850;overflow:hidden;box-shadow:0 12px 50px rgba(120,40,255,.3);color:var(--ink)}
+  .ehd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #241346;background:#0d0722}
+  .elogo{font-weight:900;color:var(--cyan);letter-spacing:1px;text-shadow:0 0 10px rgba(54,224,255,.6)}
+  .wpill{display:flex;gap:5px;align-items:center;background:#1c0f3a;border:1px solid #3a2470;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800}
+  .raidhead{position:relative;text-align:center;padding:18px 16px 8px;background:radial-gradient(120% 90% at 50% 0%,#4a0f2a,#1a0838 60%,#0a0618)}
+  .raidhead .ev{color:var(--gold);font-weight:900;letter-spacing:1px;font-size:14px}
+  .boss{position:relative;margin:10px auto 6px;width:170px;height:170px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#7b1d3a,#2a0d2e);display:flex;align-items:center;justify-content:center;font-size:84px;box-shadow:0 0 40px rgba(255,59,107,.45),inset 0 0 30px rgba(0,0,0,.6);border:2px solid #ff3b6b66}
+  .bossname{font-weight:900;font-size:18px;color:#fff;text-shadow:0 0 12px rgba(255,80,120,.6)}.stage{font-size:11px;color:var(--muted);margin-top:2px}
+  .sec{padding:14px 16px}
+  .hpwrap{margin:6px 0 2px}.hplabel{display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:6px}.hplabel .v{color:var(--hp)}
+  .hpbar{height:22px;border-radius:11px;background:#1c0f30;border:1px solid #4a2540;overflow:hidden;position:relative}
+  .hpfill{height:100%;width:46%;background:linear-gradient(90deg,var(--hp),var(--hp2));box-shadow:0 0 14px rgba(255,59,107,.6)}
+  .hppct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;text-shadow:0 1px 2px #000}
+  .mine{display:flex;gap:10px;margin-top:14px}
+  .mcard{flex:1;background:linear-gradient(160deg,#1a0d36,#120726);border:1px solid #3a2470;border-radius:12px;padding:12px;text-align:center}
+  .mcard .l{font-size:10px;color:var(--muted)}.mcard .v{font-size:20px;font-weight:900;color:#fff}.mcard .tier{font-size:12px;font-weight:800;color:var(--cyan)}
+  .atk{margin:14px 16px;display:flex;gap:10px}
+  .atkbtn{flex:1;border:none;border-radius:12px;padding:14px 6px;font-weight:900;color:#fff;cursor:pointer;text-align:center;background:linear-gradient(135deg,var(--neon2),var(--neon));box-shadow:0 6px 18px rgba(160,60,255,.4)}.atkbtn small{display:block;font-weight:700;font-size:11px;opacity:.9;margin-top:2px}
+  .sectitle{font-size:14px;font-weight:800;color:#fff;margin:4px 2px 10px;display:flex;align-items:center;gap:8px}.sectitle:before{content:"";width:4px;height:16px;border-radius:2px;background:linear-gradient(var(--cyan),var(--neon))}
+  .tier-row{display:flex;align-items:center;gap:10px;background:#160a2e;border:1px solid #3a2470;border-radius:10px;padding:10px;margin-bottom:8px}.tier-row.cur{border-color:var(--cyan);box-shadow:0 0 14px rgba(54,224,255,.2)}
+  .tb{font-weight:900;font-size:12px;padding:4px 10px;border-radius:7px;color:#fff;flex:none}.tb.g{background:linear-gradient(135deg,#ffe680,#e0a52b);color:#5a3d00}.tb.s{background:linear-gradient(135deg,#e6e9f0,#9aa3b8);color:#2a3040}.tb.b{background:linear-gradient(135deg,#ffb27a,#c0612a);color:#3a1a00}
+  .tier-row .d{flex:1;font-size:12px;color:#cbb6ff}.tier-row .r{font-weight:900;color:#fff;font-size:13px}
+  .lrow{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid #241346}.lr{width:24px;text-align:center;font-weight:900;color:var(--gold)}.nm{flex:1;font-size:13px}.dm{font-weight:800;color:var(--hp)}
+  .ovl{position:relative;margin:14px 16px;background:linear-gradient(135deg,#1d0f3a,#2a1150);border:1px solid var(--gold);border-radius:16px;padding:18px;text-align:center;box-shadow:0 0 26px rgba(255,207,58,.3)}
+  .ovl .t{font-size:20px;font-weight:900;color:var(--gold);text-shadow:0 0 12px rgba(255,207,58,.5)}.ovl .s{font-size:13px;color:#e6d9ff;margin:8px 0 12px}
+  .unlock{background:linear-gradient(135deg,#36e0ff,#7b3bff);border:none;border-radius:10px;color:#fff;font-weight:900;padding:13px;width:100%;cursor:pointer;font-size:15px}.unlock small{display:block;font-size:11px;font-weight:700;opacity:.9}
+</style>
+</head>
+<body>
+<div class="topnote"><b>対抗戦（レイド）｜機能モック（ユーザー画面）</b> — コイン消費でボスHPを削る→討伐で貢献度に応じ高還元ガチャ解放。仕様: req-3-taikousen-raid.md</div>
+<div class="tabs">
+  <div class="mt active" onclick="show(0,this)">進行中</div>
+  <div class="mt" onclick="show(1,this)">討伐 → 報酬解放</div>
+</div>
+
+<div class="screen show">
+  <p class="cap">ボスHPバー／自分の貢献度・ティア／攻撃導線／貢献ランキング</p>
+  <div class="phone">
+    <div class="ehd"><div class="elogo">NOVA GACHA</div><div class="wpill">🪙 52,000</div></div>
+    <div class="raidhead"><div class="ev">⚔ 対抗戦（レイド）開催中</div><div class="boss">👹</div><div class="bossname">守護獣ノヴァ</div><div class="stage">STAGE 1 / 期間 6/11〜6/15</div></div>
+    <div class="sec" style="padding-top:6px">
+      <div class="hpwrap"><div class="hplabel"><span>BOSS HP</span><span class="v">2,300,000 / 5,000,000</span></div><div class="hpbar"><div class="hpfill"></div><div class="hppct">46%</div></div></div>
+      <div class="mine"><div class="mcard"><div class="l">あなたの貢献度</div><div class="v">62,400</div></div><div class="mcard"><div class="l">現在ティア</div><div class="tier">🥈 Silver</div><div class="l" style="margin-top:3px">Goldまで 37,600</div></div></div>
+    </div>
+    <div class="atk"><button class="atkbtn">⚔ 攻撃（1回）<small>🪙 500 → 500 ダメージ</small></button><button class="atkbtn">⚔ 攻撃（10連）<small>🪙 5,000 → 5,000 ダメージ</small></button></div>
+    <div class="sec" style="padding-top:0">
+      <div class="sectitle">貢献ランキング</div>
+      <div class="lrow"><div class="lr">1</div><div class="nm">ドラ◯◯さん</div><div class="dm">412,000</div></div>
+      <div class="lrow"><div class="lr">2</div><div class="nm">ノヴ◯◯さん</div><div class="dm">288,500</div></div>
+      <div class="lrow" style="background:#171033"><div class="lr" style="color:var(--cyan)">7</div><div class="nm">あなた</div><div class="dm">62,400</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="screen">
+  <p class="cap">HP0で討伐。貢献ティアに応じ高還元ガチャを回数解放（01-bの解放の考え方を回数制で）</p>
+  <div class="phone">
+    <div class="ehd"><div class="elogo">NOVA GACHA</div><div class="wpill">🪙 47,000</div></div>
+    <div class="raidhead"><div class="ev" style="color:var(--gold)">🎉 討伐成功！</div><div class="boss" style="filter:grayscale(.3) brightness(.7)">💥</div><div class="bossname">守護獣ノヴァ を撃破</div><div class="stage">STAGE 1 CLEAR</div></div>
+    <div class="sec" style="padding-top:6px"><div class="hpwrap"><div class="hplabel"><span>BOSS HP</span><span class="v">0 / 5,000,000</span></div><div class="hpbar"><div class="hpfill" style="width:0"></div><div class="hppct">DEFEATED</div></div></div></div>
+    <div class="ovl"><div class="t">高還元ガチャ 解放！</div><div class="s">あなたの貢献ティア：<b style="color:#e6e9f0">🥈 Silver</b><br>還元率107% ガチャを <b style="color:var(--gold)">5回</b> 回せます</div><button class="unlock">🎁 高還元ガチャを回す<small>残り 5 回 ・ コインで抽選</small></button></div>
+    <div class="sec">
+      <div class="sectitle">貢献ティアと報酬</div>
+      <div class="tier-row"><span class="tb g">Gold</span><div class="d">100,000ダメージ以上</div><div class="r">10回</div></div>
+      <div class="tier-row cur"><span class="tb s">Silver</span><div class="d">50,000ダメージ以上（あなた）</div><div class="r">5回</div></div>
+      <div class="tier-row"><span class="tb b">Bronze</span><div class="d">10,000ダメージ以上</div><div class="r">1回</div></div>
+    </div>
+  </div>
+</div>
+<script>function show(i,el){document.querySelectorAll('.screen').forEach((s,n)=>s.classList.toggle('show',n===i));document.querySelectorAll('.mt').forEach(t=>t.classList.remove('active'));el.classList.add('active');window.scrollTo(0,0);}</script>
+</body>
+</html>

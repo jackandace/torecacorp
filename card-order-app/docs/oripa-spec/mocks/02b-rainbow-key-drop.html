@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>02-b レインボーキー ドロップ mock</title>
+<style>
+  :root{--blue:#2f6fed;--ink:#1f2733;--muted:#8a95a3;--line:#e8ebf0;--bg:#f5f7fa;--green:#16b88a;--yellow:#f5b500}
+  *{box-sizing:border-box;font-family:-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--ink)}
+  .topnote{background:#0e1726;color:#fff;padding:14px 20px;font-size:13px;line-height:1.6}
+  .topnote b{color:#79b8ff}
+  .rainbow{background:linear-gradient(90deg,#ff5d5d,#ffb13d,#ffe24a,#4ad991,#4aa8ff,#9b6bff);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+  .tabs{display:flex;gap:8px;padding:14px 20px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+  .tab{padding:8px 16px;border:1px solid var(--line);border-radius:999px;cursor:pointer;font-size:13px;background:#fff;color:var(--muted)}
+  .tab.active{background:var(--green);color:#fff;border-color:var(--green)}
+  .screen{display:none;padding:24px 20px}
+  .screen.show{display:block}
+  .cap{font-size:12px;color:var(--muted);margin:0 0 12px}
+
+  .phone{max-width:400px;margin:0 auto;background:#fff;border-radius:22px;border:1px solid var(--line);overflow:hidden;box-shadow:0 10px 40px rgba(20,40,80,.12);position:relative}
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line)}
+  .applogo{font-weight:800;color:var(--green);font-size:19px;display:flex;align-items:center;gap:6px}
+  .applogo .mk{width:24px;height:24px;border-radius:7px;background:linear-gradient(135deg,#27d39a,#0fae7e)}
+  .pill{display:flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 4px;font-size:12px;font-weight:700}
+  .pill .ic{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px}
+  .rkwc{background:linear-gradient(135deg,#ff5d5d,#9b6bff)}
+  .body{background:var(--bg);min-height:380px;padding:16px}
+  .ptitle{font-size:21px;font-weight:800;margin:6px 2px 4px}
+
+  /* drop modal */
+  .overlay{position:absolute;inset:0;background:rgba(15,18,30,.62);display:flex;align-items:center;justify-content:center;padding:18px}
+  .modal{background:#fff;border-radius:20px;width:100%;max-width:320px;padding:26px 22px;text-align:center;position:relative;overflow:hidden}
+  .modal .glow{position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:240px;height:240px;border-radius:50%;background:conic-gradient(#ff5d5d,#ffb13d,#ffe24a,#4ad991,#4aa8ff,#9b6bff,#ff5d5d);filter:blur(38px);opacity:.5}
+  .modal .inner{position:relative}
+  .bigkey{font-size:64px;line-height:1;margin:4px 0 8px;filter:drop-shadow(0 6px 14px rgba(120,80,255,.45))}
+  .mh{font-size:18px;font-weight:800;margin-bottom:10px}
+  .count{font-size:30px;font-weight:900;margin:6px 0}
+  .src{display:inline-block;font-size:12px;font-weight:700;color:#7a5ad6;background:#f0eaff;border:1px solid #ddd0ff;border-radius:999px;padding:4px 12px;margin-bottom:14px}
+  .bal{font-size:13px;color:var(--muted);margin-bottom:18px}
+  .bal b{color:var(--ink)}
+  .okbtn{width:100%;border:none;border-radius:12px;padding:13px;font-weight:800;font-size:15px;color:#fff;background:linear-gradient(135deg,#7b54e0,#4aa8ff);cursor:pointer}
+  .resultbar{position:absolute;top:14px;left:14px;right:14px;background:rgba(255,255,255,.9);border-radius:10px;font-size:11px;padding:6px 8px;color:#555}
+
+  /* holding list */
+  .keyhead{background:linear-gradient(135deg,#241b3a,#3a2a6a);border-radius:16px;padding:18px;color:#fff;display:flex;align-items:center;gap:14px;margin-bottom:16px}
+  .keyhead .big{font-size:40px}
+  .keyhead .n{font-size:30px;font-weight:900}
+  .keyhead .l{font-size:12px;opacity:.85}
+  .seclbl{font-size:13px;font-weight:700;color:var(--muted);margin:4px 2px 8px}
+  .glist{display:flex;flex-direction:column;gap:9px}
+  .gitem{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:13px;padding:11px 13px}
+  .gitem .k{font-size:22px}
+  .gitem .plus{font-weight:900;color:#7a5ad6;font-size:15px;min-width:30px}
+  .gitem .lab{font-size:12.5px;font-weight:600;line-height:1.4}
+  .gitem .tm{font-size:11px;color:var(--muted);margin-top:2px}
+  .gbadge{font-size:10px;font-weight:800;border-radius:6px;padding:2px 7px;margin-left:6px}
+  .gbadge.shitei{background:#fff0e0;color:#c47200}
+  .gbadge.unei{background:#eef1f5;color:#566}
+  .rk-rank{display:inline-block;font-size:10px;font-weight:800;border-radius:5px;padding:1px 6px;background:#fde8ef;color:#c0397a;margin-left:4px}
+
+  /* admin */
+  .console{display:flex;max-width:1180px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:0 6px 24px rgba(20,40,80,.06)}
+  .side{width:200px;border-right:1px solid var(--line);padding:14px 0;flex:none}
+  .brand{display:flex;align-items:center;gap:8px;padding:6px 16px 16px;font-weight:700;font-size:14px}
+  .brand .logo{width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,#27d39a,#0fae7e)}
+  .nav a{display:block;padding:9px 18px;color:var(--muted);font-size:13px;text-decoration:none}
+  .nav a.active{color:var(--green);background:#eafaf4;border-left:3px solid var(--green);padding-left:15px;font-weight:600}
+  .main{flex:1;padding:26px 30px;min-width:0}
+  h2.page{margin:0 0 6px;font-size:17px}
+  .hl{outline:2px dashed #9b6bff;outline-offset:8px;border-radius:10px;background:#faf8ff;padding:18px;border:1px solid #ece5ff;margin-top:14px}
+  .label{font-size:13px;font-weight:600;margin:14px 0 6px}
+  .toggle{width:46px;height:26px;border-radius:999px;background:var(--green);position:relative;display:inline-block;vertical-align:middle}
+  .toggle:after{content:"";position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:23px}
+  .rategrid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:6px}
+  .ratec{border:1px solid var(--line);border-radius:9px;padding:8px;text-align:center}
+  .ratec .r{font-size:11px;font-weight:800;color:var(--muted)}
+  .ratec input{width:100%;border:none;text-align:center;font-size:15px;font-weight:700;margin-top:4px}
+  .ratec.low{background:#eafaf4}.ratec.high{background:#fff0f5}
+  .small{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.5}
+  .input{padding:9px 11px;border:1px solid var(--line);border-radius:8px;font-size:13px;width:120px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px}
+  th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:600}
+  .mode{font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px}
+  .mode.always{background:#ffe9d6;color:#b35e00}.mode.rate{background:#e2f1ff;color:#1f6fc0}
+  .save{margin-top:18px;background:var(--green);color:#fff;border:none;padding:11px 24px;border-radius:8px;font-weight:700;cursor:pointer}
+  .pool{display:inline-flex;align-items:center;gap:8px;background:#f0eaff;border:1px solid #ddd0ff;color:#6a48c0;font-weight:700;font-size:12px;border-radius:8px;padding:5px 10px}
+</style>
+</head>
+<body>
+<div class="topnote">
+  <b>02-b｜<span class="rainbow">レインボーキー</span> ガチャドロップ機能</b> — コイン消費ガチャから救済アイテムがドロップ。
+  低レア中心だがS賞でも非ゼロ／プール上限／景品別の手動指定に対応。仕様書: <b>02-grim/b-rainbow-key-drop.md</b>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="show(0,this)">① ドロップ演出モーダル</div>
+  <div class="tab" onclick="show(1,this)">② 保有一覧（排出経路ラベル）</div>
+  <div class="tab" onclick="show(2,this)">③ 管理：ドロップ設定</div>
+</div>
+
+<!-- modal -->
+<div class="screen show">
+  <p class="cap">＊抽選結果表示の後、ドロップがあれば被せて表示。複数枚は合計数。排出元（経路）も明示。</p>
+  <div class="phone">
+    <div class="appbar">
+      <div class="applogo"><span class="mk"></span>GRIM</div>
+      <div class="pill"><span class="ic rkwc">🌈</span>6</div>
+    </div>
+    <div class="body">
+      <div class="ptitle" style="opacity:.25">抽選結果</div>
+      <div class="overlay">
+        <div class="modal">
+          <div class="glow"></div>
+          <div class="resultbar">抽選結果: D / S / C … （景品確定後に追加抽選）</div>
+          <div class="inner">
+            <div class="bigkey">🌈</div>
+            <div class="mh"><span class="rainbow">レインボーキー</span>をゲット！</div>
+            <div class="count">🌈 × 1</div>
+            <div class="src">「幻のSSRオリパ」から排出</div>
+            <div class="bal">保有数: <b>6</b> → <b>7</b></div>
+            <button class="okbtn" onclick="show(1,document.querySelectorAll('.tab')[1])">確認する</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- holding list -->
+<div class="screen">
+  <p class="cap">＊既存のレインボーキー保有一覧を拡張。各取得履歴に <b>排出経路ラベル</b>（ガチャ名 / 当選レアリティ / 指定 / 運営）を残す。</p>
+  <div class="phone">
+    <div class="appbar">
+      <div class="applogo"><span class="mk"></span>GRIM</div>
+      <div class="pill"><span class="ic rkwc">🌈</span>7</div>
+    </div>
+    <div class="body">
+      <div class="keyhead">
+        <span class="big">🌈</span>
+        <div><div class="n">7 <span style="font-size:14px;font-weight:600">個</span></div><div class="l">レインボーキー 保有数</div></div>
+      </div>
+      <div class="seclbl">取得履歴</div>
+      <div class="glist">
+        <div class="gitem"><span class="k">🌈</span><span class="plus">+1</span><div><div class="lab">幻のSSRオリパ <span class="rk-rank">D</span>から排出</div><div class="tm">6/13 10:11</div></div></div>
+        <div class="gitem"><span class="k">🌈</span><span class="plus">+2</span><div><div class="lab">夏祭りオリパ／指定景品「花火UR」<span class="gbadge shitei">指定</span></div><div class="tm">6/12 21:03</div></div></div>
+        <div class="gitem"><span class="k">🌈</span><span class="plus">+1</span><div><div class="lab">幻のSSRオリパ <span class="rk-rank">S</span>から排出</div><div class="tm">6/11 18:40</div></div></div>
+        <div class="gitem"><span class="k">🌈</span><span class="plus">+5</span><div><div class="lab">運営付与（おわび）<span class="gbadge unei">運営</span></div><div class="tm">6/10 12:00</div></div></div>
+        <div class="gitem"><span class="k">🌈</span><span class="plus">+1</span><div><div class="lab">幻のSSRオリパ <span class="rk-rank">C</span>から排出</div><div class="tm">6/09 20:22</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- admin -->
+<div class="screen">
+  <p class="cap">＊ガチャ編集に「レインボーキードロップ」セクション。プール上限＋レアリティ別率（低レア高／高レア低・全レア非ゼロ）＋景品別の手動指定。</p>
+  <div class="console">
+    <div class="side">
+      <div class="brand"><span class="logo"></span> GRIM console</div>
+      <nav class="nav"><a class="active">オリパ</a><a>カードデータベース</a><a>課金アイテム</a><a>ユーザー</a><a>お知らせ</a></nav>
+    </div>
+    <div class="main">
+      <h2 class="page">オリパ編集 — 幻のSSRオリパ</h2>
+      <div class="pool">🌈 残り排出数: 63 / 100</div>
+      <div class="hl">
+        <div class="label" style="margin-top:0">レインボーキードロップ機能 <span style="font-size:10px;background:#ece5ff;color:#7a5ad6;padding:2px 7px;border-radius:6px;font-weight:800">NEW</span> <span class="toggle" style="margin-left:8px"></span> ON</div>
+
+        <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:8px">
+          <div><div class="label">排出上限数（プール）</div><input class="input" value="100"> <span class="small">※空欄=無制限</span></div>
+          <div><div class="label">1ドロップ付与数</div><input class="input" value="1"></div>
+        </div>
+
+        <div class="label">レアリティ別ドロップ率（%）</div>
+        <div class="rategrid">
+          <div class="ratec high"><div class="r">S</div><input value="1.5"></div>
+          <div class="ratec high"><div class="r">A</div><input value="4"></div>
+          <div class="ratec"><div class="r">B</div><input value="8"></div>
+          <div class="ratec low"><div class="r">C</div><input value="18"></div>
+          <div class="ratec low"><div class="r">D</div><input value="25"></div>
+          <div class="ratec low"><div class="r">その他</div><input value="25"></div>
+        </div>
+        <div class="small">▷ 景品確定後に走る「追加ドロップ抽選」。低レアほど高確率＝救済。S/Aも0より大きく設定すればS賞でもドロップ。<br>
+        ▷ プール残量が0になると以降はドロップしません（在庫切れ）。</div>
+
+        <div class="label">景品別ドロップ指定（任意・手動）</div>
+        <table>
+          <tr><th>景品（カード）</th><th>モード</th><th>確率</th><th>付与数</th></tr>
+          <tr><td>花火UR</td><td><span class="mode always">always（必ず）</span></td><td>—</td><td>2</td></tr>
+          <tr><td>限定SR</td><td><span class="mode rate">rate（確率）</span></td><td>30%</td><td>1</td></tr>
+          <tr><td colspan="4" style="color:var(--green);font-weight:700;cursor:pointer">＋ 景品を追加して指定</td></tr>
+        </table>
+        <div class="small">▷ 指定した景品当選時はレアリティ別率より優先。キャンペーン演出や特定カードの目玉化に利用可。</div>
+      </div>
+      <button class="save">保存する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function show(i,el){
+    document.querySelectorAll('.screen').forEach((s,n)=>s.classList.toggle('show',n===i));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOVA GACHA 実画面再現 mock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ===== 実測デザイントークン（Tailwind+DaisyUI / stgスキャン） ===== */
+  :root{
+    --p:#570DF8; --pf:#4506CD; --s:#F000B8; --a:#2BCDBE;
+    --base:#0E0F1A;       /* body背景（実測 rgb(14,15,26)） */
+    --neon-pink:#ff3bd0; --neon-yellow:#ffd83a; --neon-cyan:#36e0ff;
+    --coin:#f5b21a; --err:#F87272; --line:#2a2740; --muted:#9b8fce;
+    --rounded-box:1rem; --rounded-btn:.5rem;
+  }
+  *{box-sizing:border-box;font-family:"M PLUS 1p",-apple-system,Meiryo,sans-serif}
+  body{margin:0;background:#070612;color:#fff}
+  .topnote{background:#0e1726;color:#fff;padding:14px 20px;font-size:13px;line-height:1.6}
+  .topnote b{color:#c9a4ff}
+  .metatabs{display:flex;gap:8px;padding:14px 20px;background:#13111f;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30;flex-wrap:wrap}
+  .mt{padding:7px 14px;border:1px solid var(--line);border-radius:999px;cursor:pointer;font-size:12.5px;background:#1b1830;color:#b9aee0}
+  .mt.active{background:var(--p);color:#fff;border-color:var(--p)}
+  .screen{display:none;padding:22px 16px}
+  .screen.show{display:block}
+  .cap{font-size:12px;color:#8a82b0;margin:0 0 12px;text-align:center}
+
+  /* ===== phone shell ===== */
+  .phone{width:412px;max-width:100%;margin:0 auto;background:var(--base);border-radius:20px;border:1px solid #241f3e;overflow:hidden;box-shadow:0 14px 50px rgba(90,30,200,.28);position:relative;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'%3E%3Cg fill='%23000000' fill-opacity='0'%3E%3Crect width='150' height='150'/%3E%3C/g%3E%3Cg fill='%237a2bb5' fill-opacity='0.16'%3E%3Cpath d='M30 55 L22 18 L48 40 Q60 36 72 40 L98 18 L90 55 Q104 78 82 96 Q60 110 38 96 Q16 78 30 55 Z'/%3E%3C/g%3E%3Cg fill='none' stroke='%237a2bb5' stroke-opacity='0.18' stroke-width='2'%3E%3Cpath d='M95 105 L88 72 L110 92 Q120 88 130 92 L150 74 L143 105 Q156 124 138 140 Q120 152 102 140 Q86 124 95 105 Z'/%3E%3C/g%3E%3C/svg%3E");
+    background-color:var(--base);background-size:150px 150px}
+  /* header */
+  .hdr{display:flex;align-items:center;gap:6px;padding:9px 10px;background:#0a0913;border-bottom:1px solid #1d1933}
+  .logo{display:flex;align-items:center;gap:6px;font-weight:800;font-size:13px}
+  .logo .ic{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#2a1850,#120a28);display:flex;align-items:center;justify-content:center;font-size:16px}
+  .sp{flex:1}
+  .pill{display:flex;align-items:center;gap:4px;background:#1a1730;border:1px solid #2c2748;border-radius:999px;padding:3px 5px 3px 4px;font-size:12px;font-weight:700}
+  .pill .cic{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe48a,var(--coin));color:#7a5300;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900}
+  .pill .bic{width:20px;height:20px;border-radius:4px;background:linear-gradient(135deg,#7b3bff,#b14bff);display:flex;align-items:center;justify-content:center;font-size:10px}
+  .pill .plus{width:18px;height:18px;border-radius:50%;background:var(--err);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;margin-left:1px}
+  .prof{width:30px;height:30px;border-radius:50%;border:1.5px solid #4a4470;display:flex;align-items:center;justify-content:center;font-size:14px;color:#b9aee0}
+  .auth{display:flex;gap:8px}
+  .auth .b{font-size:12px;font-weight:700;padding:6px 12px;border-radius:7px}
+  .auth .reg{background:#1a1730;border:1px solid #2c2748}.auth .lg{background:var(--p)}
+
+  /* main tabs */
+  .maintab{display:flex;background:#0a0913;border-bottom:1px solid #1d1933}
+  .maintab .t{flex:1;text-align:center;padding:12px;font-size:14px;font-weight:700;color:#8a82b0;cursor:pointer;position:relative}
+  .maintab .t.on{color:#fff}
+  .maintab .t.on:after{content:"";position:absolute;left:30%;right:30%;bottom:0;height:3px;background:var(--neon-pink);border-radius:3px;box-shadow:0 0 8px var(--neon-pink)}
+  .cats{display:flex;gap:16px;padding:10px 14px;overflow:auto;font-size:13px;font-weight:700;color:#7a72a0;border-bottom:1px solid #1a1730}
+  .cats .c.on{color:var(--neon-cyan)}
+
+  .body{padding:14px}
+  /* banner */
+  .xbanner{border-radius:12px;height:120px;background:
+    linear-gradient(115deg,#1a0b3a,#7a1d8e 55%,#e0359a),
+    repeating-linear-gradient(60deg,#ffffff10 0 8px,transparent 8px 18px);
+    display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:#fff;
+    text-shadow:0 2px 8px #000;position:relative;overflow:hidden;border:1px solid #ffffff22}
+  .xbanner .x{font-size:54px;font-weight:900;margin-right:6px;color:#fff;text-shadow:0 0 16px #ff5ad0}
+
+  /* gacha card */
+  .gcard{margin-top:14px;border-radius:14px;overflow:hidden;border:2px solid #ff3bd055;box-shadow:0 0 16px #ff3bd033;background:#120a28}
+  .gcard .img{height:170px;background:linear-gradient(135deg,#3a1170,#b0357a);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:30px;position:relative}
+  .gcard .img .nya{font-size:44px;text-shadow:0 0 14px #fff}
+  .gcard .meta{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;font-size:13px;background:#0f0a22}
+  .gcard .price{font-weight:800}.gcard .price b{color:var(--neon-yellow);font-size:16px}
+  .gcard .rest{color:var(--muted);font-size:12px}
+  .prog{height:6px;border-radius:3px;background:#241f3e;margin:0 12px 12px}
+  .prog .f{height:100%;width:35%;background:linear-gradient(90deg,var(--err),#ff7a3a);border-radius:3px}
+
+  /* exchange */
+  .excard{margin:24px auto;width:230px;background:#fff;border-radius:14px;padding:18px;text-align:center;color:#222}
+  .excard .bt{height:120px;display:flex;align-items:center;justify-content:center;font-size:60px}
+  .excard .n{font-size:26px;font-weight:900;margin:6px 0 14px}
+  .excard .btn{background:#3a3550;color:#cfc;border:none;border-radius:8px;padding:12px;width:100%;font-weight:700;color:#fff;opacity:.7}
+
+  /* gacha detail machine */
+  .machine{margin:18px auto 0;width:320px;max-width:100%}
+  .mtop{height:30px;background:linear-gradient(90deg,#36e0ff,#b14bff,#ff3bd0);border-radius:8px 8px 0 0;clip-path:polygon(6% 0,94% 0,100% 100%,0 100%);opacity:.85}
+  .mbar{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,#2a0d4a,#5a1d8e);padding:14px;border:1px solid #ff3bd055;font-size:13px}
+  .mbar .pr b{color:#fff;font-size:18px}
+  .mbar .rest{color:#cbb6ff;font-size:12px}
+  .drawbtns{display:flex;justify-content:center;gap:16px;margin-top:16px}
+  .db{width:78px;height:78px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;color:#fff;cursor:pointer;border:2px solid #ffffff44}
+  .db.one{background:radial-gradient(circle,#2a2440,#15101f);box-shadow:0 0 12px #888}
+  .db.ten{background:radial-gradient(circle,#0d3a2a,#08160f);box-shadow:0 0 14px var(--a);border-color:var(--a)}
+  .db.hund{background:radial-gradient(circle,#3a0d2a,#160810);box-shadow:0 0 14px var(--neon-pink);border-color:var(--neon-pink)}
+  .db .n{font-size:18px}.db .s{font-size:9px;opacity:.85}
+
+  /* dialog */
+  .ovl{position:absolute;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;z-index:20;padding:18px}
+  .dlg{background:#15121f;border:1px solid #2c2748;border-radius:14px;padding:22px;text-align:center;width:100%;max-width:320px}
+  .dlg h3{margin:0 0 6px;font-size:16px}
+  .dlg p{font-size:13px;color:var(--muted);margin:0 0 18px}
+  .dlg .row{display:flex;gap:10px}
+  .dlg .row button{flex:1;border-radius:8px;padding:12px;font-weight:700;border:none;cursor:pointer}
+  .dlg .ok{background:#fff;color:#15121f}.dlg .ng{background:#2a2640;color:#cfc;color:#fff}
+
+  /* enshutsu */
+  .stage{position:relative;height:560px;background:radial-gradient(120% 60% at 50% 32%,#241452,#0b0a22 70%);overflow:hidden;border-radius:0}
+  .skip{position:absolute;top:12px;right:14px;color:#fff;font-size:12px;font-weight:700;z-index:6}
+  .sbar{position:absolute;top:70px;bottom:120px;width:14px;border-radius:7px;
+    background:repeating-linear-gradient(0deg,var(--neon-yellow) 0 14px,#9a7a14 14px 20px);box-shadow:0 0 14px var(--neon-yellow)}
+  .sbar.l{left:60px}.sbar.r{right:60px}
+  .tube{position:absolute;top:60px;bottom:120px;left:50%;transform:translateX(-50%);width:120px;
+    border:3px solid var(--neon-pink);border-radius:60px/44px;box-shadow:0 0 22px var(--neon-pink),inset 0 0 22px #ff3bd066;
+    background:linear-gradient(180deg,#162a55,#0e0a2a);overflow:hidden}
+  .reel{position:absolute;left:8px;right:8px;height:30px;border-radius:8px;background:linear-gradient(90deg,var(--neon-cyan),#7ad);box-shadow:0 0 12px var(--neon-cyan);opacity:.85}
+  .reel.r1{top:62%}.reel.r2{top:74%;background:linear-gradient(90deg,#7ad,#b14bff)}
+  .startbtn{position:absolute;top:48%;left:50%;transform:translate(-50%,-50%);background:#0d0d18;border:1px solid #ffffff33;color:#fff;font-size:13px;padding:8px 14px;border-radius:999px;z-index:6}
+  .taparea{position:absolute;top:60px;bottom:160px;left:36px;right:36px;border:2px dashed #ff3bd0aa;border-radius:14px;background:#ff3bd018;display:flex;align-items:center;justify-content:center;z-index:5}
+  .taparea .l{background:var(--neon-pink);color:#fff;font-weight:800;font-size:12px;padding:5px 12px;border-radius:8px}
+  .lamp{position:absolute;bottom:44px;left:50%;transform:translateX(-50%);z-index:7;text-align:center}
+  .lampcore{width:70px;height:46px;clip-path:polygon(50% 0,61% 35%,100% 35%,68% 57%,80% 100%,50% 72%,20% 100%,32% 57%,0 35%,39% 35%);background:#33204a;display:flex;align-items:center;justify-content:center;font-weight:900;color:#5a4a7a;font-size:11px;margin:0 auto}
+  .lamp.on .lampcore{background:radial-gradient(circle,#fff,var(--neon-yellow) 50%,#ff7a3a);color:#7a3b00;box-shadow:0 0 26px var(--neon-yellow),0 0 50px #ff7a3a}
+  .lampcap{font-size:10px;color:var(--muted);margin-top:3px}
+  .badge-add{display:inline-block;background:#ff3bd0;color:#fff;font-size:9px;font-weight:800;padding:1px 6px;border-radius:5px;margin-left:6px}
+
+  /* result */
+  .rescard{display:flex;gap:12px;background:#0f0a22;border:1px solid #241f3e;border-radius:12px;padding:12px;margin-bottom:12px}
+  .rescard .cimg{width:80px;height:108px;border-radius:8px;background:linear-gradient(135deg,#ff7a3a,#c0392b);display:flex;align-items:center;justify-content:center;font-size:30px;flex:none}
+  .rescard .nm{font-weight:700;font-size:14px}
+  .rescard .coin{color:var(--coin);font-weight:800;margin-top:6px}
+  .rescard .exp{font-size:11px;color:var(--muted);margin-top:4px}
+  .rescard .share{margin-top:8px;background:var(--p);border:none;color:#fff;border-radius:7px;padding:7px 12px;font-size:12px;font-weight:700}
+  .resbar{position:sticky;bottom:0;background:#0a0913;border-top:1px solid #241f3e;padding:12px;margin:0 -14px -14px}
+  .resbar .top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px}
+  .warnbox{border:1px solid var(--err);color:var(--err);border-radius:8px;padding:9px;font-size:12px;margin-bottom:10px}
+  .resbtns{display:flex;gap:10px}
+  .resbtns .b{flex:1;background:#2a1850;border:1px solid #3a2470;color:#fff;border-radius:8px;padding:11px;font-weight:700;font-size:13px}
+
+  /* mypage */
+  .lvcard{border-radius:14px;overflow:hidden;border:1px solid #2c2748;position:relative;height:170px;background:linear-gradient(135deg,#1a1030,#3a1d5a);padding:14px;display:flex;flex-direction:column;justify-content:space-between}
+  .lvcard .hd{display:flex;justify-content:space-between;font-size:12px;color:#cbb6ff}
+  .lvcard .lv{font-size:22px;font-weight:900;display:flex;align-items:center;gap:8px}
+  .lvcard .lv .badge{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#ff7a3a,#c0392b);display:flex;align-items:center;justify-content:center;font-size:15px}
+  .lvbar{height:8px;border-radius:4px;background:#0008}.lvbar .f{height:100%;width:60%;background:linear-gradient(90deg,var(--neon-cyan),var(--a));border-radius:4px}
+  .wallet{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+  .wrow{background:#0f0a22;border:1px solid #241f3e;border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:space-between}
+  .wrow .l{font-size:12px;color:var(--muted)}.wrow .v{font-size:18px;font-weight:900}
+  .wrow .charge{background:linear-gradient(90deg,var(--neon-yellow),#ff9000);color:#5a3b00;border:none;border-radius:7px;padding:6px 12px;font-weight:800;font-size:12px}
+  .menu{margin-top:14px;background:#0f0a22;border:1px solid #241f3e;border-radius:12px;overflow:hidden}
+  .menu div{padding:13px 14px;border-bottom:1px solid #1d1933;font-size:14px;color:#d8d2ee}
+  .menu div:last-child{border:none}
+  .menu .newitem{color:var(--neon-cyan);font-weight:700}
+
+  /* login */
+  .loginwrap{padding:24px 18px}
+  .loginwrap h2{font-size:22px;margin:0 0 18px}
+  .lbl{font-size:13px;color:#cbb6ff;margin:14px 0 6px}
+  .inp{width:100%;background:#0f0a22;border:1px solid #2c2748;border-radius:8px;padding:12px;color:#fff;font-size:14px}
+  .lgbtn{width:100%;margin-top:18px;background:var(--p);border:none;color:#fff;border-radius:8px;padding:13px;font-weight:800;font-size:15px}
+  .llink{text-align:center;font-size:12px;color:#9b8fce;margin-top:14px}
+  .llink a{color:var(--neon-cyan)}
+</style>
+</head>
+<body>
+<div class="topnote">
+  <b>NOVA GACHA 実画面再現 mock</b> — stg実機スキャンを基にHTML再現（Tailwind+DaisyUIトークン / フォント M PLUS 1p / ダークネオン）。
+  新機能の追加位置検討・デザイン整合用リファレンス。参照: <b>01-novagacha/design-scan-novagacha.md</b>
+</div>
+<div class="metatabs">
+  <div class="mt active" onclick="show(0,this)">① ログイン</div>
+  <div class="mt" onclick="show(1,this)">② ホーム/ガチャ一覧</div>
+  <div class="mt" onclick="show(2,this)">③ バッテリー交換所</div>
+  <div class="mt" onclick="show(3,this)">④ ガチャ詳細</div>
+  <div class="mt" onclick="show(4,this)">⑤ 確認ダイアログ</div>
+  <div class="mt" onclick="show(5,this)">⑥ 演出画面</div>
+  <div class="mt" onclick="show(6,this)">⑦ 結果（獲得カード）</div>
+  <div class="mt" onclick="show(7,this)">⑧ マイページ</div>
+</div>
+
+<!-- ① login -->
+<div class="screen show">
+  <p class="cap">/login — メール・パスワード入力。背景=猫パターン。</p>
+  <div class="phone">
+    <div class="hdr"><div class="logo"><span class="ic">🐈‍⬛</span>NOVA GACHA</div><div class="sp"></div>
+      <div class="auth"><span class="b reg">新規登録</span><span class="b lg">ログイン</span></div></div>
+    <div class="loginwrap">
+      <h2>ログイン</h2>
+      <div class="lbl">メールアドレス</div><input class="inp" placeholder="メールアドレスを入力">
+      <div class="lbl">パスワード</div><input class="inp" type="password" placeholder="パスワードを入力">
+      <div style="text-align:right;font-size:12px;margin-top:8px;color:#9b8fce">パスワードを忘れた方は<a style="color:var(--neon-cyan)">こちら</a></div>
+      <button class="lgbtn">ログイン</button>
+      <div class="llink">アカウントをお持ちで無い方は<a>こちら</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ② home -->
+<div class="screen">
+  <p class="cap">/ — ヘッダー（通貨ピル）／Xバナー／メインタブ／カテゴリタブ／ガチャカード。</p>
+  <div class="phone">
+    <div class="hdr"><div class="logo"><span class="ic">🐈‍⬛</span></div><div class="sp"></div>
+      <div class="pill"><span class="cic">G</span>97,793,581<span class="plus">+</span></div>
+      <div class="pill"><span class="bic">🔋</span>51</div>
+      <div class="pill"><span class="bic" style="background:linear-gradient(135deg,#ffce3a,#e08a00)">🔋</span>0</div>
+      <div class="prof">👤</div></div>
+    <div class="maintab"><div class="t on">ガチャ</div><div class="t" onclick="show(2,document.querySelectorAll('.mt')[2])">バッテリー交換所</div></div>
+    <div class="cats"><span class="c">Dev</span><span class="c on">ポケモン</span><span class="c">ワンピース</span><span class="c">デュエマ</span><span class="c">MTG</span><span class="c">BT専用ガチャ</span></div>
+    <div class="body">
+      <div class="xbanner"><span class="x">𝕏</span>公式アカウント</div>
+      <div class="gcard">
+        <div class="img"><span class="nya">🐱 1/22</span></div>
+        <div class="meta"><div class="price">1口 <b>10,000</b> コイン</div><div class="rest">残 30,014/30,025</div></div>
+        <div class="prog"><div class="f"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ③ exchange -->
+<div class="screen">
+  <p class="cap">/?tab=battery — 現状は交換アイテムカードのみ（01-Eイベントスペース化の対象）。</p>
+  <div class="phone">
+    <div class="hdr"><div class="logo"><span class="ic">🐈‍⬛</span></div><div class="sp"></div>
+      <div class="pill"><span class="cic">G</span>97,793,581<span class="plus">+</span></div><div class="pill"><span class="bic">🔋</span>51</div><div class="prof">👤</div></div>
+    <div class="maintab"><div class="t" onclick="show(1,document.querySelectorAll('.mt')[1])">ガチャ</div><div class="t on">バッテリー交換所</div></div>
+    <div class="body">
+      <div class="excard"><div class="bt">🔋</div><div class="n">🔋 × 100</div><button class="btn">交換する</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ④ gacha detail -->
+<div class="screen">
+  <p class="cap">/box/:id — 大バナー＋抽選マシン＋1/10/100ガチャボタン。</p>
+  <div class="phone">
+    <div class="hdr"><div class="logo"><span class="ic">🐈‍⬛</span></div><div class="sp"></div>
+      <div class="pill"><span class="cic">G</span>97,783,581<span class="plus">+</span></div><div class="pill"><span class="bic">🔋</span>51</div><div class="prof">👤</div></div>
+    <div class="body">
+      <div class="gcard" style="margin-top:0"><div class="img"><span class="nya">🐱 1/22 で確定！</span></div></div>
+      <div class="machine">
+        <div class="mtop"></div>
+        <div class="mbar"><div class="pr">1口 <b>10,000</b> コイン</div><div class="rest">残 30,014/30,025</div></div>
+        <div class="drawbtns">
+          <div class="db one"><span class="n">①</span><span class="s">ガチャ</span></div>
+          <div class="db ten"><span class="n">⑩</span><span class="s">ガチャ</span></div>
+          <div class="db hund"><span class="n">100</span><span class="s">ガチャ</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑤ dialog -->
+<div class="screen">
+  <p class="cap">抽選前の確認ダイアログ（DaisyUI modal）。</p>
+  <div class="phone">
+    <div class="hdr"><div class="logo"><span class="ic">🐈‍⬛</span></div><div class="sp"></div><div class="pill"><span class="cic">G</span>97,783,581</div><div class="prof">👤</div></div>
+    <div class="body"><div class="gcard" style="margin-top:0"><div class="img">🐱</div></div></div>
+    <div class="ovl"><div class="dlg"><h3>ガチャを1回引きますか？</h3><p>コイン10,000コインを消費します</p>
+      <div class="row"><button class="ok">引く</button><button class="ng">キャンセル</button></div></div></div>
+  </div>
+</div>
+
+<!-- ⑥ enshutsu -->
+<div class="screen">
+  <p class="cap">演出画面（全画面）。01-f裏ボタン＝<b>タップエリア（破線）＋下部GOGOランプ</b>を重ねた状態を表示。実機ではスキップ・タップ開始のみ。</p>
+  <div class="phone">
+    <div class="stage">
+      <div class="skip">スキップ ▶▶</div>
+      <div class="sbar l"></div><div class="sbar r"></div>
+      <div class="tube"><div class="reel r1"></div><div class="reel r2"></div></div>
+      <div class="startbtn">タップして演出を開始</div>
+      <div class="taparea"><span class="l">タップエリア<span class="badge-add">01-f</span></span></div>
+      <div class="lamp on"><div class="lampcore">GOGO</div><div class="lampcap">CHANCEランプ（01-f）</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑦ result -->
+<div class="screen">
+  <p class="cap">/me/cards — 当選カード＋下部固定アクション（発送 / コイン交換）。</p>
+  <div class="phone">
+    <div class="hdr"><div class="logo"><span class="ic">🐈‍⬛</span></div><div class="sp"></div>
+      <div class="pill"><span class="cic">G</span>97,783,581<span class="plus">+</span></div><div class="pill"><span class="bic">🔋</span>51</div><div class="prof">👤</div></div>
+    <div class="body">
+      <div class="rescard"><div class="cimg">🔥</div><div><div class="nm">リザードン</div><div class="coin">🪙 333コイン</div><div class="exp">配送期限: 2026/06/25 11:45</div><button class="share">当選をシェア</button></div></div>
+      <div class="resbar">
+        <div class="top"><span>合計: 🪙 0コイン</span><span style="color:var(--neon-cyan)">すべて選択</span></div>
+        <div class="warnbox">お届け先を設定してください ✎</div>
+        <div class="resbtns"><span class="b">0枚を発送</span><span class="b">0枚をコインに交換</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ⑧ mypage -->
+<div class="screen">
+  <p class="cap">/me — レベル／ウォレット（コイン・BT・金BT・失効期限）／メニュー。<b>青字＝新規追加箇所（通知・演出モード設定）</b>。</p>
+  <div class="phone">
+    <div class="hdr"><div class="logo"><span class="ic">🐈‍⬛</span></div><div class="sp"></div>
+      <div class="pill"><span class="cic">G</span>97,793,581<span class="plus">+</span></div><div class="pill"><span class="bic">🔋</span>51</div><div class="prof">👤</div></div>
+    <div class="body">
+      <div style="font-size:20px;font-weight:800;margin:2px 2px 12px">マイページ</div>
+      <div class="lvcard">
+        <div class="hd"><span>現在のレベル</span><span>レベル詳細 ›</span></div>
+        <div class="lv"><span class="badge">⬡</span>レベル50</div>
+        <div><div style="font-size:12px;color:#cbb6ff;margin-bottom:4px">🪙 2,410,000 <span style="float:right">レベル51</span></div><div class="lvbar"><div class="f"></div></div></div>
+      </div>
+      <div class="wallet">
+        <div class="wrow"><div><div class="l">コイン ／ 失効期限</div><div class="v">97,793,581</div></div><button class="charge">Charge</button></div>
+        <div class="wrow"><div><div class="l">バッテリー</div><div class="v">51</div></div></div>
+        <div class="wrow"><div><div class="l">金バッテリー</div><div class="v">0</div></div></div>
+      </div>
+      <div class="menu">
+        <div class="newitem">🎰 演出モード設定（新規・01-f 裏ボタン）</div>
+        <div>カード獲得履歴</div><div>ガチャ履歴</div><div>コイン購入履歴</div>
+        <div>お届け先登録・変更</div><div>アカウント管理</div><div>ログアウト</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function show(i,el){
+    document.querySelectorAll('.screen').forEach((s,n)=>s.classList.toggle('show',n===i));
+    document.querySelectorAll('.mt').forEach(t=>t.classList.remove('active'));if(el)el.classList.add('active');
+    window.scrollTo(0,0);
+  }
+</script>
+</body>
+</html>

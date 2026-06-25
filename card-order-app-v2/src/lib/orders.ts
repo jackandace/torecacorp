@@ -9,7 +9,7 @@ export interface OrderValidationResult {
 
 /** 発注フォームの数量バリデーション */
 export function validateOrderQty(args: {
-  product: Pick<Product, "min_order_box" | "ct_to_box" | "planned_qty" | "ordered_qty" | "status">;
+  product: Pick<Product, "min_order_box" | "ct_to_box" | "planned_qty" | "ordered_qty" | "status" | "flow_type">;
   orderUnit: OrderUnit;
   qty: number;
 }): OrderValidationResult {
@@ -36,13 +36,17 @@ export function validateOrderQty(args: {
 
   const qtyInBox = orderUnit === "CT" ? qty * product.ct_to_box : qty;
 
-  const available = (product.planned_qty ?? 0) - product.ordered_qty;
-  if (qtyInBox > available) {
-    return {
-      ok: false,
-      error: `発注可能数を超えています (残${available}BOX)`,
-      qtyInBox,
-    };
+  // カット品(カット可能性あり)は在庫上限の概念が無く「希望BOX数」を受け付ける。
+  // 配分品(haibun)のみ planned_qty を在庫上限として残数チェックする。
+  if (product.flow_type !== "cut") {
+    const available = (product.planned_qty ?? 0) - product.ordered_qty;
+    if (qtyInBox > available) {
+      return {
+        ok: false,
+        error: `発注可能数を超えています (残${available}BOX)`,
+        qtyInBox,
+      };
+    }
   }
 
   return { ok: true, qtyInBox };

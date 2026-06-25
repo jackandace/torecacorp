@@ -7,6 +7,7 @@ const baseProduct = {
   planned_qty: 100,
   ordered_qty: 0,
   status: "受付中" as const,
+  flow_type: "haibun" as const,
 };
 
 describe("validateOrderQty", () => {
@@ -78,6 +79,21 @@ describe("validateOrderQty", () => {
   it("負数や非整数は NG", () => {
     expect(validateOrderQty({ product: baseProduct, orderUnit: "BOX", qty: -1 }).ok).toBe(false);
     expect(validateOrderQty({ product: baseProduct, orderUnit: "BOX", qty: 1.5 }).ok).toBe(false);
+  });
+
+  it("カット品は在庫上限を無視して希望BOX数を受け付ける", () => {
+    const cut = { ...baseProduct, flow_type: "cut" as const, planned_qty: 0, ordered_qty: 0 };
+    const r = validateOrderQty({ product: cut, orderUnit: "BOX", qty: 300 });
+    expect(r.ok).toBe(true);
+    expect(r.qtyInBox).toBe(300);
+  });
+
+  it("カット品でも最低発注数・受付停止は適用される", () => {
+    const cut = { ...baseProduct, flow_type: "cut" as const, planned_qty: 0 };
+    expect(validateOrderQty({ product: cut, orderUnit: "BOX", qty: 5 }).ok).toBe(false); // 最低12未満
+    expect(
+      validateOrderQty({ product: { ...cut, status: "受付停止" as const }, orderUnit: "BOX", qty: 12 }).ok,
+    ).toBe(false);
   });
 });
 

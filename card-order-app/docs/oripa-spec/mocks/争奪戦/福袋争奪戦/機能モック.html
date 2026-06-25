@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>福袋争奪戦｜機能モック</title>
+<style>
+  :root{--bg:#0a0618;--line:#3a2470;--neon:#c04bff;--neon2:#7b3bff;--cyan:#36e0ff;--gold:#ffcf3a;--pink:#ff4fa3;--ink:#f3ecff;--muted:#a08fce}
+  *{box-sizing:border-box;font-family:-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif}
+  body{margin:0;background:#06040f;color:#1f2733}
+  .topnote{background:#0e1726;color:#fff;padding:13px 18px;font-size:12.5px;line-height:1.6}
+  .topnote b{color:#d4a4ff}
+  .wrap{padding:22px 16px}
+  .cap{font-size:12px;color:#8a82b0;text-align:center;margin:0 0 12px}
+  .phone{max-width:412px;margin:0 auto;background:var(--bg);border-radius:20px;border:1px solid #2a1850;overflow:hidden;box-shadow:0 12px 50px rgba(120,40,255,.3);color:var(--ink)}
+  .ehd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid #241346;background:#0d0722}
+  .elogo{font-weight:900;color:var(--cyan);letter-spacing:1px;text-shadow:0 0 10px rgba(54,224,255,.6)}
+  .wpill{display:flex;gap:5px;align-items:center;background:#1c0f3a;border:1px solid #3a2470;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800}
+  .hero{position:relative;padding:26px 16px 20px;text-align:center;background:radial-gradient(120% 80% at 50% 0%,#3a1170 0%,#1a0838 55%,#0a0618 100%);border-bottom:1px solid #2a1850;overflow:hidden}
+  .hero .yr{color:#fff;font-weight:800;font-size:15px;letter-spacing:2px}.hero .yr b{color:var(--cyan)}
+  .hero .ttl{font-size:40px;font-weight:900;margin:6px 0 10px;background:linear-gradient(180deg,#fff,#d9b6ff 60%,#9b6bff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 24px rgba(192,75,255,.5);letter-spacing:2px}
+  .hero .term{display:inline-block;color:#fff;font-size:13px;font-weight:700;border:1px solid #6a3dceaa;border-radius:8px;padding:6px 14px;background:#1c0f3aaa}.hero .term b{color:var(--gold)}
+  .sec{padding:16px}
+  .sectitle{font-size:14px;font-weight:800;color:#fff;margin:6px 2px 12px;display:flex;align-items:center;gap:8px}
+  .sectitle:before{content:"";width:4px;height:16px;border-radius:2px;background:linear-gradient(var(--cyan),var(--neon))}
+  .pts{background:linear-gradient(160deg,#1a0d36,#120726);border:1px solid #3a2470;border-radius:14px;padding:14px}
+  .pts .row{display:flex;align-items:center;justify-content:space-between;padding:11px 6px;border-bottom:1px dashed #33205f}.pts .row:last-child{border:none}
+  .pts .l{display:flex;align-items:center;gap:10px;font-weight:700}
+  .rk{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#fff;border:1px solid #ffffff33}
+  .rk.s{background:linear-gradient(135deg,#36e0ff,#7b3bff)}.rk.a{background:linear-gradient(135deg,#ffcf3a,#ff7a3a)}.rk.b{background:linear-gradient(135deg,#ff4fa3,#7b3bff)}.rk.y{background:linear-gradient(135deg,#9b6bff,#4a2a9e)}
+  .pts .p{font-weight:900;color:var(--cyan);font-size:18px;text-shadow:0 0 8px rgba(54,224,255,.5)}
+  .rw{display:flex;align-items:center;gap:12px;background:linear-gradient(100deg,#1d0f3a,#160a2e);border:1px solid #3a2470;border-radius:12px;padding:12px;margin-bottom:10px}
+  .rw.top{border-color:var(--gold);box-shadow:0 0 18px rgba(255,207,58,.25)}
+  .rw .pos{width:52px;height:52px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;flex:none;border:1px solid #ffffff22}
+  .rw .pos .c{font-size:18px}.rw .pos .s{font-size:9px;opacity:.8}
+  .pos.g{background:linear-gradient(135deg,#ffe680,#e0a52b);color:#5a3d00}.pos.si{background:linear-gradient(135deg,#e6e9f0,#9aa3b8);color:#2a3040}.pos.br{background:linear-gradient(135deg,#ffb27a,#c0612a);color:#3a1a00}.pos.n{background:#241346;color:#cbb6ff}
+  .rw .bag{flex:1}.rw .bag .v{font-weight:900;font-size:19px;color:#fff}.rw .bag .v small{font-size:11px;color:var(--muted);font-weight:700}.rw .bag .nm{font-size:11px;color:#c9b6ff;font-weight:700}
+  .rw .bt{background:linear-gradient(135deg,#7b3bff,#c04bff);border:1px solid #ffffff33;border-radius:9px;padding:7px 10px;font-weight:900;color:#fff;font-size:14px;flex:none;text-align:center}.rw .bt small{display:block;font-size:9px;opacity:.85}
+  .myrank{background:linear-gradient(100deg,#0f2a3a,#102240);border:1px solid var(--cyan);border-radius:14px;padding:14px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 0 18px rgba(54,224,255,.18)}
+  .myrank .lab{font-size:11px;color:#9fdcff}.myrank .big{font-size:26px;font-weight:900;color:#fff}.myrank .pt{font-size:13px;color:var(--cyan);font-weight:800}
+  .lb .lrow{display:flex;align-items:center;gap:10px;padding:10px 6px;border-bottom:1px solid #241346}
+  .lb .lr{width:26px;font-weight:900;color:var(--gold);text-align:center}.lb .nm{flex:1;font-size:13px}.lb .pp{font-weight:800;color:var(--cyan)}
+</style>
+</head>
+<body>
+<div class="topnote"><b>福袋争奪戦｜機能モック（ユーザー画面）</b> — イベントページ。仕様: 01-novagacha/requirements/req-4-fukubukuro-ranking.md</div>
+<div class="wrap">
+  <p class="cap">イベントページ：バナー／ポイント獲得方法／順位報酬／自分の順位／リアルタイムランキング</p>
+  <div class="phone">
+    <div class="ehd"><div class="elogo">NOVA GACHA</div><div class="wpill">🪙 52,000</div></div>
+    <div class="hero">
+      <div class="yr">2026年 <b>6</b>月度</div>
+      <div class="ttl">福袋争奪戦</div>
+      <div class="term">開催期間　2026年 <b>6</b>月<b>11</b>日 〜 <b>6</b>月<b>15</b>日</div>
+    </div>
+    <div class="sec">
+      <div class="sectitle">ポイント獲得方法 / POINT SYSTEM</div>
+      <div class="pts">
+        <div class="row"><div class="l"><span class="rk s">S賞</span>S賞 獲得</div><div class="p">50 pt</div></div>
+        <div class="row"><div class="l"><span class="rk a">A賞</span>A賞 獲得</div><div class="p">20 pt</div></div>
+        <div class="row"><div class="l"><span class="rk b">B賞</span>B賞 獲得</div><div class="p">10 pt</div></div>
+        <div class="row"><div class="l"><span class="rk y">¥</span>500円 課金ごと</div><div class="p">0.5 pt</div></div>
+      </div>
+    </div>
+    <div class="sec" style="padding-top:0">
+      <div class="sectitle">ランキング報酬</div>
+      <div class="rw top"><div class="pos g"><span class="c">1</span><span class="s">位</span></div><div class="bag"><div class="v">100,000<small> コイン相当</small></div><div class="nm">NOVA BAG（福袋）</div></div><div class="bt">+100<small>BT</small></div></div>
+      <div class="rw"><div class="pos si"><span class="c">2</span><span class="s">位</span></div><div class="bag"><div class="v">50,000<small> コイン相当</small></div><div class="nm">NOVA BAG（福袋）</div></div><div class="bt">+50<small>BT</small></div></div>
+      <div class="rw"><div class="pos br"><span class="c">3</span><span class="s">位</span></div><div class="bag"><div class="v">50,000<small> コイン相当</small></div><div class="nm">NOVA BAG（福袋）</div></div><div class="bt">+30<small>BT</small></div></div>
+      <div class="rw"><div class="pos n"><span class="c">4-6</span><span class="s">位</span></div><div class="bag"><div class="v">30,000<small> コイン相当</small></div><div class="nm">NOVA BAG（福袋）</div></div><div class="bt">+15<small>BT</small></div></div>
+      <div class="rw"><div class="pos n"><span class="c">7-10</span><span class="s">位</span></div><div class="bag"><div class="v">15,000<small> コイン相当</small></div><div class="nm">NOVA BAG（福袋）</div></div><div class="bt">+10<small>BT</small></div></div>
+    </div>
+    <div class="sec" style="padding-top:0">
+      <div class="myrank"><div><div class="lab">あなたの現在順位</div><div class="big">4 <span style="font-size:13px">位</span></div></div><div style="text-align:right"><div class="lab">獲得ポイント</div><div class="pt">312.5 pt</div></div></div>
+    </div>
+    <div class="sec" style="padding-top:0">
+      <div class="sectitle">現在のランキング</div>
+      <div class="lb">
+        <div class="lrow"><div class="lr">1</div><div class="nm">ドラ◯◯さん</div><div class="pp">1,240 pt</div></div>
+        <div class="lrow"><div class="lr">2</div><div class="nm">ノヴ◯◯さん</div><div class="pp">880 pt</div></div>
+        <div class="lrow"><div class="lr">3</div><div class="nm">カー◯◯さん</div><div class="pp">505 pt</div></div>
+        <div class="lrow" style="background:#102240"><div class="lr" style="color:var(--cyan)">4</div><div class="nm">あなた</div><div class="pp">312.5 pt</div></div>
+        <div class="lrow"><div class="lr">5</div><div class="nm">レア◯◯さん</div><div class="pp">300 pt</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
