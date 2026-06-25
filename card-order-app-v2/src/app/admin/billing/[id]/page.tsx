@@ -27,6 +27,16 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
     .eq("invoice_id", invoice.id);
 
   const remaining = invoice.total_amount - invoice.paid_amount;
+  const kind = invoice.invoice_kind;
+  const KIND_LABEL: Record<string, string> = {
+    normal: "通常請求", deposit: "保証金(前受金)", final: "最終精算(差額)", refund: "返金",
+  };
+  const KIND_TONE: Record<string, string> = {
+    normal: "bg-slate-100 text-slate-700",
+    deposit: "bg-amber-100 text-amber-800",
+    final: "bg-indigo-100 text-indigo-800",
+    refund: "bg-rose-100 text-rose-700",
+  };
 
   return (
     <div className="space-y-6">
@@ -35,17 +45,34 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
           <Link href="/admin/billing" className="text-sm text-brand-600 hover:underline">
             ← 請求一覧
           </Link>
-          <h1 className="text-2xl font-bold mt-1">{invoice.invoice_number}</h1>
+          <h1 className="text-2xl font-bold mt-1 flex items-center gap-2">
+            {invoice.invoice_number}
+            <span className={`text-xs px-2 py-0.5 rounded font-medium ${KIND_TONE[kind]}`}>{KIND_LABEL[kind]}</span>
+          </h1>
         </div>
         <div className="flex gap-2">
-          {/* 都度署名し直す download ルート経由なのでリンクは失効しない。未生成なら自動生成 */}
-          <a className="btn-secondary" href={`/api/invoices/${invoice.id}/pdf/download`} target="_blank" rel="noreferrer">
-            PDF を開く
-          </a>
-          <form action={`/api/invoices/${invoice.id}/pdf`} method="post">
-            <button className="btn-primary">PDF を再生成</button>
-          </form>
-          {invoice.status === "入金済み" && (
+          {kind === "refund" ? (
+            // 返金は支払通知書 (都度署名・未生成なら自動生成)
+            <a className="btn-secondary" href={`/api/invoices/${invoice.id}/payment-notice/download`} target="_blank" rel="noreferrer">
+              支払通知書を開く
+            </a>
+          ) : (
+            <>
+              {/* 都度署名し直す download ルート経由なのでリンクは失効しない。未生成なら自動生成 */}
+              <a className="btn-secondary" href={`/api/invoices/${invoice.id}/pdf/download`} target="_blank" rel="noreferrer">
+                PDF を開く
+              </a>
+              <form action={`/api/invoices/${invoice.id}/pdf`} method="post">
+                <button className="btn-primary">PDF を再生成</button>
+              </form>
+            </>
+          )}
+          {kind === "deposit" && (
+            <form action={`/api/invoices/${invoice.id}/settle`} method="post">
+              <button className="btn-primary">最終精算する</button>
+            </form>
+          )}
+          {kind !== "refund" && invoice.status === "入金済み" && (
             <form action={`/api/invoices/${invoice.id}/receipt`} method="post">
               <button className="btn-secondary">領収書を発行</button>
             </form>
@@ -120,14 +147,31 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
         <aside className="space-y-4">
           <section className="card p-5 space-y-2 text-sm">
             <h2 className="font-semibold mb-2">金額</h2>
-            <div className="flex justify-between"><span>小計</span><span>{formatYen(invoice.subtotal)}</span></div>
-            <div className="flex justify-between text-emerald-600"><span>リベート</span><span>-{formatYen(invoice.rebate_amount)}</span></div>
-            <div className="flex justify-between"><span>課税対象額</span><span>{formatYen(invoice.taxable_amount)}</span></div>
-            <div className="flex justify-between"><span>消費税</span><span>{formatYen(invoice.tax_amount)}</span></div>
-            <div className="flex justify-between font-bold border-t pt-2"><span>合計 (税込)</span><span>{formatYen(invoice.total_amount)}</span></div>
-            <div className="flex justify-between text-slate-700"><span>入金済</span><span>{formatYen(invoice.paid_amount)}</span></div>
+            {kind === "deposit" ? (
+              <div className="flex justify-between font-bold"><span>保証金額 (前受金・税抜)</span><span>{formatYen(invoice.total_amount)}</span></div>
+            ) : (
+              <>
+                <div className="flex justify-between"><span>小計</span><span>{formatYen(invoice.subtotal)}</span></div>
+                <div className="flex justify-between text-emerald-600"><span>リベート</span><span>-{formatYen(invoice.rebate_amount)}</span></div>
+                <div className="flex justify-between"><span>課税対象額</span><span>{formatYen(invoice.taxable_amount)}</span></div>
+                <div className="flex justify-between"><span>消費税</span><span>{formatYen(invoice.tax_amount)}</span></div>
+                {(kind === "final" || kind === "refund") && (
+                  <>
+                    <div className="flex justify-between"><span>確定金額 (税込)</span><span>{formatYen(invoice.taxable_amount + invoice.tax_amount)}</span></div>
+                    <div className="flex justify-between text-amber-700"><span>前受金充当</span><span>-{formatYen(invoice.deposit_applied)}</span></div>
+                  </>
+                )}
+                <div className="flex justify-between font-bold border-t pt-2">
+                  <span>{kind === "final" ? "今回ご請求額" : kind === "refund" ? "返金額" : "合計 (税込)"}</span>
+                  <span>{formatYen(invoice.total_amount)}</span>
+                </div>
+              </>
+            )}
+            <div className="flex justify-between text-slate-700"><span>{kind === "refund" ? "返金済" : "入金済"}</span><span>{formatYen(invoice.paid_amount)}</span></div>
             <div className="flex justify-between font-bold text-rose-600"><span>残額</span><span>{formatYen(remaining)}</span></div>
-            <div className="text-xs text-slate-500 pt-2">状態: {invoice.status}</div>
+            <div className="text-xs text-slate-500 pt-2">
+              状態: {kind === "refund" ? (invoice.status === "入金済み" ? "返金済み" : "返金待ち") : invoice.status}
+            </div>
           </section>
 
           <PaymentForm
@@ -135,6 +179,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
             totalAmount={invoice.total_amount}
             paidAmount={invoice.paid_amount}
             lastUpdatedAt={invoice.updated_at}
+            kind={kind}
           />
         </aside>
       </div>

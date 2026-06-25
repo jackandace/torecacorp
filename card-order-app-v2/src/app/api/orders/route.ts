@@ -6,8 +6,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getListedRate } from "@/lib/rebate";
 import { validateOrderQty } from "@/lib/orders";
+import { calcDeposit } from "@/lib/deposit";
+import { nextInvoiceNumber } from "@/lib/invoice-number";
 import { writeAudit } from "@/lib/audit";
 import { notifyShop, notifyOrderToStaff } from "@/lib/notify";
 import type { Order } from "@/types/database";
@@ -115,6 +118,9 @@ export async function POST(request: NextRequest) {
     });
   }
 
+  // カット品の保証金(前受金): 発注ID + 保証金額を集める
+  const cutDeposits: { orderId: string; deposit: number }[] = [];
+
   // まとめて 1 回で insert
   if (insertRows.length > 0) {
     const { data: insertedRows, error: insertErr } = await supabase
@@ -128,6 +134,18 @@ export async function POST(request: NextRequest) {
       created.push(insertedRows[i]!.id);
       const m = rowMeta[i]!;
       createdItems.push({ series: m.series, title: m.title, qty: m.qty, unit: m.unit, qtyInBox: m.qtyInBox });
+      // カット品は保証金(希望BOX×50%)を算出
+      const product = productMap.get(m.productId);
+      if (product?.flow_type === "cut") {
+        cutDeposits.push({
+          orderId: insertedRows[i]!.id,
+          deposit: calcDeposit({
+            unitPrice: product.price ?? 0,
+            qtyBox: m.qtyInBox,
+            listedRate: getListedRate(product, shop),
+          }),
+        });
+      }
       await writeAudit(supabase, {
         shopId: shop.id,
         action: "create_order",
@@ -157,6 +175,51 @@ export async function POST(request: NextRequest) {
       shopName: shop.company_name,
       items: createdItems,
     });
+  }
+
+  // カット品があれば保証金(前受金)請求書をオーダー時に自動発行 (best-effort)
+  if (cutDeposits.length > 0) {
+    try {
+      const adminSb = createAdminClient();
+      const depositTotal = cutDeposits.reduce((s, d) => s + d.deposit, 0);
+      const invoiceNumber = await nextInvoiceNumber(adminSb, new Date());
+      const { data: dep, error: depErr } = await adminSb
+        .from("invoices")
+        .insert({
+          shop_id: shop.id,
+          invoice_number: invoiceNumber,
+          rank_at_issue: shop.current_rank,
+          invoice_kind: "deposit",
+          subtotal: depositTotal,
+          rebate_rate: 0,
+          rebate_amount: 0,
+          taxable_amount: depositTotal,
+          tax_amount: 0,
+          total_amount: depositTotal,
+          status: "未入金",
+        } satisfies Partial<import("@/types/database").Invoice>)
+        .select("id")
+        .single();
+      if (depErr || !dep) throw depErr ?? new Error("deposit invoice insert failed");
+
+      await adminSb.from("invoice_items").insert(
+        cutDeposits.map((d) => ({ invoice_id: dep.id, order_id: d.orderId, line_total: d.deposit })),
+      );
+
+      await notifyShop({
+        supabase,
+        shopId: shop.id,
+        templateCode: "deposit_invoice_issued",
+        vars: {
+          company_name: shop.company_name,
+          invoice_number: invoiceNumber,
+          total_amount: depositTotal.toLocaleString(),
+        },
+      });
+    } catch (e) {
+      // 保証金請求の自動発行失敗は発注自体を止めない (管理者が後から発行可能)
+      console.error("[orders] 保証金請求の自動発行に失敗:", e instanceof Error ? e.message : e);
+    }
   }
 
   return NextResponse.json({

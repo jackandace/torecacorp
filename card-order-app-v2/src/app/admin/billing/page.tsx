@@ -163,6 +163,15 @@ export default async function BillingPage({ searchParams }: { searchParams: Sear
                     {inv.is_legacy && (
                       <span className="ml-1 text-[10px] bg-slate-100 text-slate-600 px-1 py-0.5 rounded">過去</span>
                     )}
+                    {inv.invoice_kind === "deposit" && (
+                      <span className="ml-1 text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded">保証金</span>
+                    )}
+                    {inv.invoice_kind === "final" && (
+                      <span className="ml-1 text-[10px] bg-indigo-100 text-indigo-800 px-1 py-0.5 rounded">精算</span>
+                    )}
+                    {inv.invoice_kind === "refund" && (
+                      <span className="ml-1 text-[10px] bg-rose-100 text-rose-700 px-1 py-0.5 rounded">返金</span>
+                    )}
                   </td>
                   <td className="px-3 py-2">{shop?.company_name ?? "—"}</td>
                   <td className="px-3 py-2 text-xs">{formatJST(inv.issued_at)}</td>

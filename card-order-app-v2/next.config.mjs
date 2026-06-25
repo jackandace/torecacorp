@@ -21,6 +21,7 @@ const nextConfig = {
       "/api/invoices/[id]/pdf": ["./src/lib/pdf/fonts/**"],
       "/api/invoices/[id]/pdf/download": ["./src/lib/pdf/fonts/**"],
       "/api/invoices/[id]/receipt": ["./src/lib/pdf/fonts/**"],
+      "/api/invoices/[id]/payment-notice/download": ["./src/lib/pdf/fonts/**"],
     },
   },
 };

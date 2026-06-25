@@ -53,10 +53,19 @@ export interface InvoicePdfProps {
 }
 
 export function InvoicePdf({ invoice, shop, items, issuer }: InvoicePdfProps) {
+  const kind = invoice.invoice_kind;
+  const title = kind === "deposit" ? "保証金請求書" : kind === "final" ? "御請求書（最終精算）" : "請 求 書";
+  // 確定数量に対する満額(税込)。final で前受金控除前の総額として表示
+  const grossTotal = invoice.taxable_amount + invoice.tax_amount;
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <Text style={styles.title}>請 求 書</Text>
+        <Text style={styles.title}>{title}</Text>
+        {kind === "deposit" && (
+          <Text style={{ textAlign: "center", fontSize: 9, color: "#555", marginTop: -10, marginBottom: 12 }}>
+            （前受金・配分確定後に最終精算いたします）
+          </Text>
+        )}
 
         <View style={styles.meta}>
           <View style={styles.row}>
@@ -90,28 +99,54 @@ export function InvoicePdf({ invoice, shop, items, issuer }: InvoicePdfProps) {
           ))}
         </View>
 
-        <View style={styles.totals}>
-          <View style={styles.totalRow}>
-            <Text>小計 (案内掛け率)</Text>
-            <Text>¥{invoice.subtotal.toLocaleString()}</Text>
+        {kind === "deposit" ? (
+          <View style={styles.totals}>
+            <View style={[styles.totalRow, styles.grand]}>
+              <Text>保証金額 (前受金)</Text>
+              <Text>¥{invoice.total_amount.toLocaleString()}</Text>
+            </View>
           </View>
-          <View style={styles.totalRow}>
-            <Text>リベート ({(invoice.rebate_rate * 100).toFixed(0)}%) </Text>
-            <Text>-¥{invoice.rebate_amount.toLocaleString()}</Text>
+        ) : (
+          <View style={styles.totals}>
+            <View style={styles.totalRow}>
+              <Text>小計 (案内掛け率)</Text>
+              <Text>¥{invoice.subtotal.toLocaleString()}</Text>
+            </View>
+            <View style={styles.totalRow}>
+              <Text>リベート ({(invoice.rebate_rate * 100).toFixed(0)}%) </Text>
+              <Text>-¥{invoice.rebate_amount.toLocaleString()}</Text>
+            </View>
+            <View style={styles.totalRow}>
+              <Text>課税対象額</Text>
+              <Text>¥{invoice.taxable_amount.toLocaleString()}</Text>
+            </View>
+            <View style={styles.totalRow}>
+              <Text>消費税</Text>
+              <Text>¥{invoice.tax_amount.toLocaleString()}</Text>
+            </View>
+            {kind === "final" ? (
+              <>
+                <View style={styles.totalRow}>
+                  <Text>確定金額 (税込)</Text>
+                  <Text>¥{grossTotal.toLocaleString()}</Text>
+                </View>
+                <View style={styles.totalRow}>
+                  <Text>前受金充当</Text>
+                  <Text>-¥{invoice.deposit_applied.toLocaleString()}</Text>
+                </View>
+                <View style={[styles.totalRow, styles.grand]}>
+                  <Text>今回ご請求額</Text>
+                  <Text>¥{invoice.total_amount.toLocaleString()}</Text>
+                </View>
+              </>
+            ) : (
+              <View style={[styles.totalRow, styles.grand]}>
+                <Text>請求合計</Text>
+                <Text>¥{invoice.total_amount.toLocaleString()}</Text>
+              </View>
+            )}
           </View>
-          <View style={styles.totalRow}>
-            <Text>課税対象額</Text>
-            <Text>¥{invoice.taxable_amount.toLocaleString()}</Text>
-          </View>
-          <View style={styles.totalRow}>
-            <Text>消費税</Text>
-            <Text>¥{invoice.tax_amount.toLocaleString()}</Text>
-          </View>
-          <View style={[styles.totalRow, styles.grand]}>
-            <Text>請求合計</Text>
-            <Text>¥{invoice.total_amount.toLocaleString()}</Text>
-          </View>
-        </View>
+        )}
 
         <View style={styles.footer}>
           <Text>{issuer.name}</Text>

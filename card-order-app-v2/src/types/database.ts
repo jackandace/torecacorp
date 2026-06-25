@@ -176,6 +176,9 @@ export type Order = {
   deleted_at: string | null;
 };
 
+// 請求種別: normal=通常 / deposit=保証金(前受金) / final=最終精算(差額) / refund=返金
+export type InvoiceKind = "normal" | "deposit" | "final" | "refund";
+
 export type Invoice = {
   id: string;
   shop_id: string;
@@ -193,6 +196,10 @@ export type Invoice = {
   paid_at: string | null;
   pdf_url: string | null;
   is_legacy: boolean;
+  // 保証金/最終精算/返金フロー
+  invoice_kind: InvoiceKind;
+  parent_invoice_id: string | null; // final/refund → 元の deposit
+  deposit_applied: number;          // 前受金充当額 (final/refund で使用)
   issued_at: string;
   updated_at: string;
   deleted_at: string | null;

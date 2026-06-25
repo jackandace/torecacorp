@@ -17,13 +17,19 @@ export async function GET(request: NextRequest) {
   const shopId = request.nextUrl.searchParams.get("shop_id");
   if (!shopId) return NextResponse.json({ error: "shop_id required" }, { status: 400 });
 
-  const { data: orders } = await supabase
+  const { data: ordersRaw } = await supabase
     .from("orders")
-    .select("id, confirmed_qty, unit_price, listed_rate, rebate_rate, products(title, model_number)")
+    .select("id, confirmed_qty, unit_price, listed_rate, rebate_rate, products(title, model_number, flow_type)")
     .eq("shop_id", shopId)
     .eq("status", "確定")
     .is("deleted_at", null)
     .order("created_at", { ascending: false });
+
+  // カット品は保証金(deposit)→最終精算(settle)フローで処理するため通常請求から除外
+  const orders = (ordersRaw ?? []).filter((o) => {
+    const p = o.products as { flow_type?: string } | null;
+    return p?.flow_type !== "cut";
+  });
 
   const orderIds = (orders ?? []).map((o) => o.id);
 

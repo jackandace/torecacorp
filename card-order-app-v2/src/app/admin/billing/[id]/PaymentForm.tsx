@@ -9,10 +9,12 @@ interface Props {
   totalAmount: number;
   paidAmount: number;
   lastUpdatedAt: string;
+  kind?: "normal" | "deposit" | "final" | "refund";
 }
 
-export function PaymentForm({ invoiceId, totalAmount, paidAmount, lastUpdatedAt }: Props) {
+export function PaymentForm({ invoiceId, totalAmount, paidAmount, lastUpdatedAt, kind = "normal" }: Props) {
   const router = useRouter();
+  const isRefund = kind === "refund";
   const remaining = totalAmount - paidAmount;
   const [amount, setAmount] = useState<number>(remaining);
   const [paidAt, setPaidAt] = useState<string>(new Date().toISOString().slice(0, 10));
@@ -34,7 +36,7 @@ export function PaymentForm({ invoiceId, totalAmount, paidAmount, lastUpdatedAt 
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "更新失敗");
-      setMessage("入金を記録しました");
+      setMessage(isRefund ? "返金完了を記録しました" : "入金を記録しました");
       router.refresh();
     } catch (e) {
       setMessage(`失敗: ${e instanceof Error ? e.message : "不明"}`);
@@ -46,17 +48,19 @@ export function PaymentForm({ invoiceId, totalAmount, paidAmount, lastUpdatedAt 
   if (remaining <= 0) {
     return (
       <section className="card p-5 text-sm text-emerald-700">
-        <h2 className="font-semibold mb-2">入金消込</h2>
-        <p>全額入金済みです</p>
+        <h2 className="font-semibold mb-2">{isRefund ? "返金処理" : "入金消込"}</h2>
+        <p>{isRefund ? "返金完了済みです" : "全額入金済みです"}</p>
       </section>
     );
   }
 
   return (
     <section className="card p-5 space-y-3">
-      <h2 className="font-semibold">入金記録</h2>
+      <h2 className="font-semibold">{isRefund ? "返金完了を記録" : "入金記録"}</h2>
       <div>
-        <label className="block text-xs text-slate-600 mb-1">入金額 (残: {formatYen(remaining)})</label>
+        <label className="block text-xs text-slate-600 mb-1">
+          {isRefund ? "返金額" : "入金額"} (残: {formatYen(remaining)})
+        </label>
         <input
           type="number"
           className="input"
@@ -67,7 +71,7 @@ export function PaymentForm({ invoiceId, totalAmount, paidAmount, lastUpdatedAt 
         />
       </div>
       <div>
-        <label className="block text-xs text-slate-600 mb-1">入金日</label>
+        <label className="block text-xs text-slate-600 mb-1">{isRefund ? "返金日" : "入金日"}</label>
         <input
           type="date"
           className="input"
@@ -76,7 +80,7 @@ export function PaymentForm({ invoiceId, totalAmount, paidAmount, lastUpdatedAt 
         />
       </div>
       <button type="button" className="btn-primary w-full" disabled={busy} onClick={handleSubmit}>
-        {busy ? "記録中…" : "入金を記録"}
+        {busy ? "記録中…" : isRefund ? "返金完了を記録" : "入金を記録"}
       </button>
       {message && <p className="text-xs">{message}</p>}
     </section>
