@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GRIM ｜ カムバック機能 画面モック</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<style>
+  :root{
+    --maroon:#7d1f1f; --maroon-dark:#5e1414; --gold:#c9a24b; --gold-soft:#d9b24a;
+    --cream:#fbf3df; --orange:#ec6a1e; --red:#b22222;
+    --ink:#2b2420; --muted:#8a7c6c; --line:#e7dcc6; --paper:#efe7d6;
+    --violet:#a64bd4;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:"Noto Sans JP",system-ui,sans-serif;line-height:1.7;}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 22px;}
+
+  header.masthead{background:var(--maroon);color:#f3e6bd;border-bottom:3px solid var(--gold);}
+  .masthead .wrap{padding:30px 22px 26px;}
+  .brandline{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
+  .brand{font-family:"Noto Serif JP",serif;font-weight:900;font-size:34px;letter-spacing:4px;color:var(--gold-soft);line-height:1;}
+  .brand .sub{font-family:"Noto Sans JP",sans-serif;font-weight:500;font-size:14px;letter-spacing:1px;color:#e6cf94;}
+  h1{font-family:"Noto Serif JP",serif;font-weight:700;font-size:22px;margin:16px 0 6px;color:#f6ecc8;}
+  .meta{font-size:12.5px;color:#dcc183;}
+
+  .legend{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:26px 0 8px;font-size:13px;color:#5f5448;}
+  .legend b{color:var(--maroon);font-weight:500;}
+
+  section.screen{padding:34px 0;border-bottom:1px solid var(--line);}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:500;letter-spacing:2px;color:var(--maroon);text-transform:uppercase;}
+  .eyebrow .num{font-family:"Noto Serif JP",serif;font-weight:700;color:var(--gold);font-size:13px;}
+  .screen h2{font-family:"Noto Serif JP",serif;font-weight:700;font-size:21px;margin:8px 0 4px;color:var(--ink);}
+  .lede{font-size:14px;color:#5f5448;margin:0 0 4px;max-width:52ch;}
+
+  .row{display:grid;grid-template-columns:380px 1fr;gap:42px;align-items:start;margin-top:22px;}
+  .row.wide{grid-template-columns:1fr;}
+  .specs{list-style:none;padding:0;margin:6px 0 0;}
+  .specs li{position:relative;padding:9px 0 9px 22px;border-top:1px solid var(--line);font-size:13.5px;color:#3f3730;}
+  .specs li:first-child{border-top:none;}
+  .specs li::before{content:"";position:absolute;left:0;top:15px;width:9px;height:9px;border-radius:2px;background:var(--gold);transform:rotate(45deg);}
+  .specs li b{color:var(--maroon);font-weight:500;}
+  .tag{display:inline-block;font-size:11px;font-weight:500;background:var(--cream);border:1px solid #e3d09a;color:#8a6a1e;border-radius:20px;padding:2px 10px;margin:0 6px 6px 0;}
+
+  /* device frames */
+  .phone{width:360px;max-width:100%;margin:0 auto;background:#171210;border-radius:32px;padding:11px;box-shadow:0 14px 34px rgba(60,30,12,.2);}
+  .phone .glass{border-radius:22px;overflow:hidden;background:#fff;}
+  .browser{background:#fff;border:1px solid #e2e2e2;border-radius:12px;overflow:hidden;box-shadow:0 12px 30px rgba(40,25,15,.12);max-width:560px;}
+  .browser .bar{display:flex;align-items:center;gap:7px;padding:10px 13px;border-bottom:0.5px solid #ececec;background:#fafafa;}
+  .browser .dot{width:11px;height:11px;border-radius:50%;}
+  .browser .url{margin-left:10px;font-size:11.5px;color:#9aa0a6;}
+
+  footer{padding:26px 0 50px;color:var(--muted);font-size:12.5px;}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+
+  @media(max-width:820px){
+    .row{grid-template-columns:1fr;gap:28px;}
+    .brand{font-size:28px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="brandline">
+      <span class="brand">GRIM</span>
+      <span class="sub">オリパ コンソール ／ 機能モック</span>
+    </div>
+    <h1>カムバック機能 ｜ 画面モック集</h1>
+    <div class="meta">採用済み 3 画面 ・ rev.4（公開予定日アンカー方式）・ 2026-06-25</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="legend">
+    <b>前提</b> ：これはブランド配色と要素配置を確認するための<b>構造モック</b>です。ゴールド枠のグラデーションや箔押し風の質感など、最終ビジュアルの作り込みは実装フェーズで適用します。色値は #7d1f1f（マルーン）／#c9a24b（ゴールド）／#ec6a1e（ラベル）を基準にしています。
+  </div>
+
+  <!-- 01 -->
+  <section class="screen">
+    <div class="eyebrow"><span class="num">01</span> フロント ／ 一覧</div>
+    <h2>カムバック限定ガチャエリア</h2>
+    <p class="lede">ログイン中のカムバック対象者にだけ表示される専用エリア。新規登録限定エリアの仕組みを流用し、表示条件だけ差し替える。</p>
+    <div class="row">
+      <div class="phone"><div class="glass">
+
+        <div style="background:#fff;border-bottom:0.5px solid #e6e0d2;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;">
+          <div style="width:30px;height:30px;border-radius:5px;background:#7d1f1f;border:1.5px solid #c9a24b;display:flex;align-items:center;justify-content:center;color:#ecd9a0;font-size:13px;font-weight:500;">G</div>
+          <div style="display:flex;gap:8px;">
+            <div style="background:#7d1f1f;border:1.5px solid #c9a24b;border-radius:7px;padding:6px 12px;color:#f0e2b8;font-size:12px;font-weight:500;">新規登録</div>
+            <div style="background:#fff;border:1.5px solid #c9a24b;border-radius:7px;padding:6px 14px;color:#7d1f1f;font-size:12px;font-weight:500;">ログイン</div>
+          </div>
+        </div>
+        <div style="background:#fff;display:flex;gap:16px;padding:11px 14px 0;border-bottom:0.5px solid #e6e0d2;font-size:13.5px;">
+          <div style="padding-bottom:9px;border-bottom:2.5px solid #ec6a1e;color:#222;font-weight:500;">カムバック</div>
+          <div style="padding-bottom:9px;color:#9a9a9a;">ポケモン</div>
+          <div style="padding-bottom:9px;color:#9a9a9a;">ランク限定</div>
+        </div>
+        <div style="background:#fbf3df;border-top:2px solid #d9b24a;padding:13px 13px 16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+            <div style="display:flex;align-items:center;gap:6px;color:#7d1f1f;font-size:11px;font-weight:500;"><i class="ti ti-sparkles" style="font-size:14px;"></i>おかえりキャンペーン</div>
+            <div style="display:flex;align-items:center;gap:4px;background:#7d1f1f;color:#f3e6bd;font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;"><i class="ti ti-clock" style="font-size:12px;"></i>残り 71:58</div>
+          </div>
+          <div style="font-size:16px;font-weight:500;color:#5e1414;margin-bottom:3px;">カムバック限定ガチャ</div>
+          <div style="display:inline-block;font-size:10.5px;color:#8a6a1e;background:#f3e6c4;border:1px solid #e2cf94;border-radius:20px;padding:2px 9px;margin-bottom:12px;">復帰された方限定で表示</div>
+          <div style="position:relative;background:#fff;border-radius:14px;border:0.5px solid #e6ddc6;overflow:hidden;">
+            <span style="position:absolute;top:10px;left:10px;z-index:2;background:#ec6a1e;color:#fff;font-size:11px;font-weight:500;padding:4px 11px;border-radius:20px;">カムバック限定</span>
+            <div style="background:#a9d4d4;height:148px;display:flex;align-items:center;justify-content:center;">
+              <div style="border:2px dashed #5a6b6b;border-radius:8px;padding:18px 30px;display:flex;flex-direction:column;align-items:center;gap:6px;color:#3f4f4f;">
+                <i class="ti ti-cards" style="font-size:34px;"></i>
+                <span style="font-size:13px;font-weight:500;letter-spacing:1px;">SAMPLE</span>
+              </div>
+            </div>
+            <div style="padding:12px 13px 13px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;">
+                <div style="display:flex;align-items:center;gap:6px;font-size:14px;color:#222;"><span style="color:#555;font-size:12.5px;">1口</span><span style="display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;background:#dcb650;color:#6b3b00;font-size:11px;font-weight:500;border:1px solid #b8860b;">G</span><span style="font-weight:500;">10</span></div>
+                <div style="font-size:15px;color:#222;"><span style="font-size:12.5px;color:#555;">残</span> <span style="font-weight:500;">980</span><span style="color:#999;font-size:13px;">/1,000</span></div>
+              </div>
+              <div style="height:7px;background:#e9e2d2;border-radius:5px;overflow:hidden;margin-bottom:12px;"><div style="width:98%;height:100%;background:#b22222;"></div></div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;">
+                <div style="background:#262626;border:1.5px solid #c9a24b;border-radius:9px;text-align:center;padding:11px;color:#f0e2b8;font-size:13px;font-weight:500;">1回ガチャ</div>
+                <div style="background:#7d1f1f;border:1.5px solid #c9a24b;border-radius:9px;text-align:center;padding:11px;color:#f0e2b8;font-size:13px;font-weight:500;">10連ガチャ</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div></div>
+      <div>
+        <ul class="specs">
+          <li><b>表示条件</b>：ログイン済み ＆ カムバック対象 ＆ 公開期間内 ＆ 個人上限未満（AND）</li>
+          <li><b>差別化</b>：白カードに対しクリーム＋ゴールド帯。サムネ左上に「カムバック限定」ラベル（オレンジピル）</li>
+          <li><b>導線</b>：カウントダウンで72時間の緊急性。カードからそのまま抽選へ</li>
+          <li><b>流用</b>：新規登録限定エリア（背景色違い＋カテゴリ強制表示）の仕組みをそのまま転用</li>
+        </ul>
+        <div style="margin-top:14px;">
+          <span class="tag">未ログイン非表示</span><span class="tag">サーバー側判定必須</span><span class="tag">カテゴリ先頭表示</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 -->
+  <section class="screen">
+    <div class="eyebrow"><span class="num">02</span> フロント ／ 再ログイン時</div>
+    <h2>カムバックバナーのポップアップ</h2>
+    <p class="lede">再訪問時に出す案内。構造UIではなく、バナー画像 1 枚 ＋ ×閉じる ＋ タップで対象ガチャへ遷移、というシンプル方式。</p>
+    <div class="row">
+      <div class="phone"><div class="glass">
+
+        <div style="position:relative;min-height:520px;background:rgba(10,8,8,0.62);overflow:hidden;">
+          <div style="position:absolute;inset:0;opacity:0.18;">
+            <div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;"><div style="width:90px;height:18px;background:#fff;border-radius:3px;"></div><div style="display:flex;gap:8px;"><div style="width:46px;height:22px;background:#fff;border-radius:5px;"></div><div style="width:46px;height:22px;background:#fff;border-radius:5px;"></div></div></div>
+            <div style="margin:6px 14px 0;height:60px;background:#fff;border-radius:8px;"></div>
+            <div style="display:flex;gap:16px;padding:14px;"><div style="width:54px;height:14px;background:#fff;border-radius:3px;"></div><div style="width:54px;height:14px;background:#fff;border-radius:3px;"></div><div style="width:54px;height:14px;background:#fff;border-radius:3px;"></div></div>
+            <div style="margin:0 14px;height:120px;background:#fff;border-radius:10px;"></div>
+          </div>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;">
+            <div style="width:280px;">
+              <div style="display:flex;justify-content:flex-end;margin-bottom:8px;"><span style="width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;"><i class="ti ti-x"></i></span></div>
+              <div style="background:#7d1f1f;border:2px dashed #d6b25a;border-radius:14px;height:296px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:0 18px;">
+                <i class="ti ti-photo" style="font-size:40px;color:#e7cf8e;"></i>
+                <div style="color:#f3e6bd;font-size:16px;font-weight:500;line-height:1.5;">カムバック<br>ポップアップバナー</div>
+                <div style="color:#e0c987;font-size:12px;">1080 × 1080px（デザイン支給）</div>
+                <div style="margin-top:6px;display:inline-flex;align-items:center;gap:5px;background:#5e1414;border:1px solid #c9a24b;border-radius:20px;padding:5px 13px;color:#f0e2b8;font-size:11.5px;"><i class="ti ti-hand-finger" style="font-size:13px;"></i>タップで対象ガチャへ遷移</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div></div>
+      <div>
+        <ul class="specs">
+          <li><b>方式</b>：バナー画像 1 枚 ＋ ×閉じる ＋ タップ遷移のみ（既存キャンペーンポップと同じ作り）</li>
+          <li><b>静的制約</b>：画像には動的値（ポイント残高・ライブ残り時間）を出せない。挨拶・訴求はバナー絵に焼き込む</li>
+          <li><b>復帰ボーナス</b>：バナーで見せず<b>自動付与</b>。結果は遷移先・所持ポイント表示で確認</li>
+          <li><b>流用</b>：管理画面の既存「バナー」メニューを流用＋対象者条件を付与</li>
+        </ul>
+        <div style="margin-top:14px;">
+          <span class="tag">推奨サイズ要規定</span><span class="tag">表示頻度要決定</span><span class="tag">セグメント別は画像を複数</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section class="screen">
+    <div class="eyebrow"><span class="num">03</span> 管理画面 ／ ガチャ作成</div>
+    <h2>カムバック条件の設定</h2>
+    <p class="lede">既存の「回数制限（対象ユーザー条件）」ドロップダウンに「カムバック対象」を追加。選択時のみ条件入力欄が出る。</p>
+    <div class="row wide">
+      <div class="browser" style="margin:0;">
+        <div class="bar">
+          <span class="dot" style="background:#f0605c;"></span><span class="dot" style="background:#f6be4f;"></span><span class="dot" style="background:#3fc15b;"></span>
+          <span class="url">grim-tcg console ／ オリパ › ガチャ作成</span>
+        </div>
+        <div style="padding:18px 18px 20px;">
+          <div style="font-size:13px;color:#374151;margin-bottom:6px;">回数制限<span style="color:#9aa0a6;font-size:11px;">（対象ユーザー条件）</span></div>
+          <div style="border:1px solid #d6c2ea;border-radius:8px;overflow:hidden;max-width:420px;">
+            <div style="padding:9px 12px;font-size:12.5px;color:#9aa0a6;border-bottom:0.5px solid #efe7f6;">選択してください</div>
+            <div style="padding:9px 12px;font-size:12.5px;color:#374151;border-bottom:0.5px solid #efe7f6;">条件無し</div>
+            <div style="padding:9px 12px;font-size:12.5px;color:#374151;border-bottom:0.5px solid #efe7f6;">新規登録後24時間以内</div>
+            <div style="padding:9px 12px;font-size:12.5px;color:#374151;border-bottom:0.5px solid #efe7f6;">新規登録後1週間以内</div>
+            <div style="padding:9px 12px;font-size:12.5px;color:#ffffff;background:#a64bd4;display:flex;align-items:center;gap:8px;">
+              <i class="ti ti-check" style="font-size:14px;"></i>カムバック対象
+              <span style="margin-left:auto;font-size:10px;background:#e7f6ef;color:#0f6e56;border-radius:10px;padding:1px 8px;">新規追加</span>
+            </div>
+          </div>
+
+          <div style="margin-top:14px;background:#f7eefc;border:1px solid #e3cdf2;border-radius:10px;padding:13px;max-width:420px;">
+            <div style="font-size:12px;font-weight:500;color:#7a2ca8;margin-bottom:10px;">カムバック条件設定</div>
+            <div style="font-size:12.5px;color:#374151;display:flex;align-items:center;flex-wrap:wrap;gap:6px;">
+              公開予定日の
+              <input type="number" value="14" style="width:54px;height:30px;border:1px solid #cfd4da;border-radius:6px;padding:0 8px;font-size:13px;text-align:center;background:#fff;color:#1f2937;" />
+              日以上前に
+            </div>
+            <div style="font-size:12.5px;color:#374151;margin-top:4px;">最終ログインしたユーザーを対象にする</div>
+            <div style="margin-top:9px;font-size:11px;color:#8a6aa3;background:#fdf8ff;border-radius:6px;padding:7px 9px;line-height:1.5;">例: 公開予定日 2026-07-01・14日 → 6/17 以前が最終ログインの休眠ユーザーが対象</div>
+          </div>
+
+          <div style="margin-top:13px;font-size:11px;color:#9aa0a6;margin-bottom:6px;">＋ 併せて設定（推奨）</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div style="border:0.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;min-width:150px;">
+              <div style="font-size:11px;color:#6b7280;margin-bottom:5px;">1人あたり上限</div>
+              <div style="display:flex;align-items:center;gap:5px;"><input type="number" value="3" style="width:46px;height:28px;border:1px solid #cfd4da;border-radius:6px;padding:0 6px;font-size:13px;text-align:center;background:#fff;color:#1f2937;" /><span style="font-size:12px;color:#374151;">回</span></div>
+            </div>
+            <div style="border:0.5px solid #e5e7eb;border-radius:8px;padding:9px 12px;min-width:150px;">
+              <div style="font-size:11px;color:#6b7280;margin-bottom:5px;">引ける期間</div>
+              <div style="font-size:12px;color:#374151;line-height:2.1;">公開期間に準拠</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;">
+        <ul class="specs" style="max-width:760px;">
+          <li><b>対象判定</b>：最終ログイン ≤ 公開予定日 − XXX日（公開予定日アンカー＝キャンペーン型）</li>
+          <li><b>引ける期間</b>：ガチャの公開期間に準拠。ユーザー別の有効期限タイマー不要で<b>実装が軽い</b></li>
+          <li><b>上限・公開</b>：既存の回数制限・「公開予定日／公開設定」をそのまま流用</li>
+          <li><b>要注意</b>：ログイン直後は最終ログインが更新済みのため、<b>更新前の前回値</b>で判定（自己消滅トラップ対策）</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>GRIM ｜ カムバック機能 画面モック ・ 構造確認用</span>
+    <span>詳細仕様：カムバック機能_仕様詰めチェックリスト.md を参照</span>
+  </div>
+</footer>
+
+</body>
+</html>
