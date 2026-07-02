@@ -20,6 +20,7 @@ export default async function ShopsAdminPage() {
         <div className="flex gap-2 flex-wrap">
           <a href="/admin/shops/invites" className="btn-primary">招待リンク発行</a>
           <a href="/admin/shops/import" className="btn-secondary">CSV取込</a>
+          <a href="/admin/shops/lifetime-import" className="btn-secondary">累計額取込</a>
           <a href="/api/shops/export" className="btn-secondary">CSV出力</a>
           <a href="/admin/shops/new" className="btn-secondary">手動登録</a>
         </div>

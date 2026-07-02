@@ -12,7 +12,7 @@ interface ImportResult {
   errors: string[];
 }
 
-export function ShopImportForm() {
+export function ShopImportForm({ endpoint = "/api/shops/import" }: { endpoint?: string }) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -35,7 +35,7 @@ export function ShopImportForm() {
     try {
       const fd = new FormData();
       fd.append("file", file);
-      const res = await fetch("/api/shops/import", { method: "POST", body: fd });
+      const res = await fetch(endpoint, { method: "POST", body: fd });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "取込失敗");
       const r = json as ImportResult;
