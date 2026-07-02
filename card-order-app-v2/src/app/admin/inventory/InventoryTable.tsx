@@ -5,13 +5,28 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { Product, ProductStatus } from "@/types/database";
 import { formatRate, formatYen } from "@/lib/rebate";
+import { orderCutoffDate, todayISOInJST } from "@/lib/dates";
 
 type StatusFilter = "all" | "visible" | "hidden" | ProductStatus;
 type SortKey = "newest" | "deadline" | "series" | "title" | "stock" | "price";
+type Tab = "all" | "live" | "expired" | "expired_ordered" | "hidden";
+
+const TODAY = todayISOInJST();
+
+/** 実効締切(発注期限の7日前)が過ぎているか */
+function isExpired(p: Product): boolean {
+  const cutoff = orderCutoffDate(p.order_deadline);
+  return !!cutoff && cutoff < TODAY;
+}
+/** 公開中・受付中・締切前 (＝ショップに出ている) */
+function isLive(p: Product): boolean {
+  return p.is_visible && p.status === "受付中" && !isExpired(p);
+}
 
 export function InventoryTable({ products }: { products: Product[] }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [tab, setTab] = useState<Tab>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [seriesFilter, setSeriesFilter] = useState<string>("all");
   const [sortKey, setSortKey] = useState<SortKey>("newest");
@@ -26,9 +41,28 @@ export function InventoryTable({ products }: { products: Product[] }) {
     return Array.from(set).sort();
   }, [products]);
 
+  // サブカテゴリ別の件数
+  const tabCounts = useMemo(() => {
+    let live = 0, expired = 0, expiredOrdered = 0, hidden = 0;
+    for (const p of products) {
+      if (!p.is_visible) hidden++;
+      if (isLive(p)) live++;
+      if (isExpired(p)) {
+        expired++;
+        if (p.ordered_qty > 0) expiredOrdered++;
+      }
+    }
+    return { all: products.length, live, expired, expiredOrdered, hidden };
+  }, [products]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return products.filter((p) => {
+      // サブカテゴリタブ
+      if (tab === "live" && !isLive(p)) return false;
+      if (tab === "expired" && !isExpired(p)) return false;
+      if (tab === "expired_ordered" && !(isExpired(p) && p.ordered_qty > 0)) return false;
+      if (tab === "hidden" && p.is_visible) return false;
       if (seriesFilter !== "all" && p.series !== seriesFilter) return false;
       if (statusFilter !== "all") {
         if (statusFilter === "visible" && !p.is_visible) return false;
@@ -41,7 +75,7 @@ export function InventoryTable({ products }: { products: Product[] }) {
       }
       return true;
     });
-  }, [products, query, statusFilter, seriesFilter]);
+  }, [products, query, statusFilter, seriesFilter, tab]);
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
@@ -92,8 +126,34 @@ export function InventoryTable({ products }: { products: Product[] }) {
     } finally { setBusy(false); }
   };
 
+  const TABS: { key: Tab; label: string; count: number; tone: string }[] = [
+    { key: "all", label: "すべて", count: tabCounts.all, tone: "" },
+    { key: "live", label: "公開中・受付中", count: tabCounts.live, tone: "emerald" },
+    { key: "expired", label: "締切超過(受付終了)", count: tabCounts.expired, tone: "rose" },
+    { key: "expired_ordered", label: "発注あり期限切れ", count: tabCounts.expiredOrdered, tone: "amber" },
+    { key: "hidden", label: "非公開", count: tabCounts.hidden, tone: "slate" },
+  ];
+
   return (
     <>
+      {/* サブカテゴリタブ */}
+      <div className="flex flex-wrap gap-1.5">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            onClick={() => setTab(t.key)}
+            className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+              tab === t.key
+                ? "bg-brand-600 text-white border-brand-600"
+                : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            {t.label} <span className={tab === t.key ? "opacity-90" : "text-slate-400"}>({t.count})</span>
+          </button>
+        ))}
+      </div>
+
       <div className="card p-4 space-y-3">
         <div className="flex flex-wrap gap-2 items-center">
           <div className="relative flex-1 min-w-[240px]">
@@ -178,7 +238,7 @@ export function InventoryTable({ products }: { products: Product[] }) {
               const total = p.planned_qty ?? 0;
               const ratio = total > 0 ? stock / total : 0;
               const stockTone = ratio === 0 ? "text-rose-700" : ratio < 0.2 ? "text-amber-700" : "text-slate-700";
-              const overdue = p.order_deadline && p.order_deadline < new Date().toISOString().slice(0, 10);
+              const overdue = isExpired(p);
               return (
                 <tr key={p.id} className={`border-t border-slate-100 hover:bg-slate-50 ${selected.has(p.id) ? "bg-brand-50" : ""}`}>
                   <td className="px-2 py-2">

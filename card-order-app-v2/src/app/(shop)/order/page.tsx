@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { rankAtLeast } from "@/constants/ranks";
+import { addDaysISO, ORDER_CUTOFF_DAYS, todayISOInJST } from "@/lib/dates";
 import { OrderForm } from "./OrderForm";
 
 export const metadata = { title: "発注 | トレカ商事" };
@@ -8,7 +9,9 @@ export const dynamic = "force-dynamic";
 
 export default async function OrderPage() {
   const supabase = createClient();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayISOInJST();
+  // ショップ締切 = 問屋発注期限の7日前。よって受付中なのは deadline >= today+7 のもの
+  const minDeadline = addDaysISO(today, ORDER_CUTOFF_DAYS);
 
   const [{ data: products }, { data: shop }] = await Promise.all([
     supabase
@@ -16,8 +19,8 @@ export default async function OrderPage() {
       .select("*")
       .eq("is_visible", true)
       .eq("status", "受付中")
-      // 発注締切が過ぎた商品は出さない (締切なしは表示)
-      .or(`order_deadline.is.null,order_deadline.gte.${today}`)
+      // 実効締切(発注期限の7日前)が過ぎた商品は出さない (締切なしは表示)
+      .or(`order_deadline.is.null,order_deadline.gte.${minDeadline}`)
       .is("deleted_at", null)
       .order("created_at", { ascending: false }),
     supabase

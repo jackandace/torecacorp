@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Product, Shop, OrderUnit, ProductCategory } from "@/types/database";
 import { getListedRate, formatRate, formatYen } from "@/lib/rebate";
 import { validateOrderQty, calcCartSubtotal } from "@/lib/orders";
+import { orderCutoffDate } from "@/lib/dates";
 
 interface CartItem {
   product: Product;
@@ -118,8 +119,9 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
     const q = query.trim().toLowerCase();
     const todayStr = new Date().toISOString().slice(0, 10);
     const filtered = products.filter((p) => {
-      // 締切が過ぎた商品は自動的に非表示
-      if (p.order_deadline && p.order_deadline < todayStr) return false;
+      // 実効締切(問屋発注期限の7日前)が過ぎた商品は自動的に非表示
+      const cutoff = orderCutoffDate(p.order_deadline);
+      if (cutoff && cutoff < todayStr) return false;
       if (category !== "all" && p.category !== category) return false;
       if (q) {
         const hay = `${p.series ?? ""} ${p.title} ${p.full_name ?? ""} ${p.model_number ?? ""}`.toLowerCase();
@@ -443,10 +445,12 @@ function daysUntil(dateStr: string | null): number | null {
 }
 
 function DeadlineBadge({ deadline }: { deadline: string | null }) {
-  const days = daysUntil(deadline);
+  // ショップ表示の締切は「問屋発注期限の7日前」
+  const cutoff = orderCutoffDate(deadline);
+  const days = daysUntil(cutoff);
   if (days == null) return null;
   let tone = "bg-slate-100 text-slate-700";
-  let label = `締切 ${deadline}`;
+  let label = `締切 ${cutoff}`;
   if (days < 0) {
     tone = "bg-rose-100 text-rose-700";
     label = `締切超過 (${Math.abs(days)} 日前)`;
@@ -460,7 +464,7 @@ function DeadlineBadge({ deadline }: { deadline: string | null }) {
     tone = "bg-yellow-50 text-yellow-800 border border-yellow-200";
     label = `あと ${days} 日`;
   } else {
-    label = `締切 ${deadline}`;
+    label = `締切 ${cutoff}`;
   }
   return (
     <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded ${tone}`}>
