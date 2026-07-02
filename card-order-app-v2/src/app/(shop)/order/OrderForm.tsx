@@ -557,6 +557,13 @@ function ProductCard({
           {product.notes && (
             <p className="text-xs text-slate-500 mt-1 line-clamp-2">{product.notes}</p>
           )}
+          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-[11px] text-slate-400">
+            {product.carton_delivery && <span className="text-slate-500">📦 カートン単位でお届け</span>}
+            {product.jan_code && <span>JAN: {product.jan_code}</span>}
+          </div>
+          {product.release_info && (
+            <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 whitespace-pre-line">{product.release_info}</p>
+          )}
         </div>
 
         {/* 注文操作 (在庫切れ時は全 UI を無効化) */}

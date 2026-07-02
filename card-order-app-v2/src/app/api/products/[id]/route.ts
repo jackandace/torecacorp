@@ -26,6 +26,10 @@ const PatchSchema = z.object({
   orderDeadline: z.string().nullable(),
   notes: z.string().nullable(),
   minRank: z.enum(["standard", "bronze", "silver", "gold", "platinum"]).nullable().optional(),
+  janCode: z.string().max(50).nullable().optional(),
+  releaseInfo: z.string().max(2000).nullable().optional(),
+  cartonDelivery: z.boolean().optional(),
+  masterCartonBox: z.number().int().positive().max(100000).nullable().optional(),
   lastUpdatedAt: z.string(),
 });
 
@@ -69,6 +73,10 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     order_deadline: body.orderDeadline,
     notes: body.notes,
     min_rank: body.minRank ?? null,
+    ...(body.janCode !== undefined ? { jan_code: body.janCode } : {}),
+    ...(body.releaseInfo !== undefined ? { release_info: body.releaseInfo } : {}),
+    ...(body.cartonDelivery !== undefined ? { carton_delivery: body.cartonDelivery } : {}),
+    ...(body.masterCartonBox !== undefined ? { master_carton_box: body.masterCartonBox } : {}),
   };
 
   const { data: updated, error } = await supabase

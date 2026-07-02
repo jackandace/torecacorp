@@ -138,6 +138,11 @@ export type Product = {
   notes: string | null;
   // 最低表示ランク (null=制限なし)。再配分品など限定公開で使用
   min_rank: RankCode | null;
+  // 商品詳細 (022)
+  jan_code: string | null;          // JANコード
+  release_info: string | null;      // メーカー発売情報の詳細
+  carton_delivery: boolean;         // カートン単位で届くか
+  master_carton_box: number | null; // マスターカートンあたりのBOX数
   created_at: string;
   updated_at: string;
   deleted_at: string | null;

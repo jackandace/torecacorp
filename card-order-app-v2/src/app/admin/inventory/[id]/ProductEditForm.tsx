@@ -26,9 +26,44 @@ export function ProductEditForm({ product }: { product: Product }) {
   const [status, setStatus] = useState<ProductStatus>(product.status);
   const [orderDeadline, setOrderDeadline] = useState(product.order_deadline ?? "");
   const [minRank, setMinRank] = useState<RankCode | "">(product.min_rank ?? "");
+  const [janCode, setJanCode] = useState(product.jan_code ?? "");
+  const [releaseInfo, setReleaseInfo] = useState(product.release_info ?? "");
+  const [cartonDelivery, setCartonDelivery] = useState(product.carton_delivery ?? false);
+  const [masterCartonBox, setMasterCartonBox] = useState(product.master_carton_box ?? 0);
   const [notes, setNotes] = useState(product.notes ?? "");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  // Web からの発売情報/JAN 取得補助
+  const [lookupUrl, setLookupUrl] = useState("");
+  const [lookupBusy, setLookupBusy] = useState(false);
+  const [lookupMsg, setLookupMsg] = useState<string | null>(null);
+
+  const runLookup = async () => {
+    if (!lookupUrl.trim()) return;
+    setLookupBusy(true);
+    setLookupMsg(null);
+    try {
+      const res = await fetch(`/api/products/${product.id}/lookup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: lookupUrl.trim() }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "取得失敗");
+      if (json.jan && !janCode) setJanCode(json.jan);
+      const parts = [json.title, json.releaseDate ? `発売: ${json.releaseDate}` : "", json.description]
+        .filter(Boolean)
+        .join("\n");
+      if (parts) setReleaseInfo((prev) => (prev ? prev : parts));
+      setLookupMsg(
+        `取得: JAN=${json.jan ?? "—"} / 発売=${json.releaseDate ?? "—"}。内容を確認して保存してください`,
+      );
+    } catch (e) {
+      setLookupMsg(`失敗: ${e instanceof Error ? e.message : "不明"}`);
+    } finally {
+      setLookupBusy(false);
+    }
+  };
 
   const handleSubmit = async () => {
     setBusy(true);
@@ -56,6 +91,10 @@ export function ProductEditForm({ product }: { product: Product }) {
           status,
           orderDeadline: orderDeadline || null,
           minRank: minRank || null,
+          janCode: janCode || null,
+          releaseInfo: releaseInfo || null,
+          cartonDelivery,
+          masterCartonBox: masterCartonBox > 0 ? masterCartonBox : null,
           notes: notes || null,
           lastUpdatedAt: product.updated_at,
         }),
@@ -160,7 +199,7 @@ export function ProductEditForm({ product }: { product: Product }) {
           />
         </div>
         <div>
-          <label className="block text-xs text-slate-600 mb-1">1 CT あたり BOX 数</label>
+          <label className="block text-xs text-slate-600 mb-1">カートン(CT)あたり BOX 数 (12 / 20 等)</label>
           <input
             className="input"
             type="number"
@@ -216,6 +255,41 @@ export function ProductEditForm({ product }: { product: Product }) {
             ))}
           </select>
           <p className="text-xs text-slate-500 mt-1">個別指名がある場合はランクより指名が優先されます</p>
+        </div>
+        <div>
+          <label className="block text-xs text-slate-600 mb-1">JANコード</label>
+          <input className="input" placeholder="4901234567890" value={janCode} onChange={(e) => setJanCode(e.target.value)} />
+        </div>
+        <div>
+          <label className="block text-xs text-slate-600 mb-1">マスターカートン BOX数 (任意)</label>
+          <input
+            className="input"
+            type="number"
+            min={0}
+            value={masterCartonBox}
+            onChange={(e) => setMasterCartonBox(parseInt(e.target.value || "0", 10))}
+          />
+        </div>
+        <label className="flex items-center gap-2 md:col-span-2">
+          <input type="checkbox" checked={cartonDelivery} onChange={(e) => setCartonDelivery(e.target.checked)} />
+          <span>マスターカートン/カートン単位で届く (カートンBOX単位で入荷)</span>
+        </label>
+        <div className="md:col-span-2">
+          <label className="block text-xs text-slate-600 mb-1">メーカー発売情報 (発売日・仕様など)</label>
+          <textarea className="input" rows={3} value={releaseInfo} onChange={(e) => setReleaseInfo(e.target.value)} />
+          <div className="mt-2 flex flex-wrap items-center gap-2 bg-slate-50 border border-slate-200 rounded p-2">
+            <input
+              className="input flex-1 min-w-[220px] text-xs"
+              placeholder="メーカー/商品ページのURLを貼り付け → 発売情報・JANを自動取得"
+              value={lookupUrl}
+              onChange={(e) => setLookupUrl(e.target.value)}
+            />
+            <button type="button" className="btn-secondary text-xs" disabled={lookupBusy || !lookupUrl.trim()} onClick={runLookup}>
+              {lookupBusy ? "取得中…" : "Webから取得"}
+            </button>
+          </div>
+          {lookupMsg && <p className="text-xs text-slate-600 mt-1">{lookupMsg}</p>}
+          <p className="text-[11px] text-slate-400 mt-1">※ 取得結果は候補です。内容を確認・修正してから「保存」してください。</p>
         </div>
         <div className="md:col-span-2">
           <label className="block text-xs text-slate-600 mb-1">備考</label>
