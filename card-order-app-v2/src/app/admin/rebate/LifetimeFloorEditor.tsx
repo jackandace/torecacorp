@@ -75,7 +75,7 @@ export function LifetimeFloorEditor({ settings }: { settings: RankSetting[] }) {
 
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" checked={applyNow} onChange={(e) => setApplyNow(e.target.checked)} />
-        今すぐ全ショップにフロアを適用する(昇格のみ・降格はしません)
+        今すぐ全ショップにフロアを適用する(active・pending 対象／昇格のみ・降格はしません)
       </label>
 
       <div className="flex items-center gap-3">

@@ -60,10 +60,12 @@ export async function POST(request: NextRequest) {
   if (body.applyNow) {
     const { data: settingsRows } = await admin.from("rank_settings").select("*");
     const settings = buildRankSettingsMap(settingsRows ?? []);
+    // 累計フロアは過去実績ベースのため pending も対象 (suspended/削除は除外)。
+    // 月次cronは受注ベースのため active のみ (別軸)。
     const { data: shops } = await admin
       .from("shops")
       .select("id, company_name, current_rank, lifetime_amount")
-      .eq("status", "active")
+      .in("status", ["active", "pending"])
       .is("deleted_at", null);
 
     const month = thisMonthStr();
