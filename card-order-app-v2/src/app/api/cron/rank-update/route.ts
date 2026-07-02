@@ -5,7 +5,7 @@
 // 冪等性: 同月に複数回実行しても rank_history は同じ shop/month で重複しないようにする。
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { buildRankSettingsMap, computeGraceUntil, evaluateRank } from "@/lib/ranks";
+import { buildRankSettingsMap, computeGraceUntil, evaluateRank, lifetimeFloorRank, higherRank } from "@/lib/ranks";
 import { firstDayOfMonth, lastDayOfMonth, lastMonth, toISODate } from "@/lib/dates";
 import { notifyShop } from "@/lib/notify";
 import { RANK_LABEL } from "@/constants/ranks";
@@ -80,6 +80,14 @@ async function run(request: NextRequest) {
           today,
           settings,
         });
+
+        // 累計下限(フロア)を適用: 月次判定より累計フロアが上位ならフロアを採用
+        const floor = lifetimeFloorRank(shop.lifetime_amount ?? 0, settings);
+        const combined = higherRank(result.newRank, floor);
+        if (combined !== result.newRank) {
+          result.newRank = combined;
+          result.reason = "promote";
+        }
 
         // 履歴記録 (同 shop/month で既に履歴があれば更新)
         const { error: historyErr } = await supabase

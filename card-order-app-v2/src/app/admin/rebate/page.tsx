@@ -3,6 +3,7 @@ import { RANK_LABEL } from "@/constants/ranks";
 import { formatRate, formatYen } from "@/lib/rebate";
 import { formatJST } from "@/lib/dates";
 import { RankSettingsEditor } from "./RankSettingsEditor";
+import { LifetimeFloorEditor } from "./LifetimeFloorEditor";
 
 export const metadata = { title: "リベート管理 | 管理" };
 export const dynamic = "force-dynamic";
@@ -58,6 +59,10 @@ export default async function RebatePage() {
         <p className="text-xs text-slate-500 mt-2">
           ※ 変更内容は次月 1 日に自動反映されます (当月内は予約状態のまま)。
         </p>
+      </section>
+
+      <section>
+        <LifetimeFloorEditor settings={settings ?? []} />
       </section>
 
       <section>

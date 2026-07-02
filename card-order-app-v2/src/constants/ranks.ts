@@ -29,12 +29,13 @@ export const RANK_LABEL: Record<RankCode, string> = {
 };
 
 // rank_settings 未取得時のフォールバック (DB を真実とする)
-export const DEFAULT_RANK_SETTINGS: Record<RankCode, { threshold: number; rebate: number }> = {
-  platinum: { threshold: 1_000_000, rebate: 0.10 },
-  gold:     { threshold:   500_000, rebate: 0.07 },
-  silver:   { threshold:   200_000, rebate: 0.05 },
-  bronze:   { threshold:   100_000, rebate: 0.03 },
-  standard: { threshold:         0, rebate: 0.00 },
+// lifetime = 累計下限しきい値 (0=無効。DB 側でも既定0)
+export const DEFAULT_RANK_SETTINGS: Record<RankCode, { threshold: number; rebate: number; lifetime: number }> = {
+  platinum: { threshold: 1_000_000, rebate: 0.10, lifetime: 0 },
+  gold:     { threshold:   500_000, rebate: 0.07, lifetime: 0 },
+  silver:   { threshold:   200_000, rebate: 0.05, lifetime: 0 },
+  bronze:   { threshold:   100_000, rebate: 0.03, lifetime: 0 },
+  standard: { threshold:         0, rebate: 0.00, lifetime: 0 },
 };
 
 // 降格猶予判定の閾値倍率 (基準の 50% を下回ると降格対象)

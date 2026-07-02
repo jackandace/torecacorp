@@ -6,14 +6,38 @@ import {
   DEFAULT_RANK_SETTINGS,
 } from "@/constants/ranks";
 
-export type RankSettingsMap = Record<RankCode, { threshold: number; rebate: number }>;
+export type RankSettingsMap = Record<RankCode, { threshold: number; rebate: number; lifetime: number }>;
 
 export function buildRankSettingsMap(rows: RankSetting[]): RankSettingsMap {
   const map = { ...DEFAULT_RANK_SETTINGS };
   for (const row of rows) {
-    map[row.rank] = { threshold: row.threshold_amount, rebate: row.rebate_rate };
+    map[row.rank] = {
+      threshold: row.threshold_amount,
+      rebate: row.rebate_rate,
+      lifetime: row.lifetime_threshold ?? 0,
+    };
   }
   return map;
+}
+
+/**
+ * 累計取引額から「最低保証ランク(フロア)」を求める。
+ * lifetime_threshold > 0 かつ lifetimeAmount がそれ以上の最上位ランクを返す。
+ * どれも満たさなければ standard。
+ */
+export function lifetimeFloorRank(lifetimeAmount: number, settings: RankSettingsMap): RankCode {
+  // 高いランクから走査
+  for (let i = RANK_ORDER.length - 1; i >= 0; i--) {
+    const rank = RANK_ORDER[i]!;
+    const floor = settings[rank].lifetime;
+    if (floor > 0 && lifetimeAmount >= floor) return rank;
+  }
+  return "standard";
+}
+
+/** 2つのランクのうち上位を返す */
+export function higherRank(a: RankCode, b: RankCode): RankCode {
+  return RANK_ORDER.indexOf(a) >= RANK_ORDER.indexOf(b) ? a : b;
 }
 
 export function getNextRank(current: RankCode): RankCode | null {

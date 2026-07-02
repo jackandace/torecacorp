@@ -98,6 +98,8 @@ export type RankSetting = {
   rank: RankCode;
   threshold_amount: number;
   rebate_rate: number;
+  // 累計取引額の下限しきい値 (0=無効)。累計がこれ以上なら当該ランクを最低保証
+  lifetime_threshold: number;
   updated_at: string;
 };
 

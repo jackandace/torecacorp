@@ -6,6 +6,8 @@ import {
   getPreviousRank,
   computeGraceUntil,
   amountToNextRank,
+  lifetimeFloorRank,
+  higherRank,
 } from "./ranks";
 import { DEFAULT_RANK_SETTINGS } from "@/constants/ranks";
 
@@ -116,11 +118,44 @@ describe("buildRankSettingsMap", () => {
   });
   it("DB の row があれば上書き", () => {
     const m = buildRankSettingsMap([
-      { rank: "gold", threshold_amount: 999_999, rebate_rate: 0.08, updated_at: "" },
+      { rank: "gold", threshold_amount: 999_999, rebate_rate: 0.08, lifetime_threshold: 0, updated_at: "" },
     ]);
     expect(m.gold.threshold).toBe(999_999);
     expect(m.gold.rebate).toBe(0.08);
     expect(m.silver.threshold).toBe(200_000); // 他は変わらず
+  });
+});
+
+describe("lifetimeFloorRank (累計下限フロア)", () => {
+  const settings = buildRankSettingsMap([
+    { rank: "platinum", threshold_amount: 1_000_000, rebate_rate: 0.1, lifetime_threshold: 3_000_000, updated_at: "" },
+    { rank: "gold", threshold_amount: 500_000, rebate_rate: 0.07, lifetime_threshold: 1_000_000, updated_at: "" },
+    { rank: "silver", threshold_amount: 200_000, rebate_rate: 0.05, lifetime_threshold: 300_000, updated_at: "" },
+    { rank: "bronze", threshold_amount: 100_000, rebate_rate: 0.03, lifetime_threshold: 100_000, updated_at: "" },
+    { rank: "standard", threshold_amount: 0, rebate_rate: 0, lifetime_threshold: 0, updated_at: "" },
+  ]);
+  it("累計 978万 → platinum フロア", () => {
+    expect(lifetimeFloorRank(9_780_306, settings)).toBe("platinum");
+  });
+  it("累計 108万 → gold フロア", () => {
+    expect(lifetimeFloorRank(1_088_385, settings)).toBe("gold");
+  });
+  it("累計 30万 → silver フロア", () => {
+    expect(lifetimeFloorRank(305_489, settings)).toBe("silver");
+  });
+  it("累計 5万 → standard (下限未満)", () => {
+    expect(lifetimeFloorRank(50_000, settings)).toBe("standard");
+  });
+  it("しきい値が全て0(無効)なら常に standard", () => {
+    expect(lifetimeFloorRank(99_999_999, buildRankSettingsMap([]))).toBe("standard");
+  });
+});
+
+describe("higherRank", () => {
+  it("上位ランクを返す", () => {
+    expect(higherRank("silver", "gold")).toBe("gold");
+    expect(higherRank("platinum", "bronze")).toBe("platinum");
+    expect(higherRank("standard", "standard")).toBe("standard");
   });
 });
 
