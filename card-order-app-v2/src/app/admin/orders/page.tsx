@@ -1,18 +1,29 @@
 import { createClient } from "@/lib/supabase/server";
-import { formatJST } from "@/lib/dates";
+import { formatJST, orderCutoffDate, todayISOInJST } from "@/lib/dates";
 import { formatYen } from "@/lib/rebate";
 
 export const metadata = { title: "発注管理 | 管理" };
 export const dynamic = "force-dynamic";
 
+const PENDING_STATUSES = ["リクエスト", "発注調整中", "仮確定"];
+
 export default async function OrdersAdminPage() {
   const supabase = createClient();
   const { data: orders } = await supabase
     .from("orders")
-    .select("*, shops(company_name), products(title, flow_type)")
+    .select("*, shops(company_name), products(title, flow_type, order_deadline)")
     .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(100);
+
+  const today = todayISOInJST();
+  // 締切(発注期限の7日前)を過ぎたのに未確定 = 要確定
+  const needsConfirm = (o: { status: string; products?: { order_deadline?: string | null } | null }) => {
+    if (!PENDING_STATUSES.includes(o.status)) return false;
+    const cutoff = orderCutoffDate(o.products?.order_deadline ?? null);
+    return !!cutoff && cutoff < today;
+  };
+  const needCount = (orders ?? []).filter((o) => needsConfirm(o as never)).length;
 
   return (
     <div className="space-y-6">
@@ -23,6 +34,12 @@ export default async function OrdersAdminPage() {
           <a href="/api/orders/export" className="btn-secondary">CSVエクスポート</a>
         </div>
       </div>
+
+      {needCount > 0 && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+          ⚠ 締切を過ぎたのに未確定の発注が <strong>{needCount} 件</strong> あります。個数を確定するとショップへ自動で確定通知が送られます。
+        </div>
+      )}
 
       <div className="card overflow-hidden">
         <table className="w-full text-sm">
@@ -43,15 +60,21 @@ export default async function OrdersAdminPage() {
             {(orders ?? []).map((o) => {
               const shop = (o as { shops?: { company_name?: string } }).shops;
               const prod = (o as { products?: { title?: string; flow_type?: string } }).products;
+              const confirmNeeded = needsConfirm(o as never);
               return (
-                <tr key={o.id} className="border-t border-slate-100">
+                <tr key={o.id} className={`border-t border-slate-100 ${confirmNeeded ? "bg-amber-50" : ""}`}>
                   <td className="px-3 py-2">{formatJST(o.created_at)}</td>
                   <td className="px-3 py-2">{shop?.company_name ?? "—"}</td>
                   <td className="px-3 py-2">{prod?.title ?? "—"}</td>
                   <td className="px-3 py-2">{prod?.flow_type === "cut" ? "カット割" : "配分"}</td>
                   <td className="px-3 py-2 text-right">{o.requested_qty}{o.order_unit}</td>
                   <td className="px-3 py-2 text-right">{formatYen(o.total_price ?? 0)}</td>
-                  <td className="px-3 py-2">{o.status}</td>
+                  <td className="px-3 py-2">
+                    {o.status}
+                    {confirmNeeded && (
+                      <span className="ml-1 inline-flex items-center text-[10px] px-1.5 py-0.5 rounded bg-amber-500 text-white font-bold">要確定</span>
+                    )}
+                  </td>
                   <td className="px-3 py-2">{o.shipping_status}</td>
                   <td className="px-3 py-2">
                     <a href={`/admin/orders/${o.id}`} className="text-brand-600 hover:underline">詳細</a>
