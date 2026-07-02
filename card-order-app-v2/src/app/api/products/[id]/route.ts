@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/auth";
 import { writeAudit } from "@/lib/audit";
+import { checkProductPublishable } from "@/lib/product-checks";
 import type { Product } from "@/types/database";
 
 const PatchSchema = z.object({
@@ -52,6 +53,29 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     .is("deleted_at", null)
     .maybeSingle();
   if (!before) return NextResponse.json({ error: "not found" }, { status: 404 });
+
+  // 公開しようとする場合は設定漏れをチェック (金銭トラブル防止)
+  if (body.isVisible) {
+    const check = checkProductPublishable({
+      title: body.title,
+      price: body.price,
+      actual_rate: body.actualRate,
+      ct_to_box: body.ctToBox,
+      min_order_box: body.minOrderBox,
+      planned_qty: body.plannedQty,
+      flow_type: body.flowType,
+      order_deadline: body.orderDeadline,
+      jan_code: body.janCode ?? null,
+      carton_delivery: body.cartonDelivery ?? false,
+      master_carton_box: body.masterCartonBox ?? null,
+    });
+    if (!check.ok) {
+      return NextResponse.json(
+        { error: "公開できません(設定漏れ)", checkErrors: check.errors },
+        { status: 400 },
+      );
+    }
+  }
 
   const update: Partial<Product> = {
     series: body.series ?? null,

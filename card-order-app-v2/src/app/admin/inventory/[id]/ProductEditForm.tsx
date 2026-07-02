@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Product, ProductCategory, ProductStatus, FlowType, RankCode } from "@/types/database";
 import { formatRate } from "@/lib/rebate";
 import { RANK_LABEL, RANK_ORDER } from "@/constants/ranks";
+import { checkProductPublishable } from "@/lib/product-checks";
 
 export function ProductEditForm({ product }: { product: Product }) {
   const router = useRouter();
@@ -100,7 +101,12 @@ export function ProductEditForm({ product }: { product: Product }) {
         }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "更新失敗");
+      if (!res.ok) {
+        const detail = Array.isArray(json.checkErrors) && json.checkErrors.length
+          ? `: ${json.checkErrors.join(" / ")}`
+          : "";
+        throw new Error((json.error ?? "更新失敗") + detail);
+      }
       setMessage("保存しました");
       router.refresh();
     } catch (e) {
@@ -125,9 +131,35 @@ export function ProductEditForm({ product }: { product: Product }) {
 
   const listedPreview = actualRate + rateMarkup;
 
+  const check = checkProductPublishable({
+    title,
+    price,
+    actual_rate: actualRate,
+    ct_to_box: ctToBox,
+    min_order_box: minOrderBox,
+    planned_qty: plannedQty,
+    flow_type: flowType,
+    order_deadline: orderDeadline || null,
+    jan_code: janCode || null,
+    carton_delivery: cartonDelivery,
+    master_carton_box: masterCartonBox > 0 ? masterCartonBox : null,
+  });
+
   return (
     <section className="card p-5 space-y-4">
       <h2 className="font-semibold">商品情報</h2>
+
+      {/* 公開前チェッカー */}
+      {(check.errors.length > 0 || check.warnings.length > 0) && (
+        <div className={`rounded-lg border p-3 text-xs space-y-1 ${check.ok ? "border-amber-200 bg-amber-50" : "border-rose-200 bg-rose-50"}`}>
+          <div className="font-semibold">
+            {check.ok ? "⚠ 公開前の確認事項" : "🚫 公開できない設定漏れがあります(金額に直結)"}
+          </div>
+          {check.errors.map((e, i) => <div key={`e${i}`} className="text-rose-700">・{e}</div>)}
+          {check.warnings.map((w, i) => <div key={`w${i}`} className="text-amber-700">・{w}</div>)}
+          {!check.ok && <div className="text-rose-600 mt-1">※ エラーを解消しないと「ショップに公開する」で保存できません。</div>}
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
         <div>
           <label className="block text-xs text-slate-600 mb-1">シリーズ (ゲームタイトル)</label>
