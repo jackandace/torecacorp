@@ -482,8 +482,15 @@ function ProductCard({
   listedRate: number;
   onAdd: (p: Product, unit: OrderUnit, qty: number) => void;
 }) {
+  // 単位ごとの初期数量: BOX=1カートン分(=ct_to_box、最低発注数を下回らない) / CT=1
+  const defaultBox = Math.max(product.min_order_box, product.ct_to_box);
   const [unit, setUnit] = useState<OrderUnit>("BOX");
-  const [qty, setQty] = useState<number>(product.min_order_box);
+  const [qty, setQty] = useState<number>(defaultBox);
+  // 単位切替時に既定数量へ自動セット (12box品→12 / 20box品→20 / CT→1)
+  const changeUnit = (u: OrderUnit) => {
+    setUnit(u);
+    setQty(u === "CT" ? 1 : defaultBox);
+  };
   const isCut = product.flow_type === "cut";
   const available = (product.planned_qty ?? 0) - product.ordered_qty;
   // カット品は在庫上限の概念が無く希望BOX数を受け付けるため SOLD OUT にしない
@@ -581,7 +588,7 @@ function ProductCard({
                       ? "bg-brand-600 text-white border-brand-600"
                       : "bg-white border-slate-300"
                 }`}
-                onClick={() => setUnit(u)}
+                onClick={() => changeUnit(u)}
               >
                 {u}
               </button>
