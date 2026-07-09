@@ -7,6 +7,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Shop } from "@/types/database";
 import { renderPdfToBuffer } from "./render";
 import { InvoicePdf } from "./invoice";
+import { ISSUER } from "./issuer";
 
 /** 請求書 PDF の Storage 保存パス (invoices バケット内・固定) */
 export function invoicePdfPath(invoiceId: string): string {
@@ -67,10 +68,7 @@ export async function generateInvoicePdf(
       invoice,
       shop,
       items: pdfItems,
-      issuer: {
-        name: process.env.INVOICE_ISSUER_NAME ?? "PALETTE GROUP トレカ商事カンパニー",
-        registrationNumber: process.env.INVOICE_REGISTRATION_NUMBER ?? "T0000000000000",
-      },
+      issuer: ISSUER,
     }),
   );
 

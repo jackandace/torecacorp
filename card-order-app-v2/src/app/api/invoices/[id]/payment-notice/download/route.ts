@@ -8,6 +8,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdmin } from "@/lib/auth";
 import { renderPdfToBuffer } from "@/lib/pdf/render";
 import { PaymentNoticePdf } from "@/lib/pdf/payment-notice";
+import { ISSUER } from "@/lib/pdf/issuer";
 import type { Shop } from "@/types/database";
 
 export const runtime = "nodejs";
@@ -72,10 +73,7 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
           shop,
           issuedAt: invoice.issued_at.slice(0, 10),
           productNames,
-          issuer: {
-            name: process.env.INVOICE_ISSUER_NAME ?? "株式会社パレットグループ",
-            registrationNumber: process.env.INVOICE_REGISTRATION_NUMBER ?? "T8011001119787",
-          },
+          issuer: ISSUER,
         }),
       );
       const { error: upErr } = await adminSb.storage

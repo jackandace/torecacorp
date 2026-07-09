@@ -1,5 +1,6 @@
 // 請求書 発行元・振込先などの固定情報 (株式会社パレットグループ)
-// 名称・インボイス番号は環境変数で上書き可能。住所/振込先は固定。
+// 名称・登録番号・住所・振込先はすべて固定値(単一の出所)。
+// 過去に環境変数へ残った別値/ダミーが本番へ反映される事故があったため、上書きは廃止。
 import fs from "node:fs";
 import path from "node:path";
 
@@ -9,8 +10,10 @@ export const SEAL_PATH = path.join(process.cwd(), "src/lib/pdf/assets/company-se
 export const HAS_SEAL = (() => { try { return fs.existsSync(SEAL_PATH); } catch { return false; } })();
 
 export const ISSUER = {
-  name: process.env.INVOICE_ISSUER_NAME ?? "株式会社パレットグループ",
-  registrationNumber: process.env.INVOICE_REGISTRATION_NUMBER ?? "T8011001119787",
+  // 署名欄の名称は固定(過去に環境変数の別値が本番へ残り不整合を招いたため上書きは廃止)
+  name: "株式会社パレットグループ トレカ商事カンパニー",
+  // 適格請求書発行事業者 登録番号(T+法人番号13桁)。固定値(環境変数のダミーで上書きされる事故を防ぐため直書き)。
+  registrationNumber: "T8011001119787",
   address1: "東京都千代田区神田鍛冶町3丁目3番地1",
   address2: "神田ノースフロント 8F",
   tel: "03-4405-4584",

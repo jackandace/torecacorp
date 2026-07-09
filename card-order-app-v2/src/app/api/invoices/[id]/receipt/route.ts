@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdmin } from "@/lib/auth";
 import { renderPdfToBuffer } from "@/lib/pdf/render";
 import { ReceiptPdf } from "@/lib/pdf/receipt";
+import { ISSUER } from "@/lib/pdf/issuer";
 import { writeAudit } from "@/lib/audit";
 import type { Shop } from "@/types/database";
 
@@ -36,10 +37,7 @@ export async function POST(_request: NextRequest, { params }: { params: { id: st
       shop,
       paidAt,
       receivedFor: `商品代金 (${invoice.invoice_number})`,
-      issuer: {
-        name: process.env.INVOICE_ISSUER_NAME ?? "PALETTE GROUP トレカ商事カンパニー",
-        registrationNumber: process.env.INVOICE_REGISTRATION_NUMBER ?? "T0000000000000",
-      },
+      issuer: ISSUER,
     }),
   );
 
