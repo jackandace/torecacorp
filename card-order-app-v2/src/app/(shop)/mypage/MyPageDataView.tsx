@@ -387,14 +387,25 @@ function InvoiceDetail({ invoice, shopRank }: { invoice: Invoice; shopRank: Rank
       </div>
 
       {/* download ルートが都度署名＆未生成なら自動生成するため常に表示・失効しない */}
-      <a
-        href={`/api/invoices/${invoice.id}/pdf/download`}
-        target="_blank"
-        rel="noreferrer"
-        className="btn-primary w-full text-center"
-      >
-        PDF をダウンロード
-      </a>
+      {invoice.invoice_kind === "refund" ? (
+        <a
+          href={`/api/invoices/${invoice.id}/payment-notice/download`}
+          target="_blank"
+          rel="noreferrer"
+          className="btn-primary w-full text-center"
+        >
+          支払通知書をダウンロード
+        </a>
+      ) : (
+        <a
+          href={`/api/invoices/${invoice.id}/pdf/download`}
+          target="_blank"
+          rel="noreferrer"
+          className="btn-primary w-full text-center"
+        >
+          PDF をダウンロード
+        </a>
+      )}
       <p className="text-xs text-slate-500">
         ※ 表示ランク (現在: {RANK_LABEL[shopRank]}) は最新値で、発行時ランクとは異なる場合があります。
       </p>

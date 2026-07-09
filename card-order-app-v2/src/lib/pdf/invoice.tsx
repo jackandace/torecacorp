@@ -10,11 +10,12 @@ import {
   Page,
   Text,
   View,
+  Image,
   StyleSheet,
 } from "@react-pdf/renderer";
 import type { Invoice, Shop } from "@/types/database";
 import { registerJpFont, JP_FONT_FAMILY } from "./fonts";
-import { ISSUER, BANK, INVOICE_FOOTER_NOTE, invoiceSubject } from "./issuer";
+import { ISSUER, BANK, INVOICE_FOOTER_NOTE, invoiceSubject, HAS_SEAL, SEAL_PATH } from "./issuer";
 
 registerJpFont();
 
@@ -26,8 +27,9 @@ const styles = StyleSheet.create({
   dateBox: { alignItems: "flex-end" },
   subjectRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 18, alignItems: "flex-start" },
   subject: { fontSize: 12, fontWeight: 700, borderBottom: "1pt solid #333", paddingBottom: 3 },
-  issuer: { fontSize: 8.5, lineHeight: 1.5, textAlign: "left" },
+  issuer: { fontSize: 8.5, lineHeight: 1.5, textAlign: "left", position: "relative" },
   issuerName: { fontSize: 11, marginBottom: 2 },
+  seal: { position: "absolute", top: -6, right: 4, width: 52, height: 52 },
   grandRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 18, borderBottom: "1.5pt solid #333", borderTop: "1.5pt solid #333", paddingVertical: 6 },
   grandLabel: { fontSize: 12 },
   grandValue: { fontSize: 15, fontWeight: 700 },
@@ -104,6 +106,7 @@ export function InvoicePdf({ invoice, shop, items }: InvoicePdfProps) {
             <Text style={{ marginTop: 6 }}>下記の通り、ご請求申し上げます。</Text>
           </View>
           <View style={styles.issuer}>
+            {HAS_SEAL && <Image src={SEAL_PATH} style={styles.seal} />}
             <Text style={styles.issuerName}>{ISSUER.name}</Text>
             <Text>{ISSUER.address1}</Text>
             <Text>{ISSUER.address2}</Text>

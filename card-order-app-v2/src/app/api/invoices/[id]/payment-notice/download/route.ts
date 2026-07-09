@@ -53,16 +53,28 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
     let signed = await adminSb.storage.from("invoices").createSignedUrl(path, 120);
     if (signed.error || !signed.data) {
       const shop = invoice.shops as unknown as Shop;
-      const finalTotal = invoice.deposit_applied - invoice.total_amount; // 確定満額
+      // 対象商品名を取得 (摘要用)
+      const { data: items } = await adminSb
+        .from("invoice_items")
+        .select("orders(products(title))")
+        .eq("invoice_id", invoice.id);
+      const productNames = [
+        ...new Set(
+          (items ?? [])
+            .map((it) => (it.orders as unknown as { products?: { title?: string } } | null)?.products?.title)
+            .filter((t): t is string => !!t),
+        ),
+      ].join(" / ");
+
       const buf = await renderPdfToBuffer(
         PaymentNoticePdf({
           invoice,
           shop,
           issuedAt: invoice.issued_at.slice(0, 10),
-          finalTotal,
+          productNames,
           issuer: {
-            name: process.env.INVOICE_ISSUER_NAME ?? "PALETTE GROUP トレカ商事カンパニー",
-            registrationNumber: process.env.INVOICE_REGISTRATION_NUMBER ?? "T0000000000000",
+            name: process.env.INVOICE_ISSUER_NAME ?? "株式会社パレットグループ",
+            registrationNumber: process.env.INVOICE_REGISTRATION_NUMBER ?? "T8011001119787",
           },
         }),
       );

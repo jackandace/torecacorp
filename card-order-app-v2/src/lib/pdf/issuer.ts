@@ -1,5 +1,12 @@
 // 請求書 発行元・振込先などの固定情報 (株式会社パレットグループ)
 // 名称・インボイス番号は環境変数で上書き可能。住所/振込先は固定。
+import fs from "node:fs";
+import path from "node:path";
+
+// 電子印(角印) — src/lib/pdf/assets/company-seal.png があれば発行元に重ねて表示。
+// 透過PNG・正方形推奨。ファイルが無ければ印なしでレンダリング(エラーにしない)。
+export const SEAL_PATH = path.join(process.cwd(), "src/lib/pdf/assets/company-seal.png");
+export const HAS_SEAL = (() => { try { return fs.existsSync(SEAL_PATH); } catch { return false; } })();
 
 export const ISSUER = {
   name: process.env.INVOICE_ISSUER_NAME ?? "株式会社パレットグループ",
