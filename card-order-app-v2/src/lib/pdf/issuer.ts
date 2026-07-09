@@ -15,9 +15,9 @@ export const BANK = {
     "GMOあおぞらネット銀行(0310)",
     "法人第二営業部支店(102)",
     "普通: 1673852",
-    "カ)アリイ",
+    "カ)パレットグループ",
   ],
-  note: "※社名変更前の口座名義となります。",
+  note: "",
 };
 
 export const INVOICE_FOOTER_NOTE =

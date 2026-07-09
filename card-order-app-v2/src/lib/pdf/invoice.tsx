@@ -218,7 +218,7 @@ export function InvoicePdf({ invoice, shop, items }: InvoicePdfProps) {
         <View style={styles.bank}>
           <Text style={styles.bankTitle}>お振込先</Text>
           {BANK.lines.map((l, i) => <Text key={i}>{l}</Text>)}
-          <Text style={styles.redNote}>{BANK.note}</Text>
+          {BANK.note ? <Text style={styles.redNote}>{BANK.note}</Text> : null}
         </View>
 
         {/* 備考 */}
