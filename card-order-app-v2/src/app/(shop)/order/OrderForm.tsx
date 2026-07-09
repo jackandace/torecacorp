@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { Product, Shop, OrderUnit, ProductCategory } from "@/types/database";
 import { getListedRate, formatRate, formatYen } from "@/lib/rebate";
@@ -41,6 +42,17 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("deadline");
+
+  // 表示形式 (リスト / グリッド) — ブラウザに記憶
+  const [view, setView] = useState<"list" | "grid">("list");
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? window.localStorage.getItem("order_view") : null;
+    if (saved === "grid" || saved === "list") setView(saved);
+  }, []);
+  const changeView = (v: "list" | "grid") => {
+    setView(v);
+    try { window.localStorage.setItem("order_view", v); } catch { /* ignore */ }
+  };
 
   // リアルタイム在庫: Supabase Realtime で products の変更を購読し、
   // 他ショップの発注確定・管理者の在庫更新を画面リロードなしで反映する。
@@ -255,16 +267,39 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
                 その他 ({categoryCounts.other})
               </TabButton>
             </div>
-            <select
-              className="text-xs border border-slate-300 rounded px-2 py-1 bg-white"
-              value={sort}
-              onChange={(e) => setSort(e.target.value as SortKey)}
-            >
-              <option value="deadline">発注締切が近い順</option>
-              <option value="newest">掲載が新しい順</option>
-              <option value="price_asc">定価が安い順</option>
-              <option value="price_desc">定価が高い順</option>
-            </select>
+            <div className="flex items-center gap-2">
+              {/* 表示形式 切替 */}
+              <div className="flex rounded border border-slate-300 overflow-hidden" role="group" aria-label="表示形式">
+                <button
+                  type="button"
+                  aria-pressed={view === "list"}
+                  onClick={() => changeView("list")}
+                  className={`px-2 py-1 ${view === "list" ? "bg-brand-600 text-white" : "bg-white text-slate-600"}`}
+                  title="リスト表示"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={view === "grid"}
+                  onClick={() => changeView("grid")}
+                  className={`px-2 py-1 border-l border-slate-300 ${view === "grid" ? "bg-brand-600 text-white" : "bg-white text-slate-600"}`}
+                  title="グリッド表示"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </button>
+              </div>
+              <select
+                className="text-xs border border-slate-300 rounded px-2 py-1 bg-white"
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortKey)}
+              >
+                <option value="deadline">発注締切が近い順</option>
+                <option value="newest">掲載が新しい順</option>
+                <option value="price_asc">定価が安い順</option>
+                <option value="price_desc">定価が高い順</option>
+              </select>
+            </div>
           </div>
           <p className="text-xs text-slate-500 flex items-center gap-2">
             <span>{visibleProducts.length} 件表示中 / 全 {products.length} 件</span>
@@ -285,14 +320,17 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
             {products.length === 0 ? "現在受付中の商品はありません。" : "条件に一致する商品がありません。"}
           </div>
         )}
-        {visibleProducts.map((p) => (
-          <ProductCard
-            key={p.id}
-            product={p}
-            listedRate={getListedRate(p, shop)}
-            onAdd={addToCart}
-          />
-        ))}
+        <div className={view === "grid" ? "grid grid-cols-2 xl:grid-cols-3 gap-3" : "space-y-3"}>
+          {visibleProducts.map((p) => (
+            <ProductCard
+              key={p.id}
+              product={p}
+              listedRate={getListedRate(p, shop)}
+              onAdd={addToCart}
+              compact={view === "grid"}
+            />
+          ))}
+        </div>
       </div>
 
       {/* カート */}
@@ -477,10 +515,12 @@ function ProductCard({
   product,
   listedRate,
   onAdd,
+  compact = false,
 }: {
   product: Product;
   listedRate: number;
   onAdd: (p: Product, unit: OrderUnit, qty: number) => void;
+  compact?: boolean;
 }) {
   // 単位ごとの初期数量: BOX=1カートン分(=ct_to_box、最低発注数を下回らない) / CT=1
   const defaultBox = Math.max(product.min_order_box, product.ct_to_box);
@@ -498,10 +538,10 @@ function ProductCard({
   const flowBadge = isCut ? "カット割" : "配分品";
 
   return (
-    <div className={`card p-4 sm:p-5 relative ${soldOut ? "opacity-60" : ""}`}>
-      <div className="flex flex-col sm:flex-row gap-4">
+    <div className={`card p-3 sm:p-5 relative ${soldOut ? "opacity-60" : ""}`}>
+      <div className={compact ? "flex flex-col gap-2" : "flex flex-col sm:flex-row gap-4"}>
         {/* 画像 */}
-        <div className="sm:w-32 flex-shrink-0">
+        <Link href={`/order/${product.id}`} className={compact ? "block" : "sm:w-32 flex-shrink-0"}>
           <div className="relative w-full aspect-square bg-slate-100 rounded overflow-hidden">
             {product.image_url ? (
               <Image
@@ -525,7 +565,7 @@ function ProductCard({
               </div>
             )}
           </div>
-        </div>
+        </Link>
 
         {/* 商品情報 */}
         <div className="flex-1 min-w-0">
@@ -539,11 +579,13 @@ function ProductCard({
               <DeadlineBadge deadline={product.order_deadline} />
             )}
           </div>
-          <h3 className="font-semibold leading-snug">{product.title}</h3>
-          {product.full_name && product.full_name !== product.title && (
+          <Link href={`/order/${product.id}`}>
+            <h3 className={`font-semibold leading-snug hover:text-brand-700 ${compact ? "text-sm line-clamp-2" : ""}`}>{product.title}</h3>
+          </Link>
+          {!compact && product.full_name && product.full_name !== product.title && (
             <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{product.full_name}</p>
           )}
-          {product.model_number && (
+          {!compact && product.model_number && (
             <p className="text-xs text-slate-500 mt-1">型番: {product.model_number}</p>
           )}
           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm">
@@ -561,20 +603,24 @@ function ProductCard({
                 : `残 ${available} BOX / ${product.planned_qty ?? 0} BOX (1CT = ${product.ct_to_box} BOX)`}
             </p>
           )}
-          {product.notes && (
+          {!compact && product.notes && (
             <p className="text-xs text-slate-500 mt-1 line-clamp-2">{product.notes}</p>
           )}
-          <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-[11px] text-slate-400">
-            {product.carton_delivery && <span className="text-slate-500">📦 カートン単位でお届け</span>}
-            {product.jan_code && <span>JAN: {product.jan_code}</span>}
-          </div>
-          {product.release_info && (
+          {!compact && (
+            <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-[11px] text-slate-400">
+              {product.carton_delivery && <span className="text-slate-500">📦 カートン単位でお届け</span>}
+              {product.jan_code && <span>JAN: {product.jan_code}</span>}
+            </div>
+          )}
+          {!compact && product.release_info && (
             <p className="text-[11px] text-slate-400 mt-1 line-clamp-2 whitespace-pre-line">{product.release_info}</p>
           )}
         </div>
 
         {/* 注文操作 (在庫切れ時は全 UI を無効化) */}
-        <div className="flex flex-row sm:flex-col items-end sm:items-stretch gap-2 sm:w-40 flex-shrink-0">
+        <div className={compact
+          ? "flex flex-col gap-2"
+          : "flex flex-row sm:flex-col items-end sm:items-stretch gap-2 sm:w-40 flex-shrink-0"}>
           <div className="flex gap-1 text-xs">
             {(["BOX", "CT"] as OrderUnit[]).map((u) => (
               <button
