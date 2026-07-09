@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { RANK_LABEL } from "@/constants/ranks";
 import { formatJST } from "@/lib/dates";
@@ -5,18 +6,39 @@ import { formatJST } from "@/lib/dates";
 export const metadata = { title: "顧客管理 | 管理" };
 export const dynamic = "force-dynamic";
 
-export default async function ShopsAdminPage() {
+const PAGE_SIZE = 50;
+
+interface SearchParams { page?: string; q?: string }
+
+export default async function ShopsAdminPage({ searchParams }: { searchParams: SearchParams }) {
   const supabase = createClient();
-  const { data: shops } = await supabase
+  const page = Math.max(1, parseInt(searchParams.page ?? "1", 10) || 1);
+  const q = (searchParams.q ?? "").trim();
+  const offset = (page - 1) * PAGE_SIZE;
+
+  // 必要な列だけを取得 + 件数 + ページング (顧客数が増えても軽い)
+  let query = supabase
     .from("shops")
-    .select("*")
-    .is("deleted_at", null)
-    .order("created_at", { ascending: false });
+    .select("id, company_name, contact_name, email, current_rank, status, oath_expires_at, created_at", { count: "exact" })
+    .is("deleted_at", null);
+
+  if (q) {
+    const esc = q.replace(/[%,]/g, " ");
+    query = query.or(`company_name.ilike.%${esc}%,email.ilike.%${esc}%,contact_name.ilike.%${esc}%`);
+  }
+
+  const { data: shops, count } = await query
+    .order("created_at", { ascending: false })
+    .range(offset, offset + PAGE_SIZE - 1);
+
+  const total = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const qParam = q ? `&q=${encodeURIComponent(q)}` : "";
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">顧客管理</h1>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h1 className="text-2xl font-bold">顧客管理 ({total})</h1>
         <div className="flex gap-2 flex-wrap">
           <a href="/admin/shops/invites" className="btn-primary">招待リンク発行</a>
           <a href="/admin/shops/import" className="btn-secondary">CSV取込</a>
@@ -25,8 +47,22 @@ export default async function ShopsAdminPage() {
           <a href="/admin/shops/new" className="btn-secondary">手動登録</a>
         </div>
       </div>
-      <div className="card overflow-hidden">
-        <table className="w-full text-sm">
+
+      {/* 検索 (会社名・メール・担当) */}
+      <form method="get" className="flex gap-2">
+        <input
+          type="search"
+          name="q"
+          defaultValue={q}
+          placeholder="会社名・メール・担当で検索"
+          className="input max-w-sm"
+        />
+        <button className="btn-secondary" type="submit">検索</button>
+        {q && <Link href="/admin/shops" className="btn-secondary">クリア</Link>}
+      </form>
+
+      <div className="card overflow-x-auto">
+        <table className="w-full text-sm min-w-[720px]">
           <thead className="bg-slate-50 text-slate-600">
             <tr>
               <th className="text-left px-3 py-2">会社名</th>
@@ -59,16 +95,25 @@ export default async function ShopsAdminPage() {
             {(!shops || shops.length === 0) && (
               <tr>
                 <td colSpan={8} className="px-3 py-6 text-center text-slate-500">
-                  ショップはまだ登録されていません
+                  {q ? "該当するショップがありません" : "ショップはまだ登録されていません"}
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-slate-500">
-        TODO: 詳細ページ (ランク変動履歴・宣誓書PDF アップ/署名付きURL ダウンロード・調査履歴)
-      </p>
+
+      {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-3 text-sm">
+          {page > 1 && (
+            <Link href={`/admin/shops?page=${page - 1}${qParam}`} className="btn-secondary text-xs">← 前</Link>
+          )}
+          <span className="text-slate-500">{page} / {totalPages}</span>
+          {page < totalPages && (
+            <Link href={`/admin/shops?page=${page + 1}${qParam}`} className="btn-secondary text-xs">次 →</Link>
+          )}
+        </div>
+      )}
     </div>
   );
 }
