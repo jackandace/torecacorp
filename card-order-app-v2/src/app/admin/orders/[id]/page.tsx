@@ -66,7 +66,14 @@ export default async function OrderDetailPage({ params }: { params: { id: string
           </Link>
           <h1 className="text-2xl font-bold mt-1">発注詳細</h1>
         </div>
-        <span className="badge bg-slate-100 text-slate-700">ID: {order.id.slice(0, 8)}</span>
+        <div className="flex items-center gap-2">
+          {product?.flow_type === "cut" && (
+            <form action={`/api/orders/${order.id}/deposit-invoice`} method="post">
+              <button className="btn-primary text-xs">保証金請求書(50%)を発行</button>
+            </form>
+          )}
+          <span className="badge bg-slate-100 text-slate-700">ID: {order.id.slice(0, 8)}</span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

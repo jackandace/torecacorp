@@ -9,7 +9,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/auth";
-import { calcRebate, aggregateRebate } from "@/lib/rebate";
+import { calcRebate, aggregateRebate, applyHandlingFee } from "@/lib/rebate";
 import { calcSettlement } from "@/lib/deposit";
 import { nextInvoiceNumber } from "@/lib/invoice-number";
 import { writeAudit } from "@/lib/audit";
@@ -85,8 +85,9 @@ export async function POST(_request: NextRequest, { params }: { params: { id: st
       }),
     );
     const totals = aggregateRebate(lines);
+    const withFee = applyHandlingFee(totals); // 決済手数料(税抜2%)を上乗せした確定満額
     const depositPaid = deposit.paid_amount;
-    const { kind, amount } = calcSettlement({ finalTotal: totals.totalAmount, depositPaid });
+    const { kind, amount } = calcSettlement({ finalTotal: withFee.totalAmount, depositPaid });
 
     if (kind === "settled") {
       await writeAudit(supabase, {
@@ -110,11 +111,12 @@ export async function POST(_request: NextRequest, { params }: { params: { id: st
         invoice_kind: kind, // 'final' | 'refund'
         parent_invoice_id: deposit.id,
         deposit_applied: depositPaid,
-        subtotal: totals.subtotal,
+        subtotal: withFee.subtotal,
         rebate_rate: orders[0]!.rebate_rate,
-        rebate_amount: totals.rebateAmount,
-        taxable_amount: totals.taxableAmount,
-        tax_amount: totals.taxAmount,
+        rebate_amount: withFee.rebateAmount,
+        fee_amount: withFee.feeAmount,
+        taxable_amount: withFee.taxableAmount,
+        tax_amount: withFee.taxAmount,
         total_amount: amount, // final=差額 / refund=返金額 (いずれも正の額)
         status: "未入金",
       } satisfies Partial<import("@/types/database").Invoice>)

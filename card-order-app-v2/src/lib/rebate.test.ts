@@ -1,5 +1,28 @@
 import { describe, expect, it } from "vitest";
-import { calcRebate, aggregateRebate, getListedRate, formatRate, formatYen } from "./rebate";
+import { calcRebate, aggregateRebate, getListedRate, formatRate, formatYen, calcHandlingFee, applyHandlingFee, HANDLING_FEE_RATE } from "./rebate";
+
+describe("calcHandlingFee (決済手数料 税抜2%)", () => {
+  it("HANDLING_FEE_RATE は 0.02", () => {
+    expect(HANDLING_FEE_RATE).toBe(0.02);
+  });
+  it("商品代金(税抜)×2% 四捨五入", () => {
+    expect(calcHandlingFee(31356)).toBe(627); // 627.12 → 627
+    expect(calcHandlingFee(2613)).toBe(52);   // 52.26 → 52
+    expect(calcHandlingFee(28505)).toBe(570); // 570.1 → 570
+  });
+});
+
+describe("applyHandlingFee", () => {
+  it("手数料を課税対象に上乗せし税込で実質2.2%相当", () => {
+    // 小計 100000 税抜, リベート0
+    const base = { subtotal: 100000, rebateAmount: 0, taxableAmount: 100000, taxAmount: 10000, totalAmount: 110000 };
+    const r = applyHandlingFee(base);
+    expect(r.feeAmount).toBe(2000);            // 100000 × 2%
+    expect(r.taxableAmount).toBe(102000);      // 100000 + 2000
+    expect(r.taxAmount).toBe(10200);           // 102000 × 10%
+    expect(r.totalAmount).toBe(112200);        // 手数料は税込2200 = 商品代金の2.2%
+  });
+});
 
 describe("getListedRate", () => {
   it("実掛け率 + 上乗せ率を返す", () => {

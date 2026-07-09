@@ -55,6 +55,39 @@ export function aggregateRebate(lines: RebateBreakdown[]): RebateBreakdown {
   );
 }
 
+// 決済手数料: 商品代金(税抜)に対する率。税抜2% → 消費税を乗せて実質 税込2.2%。
+export const HANDLING_FEE_RATE = 0.02;
+
+/** 手数料(税抜) = 商品代金(税抜) × 2% (四捨五入・一般商取引) */
+export function calcHandlingFee(subtotal: number): number {
+  return Math.round(subtotal * HANDLING_FEE_RATE);
+}
+
+export interface RebateWithFee extends RebateBreakdown {
+  feeAmount: number; // 税抜手数料
+}
+
+/**
+ * 手数料を上乗せして課税対象・消費税・合計を再計算する。
+ *   課税対象 = 小計 - リベート + 手数料(税抜)
+ *   消費税   = 課税対象 × 10% (切り捨て・既存calcRebateと整合)
+ *   合計     = 課税対象 + 消費税
+ */
+export function applyHandlingFee(totals: RebateBreakdown): RebateWithFee {
+  const feeAmount = calcHandlingFee(totals.subtotal);
+  const taxableAmount = totals.subtotal - totals.rebateAmount + feeAmount;
+  const taxAmount = Math.floor(taxableAmount * TAX_RATE);
+  const totalAmount = taxableAmount + taxAmount;
+  return {
+    subtotal: totals.subtotal,
+    rebateAmount: totals.rebateAmount,
+    feeAmount,
+    taxableAmount,
+    taxAmount,
+    totalAmount,
+  };
+}
+
 /** 表示用: 0.84 → "84%" */
 export function formatRate(rate: number): string {
   return `${(rate * 100).toFixed(0)}%`;

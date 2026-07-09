@@ -194,6 +194,7 @@ export type Invoice = {
   subtotal: number;
   rebate_rate: number;
   rebate_amount: number;
+  fee_amount: number;      // 決済手数料(税抜)。商品代金税抜×2%
   taxable_amount: number;
   tax_amount: number;
   total_amount: number;

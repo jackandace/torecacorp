@@ -11,7 +11,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/auth";
-import { calcRebate, aggregateRebate } from "@/lib/rebate";
+import { calcRebate, aggregateRebate, applyHandlingFee } from "@/lib/rebate";
 import { nextInvoiceNumber } from "@/lib/invoice-number";
 import { writeAudit } from "@/lib/audit";
 import { notifyShop } from "@/lib/notify";
@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
     }),
   );
   const totals = aggregateRebate(lines);
+  const withFee = applyHandlingFee(totals); // 決済手数料(税抜2%)を上乗せ
 
   const invoiceNumber = await nextInvoiceNumber(supabase, new Date());
 
@@ -76,12 +77,13 @@ export async function POST(request: NextRequest) {
       shop_id: shop.id,
       invoice_number: invoiceNumber,
       rank_at_issue: shop.current_rank,
-      subtotal: totals.subtotal,
+      subtotal: withFee.subtotal,
       rebate_rate: orders[0]!.rebate_rate, // ショップ単位なので全 line 共通の想定
-      rebate_amount: totals.rebateAmount,
-      taxable_amount: totals.taxableAmount,
-      tax_amount: totals.taxAmount,
-      total_amount: totals.totalAmount,
+      rebate_amount: withFee.rebateAmount,
+      fee_amount: withFee.feeAmount,
+      taxable_amount: withFee.taxableAmount,
+      tax_amount: withFee.taxAmount,
+      total_amount: withFee.totalAmount,
       status: "未入金",
       due_date: body.dueDate ?? null,
     })

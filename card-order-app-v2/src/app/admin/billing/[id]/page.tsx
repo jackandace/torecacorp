@@ -152,7 +152,12 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
             ) : (
               <>
                 <div className="flex justify-between"><span>小計</span><span>{formatYen(invoice.subtotal)}</span></div>
-                <div className="flex justify-between text-emerald-600"><span>リベート</span><span>-{formatYen(invoice.rebate_amount)}</span></div>
+                {invoice.rebate_amount > 0 && (
+                  <div className="flex justify-between text-emerald-600"><span>リベート</span><span>-{formatYen(invoice.rebate_amount)}</span></div>
+                )}
+                {invoice.fee_amount > 0 && (
+                  <div className="flex justify-between"><span>手数料(2%)</span><span>{formatYen(invoice.fee_amount)}</span></div>
+                )}
                 <div className="flex justify-between"><span>課税対象額</span><span>{formatYen(invoice.taxable_amount)}</span></div>
                 <div className="flex justify-between"><span>消費税</span><span>{formatYen(invoice.tax_amount)}</span></div>
                 {(kind === "final" || kind === "refund") && (
