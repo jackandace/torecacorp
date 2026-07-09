@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
   remarksBox: { flexDirection: "row", marginTop: 14, border: "1pt solid #999" },
   remarksLabel: { width: 60, padding: 6, backgroundColor: "#eef2f7", textAlign: "center" },
   remarksBody: { flex: 1, padding: 6, fontSize: 8.5 },
+  calcNote: { marginTop: 10, fontSize: 7.5, color: "#667085", lineHeight: 1.5 },
 });
 
 export interface InvoicePdfItem {
@@ -226,6 +227,14 @@ export function InvoicePdf({ invoice, shop, items }: InvoicePdfProps) {
           <Text style={styles.remarksLabel}>備考</Text>
           <Text style={styles.remarksBody}>{INVOICE_FOOTER_NOTE}</Text>
         </View>
+
+        {/* 計算方法の注記 (お客様向け) */}
+        <Text style={styles.calcNote}>
+          {isDeposit
+            ? "※ 本請求はカット対象商品の保証金（前受金）です。金額は「定価 × 希望数量 × 案内掛け率 × 50%」で算出しています。メーカーからの提供数量が確定次第、最終金額を精算し、差額のご請求（お預かりが上回った場合は返金）を行います。"
+            : "※ ご請求額は「定価 × 数量 × 案内掛け率 − リベート（ランク割引）＋ 決済手数料（税抜2%）＋ 消費税10%」で算出しています。" +
+              (isFinal ? "本請求は数量確定後の最終精算で、お預かりの保証金（前受金）を充当した差額分です。" : "")}
+        </Text>
       </Page>
     </Document>
   );

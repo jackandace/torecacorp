@@ -125,6 +125,30 @@ export function MyPageDataView(props: Props) {
       {/* 請求書 */}
       <section>
         <h2 className="text-lg font-semibold mb-3">請求書 ({props.invCount} 件)</h2>
+
+        {/* 請求金額の計算方法 (お客様向け注意書き) */}
+        <details className="card p-4 mb-3 text-sm">
+          <summary className="cursor-pointer font-medium text-brand-700">請求金額の計算方法について</summary>
+          <div className="mt-3 space-y-2 text-slate-600 text-[13px] leading-relaxed">
+            <p>ご請求額は以下の考え方で算出しています（消費税は外税表示）。</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li><b>案内単価</b> ＝ 定価 × 案内掛け率（お客様ごとの掛け率）</li>
+              <li><b>小計</b> ＝ 案内単価 × 数量（BOX）</li>
+              <li><b>リベート</b> ＝ 小計 × ランク割引率（現在のランクに応じた値引き）</li>
+              <li><b>決済手数料</b> ＝ 小計 × 2%（消費税を含めると実質 税込2.2%）</li>
+              <li><b>消費税</b> ＝（小計 − リベート ＋ 手数料）× 10%</li>
+              <li><b>ご請求合計</b> ＝ 小計 − リベート ＋ 手数料 ＋ 消費税</li>
+            </ul>
+            <p className="pt-1">
+              <b>カット対象商品</b>（メーカー提供数量が変動する商品）は、ご発注時に
+              <b>保証金として50%（前受金）</b>を先にご請求し、
+              <b>数量が確定した後に差額を精算</b>いたします。お預かりが確定金額を上回った場合は
+              <b>差額を返金</b>（支払通知書をお送りします）。
+            </p>
+            <p className="text-slate-400 text-xs">※ 端数は一般的な商取引の丸め（小計・リベート・消費税は切り捨て、手数料は四捨五入）で処理しています。</p>
+          </div>
+        </details>
+
         <div className="card overflow-x-auto">
           <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-slate-50 text-slate-600">
