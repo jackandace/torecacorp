@@ -41,8 +41,42 @@ export default async function OrdersAdminPage() {
         </div>
       )}
 
-      <div className="card overflow-hidden">
-        <table className="w-full text-sm">
+      {/* モバイル: カード表示 */}
+      <div className="md:hidden space-y-2">
+        {(orders ?? []).map((o) => {
+          const shop = (o as { shops?: { company_name?: string } }).shops;
+          const prod = (o as { products?: { title?: string; flow_type?: string } }).products;
+          const confirmNeeded = needsConfirm(o as never);
+          return (
+            <a key={o.id} href={`/admin/orders/${o.id}`} className={`card p-3 block ${confirmNeeded ? "bg-amber-50" : ""}`}>
+              <div className="flex justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="font-medium text-sm truncate">{shop?.company_name ?? "—"}</div>
+                  <div className="text-xs text-slate-500 truncate">{prod?.title ?? "—"}</div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">
+                    {formatJST(o.created_at)} ・ {prod?.flow_type === "cut" ? "カット割" : "配分"} ・ {o.requested_qty}{o.order_unit}
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-sm font-medium whitespace-nowrap">{formatYen(o.total_price ?? 0)}</div>
+                  <div className="text-xs mt-1">
+                    {o.status}
+                    {confirmNeeded && <span className="ml-1 text-[10px] px-1 py-0.5 rounded bg-amber-500 text-white font-bold">要確定</span>}
+                  </div>
+                  <div className="text-[11px] text-slate-400">{o.shipping_status}</div>
+                </div>
+              </div>
+            </a>
+          );
+        })}
+        {(!orders || orders.length === 0) && (
+          <div className="card p-6 text-center text-slate-500 text-sm">発注はまだありません</div>
+        )}
+      </div>
+
+      {/* PC: テーブル表示 */}
+      <div className="card overflow-x-auto hidden md:block">
+        <table className="w-full text-sm min-w-[900px]">
           <thead className="bg-slate-50 text-slate-600">
             <tr>
               <th className="text-left px-3 py-2">日時</th>

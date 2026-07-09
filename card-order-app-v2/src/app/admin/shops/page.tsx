@@ -61,7 +61,30 @@ export default async function ShopsAdminPage({ searchParams }: { searchParams: S
         {q && <Link href="/admin/shops" className="btn-secondary">クリア</Link>}
       </form>
 
-      <div className="card overflow-x-auto">
+      {/* モバイル: カード表示 */}
+      <div className="md:hidden space-y-2">
+        {(shops ?? []).map((s) => (
+          <a key={s.id} href={`/admin/shops/${s.id}`} className="card p-3 block">
+            <div className="flex justify-between gap-3">
+              <div className="min-w-0">
+                <div className="font-medium text-sm truncate">{s.company_name}</div>
+                <div className="text-xs text-slate-500 truncate">{s.contact_name} ・ {s.email}</div>
+                <div className="text-[11px] text-slate-400 mt-0.5">{s.oath_expires_at ? `宣誓書 失効: ${s.oath_expires_at}` : "宣誓書 未提出"}</div>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="text-xs">{RANK_LABEL[s.current_rank]}</div>
+                <div className="text-[11px] text-slate-500 mt-0.5">{s.status}</div>
+              </div>
+            </div>
+          </a>
+        ))}
+        {(!shops || shops.length === 0) && (
+          <div className="card p-6 text-center text-slate-500 text-sm">{q ? "該当するショップがありません" : "ショップはまだ登録されていません"}</div>
+        )}
+      </div>
+
+      {/* PC: テーブル表示 */}
+      <div className="card overflow-x-auto hidden md:block">
         <table className="w-full text-sm min-w-[720px]">
           <thead className="bg-slate-50 text-slate-600">
             <tr>

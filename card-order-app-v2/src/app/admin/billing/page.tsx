@@ -136,7 +136,37 @@ export default async function BillingPage({ searchParams }: { searchParams: Sear
         ))}
       </div>
 
-      <div className="card overflow-x-auto">
+      {/* モバイル: カード表示 */}
+      <div className="md:hidden space-y-2">
+        {(invoices ?? []).map((inv) => {
+          const shop = (inv as { shops?: { company_name?: string } }).shops;
+          const remaining = inv.total_amount - inv.paid_amount;
+          const overdue = inv.status !== "入金済み" && inv.due_date && inv.due_date < today;
+          const kindLabel = inv.invoice_kind === "deposit" ? "保証金" : inv.invoice_kind === "final" ? "精算" : inv.invoice_kind === "refund" ? "返金" : inv.is_legacy ? "過去" : "";
+          return (
+            <Link key={inv.id} href={`/admin/billing/${inv.id}`} className={`card p-3 block ${overdue ? "bg-rose-50/50" : ""}`}>
+              <div className="flex justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="font-mono text-xs truncate">{inv.invoice_number}{kindLabel && <span className="ml-1 text-[10px] bg-slate-100 text-slate-600 px-1 py-0.5 rounded">{kindLabel}</span>}</div>
+                  <div className="text-sm font-medium truncate mt-0.5">{shop?.company_name ?? "—"}</div>
+                  <div className={`text-[11px] mt-0.5 ${overdue ? "text-rose-700 font-semibold" : "text-slate-400"}`}>期限 {inv.due_date ?? "—"}{overdue && " ⚠"}</div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="text-sm font-medium whitespace-nowrap">{formatYen(inv.total_amount)}</div>
+                  {remaining > 0 && <div className="text-xs text-rose-700 font-semibold">残 {formatYen(remaining)}</div>}
+                  <div className="mt-1"><InvoiceStatusBadge status={inv.status} /></div>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+        {(!invoices || invoices.length === 0) && (
+          <div className="card p-6 text-center text-slate-500 text-sm">該当する請求書はありません</div>
+        )}
+      </div>
+
+      {/* PC: テーブル表示 */}
+      <div className="card overflow-x-auto hidden md:block">
         <table className="w-full text-sm min-w-[900px]">
           <thead className="bg-slate-50 text-slate-600">
             <tr>
