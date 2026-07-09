@@ -73,7 +73,30 @@ export function MyPageDataView(props: Props) {
             </button>
           ))}
         </div>
-        <div className="card overflow-x-auto">
+        {/* モバイル: カード表示 */}
+        <div className="sm:hidden space-y-2">
+          {props.orders.map((o) => (
+            <button key={o.id} type="button" onClick={() => setOpenOrder(o)} className="card p-3 w-full text-left flex justify-between gap-3">
+              <div className="min-w-0">
+                <div className="font-medium text-sm truncate">{o.products?.title ?? "—"}</div>
+                <div className="text-xs text-slate-500 mt-0.5">{formatJST(o.created_at)} ・ {o.requested_qty}{o.order_unit}</div>
+                <div className="flex flex-wrap gap-1 mt-1"><OrderStatusBadge status={o.status} /><ShippingStatusBadge status={o.shipping_status} /></div>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="text-sm font-medium whitespace-nowrap">{o.total_price ? formatYen(o.total_price) : "—"}</div>
+                <div className="text-xs text-brand-600 mt-1">詳細 →</div>
+              </div>
+            </button>
+          ))}
+          {props.orders.length === 0 && (
+            <div className="card p-6 text-center text-slate-500 text-sm">
+              {props.ordStatus === "all" ? "まだ発注はありません" : "該当する発注がありません"}
+            </div>
+          )}
+        </div>
+
+        {/* PC: テーブル表示 */}
+        <div className="card overflow-x-auto hidden sm:block">
           <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
@@ -149,7 +172,29 @@ export function MyPageDataView(props: Props) {
           </div>
         </details>
 
-        <div className="card overflow-x-auto">
+        {/* モバイル: カード表示 */}
+        <div className="sm:hidden space-y-2">
+          {props.invoices.map((inv) => (
+            <button key={inv.id} type="button" onClick={() => setOpenInvoice(inv)} className="card p-3 w-full text-left flex justify-between gap-3">
+              <div className="min-w-0">
+                <div className="font-mono text-xs truncate">{inv.invoice_number}</div>
+                <div className="text-xs text-slate-500 mt-0.5">{formatJST(inv.issued_at)}</div>
+                <div className="mt-1"><InvoiceStatusBadge status={inv.status} /></div>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="text-sm font-medium whitespace-nowrap">{formatYen(inv.total_amount)}</div>
+                <div className="text-[11px] text-slate-400">入金 {formatYen(inv.paid_amount)}</div>
+                <div className="text-xs text-brand-600 mt-1">詳細 →</div>
+              </div>
+            </button>
+          ))}
+          {props.invoices.length === 0 && (
+            <div className="card p-6 text-center text-slate-500 text-sm">請求書はまだ発行されていません</div>
+          )}
+        </div>
+
+        {/* PC: テーブル表示 */}
+        <div className="card overflow-x-auto hidden sm:block">
           <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
