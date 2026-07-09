@@ -28,16 +28,18 @@ export async function POST(request: NextRequest) {
   }
 
   const adminSb = createAdminClient();
+  const redirectTo = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/reset-password`;
   // 招待メール送信 (パスワード設定リンク)
   const { data: invited, error: inviteErr } = await adminSb.auth.admin.inviteUserByEmail(body.email, {
     data: { role: body.role, display_name: body.displayName },
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/reset-password`,
+    redirectTo,
   });
 
   let userId: string | null = null;
+  let emailSent = false;
   if (inviteErr) {
     const msg = inviteErr.message.toLowerCase();
-    if (msg.includes("already") || msg.includes("registered")) {
+    if (msg.includes("already") || msg.includes("registered") || msg.includes("exist")) {
       const { data: list } = await adminSb.auth.admin.listUsers({ page: 1, perPage: 1000 });
       const existing = list?.users.find((u) => u.email?.toLowerCase() === body.email.toLowerCase());
       if (existing) {
@@ -46,14 +48,20 @@ export async function POST(request: NextRequest) {
         await adminSb.auth.admin.updateUserById(existing.id, {
           user_metadata: { ...existing.user_metadata, role: body.role, display_name: body.displayName },
         });
+        // 既存ユーザーには invite メールが飛ばないため、パスワード設定(再設定)リンクを別途送る
+        const { error: resetErr } = await adminSb.auth.resetPasswordForEmail(body.email, { redirectTo });
+        emailSent = !resetErr;
+        if (resetErr) console.error("[invite_staff] 既存ユーザーへの再設定メール送信失敗:", resetErr.message);
       } else {
         return NextResponse.json({ error: "既存ユーザー検索失敗" }, { status: 500 });
       }
     } else {
+      // レート制限などはメール未達の主因になりやすいので原文を返す
       return NextResponse.json({ error: `招待失敗: ${inviteErr.message}` }, { status: 500 });
     }
   } else {
     userId = invited.user?.id ?? null;
+    emailSent = true;
   }
   if (!userId) return NextResponse.json({ error: "user ID 取得失敗" }, { status: 500 });
 
@@ -70,8 +78,8 @@ export async function POST(request: NextRequest) {
     action: "invite_staff",
     targetTable: "staff_profiles",
     targetId: userId,
-    after: { email: body.email, role: body.role, display_name: body.displayName },
+    after: { email: body.email, role: body.role, display_name: body.displayName, email_sent: emailSent },
   });
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, emailSent });
 }

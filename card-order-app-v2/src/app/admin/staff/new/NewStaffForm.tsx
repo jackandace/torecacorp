@@ -27,7 +27,17 @@ export function NewStaffForm() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "失敗");
-      router.push("/admin/staff");
+      if (json.emailSent === false) {
+        // 登録は成功したがメール送信に失敗 (送信レート制限など)。気づけるよう自動遷移しない。
+        setMessage({
+          kind: "err",
+          text: "登録は完了しましたが設定メールを送信できませんでした(送信制限の可能性)。時間をおいて再招待するか、パスワード再設定リンクを送ってください。",
+        });
+        setBusy(false);
+        return;
+      }
+      setMessage({ kind: "ok", text: "招待メール(パスワード設定リンク)を送信しました。一覧へ移動します…" });
+      setTimeout(() => router.push("/admin/staff"), 1400);
     } catch (e) {
       setMessage({ kind: "err", text: `失敗: ${e instanceof Error ? e.message : "不明"}` });
       setBusy(false);
