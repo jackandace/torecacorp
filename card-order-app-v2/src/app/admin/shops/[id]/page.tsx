@@ -9,6 +9,7 @@ import { OathUpload } from "./OathUpload";
 import { BusinessDocUpload } from "./BusinessDocUpload";
 import { LegacyInvoiceUpload } from "./LegacyInvoiceUpload";
 import { BUSINESS_TYPE_LABEL } from "@/constants/business";
+import { shopRefundAccount } from "@/lib/refund-account";
 
 export const dynamic = "force-dynamic";
 
@@ -173,6 +174,25 @@ export default async function ShopDetailPage({ params }: { params: { id: string 
             <div>{shop.phone ?? "—"}</div>
             <div className="text-slate-500 text-xs">納品先</div>
             <div className="whitespace-pre-wrap text-xs">{shop.delivery_address ?? "—"}</div>
+          </section>
+
+          <section className="card p-5 space-y-2 text-sm">
+            <h2 className="font-semibold">返金先口座</h2>
+            {(() => {
+              const acc = shopRefundAccount(shop);
+              return acc ? (
+                <div className="space-y-0.5">
+                  <div>{acc.refund_bank_name} {acc.refund_bank_branch}</div>
+                  <div>{acc.refund_account_type} {acc.refund_account_number}</div>
+                  <div className="text-slate-600">名義: {acc.refund_account_holder}</div>
+                  {shop.refund_account_updated_at && (
+                    <div className="text-xs text-slate-400 pt-1">更新: {formatJST(shop.refund_account_updated_at)}</div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-slate-500">未登録(返金時は支払通知書に手書き欄)</p>
+              );
+            })()}
           </section>
 
           <section className="card p-5 space-y-2">

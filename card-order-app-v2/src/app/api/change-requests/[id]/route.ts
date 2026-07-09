@@ -8,11 +8,14 @@ import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/auth";
 import { notifyShop } from "@/lib/notify";
 import { writeAudit } from "@/lib/audit";
+import { parseRefundAccountJson, refundAccountOneLine } from "@/lib/refund-account";
+import type { Shop } from "@/types/database";
 
 const FIELD_LABEL: Record<string, string> = {
   delivery_address: "配送先住所",
   company_name: "会社名・屋号",
   address: "登録住所",
+  refund_account: "返金先口座",
 };
 
 const Schema = z.object({
@@ -45,12 +48,31 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
   const companyName = (req as { shops?: { company_name?: string } }).shops?.company_name ?? "";
 
+  // 返金先口座は JSON。通知・監査には読める1行表記を使う。
+  const refundAcc = req.field === "refund_account" ? parseRefundAccountJson(req.new_value) : null;
+  const newValueDisplay =
+    req.field === "refund_account" ? (refundAcc ? refundAccountOneLine(refundAcc) : "返金先口座") : req.new_value;
+
   if (body.action === "approve") {
-    // shops の該当フィールドを書き換え (field は CHECK 制約で 3 種に限定済み)
-    const update: Partial<import("@/types/database").Shop> =
-      req.field === "delivery_address" ? { delivery_address: req.new_value } :
-      req.field === "company_name"     ? { company_name: req.new_value } :
-                                         { address: req.new_value };
+    // shops の該当フィールドを書き換え。refund_account は5カラムへ展開。
+    let update: Partial<Shop>;
+    if (req.field === "refund_account") {
+      if (!refundAcc) return NextResponse.json({ error: "口座情報の解析に失敗しました" }, { status: 400 });
+      update = {
+        refund_bank_name: refundAcc.refund_bank_name,
+        refund_bank_branch: refundAcc.refund_bank_branch,
+        refund_account_type: refundAcc.refund_account_type,
+        refund_account_number: refundAcc.refund_account_number,
+        refund_account_holder: refundAcc.refund_account_holder,
+        refund_account_updated_at: new Date().toISOString(),
+      };
+    } else if (req.field === "delivery_address") {
+      update = { delivery_address: req.new_value };
+    } else if (req.field === "company_name") {
+      update = { company_name: req.new_value };
+    } else {
+      update = { address: req.new_value };
+    }
     const { error: updErr } = await supabase
       .from("shops")
       .update(update)
@@ -78,7 +100,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     vars: {
       company_name: companyName,
       field_label: FIELD_LABEL[req.field] ?? req.field,
-      new_value: req.new_value,
+      new_value: newValueDisplay,
       review_note: body.reviewNote ?? "",
     },
   });

@@ -58,12 +58,19 @@ export type Shop = {
   lifetime_amount: number;
   // 015 migration で追加
   terms_agreed_at: string | null;
+  // 025 migration で追加 (返金先口座・承認制)
+  refund_bank_name: string | null;
+  refund_bank_branch: string | null;
+  refund_account_type: "普通" | "当座" | null;
+  refund_account_number: string | null;
+  refund_account_holder: string | null;
+  refund_account_updated_at: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
 };
 
-export type ChangeRequestField = "delivery_address" | "company_name" | "address";
+export type ChangeRequestField = "delivery_address" | "company_name" | "address" | "refund_account";
 export type ChangeRequestStatus = "pending" | "approved" | "rejected";
 
 export type ShopChangeRequest = {

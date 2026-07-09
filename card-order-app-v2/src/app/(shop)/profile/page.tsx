@@ -3,8 +3,10 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { RANK_LABEL } from "@/constants/ranks";
 import { formatJST } from "@/lib/dates";
+import { shopRefundAccount } from "@/lib/refund-account";
 import { ProfileForm } from "./ProfileForm";
 import { DeliveryChangeRequest } from "./DeliveryChangeRequest";
+import { RefundAccountForm } from "./RefundAccountForm";
 import { PasswordChangeForm } from "./PasswordChangeForm";
 import { OathUploadShop } from "./OathUploadShop";
 
@@ -91,6 +93,13 @@ export default async function ProfilePage() {
       <DeliveryChangeRequest
         shopId={shop.id}
         currentAddress={shop.delivery_address}
+        pendingRequests={pendingRequests ?? []}
+        recentRequests={recentRequests ?? []}
+      />
+
+      {/* 返金先口座 (承認制) */}
+      <RefundAccountForm
+        current={shopRefundAccount(shop)}
         pendingRequests={pendingRequests ?? []}
         recentRequests={recentRequests ?? []}
       />

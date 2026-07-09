@@ -4,17 +4,20 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { notifyShop } from "@/lib/notify";
 import { writeAudit } from "@/lib/audit";
+import { validateRefundAccount, refundAccountOneLine, shopRefundAccount } from "@/lib/refund-account";
 
 const FIELD_LABEL: Record<string, string> = {
   delivery_address: "配送先住所",
   company_name: "会社名・屋号",
   address: "登録住所",
+  refund_account: "返金先口座",
 };
 
 const Schema = z.object({
-  field: z.enum(["delivery_address"]), // 現状ショップから申請できるのは配送先のみ
-  newValue: z.string().min(1).max(500),
-  reason: z.string().max(500).nullable(),
+  field: z.enum(["delivery_address", "refund_account"]),
+  newValue: z.string().max(500).optional(), // delivery_address 用
+  account: z.unknown().optional(),          // refund_account 用 (5項目のオブジェクト)
+  reason: z.string().max(500).nullable().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -29,13 +32,33 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "invalid" }, { status: 400 });
   }
 
+  // "*" にして 025 未適用でも既存フィールド(配送先)の申請が壊れないようにする
   const { data: shop } = await supabase
     .from("shops")
-    .select("id, company_name, delivery_address")
+    .select("*")
     .eq("user_id", user.id)
     .is("deleted_at", null)
     .maybeSingle();
   if (!shop) return NextResponse.json({ error: "shop not found" }, { status: 404 });
+
+  // フィールド別に現在値/申請値を組み立て + 検証
+  let currentValue: string | null;
+  let newValueStored: string;  // DB 保存値 (refund_account は JSON)
+  let newValueDisplay: string; // 通知・監査向けの読める値
+  if (body.field === "delivery_address") {
+    const v = body.newValue?.trim();
+    if (!v) return NextResponse.json({ error: "新しい配送先を入力してください" }, { status: 400 });
+    currentValue = shop.delivery_address;
+    newValueStored = v;
+    newValueDisplay = v;
+  } else {
+    const res = validateRefundAccount(body.account);
+    if (!res.ok) return NextResponse.json({ error: res.error }, { status: 400 });
+    const cur = shopRefundAccount(shop);
+    currentValue = cur ? refundAccountOneLine(cur) : null;
+    newValueStored = JSON.stringify(res.value);
+    newValueDisplay = refundAccountOneLine(res.value);
+  }
 
   // 同一フィールドの pending 申請があれば重複防止
   const { data: existing } = await supabase
@@ -57,9 +80,9 @@ export async function POST(request: NextRequest) {
     .insert({
       shop_id: shop.id,
       field: body.field,
-      current_value: shop.delivery_address,
-      new_value: body.newValue,
-      reason: body.reason,
+      current_value: currentValue,
+      new_value: newValueStored,
+      reason: body.reason ?? null,
     })
     .select("*")
     .single();
@@ -75,7 +98,7 @@ export async function POST(request: NextRequest) {
     vars: {
       company_name: shop.company_name,
       field_label: FIELD_LABEL[body.field] ?? body.field,
-      new_value: body.newValue,
+      new_value: newValueDisplay,
     },
   });
 
@@ -84,7 +107,7 @@ export async function POST(request: NextRequest) {
     action: "shop_change_request_created",
     targetTable: "shop_change_requests",
     targetId: created.id,
-    after: { field: body.field, new_value: body.newValue },
+    after: { field: body.field, new_value: newValueDisplay },
   });
 
   return NextResponse.json({ ok: true, request: created });

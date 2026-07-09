@@ -6,6 +6,7 @@ import { Document, Page, Text, View, Image, StyleSheet } from "@react-pdf/render
 import type { Invoice, Shop } from "@/types/database";
 import { registerJpFont, JP_FONT_FAMILY } from "./fonts";
 import { ISSUER, INVOICE_FOOTER_NOTE, HAS_SEAL, SEAL_PATH } from "./issuer";
+import { shopRefundAccount, refundAccountLines } from "@/lib/refund-account";
 
 registerJpFont();
 
@@ -62,6 +63,9 @@ export function PaymentNoticePdf({ invoice, shop, issuedAt, productNames }: Paym
   const refund = invoice.total_amount; // 返金額
   const d = jpDate(issuedAt);
   const desc = `${productNames || "カード卸"} 差額返金分`;
+  // 事前登録の返金先口座があれば自動記載、無ければ記入欄
+  const acc = shopRefundAccount(shop);
+  const accLines = acc ? refundAccountLines(acc) : null;
 
   return (
     <Document>
@@ -124,12 +128,23 @@ export function PaymentNoticePdf({ invoice, shop, issuedAt, productNames }: Paym
           </View>
         </View>
 
-        {/* 指定口座 (お客様記入欄) */}
+        {/* 指定口座: 事前登録があれば自動記載、無ければ記入欄 */}
         <View style={styles.bank}>
-          <Text style={styles.bankTitle}>指定口座にお振り込みいたします。下記をご記入のうえご返信ください。</Text>
-          <Text style={styles.bankLine}>銀行名 ／ 支店名：</Text>
-          <Text style={styles.bankLine}>口座種別 ／ 口座番号：</Text>
-          <Text style={styles.bankLine}>口座名義：</Text>
+          {accLines ? (
+            <>
+              <Text style={styles.bankTitle}>下記のご登録口座にお振り込みいたします。</Text>
+              <Text style={styles.bankLine}>{accLines.bank}</Text>
+              <Text style={styles.bankLine}>{accLines.account}</Text>
+              <Text style={styles.bankLine}>{accLines.holder}</Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.bankTitle}>指定口座にお振り込みいたします。下記をご記入のうえご返信ください。</Text>
+              <Text style={styles.bankLine}>銀行名 ／ 支店名：</Text>
+              <Text style={styles.bankLine}>口座種別 ／ 口座番号：</Text>
+              <Text style={styles.bankLine}>口座名義：</Text>
+            </>
+          )}
         </View>
 
         <View style={styles.remarksBox}>

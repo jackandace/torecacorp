@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { ShopChangeRequest } from "@/types/database";
 import { formatJST } from "@/lib/dates";
+import { parseRefundAccountJson, refundAccountOneLine } from "@/lib/refund-account";
 
 type RequestWithShop = ShopChangeRequest & {
   shops?: { company_name?: string | null; contact_name?: string | null } | null;
@@ -14,7 +15,17 @@ const FIELD_LABEL: Record<string, string> = {
   delivery_address: "配送先住所",
   company_name: "会社名・屋号",
   address: "登録住所",
+  refund_account: "返金先口座",
 };
+
+/** 返金先口座は new_value が JSON なので読める形に整形 */
+function displayValue(r: Pick<ShopChangeRequest, "field" | "new_value">): string {
+  if (r.field === "refund_account") {
+    const a = parseRefundAccountJson(r.new_value);
+    return a ? refundAccountOneLine(a) : r.new_value;
+  }
+  return r.new_value;
+}
 
 export function ChangeRequestList({ pending, history }: { pending: RequestWithShop[]; history: RequestWithShop[] }) {
   const router = useRouter();
@@ -72,7 +83,7 @@ export function ChangeRequestList({ pending, history }: { pending: RequestWithSh
                 </div>
                 <div className="bg-emerald-50 border border-emerald-200 rounded p-3">
                   <div className="text-xs text-emerald-700 mb-1">変更後</div>
-                  <div className="whitespace-pre-wrap font-medium">{r.new_value}</div>
+                  <div className="whitespace-pre-wrap font-medium">{displayValue(r)}</div>
                 </div>
               </div>
 
@@ -110,7 +121,7 @@ export function ChangeRequestList({ pending, history }: { pending: RequestWithSh
                     className="btn-primary text-sm"
                     disabled={busyId === r.id}
                     onClick={() => {
-                      if (confirm(`承認して登録情報を書き換えますか?\n\n変更後: ${r.new_value}`)) {
+                      if (confirm(`承認して登録情報を書き換えますか?\n\n変更後: ${displayValue(r)}`)) {
                         review(r.id, "approve");
                       }
                     }}
@@ -152,7 +163,7 @@ export function ChangeRequestList({ pending, history }: { pending: RequestWithSh
                   <td className="px-3 py-2 text-xs">{r.reviewed_at ? formatJST(r.reviewed_at) : "—"}</td>
                   <td className="px-3 py-2">{r.shops?.company_name ?? "—"}</td>
                   <td className="px-3 py-2 text-xs">{FIELD_LABEL[r.field] ?? r.field}</td>
-                  <td className="px-3 py-2 text-xs max-w-xs truncate">{r.new_value}</td>
+                  <td className="px-3 py-2 text-xs max-w-xs truncate">{displayValue(r)}</td>
                   <td className="px-3 py-2">
                     <span className={`inline-flex text-xs px-2 py-0.5 rounded font-medium ${
                       r.status === "approved" ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-700"
