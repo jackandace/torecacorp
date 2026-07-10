@@ -5,6 +5,7 @@ import { formatJST } from "@/lib/dates";
 import { formatRate, formatYen } from "@/lib/rebate";
 import { RANK_LABEL } from "@/constants/ranks";
 import { PaymentForm } from "./PaymentForm";
+import { InvoiceActions } from "./InvoiceActions";
 
 export const dynamic = "force-dynamic";
 
@@ -40,44 +41,17 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <Link href="/admin/billing" className="text-sm text-brand-600 hover:underline">
             ← 請求一覧
           </Link>
-          <h1 className="text-2xl font-bold mt-1 flex items-center gap-2">
+          <h1 className="text-2xl font-bold mt-1 flex items-center flex-wrap gap-2">
             {invoice.invoice_number}
             <span className={`text-xs px-2 py-0.5 rounded font-medium ${KIND_TONE[kind]}`}>{KIND_LABEL[kind]}</span>
           </h1>
         </div>
-        <div className="flex gap-2">
-          {kind === "refund" ? (
-            // 返金は支払通知書 (都度署名・未生成なら自動生成)
-            <a className="btn-secondary" href={`/api/invoices/${invoice.id}/payment-notice/download`} target="_blank" rel="noreferrer">
-              支払通知書を開く
-            </a>
-          ) : (
-            <>
-              {/* 都度署名し直す download ルート経由なのでリンクは失効しない。未生成なら自動生成 */}
-              <a className="btn-secondary" href={`/api/invoices/${invoice.id}/pdf/download`} target="_blank" rel="noreferrer">
-                PDF を開く
-              </a>
-              <form action={`/api/invoices/${invoice.id}/pdf`} method="post">
-                <button className="btn-primary">PDF を再生成</button>
-              </form>
-            </>
-          )}
-          {kind === "deposit" && (
-            <form action={`/api/invoices/${invoice.id}/settle`} method="post">
-              <button className="btn-primary">最終精算する</button>
-            </form>
-          )}
-          {kind !== "refund" && invoice.status === "入金済み" && (
-            <form action={`/api/invoices/${invoice.id}/receipt`} method="post">
-              <button className="btn-secondary">領収書を発行</button>
-            </form>
-          )}
-        </div>
+        <InvoiceActions invoiceId={invoice.id} kind={kind} status={invoice.status} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
