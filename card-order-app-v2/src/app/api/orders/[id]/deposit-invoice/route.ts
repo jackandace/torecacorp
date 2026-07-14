@@ -6,7 +6,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/auth";
-import { calcDeposit } from "@/lib/deposit";
+import { calcDeposit, DEPOSIT_RATE, isValidDepositRate } from "@/lib/deposit";
 import { nextInvoiceNumber } from "@/lib/invoice-number";
 import { writeAudit } from "@/lib/audit";
 import { notifyShop } from "@/lib/notify";
@@ -18,6 +18,13 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !isAdmin(user)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+
+    // 保証金率 (既定50%。数量が多い発注は下げて返金リスクを抑えられる)
+    const body = await request.json().catch(() => ({}));
+    const rate = typeof body?.rate === "number" ? body.rate : DEPOSIT_RATE;
+    if (!isValidDepositRate(rate)) {
+      return NextResponse.json({ error: "保証金率が不正です (0〜100%)" }, { status: 400 });
+    }
 
     const { data: order } = await supabase
       .from("orders")
@@ -38,7 +45,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     });
     if (dup) {
       const inv = dup.invoices as unknown as { invoice_number?: string };
-      return NextResponse.json({ error: `既に保証金請求書があります (${inv?.invoice_number ?? ""})` }, { status: 409 });
+      return NextResponse.json(
+        { error: `既に保証金請求書があります (${inv?.invoice_number ?? ""})`, invoiceId: dup.invoice_id, invoiceNumber: inv?.invoice_number ?? null },
+        { status: 409 },
+      );
     }
 
     const qtyBox = order.requested_qty_box ?? order.requested_qty;
@@ -46,6 +56,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       unitPrice: order.unit_price ?? 0,
       qtyBox,
       listedRate: order.listed_rate,
+      rate,
     });
     if (deposit <= 0) {
       return NextResponse.json({ error: "保証金額が0です(単価・数量・掛け率をご確認ください)" }, { status: 400 });
@@ -89,7 +100,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       action: "issue_deposit_invoice",
       targetTable: "invoices",
       targetId: inv.id,
-      after: { invoice_number: invoiceNumber, deposit, order_id: order.id },
+      after: { invoice_number: invoiceNumber, deposit, rate, order_id: order.id },
     });
 
     await notifyShop({
@@ -103,8 +114,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       },
     });
 
-    // フォーム遷移: 発行した保証金請求書の詳細へ
-    return NextResponse.redirect(new URL(`/admin/billing/${inv.id}`, request.url), 303);
+    // クライアントで請求詳細へ遷移させる (生JSON画面に飛ばさない)
+    return NextResponse.json({ ok: true, invoiceId: inv.id, invoiceNumber, deposit, rate });
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "unknown" }, { status: 500 });
   }

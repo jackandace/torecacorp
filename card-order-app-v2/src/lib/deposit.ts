@@ -4,16 +4,26 @@
 //   ・前受金として消費税・リベートは課さない (最終精算で確定数量に対して計算)
 //   ・金額は円単位 integer。小数点は Math.floor で切り捨て (rebate.ts と整合)
 
-/** 保証金率 (一律50%固定) */
+/** 保証金率のデフォルト (50%) */
 export const DEPOSIT_RATE = 0.5;
 
-/** 1明細の保証金額 (税抜・リベート前) */
+/** 発行時に選べる保証金率 (数量が多い発注は率を下げて返金リスクを抑える) */
+export const DEPOSIT_RATE_OPTIONS = [0.5, 0.4, 0.3] as const;
+
+/** 率が妥当か (0 < rate <= 1) */
+export function isValidDepositRate(rate: number): boolean {
+  return Number.isFinite(rate) && rate > 0 && rate <= 1;
+}
+
+/** 1明細の保証金額 (税抜・リベート前)。rate 未指定は 50%。 */
 export function calcDeposit(args: {
   unitPrice: number;
   qtyBox: number;
   listedRate: number;
+  rate?: number;
 }): number {
-  return Math.floor(args.unitPrice * args.qtyBox * args.listedRate * DEPOSIT_RATE);
+  const rate = args.rate ?? DEPOSIT_RATE;
+  return Math.floor(args.unitPrice * args.qtyBox * args.listedRate * rate);
 }
 
 /**
