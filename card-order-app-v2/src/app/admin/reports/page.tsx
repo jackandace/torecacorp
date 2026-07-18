@@ -112,6 +112,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Sear
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-2xl font-bold">レポート ({label})</h1>
         <div className="flex gap-2 items-center">
+          <Link href="/admin/reports/recognition" className="btn-secondary text-xs">収益認識(納品基準)</Link>
           <Link href={`/api/reports/export?${exportParams}`} className="btn-secondary text-xs">
             CSV エクスポート
           </Link>
