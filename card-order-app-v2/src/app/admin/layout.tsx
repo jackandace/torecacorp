@@ -14,6 +14,7 @@ const NAV = [
   { href: "/admin/notifications",    label: "通知センター" },
   { href: "/admin/surveys",          label: "販売店調査" },
   { href: "/admin/reports",          label: "レポート" },
+  { href: "/admin/forecast",         label: "売上予測" },
   { href: "/admin/tasks",            label: "タスク" },
   { href: "/admin/change-requests",  label: "変更申請" },
   { href: "/admin/inquiries",        label: "問い合わせ" },
