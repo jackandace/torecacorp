@@ -4,7 +4,7 @@ import type { UserRole } from "@/types/database";
 
 export function getUserRole(user: User | null | undefined): UserRole {
   const role = user?.user_metadata?.role;
-  if (role === "admin" || role === "super_admin") return role;
+  if (role === "admin" || role === "super_admin" || role === "supplier") return role;
   return "shop";
 }
 
@@ -15,4 +15,9 @@ export function isAdmin(user: User | null | undefined): boolean {
 
 export function isSuperAdmin(user: User | null | undefined): boolean {
   return getUserRole(user) === "super_admin";
+}
+
+/** 問屋(サプライヤー)ロールか */
+export function isSupplier(user: User | null | undefined): boolean {
+  return getUserRole(user) === "supplier";
 }

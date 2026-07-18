@@ -8,6 +8,7 @@ const NAV = [
   { href: "/admin/inventory",        label: "在庫管理" },
   { href: "/admin/orders",           label: "発注管理" },
   { href: "/admin/shops",            label: "顧客管理" },
+  { href: "/admin/suppliers",        label: "問屋管理" },
   { href: "/admin/billing",          label: "請求・入金" },
   { href: "/admin/rebate",           label: "リベート管理", superOnly: true },
   { href: "/admin/notifications",    label: "通知センター" },

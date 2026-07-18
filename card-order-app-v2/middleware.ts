@@ -74,8 +74,24 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
+    const role = user.user_metadata?.role;
+    const supplier = role === "supplier";
+
+    // /supplier 配下は 問屋(supplier) のみ
+    if (pathname.startsWith("/supplier") && !supplier) {
+      const url = request.nextUrl.clone();
+      url.pathname = isAdminRole(role) ? "/admin" : "/mypage";
+      return NextResponse.redirect(url);
+    }
+    // 問屋はショップ/管理の画面に入らず /supplier へ (API は各ルートで認証するため除外)
+    if (supplier && !pathname.startsWith("/supplier") && !pathname.startsWith("/api")) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/supplier";
+      return NextResponse.redirect(url);
+    }
+
     // /admin 配下は admin / super_admin のみ
-    if (pathname.startsWith("/admin") && !isAdminRole(user.user_metadata?.role)) {
+    if (pathname.startsWith("/admin") && !isAdminRole(role)) {
       const url = request.nextUrl.clone();
       url.pathname = "/mypage";
       return NextResponse.redirect(url);

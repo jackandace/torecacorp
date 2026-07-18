@@ -25,7 +25,7 @@ export type InvoiceStatus = "未入金" | "一部入金" | "入金済み";
 export type NotificationChannel = "email" | "inapp";
 export type NotificationStatus = "queued" | "sent" | "failed";
 export type BatchStatus = "success" | "failure" | "partial";
-export type UserRole = "shop" | "admin" | "super_admin";
+export type UserRole = "shop" | "admin" | "super_admin" | "supplier";
 export type TaskCategory = "invoice" | "shipment" | "oath" | "survey" | "inventory" | "onboarding" | "other";
 export type TaskStatus = "open" | "in_progress" | "done" | "cancelled";
 export type TaskPriority = "low" | "normal" | "high" | "urgent";
@@ -150,9 +150,36 @@ export type Product = {
   release_info: string | null;      // メーカー発売情報の詳細
   carton_delivery: boolean;         // カートン単位で届くか
   master_carton_box: number | null; // マスターカートンあたりのBOX数
+  // 問屋紐付け (026)
+  supplier_id: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+};
+
+// 問屋(サプライヤー)マスタ (026)
+export type Supplier = {
+  id: string;
+  name: string;
+  code: string | null;
+  contact_name: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  active: boolean;
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+};
+
+// 問屋ユーザー ↔ 問屋 (1ユーザー=1問屋)
+export type SupplierUser = {
+  id: string;
+  supplier_id: string;
+  user_id: string;
+  display_name: string | null;
+  created_at: string;
 };
 
 // 商品の個別指名公開 (このリストにあるショップにのみ表示。ランクより優先)
@@ -449,6 +476,10 @@ export type Database = {
       registration_invites:   TableDef<RegistrationInvite>;
       shop_change_requests:   TableDef<ShopChangeRequest, [
         FK<"shop_change_requests_shop_id_fkey", ["shop_id"], "shops", ["id"]>,
+      ]>;
+      suppliers:              TableDef<Supplier>;
+      supplier_users:         TableDef<SupplierUser, [
+        FK<"supplier_users_supplier_id_fkey", ["supplier_id"], "suppliers", ["id"]>,
       ]>;
     };
     Views: { [_ in never]: never };
