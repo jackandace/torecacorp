@@ -20,6 +20,13 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
 
   if (!product) notFound();
 
+  const { data: suppliers } = await supabase
+    .from("suppliers")
+    .select("id, name")
+    .is("deleted_at", null)
+    .eq("active", true)
+    .order("name", { ascending: true });
+
   // 個別指名公開の管理用データ (指名一覧 + 選択肢のショップ一覧)
   const [{ data: accessRows }, { data: shopOptions }] = await Promise.all([
     supabase
@@ -60,7 +67,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <ProductEditForm product={product} />
+          <ProductEditForm product={product} suppliers={suppliers ?? []} />
           <ProductAccessManager
             productId={product.id}
             initialAccess={initialAccess}

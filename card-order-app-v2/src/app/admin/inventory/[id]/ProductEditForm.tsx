@@ -7,13 +7,14 @@ import { formatRate } from "@/lib/rebate";
 import { RANK_LABEL, RANK_ORDER } from "@/constants/ranks";
 import { checkProductPublishable } from "@/lib/product-checks";
 
-export function ProductEditForm({ product }: { product: Product }) {
+export function ProductEditForm({ product, suppliers }: { product: Product; suppliers: { id: string; name: string }[] }) {
   const router = useRouter();
   const [series, setSeries] = useState(product.series ?? "");
   const [title, setTitle] = useState(product.title);
   const [fullName, setFullName] = useState(product.full_name ?? "");
   const [modelNumber, setModelNumber] = useState(product.model_number ?? "");
   const [category, setCategory] = useState<ProductCategory>(product.category);
+  const [supplierId, setSupplierId] = useState(product.supplier_id ?? "");
   const [actualRate, setActualRate] = useState(product.actual_rate);
   const [rateMarkup, setRateMarkup] = useState(product.rate_markup);
   const [price, setPrice] = useState(product.price ?? 0);
@@ -97,6 +98,7 @@ export function ProductEditForm({ product }: { product: Product }) {
           cartonDelivery,
           masterCartonBox: masterCartonBox > 0 ? masterCartonBox : null,
           notes: notes || null,
+          supplierId: supplierId || null,
           lastUpdatedAt: product.updated_at,
         }),
       });
@@ -183,6 +185,13 @@ export function ProductEditForm({ product }: { product: Product }) {
             <option value="pokemon">ポケモン</option>
             <option value="onepiece">ワンピース</option>
             <option value="other">その他</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs text-slate-600 mb-1">問屋(仕入先)</label>
+          <select className="input" value={supplierId} onChange={(e) => setSupplierId(e.target.value)}>
+            <option value="">未設定</option>
+            {suppliers.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
         </div>
         <div>

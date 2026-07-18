@@ -31,6 +31,7 @@ const PatchSchema = z.object({
   releaseInfo: z.string().max(2000).nullable().optional(),
   cartonDelivery: z.boolean().optional(),
   masterCartonBox: z.number().int().positive().max(100000).nullable().optional(),
+  supplierId: z.string().uuid().nullable().optional(),
   lastUpdatedAt: z.string(),
 });
 
@@ -101,6 +102,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     ...(body.releaseInfo !== undefined ? { release_info: body.releaseInfo } : {}),
     ...(body.cartonDelivery !== undefined ? { carton_delivery: body.cartonDelivery } : {}),
     ...(body.masterCartonBox !== undefined ? { master_carton_box: body.masterCartonBox } : {}),
+    ...(body.supplierId !== undefined ? { supplier_id: body.supplierId } : {}),
   };
 
   const { data: updated, error } = await supabase

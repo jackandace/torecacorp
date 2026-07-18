@@ -14,6 +14,8 @@ const PUBLIC_PATHS = [
   "/terms",           // 利用注意事項・免責事項
   "/api/register",    // 登録 API (トークン制) + 既存ショップ向けリンク送付
   "/api/health",
+  "/receipt",         // 受領確認 (ログイン不要・トークン制)
+  "/api/receipt",     // 受領確認 API (トークン制)
 ];
 
 function isAdminRole(role: unknown): boolean {
