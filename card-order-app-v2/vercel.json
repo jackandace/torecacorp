@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/archive-old-data",
       "schedule": "0 18 1 * *"
+    },
+    {
+      "path": "/api/cron/forecast-snapshot",
+      "schedule": "5 0 1 * *"
     }
   ]
 }

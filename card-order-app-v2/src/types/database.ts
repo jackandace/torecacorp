@@ -182,6 +182,17 @@ export type SupplierUser = {
   created_at: string;
 };
 
+// 予実スナップショット (029・フェーズD)
+export type ForecastSnapshot = {
+  id: string;
+  target_month: string;      // 'YYYY-MM'
+  forecast_amount: number;
+  actual_amount: number | null;
+  variance: number | null;
+  snapshot_at: string;
+  closed_at: string | null;
+};
+
 // 商品の個別指名公開 (このリストにあるショップにのみ表示。ランクより優先)
 export type ProductShopAccess = {
   id: string;
@@ -487,6 +498,7 @@ export type Database = {
       supplier_users:         TableDef<SupplierUser, [
         FK<"supplier_users_supplier_id_fkey", ["supplier_id"], "suppliers", ["id"]>,
       ]>;
+      forecast_snapshots:     TableDef<ForecastSnapshot>;
     };
     Views: { [_ in never]: never };
     Functions: {

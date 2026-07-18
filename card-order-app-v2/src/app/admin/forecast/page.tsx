@@ -41,6 +41,18 @@ export default async function ForecastPage() {
   const projTotal = projection.reduce((s, m) => s + m.amount, 0);
   const maxProj = Math.max(1, ...projection.map((m) => m.amount));
 
+  // 予実スナップショット(フェーズD)+ 自己補正係数
+  const { data: snaps } = await supabase
+    .from("forecast_snapshots")
+    .select("*")
+    .order("target_month", { ascending: false })
+    .limit(24);
+  const closedSnaps = (snaps ?? []).filter((s) => s.actual_amount != null && s.forecast_amount > 0);
+  const corrRatio = closedSnaps.length >= 2
+    ? closedSnaps.reduce((s, x) => s + (x.actual_amount as number) / x.forecast_amount, 0) / closedSnaps.length
+    : null;
+  const projCorrected = corrRatio ? Math.round(projTotal * corrRatio) : null;
+
   // ショップ別
   const shopMap = new Map<string, { name: string; rev: number; cnt: number }>();
   for (const o of rows) {
@@ -74,7 +86,7 @@ export default async function ForecastPage() {
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="card p-5"><div className="text-xs text-slate-500">累計 確定売上(税抜)</div><div className="text-2xl font-bold mt-1">{formatYen(totalRev)}</div></div>
-        <div className="card p-5"><div className="text-xs text-slate-500">今後6ヶ月の予測売上</div><div className="text-2xl font-bold mt-1 text-brand-700">{formatYen(projTotal)}</div></div>
+        <div className="card p-5"><div className="text-xs text-slate-500">今後6ヶ月の予測売上</div><div className="text-2xl font-bold mt-1 text-brand-700">{formatYen(projTotal)}</div>{projCorrected != null && <div className="text-xs text-slate-400 mt-0.5">補正後 {formatYen(projCorrected)}(×{corrRatio!.toFixed(2)})</div>}</div>
         <div className="card p-5"><div className="text-xs text-slate-500">タイトル / ショップ</div><div className="text-2xl font-bold mt-1">{titles.length} / {shops.length}</div></div>
       </div>
 
@@ -100,6 +112,36 @@ export default async function ForecastPage() {
           })}
         </div>
       </section>
+
+      {/* 予実(締め) */}
+      {(snaps ?? []).length > 0 && (
+        <section className="card p-5">
+          <h2 className="font-semibold mb-1">予実(月次締め)</h2>
+          <p className="text-xs text-slate-500 mb-3">
+            月初に凍結した予測と、月末の実績(納品=収益認識)の差異。差異の傾向から補正係数
+            {corrRatio != null ? `(現在 ×${corrRatio.toFixed(2)})` : ""}を算出し予測に反映します。
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[520px]">
+              <thead className="text-slate-600 text-xs"><tr>
+                <th className="text-left px-2 py-1">対象月</th><th className="text-right px-2 py-1">予測</th>
+                <th className="text-right px-2 py-1">実績</th><th className="text-right px-2 py-1">差異</th><th className="text-left px-2 py-1">状態</th>
+              </tr></thead>
+              <tbody>
+                {(snaps ?? []).map((s) => (
+                  <tr key={s.id} className="border-t border-slate-100">
+                    <td className="px-2 py-1.5 font-medium">{s.target_month}</td>
+                    <td className="px-2 py-1.5 text-right">{formatYen(s.forecast_amount)}</td>
+                    <td className="px-2 py-1.5 text-right">{s.actual_amount != null ? formatYen(s.actual_amount) : "—"}</td>
+                    <td className={`px-2 py-1.5 text-right ${(s.variance ?? 0) >= 0 ? "text-emerald-700" : "text-rose-600"}`}>{s.variance != null ? `${s.variance >= 0 ? "+" : ""}${formatYen(s.variance)}` : "—"}</td>
+                    <td className="px-2 py-1.5 text-xs">{s.closed_at ? <span className="text-slate-400">締め済</span> : <span className="text-amber-600">予測中</span>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
       {/* タイトル別 予測 */}
       <section className="card p-5">
@@ -148,9 +190,10 @@ export default async function ForecastPage() {
       </section>
 
       <div className="card p-5 bg-slate-50 text-sm">
-        <div className="font-semibold mb-1">精度を上げる次のステップ(フェーズD)</div>
+        <div className="font-semibold mb-1">仕組み(稼働中)</div>
         <p className="text-slate-600 text-xs">
-          月初に予測をスナップショット保存し、月末に実績(納品=収益認識)と突合して差異を記録。差異の傾向から周期・見込みの係数を自動補正していきます。入荷案内ログ(フェーズB)を溜めると、発注前でも入荷予定から先行して予測できます。
+          月初に予測を自動で凍結保存し、月末に実績(納品=収益認識)と突合して差異を記録。差異の傾向から補正係数を算出し予測に反映します(予実が積み上がるほど精度向上)。
+          さらに<strong>入荷案内ログ(フェーズB)</strong>を溜めれば、発注が来る前に入荷予定から先行して予測できます — こちらは入荷登録(問屋フェーズ4)と一緒に拡張予定です。
         </p>
       </div>
     </div>
