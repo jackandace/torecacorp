@@ -9,10 +9,11 @@ export default async function SupplierDashboard() {
   const ctx = await getCurrentSupplier(supabase);
   if (!ctx) return null; // レイアウト側で未設定案内を表示
 
-  // 自社商品数 (RLSで自社分のみ)
+  // 自社商品数 (supplier_id で明示スコープ)
   const { count: productCount } = await supabase
     .from("products")
     .select("*", { count: "exact", head: true })
+    .eq("supplier_id", ctx.supplier.id)
     .is("deleted_at", null);
 
   return (
