@@ -27,7 +27,8 @@ export default async function SupplierLayout({ children }: { children: React.Rea
         </div>
         <nav className="max-w-5xl mx-auto px-4 flex gap-5 text-sm overflow-x-auto">
           <Link href="/supplier" className="py-2 border-b-2 border-transparent hover:border-white/70 whitespace-nowrap">ダッシュボード</Link>
-          {/* フェーズ2以降で追加: 入荷登録 / 出荷更新 / 納品報告書 */}
+          <Link href="/supplier/shipments" className="py-2 border-b-2 border-transparent hover:border-white/70 whitespace-nowrap">出荷更新</Link>
+          {/* フェーズ3-4で追加: 納品完了 / 入荷登録 */}
         </nav>
       </header>
       <main className="max-w-5xl mx-auto px-4 py-6">

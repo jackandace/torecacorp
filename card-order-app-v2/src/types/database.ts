@@ -212,6 +212,12 @@ export type Order = {
   admin_note: string | null;
   confirmed_at: string | null;
   shipped_at: string | null;
+  // 出荷/納品/受領 (027)
+  carrier: string | null;
+  delivered_at: string | null;              // 納品完了日 = 収益認識日
+  received_at: string | null;               // ショップ受領確認日
+  receipt_token: string | null;
+  receipt_token_expires_at: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
