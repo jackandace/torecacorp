@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function OrderPage() {
   const supabase = createClient();
   const today = todayISOInJST();
-  // ショップ締切 = 問屋発注期限の7日前。よって受付中なのは deadline >= today+7 のもの
+  // ショップ締切 = 問屋発注期限の3日前。よって受付中なのは deadline >= today+3 のもの
   const minDeadline = addDaysISO(today, ORDER_CUTOFF_DAYS);
 
   const [{ data: products }, { data: shop }] = await Promise.all([
@@ -19,7 +19,7 @@ export default async function OrderPage() {
       .select("*")
       .eq("is_visible", true)
       .eq("status", "受付中")
-      // 実効締切(発注期限の7日前)が過ぎた商品は出さない (締切なしは表示)
+      // 実効締切(発注期限の3日前)が過ぎた商品は出さない (締切なしは表示)
       .or(`order_deadline.is.null,order_deadline.gte.${minDeadline}`)
       .is("deleted_at", null)
       .order("created_at", { ascending: false }),

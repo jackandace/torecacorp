@@ -13,7 +13,7 @@ type Tab = "all" | "live" | "expired" | "expired_ordered" | "hidden";
 
 const TODAY = todayISOInJST();
 
-/** 実効締切(発注期限の7日前)が過ぎているか */
+/** 実効締切(発注期限の3日前)が過ぎているか */
 function isExpired(p: Product): boolean {
   const cutoff = orderCutoffDate(p.order_deadline);
   return !!cutoff && cutoff < TODAY;

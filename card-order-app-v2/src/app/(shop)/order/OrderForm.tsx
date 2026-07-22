@@ -131,7 +131,7 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
     const q = query.trim().toLowerCase();
     const todayStr = new Date().toISOString().slice(0, 10);
     const filtered = products.filter((p) => {
-      // 実効締切(問屋発注期限の7日前)が過ぎた商品は自動的に非表示
+      // 実効締切(問屋発注期限の3日前)が過ぎた商品は自動的に非表示
       const cutoff = orderCutoffDate(p.order_deadline);
       if (cutoff && cutoff < todayStr) return false;
       if (category !== "all" && p.category !== category) return false;
@@ -483,7 +483,7 @@ function daysUntil(dateStr: string | null): number | null {
 }
 
 function DeadlineBadge({ deadline }: { deadline: string | null }) {
-  // ショップ表示の締切は「問屋発注期限の7日前」
+  // ショップ表示の締切は「問屋発注期限の3日前」
   const cutoff = orderCutoffDate(deadline);
   const days = daysUntil(cutoff);
   if (days == null) return null;

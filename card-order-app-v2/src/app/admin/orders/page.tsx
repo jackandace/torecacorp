@@ -17,7 +17,7 @@ export default async function OrdersAdminPage() {
     .limit(100);
 
   const today = todayISOInJST();
-  // 締切(発注期限の7日前)を過ぎたのに未確定 = 要確定
+  // 締切(発注期限の3日前)を過ぎたのに未確定 = 要確定
   const needsConfirm = (o: { status: string; products?: { order_deadline?: string | null } | null }) => {
     if (!PENDING_STATUSES.includes(o.status)) return false;
     const cutoff = orderCutoffDate(o.products?.order_deadline ?? null);

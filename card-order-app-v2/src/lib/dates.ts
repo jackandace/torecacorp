@@ -41,8 +41,8 @@ export function addDaysISO(dateStr: string, days: number): string {
   return `${y}-${mo}-${da}`;
 }
 
-/** 発注締切のリードタイム: 問屋発注期限の何日前でショップ受付を締めるか */
-export const ORDER_CUTOFF_DAYS = 7;
+/** 発注締切のリードタイム: 問屋発注期限の何日前でショップ受付を締めるか (問屋=橋本さん締切の3日前) */
+export const ORDER_CUTOFF_DAYS = 3;
 
 /**
  * ショップ受付の実効締切 = 問屋発注期限(order_deadline)の ORDER_CUTOFF_DAYS 日前。
