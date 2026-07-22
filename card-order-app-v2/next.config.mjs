@@ -22,6 +22,7 @@ const nextConfig = {
       "/api/invoices/[id]/pdf/download": ["./src/lib/pdf/fonts/**", "./src/lib/pdf/assets/**"],
       "/api/invoices/[id]/receipt": ["./src/lib/pdf/fonts/**", "./src/lib/pdf/assets/**"],
       "/api/invoices/[id]/payment-notice/download": ["./src/lib/pdf/fonts/**", "./src/lib/pdf/assets/**"],
+      "/api/orders/[id]/delivery-report/download": ["./src/lib/pdf/fonts/**", "./src/lib/pdf/assets/**"],
     },
   },
 };

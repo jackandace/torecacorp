@@ -83,7 +83,7 @@ export default async function RecognitionReport() {
           <table className="w-full text-sm min-w-[640px]">
             <thead className="text-slate-600 text-xs"><tr>
               <th className="text-left px-2 py-1">納品日</th><th className="text-left px-2 py-1">ショップ</th>
-              <th className="text-left px-2 py-1">商品</th><th className="text-right px-2 py-1">税抜</th><th className="text-left px-2 py-1">受領</th>
+              <th className="text-left px-2 py-1">商品</th><th className="text-right px-2 py-1">税抜</th><th className="text-left px-2 py-1">受領</th><th className="text-left px-2 py-1">報告書</th>
             </tr></thead>
             <tbody>
               {rows.slice(0, 50).map((o) => {
@@ -98,10 +98,11 @@ export default async function RecognitionReport() {
                     <td className="px-2 py-1.5">{o.received_at
                       ? <span className="text-[10px] bg-emerald-100 text-emerald-700 rounded px-1.5 py-0.5">受領済</span>
                       : <span className="text-[10px] bg-amber-100 text-amber-700 rounded px-1.5 py-0.5">未受領</span>}</td>
+                    <td className="px-2 py-1.5"><a className="text-xs text-brand-600 hover:underline" href={`/api/orders/${o.id}/delivery-report/download`} target="_blank" rel="noreferrer">納品報告書</a></td>
                   </tr>
                 );
               })}
-              {rows.length === 0 && <tr><td colSpan={5} className="px-2 py-6 text-center text-slate-500">データなし</td></tr>}
+              {rows.length === 0 && <tr><td colSpan={6} className="px-2 py-6 text-center text-slate-500">データなし</td></tr>}
             </tbody>
           </table>
         </div>
