@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UIモック：グルマンディーズ様 追加機能フェーズ2（ライト）</title>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#FBE7F0; --card:#FFFFFF; --line:#F3D5E2;
+  --ink:#3A2A33; --sub:#8A6E7C;
+  --brand1:#FF7A1A; --brand2:#F43F8E; --brand3:#FFC531;
+  --grad:linear-gradient(90deg,#FF8A1E,#FF6A00);
+  --grad2:linear-gradient(90deg,#FF8A1E,#F43F8E);
+  --ok:#0E9F6E; --ng:#E02424; --admin:#0E7490;
+}
+*{ box-sizing:border-box; }
+body{ margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Maru Gothic ProN","Hiragino Sans","Noto Sans JP","Segoe UI",sans-serif; }
+.bar{ background:var(--grad2); padding:10px 16px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:5; color:#fff; }
+.bar .logo{ font-weight:800; letter-spacing:.5px; }
+.bar .pt{ font-size:12px; background:rgba(255,255,255,.25); padding:3px 10px; border-radius:999px; }
+.disclaimer{ background:#FFF7E8; color:#92610D; font-size:11.5px; padding:6px 16px; text-align:center; border-bottom:1px solid #F3E3BE; }
+.tabs{ display:flex; gap:6px; overflow:auto; padding:10px 12px; background:#fff; border-bottom:1px solid var(--line); position:sticky; top:42px; z-index:4; align-items:center; }
+.tabs .grp{ font-size:10px; color:#C79BAD; white-space:nowrap; padding:0 2px; letter-spacing:.1em; font-weight:700; }
+.tabs button{ white-space:nowrap; border:1px solid var(--line); background:#fff; color:#6B5560; border-radius:999px; padding:7px 14px; font:inherit; font-size:13px; cursor:pointer; }
+.tabs button.active{ background:var(--grad2); border-color:transparent; color:#fff; font-weight:700; }
+.tabs button.adm{ border-style:dashed; }
+.tabs button.adm.active{ background:var(--admin); }
+.screen{ display:none; padding:16px; max-width:760px; margin:0 auto; }
+.screen.active{ display:block; }
+.note{ font-size:11.5px; color:var(--sub); margin:0 0 12px; line-height:1.6; }
+.badge{ display:inline-block; font-size:10px; font-weight:700; padding:1px 8px; border-radius:6px; margin-right:6px; vertical-align:1px; }
+.badge.in{ background:#DEF7EC; color:#046C4E; }
+.badge.tbd{ background:#FDF6B2; color:#8E4B10; }
+.btn{ display:inline-block; border:none; border-radius:999px; padding:13px 22px; font:inherit; font-weight:800; font-size:14px; cursor:pointer; }
+.btn.p{ background:var(--grad); color:#fff; box-shadow:0 3px 8px rgba(255,106,0,.3); }
+.btn.g{ background:#F4E3EB; color:#6B5560; }
+.btn.gold{ background:var(--grad2); color:#fff; box-shadow:0 3px 8px rgba(244,63,142,.3); }
+.btn.dis{ background:#F4E3EB; color:#C7A9B8; cursor:not-allowed; box-shadow:none; }
+.btn.full{ display:block; width:100%; text-align:center; }
+.row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.row.split{ flex-wrap:nowrap; }
+.row.split .btn{ flex:1; text-align:center; padding-left:0; padding-right:0; }
+.phone{ max-width:420px; margin:0 auto; }
+h3{ margin:4px 0 10px; font-size:16px; }
+h4{ margin:14px 0 8px; font-size:13.5px; color:#6B5560; }
+.tag{ font-size:10px; padding:1px 7px; border-radius:6px; color:#fff; }
+
+/* gacha card (サイト準拠) */
+.gcard{ background:var(--card); border-radius:18px; overflow:hidden; box-shadow:0 4px 16px rgba(58,42,51,.10); }
+.gcard .visual{ position:relative; min-height:150px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:6px; color:#fff; text-align:center; padding:22px 14px; }
+.gcard .visual .t{ font-size:24px; font-weight:900; letter-spacing:.04em; text-shadow:0 2px 0 rgba(0,0,0,.18); }
+.gcard .visual .st{ font-size:11.5px; font-weight:700; background:rgba(255,255,255,.92); color:#B03A6E; border-radius:999px; padding:3px 12px; }
+.gcard .visual .corner{ position:absolute; top:10px; left:10px; background:#FF6A00; color:#fff; font-size:11px; font-weight:800; padding:4px 12px; border-radius:999px; }
+.gcard .bodyc{ padding:14px 16px 16px; }
+.warnbox{ border:2px solid #F5C518; border-radius:12px; background:#fff; padding:10px 12px; display:flex; gap:10px; align-items:center; font-size:12px; line-height:1.6; }
+.warnbox .wb{ background:var(--grad); color:#fff; font-weight:800; font-size:12px; padding:6px 12px; border-radius:999px; flex:0 0 auto; }
+.pricerow{ display:flex; justify-content:space-between; align-items:center; margin:12px 0 8px; }
+.pricerow .pr{ font-size:15px; font-weight:800; display:flex; align-items:center; gap:5px; }
+.pricerow .coin{ width:18px; height:18px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#FFE39A,#F0A80A); display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:900; color:#7A5200; }
+.pricerow .zan{ font-size:17px; font-weight:900; }
+.pricerow .zan small{ font-size:12px; font-weight:700; color:var(--sub); margin-right:4px; }
+.pbar{ height:10px; background:#F3D5E2; border-radius:999px; overflow:hidden; margin:6px 0 14px; }
+.pbar i{ display:block; height:100%; background:#F65FA4; border-radius:999px; }
+
+/* flags */
+.flags{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.flag{ border-radius:12px; padding:12px 8px; text-align:center; font-weight:800; font-size:12px; color:#fff; box-shadow:0 2px 8px rgba(58,42,51,.12); }
+.flag small{ display:block; font-weight:600; font-size:11px; opacity:.95; margin-top:4px; }
+.f-or{ background:linear-gradient(135deg,#FF8A3D,#F1660A); }
+.f-pk{ background:linear-gradient(135deg,#F973B5,#E62E82); }
+.f-yl{ background:linear-gradient(135deg,#FFD457,#F0A80A); color:#5C4300; }
+.recipe{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-top:10px; box-shadow:0 1px 4px rgba(58,42,51,.06); }
+.recipe .ttl{ font-weight:700; font-size:14px; }
+.recipe .need{ font-size:12px; color:var(--sub); margin:6px 0 10px; }
+.need b.ok{ color:var(--ok); } .need b.ng{ color:var(--ng); }
+
+/* concern box */
+.concern{ background:#FFF3F3; border:1px solid #F2C4C4; border-left:4px solid #D64545; border-radius:10px; padding:10px 14px; margin-top:14px; font-size:11.5px; color:#7A4A4A; line-height:1.8; }
+.concern .cttl{ display:block; font-weight:800; color:#B03030; margin-bottom:2px; font-size:11.5px; }
+.concern b{ color:#B03030; }
+
+/* footer nav */
+body{ padding-bottom:64px; }
+.fnav{ position:fixed; left:0; right:0; bottom:0; z-index:6; background:#fff; border-top:1px solid var(--line); display:flex; justify-content:center; gap:2px; padding:6px 8px calc(6px + env(safe-area-inset-bottom)); }
+.fnav a{ flex:1; max-width:96px; text-align:center; text-decoration:none; color:#A98A99; font-size:10px; font-weight:700; line-height:1.3; padding:4px 0; border-radius:10px; }
+.fnav a .ic{ display:block; font-size:18px; }
+.fnav a.on{ color:#F43F8E; background:#FDEFF5; }
+
+/* mypage (実サイト準拠) */
+.mypg{ background:#F7F3EA; border-radius:16px; padding:16px 16px 8px; }
+.mypg h3{ margin:0 0 4px; }
+.secttl{ display:flex; justify-content:space-between; align-items:baseline; font-weight:800; font-size:14px; margin:16px 0 8px; color:#3A2A33; }
+.secttl small{ color:#B45309; font-size:11px; font-weight:700; }
+.newtag{ font-size:10px; font-weight:800; color:#fff; background:#F08300; border-radius:6px; padding:1px 7px; vertical-align:2px; }
+.balbox{ background:#fff; border:2px solid #F5C9A0; border-radius:12px; padding:12px 14px; display:flex; align-items:center; gap:10px; }
+.balbox b{ font-size:17px; }
+.balbox .sp{ flex:1; }
+.btnchg{ background:#F08300; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-weight:800; font:inherit; font-size:13px; cursor:pointer; }
+.mcoin{ width:26px; height:26px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#FFE39A,#E8A20C); display:inline-flex; align-items:center; justify-content:center; font-weight:900; font-size:12px; color:#6B4A00; flex:0 0 auto; }
+.mlist{ margin-top:14px; }
+.mlist .mrow{ padding:14px 4px; border-bottom:1px solid #E7E0D2; font-size:14px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; color:#3A2A33; }
+.mlist .mrow:last-child{ border-bottom:none; }
+.mlist .mrow .nw{ color:#F08300; font-weight:800; font-size:11px; }
+
+/* recipe categories */
+.cats{ display:flex; gap:6px; margin:12px 0 2px; flex-wrap:wrap; }
+.cats span{ font-size:11px; font-weight:700; padding:5px 12px; border-radius:999px; background:#fff; border:1px solid var(--line); color:#8A6E7C; }
+.cats span.on{ background:var(--grad2); color:#fff; border-color:transparent; }
+
+/* tickets */
+.tk{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:10px; display:flex; gap:12px; align-items:center; box-shadow:0 1px 4px rgba(31,36,48,.05); }
+.tk .icon{ width:52px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; color:#fff; flex:0 0 auto; }
+.i-rb{ background:linear-gradient(90deg,#E02424,#FF7A1A,#0E9F6E,#3F83F8,#9061F9); }
+.i-st{ background:#3F83F8; } .i-ev{ background:var(--admin); }
+.tk .b{ flex:1; } .tk .n{ font-weight:700; font-size:13.5px; } .tk .m{ font-size:11px; color:var(--sub); margin-top:2px; }
+.lim{ font-size:10px; background:#FDE8E8; color:#C81E1E; padding:1px 7px; border-radius:6px; }
+
+/* step-up */
+.steps{ display:flex; flex-direction:column; gap:8px; margin:10px 0; }
+.step{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; font-size:13px; }
+.step.cur{ border-color:#F43F8E; box-shadow:0 0 0 1px #F43F8E inset, 0 2px 8px rgba(244,63,142,.15); }
+.step .s{ font-weight:800; } .step .pr{ color:#C05C00; font-weight:700; } .step .rate{ color:var(--ok); font-size:12px; }
+.step.done{ opacity:.5; }
+.gauge{ height:8px; background:#EAECF2; border-radius:999px; overflow:hidden; margin:8px 0 4px; }
+.gauge i{ display:block; height:100%; width:40%; background:var(--grad); }
+
+/* two-choice */
+.choice{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.ch{ background:#FFF7FA; border:2px solid var(--line); border-radius:14px; padding:12px; cursor:pointer; text-align:center; }
+.ch.sel{ border-color:#F43F8E; background:#fff; box-shadow:0 2px 10px rgba(244,63,142,.18); }
+.ch .h{ font-weight:800; font-size:14px; }
+.ch .d{ font-size:11.5px; color:var(--sub); margin-top:4px; line-height:1.7; }
+
+/* ===== admin (console) ===== */
+.admin{ background:#fff; border:1px solid var(--line); color:#1E2635; border-radius:16px; padding:16px; font-size:13px; }
+.admin .crumb{ font-size:11px; color:#6B7684; margin-bottom:8px; }
+.admin h3{ color:#1E2635; margin:0 0 12px; }
+.admin h4{ color:#374151; margin:16px 0 6px; }
+.admin .panel{ background:#F8FAFC; border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin-bottom:12px; }
+.admin table{ width:100%; border-collapse:collapse; font-size:12px; background:#fff; }
+.admin th{ background:#EEF1F6; text-align:left; padding:7px 9px; border:1px solid var(--line); font-size:11px; color:#4B5563; white-space:nowrap; }
+.admin td{ padding:7px 9px; border:1px solid var(--line); }
+.admin input,.admin select{ font:inherit; font-size:12px; padding:5px 8px; border:1px solid #C7CFDB; border-radius:6px; background:#fff; color:#1E2635; max-width:110px; }
+.admin .btnA{ border:none; border-radius:8px; padding:8px 14px; font:inherit; font-weight:700; font-size:12.5px; cursor:pointer; background:var(--admin); color:#fff; }
+.admin .btnB{ background:#E5E9F0; color:#374151; }
+.admin .chip{ display:inline-block; font-size:10.5px; padding:1px 8px; border-radius:6px; background:#E0F2FE; color:#075985; margin:1px 2px; }
+.admin .sw{ display:inline-flex; align-items:center; gap:6px; font-size:12px; }
+.admin .sw i{ width:30px; height:16px; border-radius:999px; background:var(--admin); position:relative; display:inline-block; }
+.admin .sw i::after{ content:""; position:absolute; right:2px; top:2px; width:12px; height:12px; border-radius:50%; background:#fff; }
+.admin .sw.off i{ background:#C7CFDB; } .admin .sw.off i::after{ right:auto; left:2px; }
+.admin .hint{ font-size:11px; color:#6B7684; margin-top:4px; line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="bar"><div class="logo">ORI-PARADE</div></div>
+<div class="disclaimer">⚠ 合意形成用モックです。確率・金額・枚数はすべてダミー値。実際の値は仕様確定時に設定します。</div>
+<div class="tabs">
+  <span class="grp">USER</span>
+  <button class="active" onclick="show('u1',this)">U-01 合成ラボ</button>
+  <button onclick="show('u6',this)">U-02a マイページ</button>
+  <button onclick="show('u2',this)">U-02b 所持チケット</button>
+  <button onclick="show('u3',this)">U-03 ステップアップ</button>
+  <button onclick="show('u4',this)">U-04 2択ガチャ</button>
+  <button onclick="show('u5',this)">U-05 ログボ</button>
+  <span class="grp">ADMIN</span>
+  <button class="adm" onclick="show('a1',this)">A-01 交換レシピ</button>
+  <button class="adm" onclick="show('a2',this)">A-02 チケット管理</button>
+  <button class="adm" onclick="show('a3',this)">A-03 ステップアップ設定</button>
+  <button class="adm" onclick="show('a4',this)">A-04 ログボ設定</button>
+</div>
+
+<!-- ================= U-01 フラッグ交換所 ================= -->
+<div id="u1" class="screen active phone">
+  <p class="note"><span class="badge in">スコープ内</span>U-01 合成ラボ：フッターナビから直接アクセスできる独立機能。実験場の世界観で、素材（カードID or 景品名で指定・最大10種の掛け合わせ）×個数 → 別アイテムを錬成できる汎用合成エンジン。フラッグは発送不可・コイン交換可の「pt交換限定景品」。</p>
+  <div class="gcard" style="margin-bottom:12px;">
+    <div class="visual" style="background:linear-gradient(135deg,#4C1D95,#7C3AED 55%,#0D9488);min-height:96px;">
+      <span class="corner">EXPERIMENT LAB</span>
+      <div class="t" style="font-size:22px;">⚗️ 合成ラボ</div>
+      <div class="st">素材をまぜて、新しいお宝を錬成せよ！</div>
+    </div>
+  </div>
+  <h4>🧫 素材ストック</h4>
+  <div class="flags">
+    <div class="flag f-or">オレンジ<small>所持 4枚</small></div>
+    <div class="flag f-pk">ピンク<small>所持 2枚</small></div>
+    <div class="flag f-yl">イエロー<small>所持 5枚</small></div>
+  </div>
+  <div class="cats"><span class="on">すべて</span><span>🧪 フラッグ調合</span><span>⚗️ チケット調合</span><span>🔬 パック合成</span><span>🔁 交換</span></div>
+
+  <h4>🧪 フラッグ調合</h4>
+  <div class="recipe">
+    <div class="ttl">✨ フラッグX（スペシャルフラッグ）</div>
+    <div class="need">合成：オレンジ×1 <b class="ok">✓</b> ＋ ピンク×1 <b class="ok">✓</b> → フラッグX ×1（さらに上位レシピの素材になる）</div>
+    <button class="btn p" onclick="alert('（モック）合成確認 → フラッグX付与')">調合する</button>
+  </div>
+  <div class="recipe">
+    <div class="ttl">🌈 虹色フラッグチケット（限定ガチャ参加券）</div>
+    <div class="need">必要：オレンジ×3 <b class="ok">✓</b> ／ ピンク×3 <b class="ng">✗ あと1枚</b> ／ イエロー×3 <b class="ok">✓</b></div>
+    <button class="btn dis">交換する（素材不足）</button>
+  </div>
+
+  <h4>⚗️ チケット調合</h4>
+  <div class="recipe">
+    <div class="ttl">🎟️ プレミアチケット（チケット×チケット）</div>
+    <div class="need">合成：虹色フラッグチケット×2 <b class="ng">✗ 所持 1/2</b> → プレミアチケット ×1</div>
+    <button class="btn dis">調合する（素材不足）</button>
+  </div>
+  <div class="recipe">
+    <div class="ttl">👑 ゴールドチケット（チケット＋フラッグ）</div>
+    <div class="need">合成：虹色フラッグチケット×1 <b class="ok">✓</b> ＋ フラッグX×2 <b class="ng">✗ 所持 0/2</b> → ゴールドチケット ×1</div>
+    <button class="btn dis">調合する（素材不足）</button>
+  </div>
+
+  <h4>🔬 パック合成（圧縮実験）</h4>
+  <div class="recipe">
+    <div class="ttl">📦 スペシャルBOX（未開封・発送可）</div>
+    <div class="need">合成：○○パック×10 <b class="ng">✗ 所持 6/10</b> → ○○BOX ×1（残り在庫 5）</div>
+    <button class="btn dis">調合する（素材不足）</button>
+  </div>
+
+  <h4>🔁 交換カウンター</h4>
+  <div class="recipe">
+    <div class="ttl">サイン入り高額カードA <span class="tag" style="background:#E02424">SSR</span></div>
+    <div class="need">必要：オレンジ×2 <b class="ok">✓</b> ／ イエロー×4 <b class="ok">✓</b>　残り在庫 3</div>
+    <button class="btn p" onclick="alert('（モック）交換確認モーダル→成果物付与')">交換する</button>
+  </div>
+  <div class="recipe">
+    <div class="ttl">フラッグをptに還元</div>
+    <div class="need">1枚 = 10pt（レシピ対象外・余剰フラッグの救済。還元可否/レートはコンソール設定★）</div>
+    <button class="btn g">還元するフラッグを選ぶ</button>
+  </div>
+
+  <div class="concern"><span class="cttl">⚠ 懸念・制約（合成ラボ）</span>
+  ・フラッグは<b>「pt交換限定景品」</b>：通常の景品と同じ基盤・同じ口消費で排出。<b>発送のみ不可、コイン（pt）交換は常時可</b>。景品マスタに区分フラグを1つ足すだけで、特典トラックのような別系統は作らない<br>
+  ・ハズレ枠にフラッグを置いても<b>コイン交換可能な価値がある</b>ため「支払いに対して必ず価値ある物が届く」建付けは維持できる整理 → この整理の妥当性と交換レートの下限は<b>弁護士確認</b><br>
+  ・排出がランダム（景品として抽選）になるため、<b>異なる色の組み合わせ→利益（絵合わせ）の論点は残る</b>。異種素材レシピの追加時は法務観点チェックを公開前フローに組み込む<br>
+  ・パック合成は<b>同種×n→BOXを基本</b>とする。異種パックの組み合わせレシピは絵合わせ該当性を個別に弁護士確認<br>
+  ・パック／BOXは発送可能な通常カードのため、成果物BOXは<b>在庫連動（在庫0で自動クローズ）</b>・素材パックは発送申請中のものを合成不可にする排他制御が必要<br>
+  ・発送不可の制御は<b>共通判定関数1箇所＋DB制約</b>の二重防御（区分フラグ参照）。1排出＝1レコードで複数所持、消費は行ロック＋冪等キーで二重消費防止</div>
+</div>
+
+<!-- ================= U-02 チケット ================= -->
+<div id="u2" class="screen phone">
+  <p class="note"><span class="badge in">スコープ内</span>U-02b 所持チケット一覧（詳細）：U-02a マイページの「所持チケット」ボックスまたはメニュー行から遷移する詳細画面。複数種類のチケットを保持し、1人1枚制限チケットは所持上限バッジを表示。</p>
+  <h3>所持チケット</h3>
+  <div class="tk">
+    <div class="icon i-rb">虹色</div>
+    <div class="b"><div class="n">虹色フラッグチケット <span class="lim">1人1枚</span></div>
+    <div class="m">利用先：限定ガチャ「レインボーパレード」／有効期限 2026.09.30</div></div>
+    <button class="btn p" style="padding:8px 12px;font-size:12px;">使う</button>
+  </div>
+  <div class="tk">
+    <div class="icon i-st">選択</div>
+    <div class="b"><div class="n">セレクトガチャチケット</div>
+    <div class="m">利用先：2択ガチャ（AまたはB）／有効期限 2026.08.15 ／ 所持 1枚</div></div>
+    <button class="btn p" style="padding:8px 12px;font-size:12px;" onclick="show('u4',document.querySelectorAll('.tabs button')[4])">使う</button>
+  </div>
+  <div class="tk">
+    <div class="icon i-ev">EVENT</div>
+    <div class="b"><div class="n">イベント参加チケット</div>
+    <div class="m">利用先：対象イベントガチャ／有効期限なし ／ 所持 2枚</div></div>
+    <button class="btn g" style="padding:8px 12px;font-size:12px;">詳細</button>
+  </div>
+  <p class="note" style="margin-top:10px;">※チケット種別・有効期限・所持上限・利用先ガチャはすべてコンソール（A-02）で設定。</p>
+
+  <h4>ガチャエリア側の動線（同じガチャに合流）</h4>
+  <p class="note" style="margin-bottom:8px;">チケット対象ガチャは通常のガチャ一覧にも並ぶ。どちらのルートから入っても同一のガチャ詳細・同一の消費処理に合流する。</p>
+  <div class="gcard">
+    <div class="visual" style="background:linear-gradient(135deg,#E62E82,#9061F9);min-height:84px;">
+      <span class="corner">🎫 チケット制</span>
+      <div class="t" style="font-size:18px;">レインボーパレード</div>
+      <div class="st">虹色フラッグチケット限定ガチャ</div>
+    </div>
+    <div class="bodyc">
+      <div class="pricerow">
+        <span class="pr"><span class="coin" style="background:linear-gradient(135deg,#F973B5,#9061F9);color:#fff;">🎫</span>1 <span style="font-size:11px;font-weight:700;color:var(--sub);">/ 1口（コインアイコンがチケットに切替）</span></span>
+        <span class="zan"><small>残</small>67<span style="font-size:12px;font-weight:700;color:var(--sub);">/100</span></span>
+      </div>
+      <div class="pbar"><i style="width:67%"></i></div>
+      <div class="note" style="margin:0 0 10px;">所持チケット：1枚（10枚以上で「10連ガチャ」ボタンが自動表示・10枚消費）</div>
+      <button class="btn p full" onclick="alert('（モック）チケット1枚消費 → 抽選 → 結果（マイページの「使う」と同じ処理に合流）')">1回ガチャ</button>
+      <button class="btn g full" style="margin-top:8px;" onclick="show('u1',document.querySelectorAll('.tabs button')[0])">合成ラボで入手方法を見る</button>
+    </div>
+  </div>
+
+  <div class="concern"><span class="cttl">⚠ 懸念・制約（チケット基盤）</span>
+  ・チケットはフラッグと分離した<b>独立の小基盤</b>：付与1回＝1レコード＋有効期限。付与ごとに期限が異なるためスタック（数量）管理は不可<br>
+  ・「1人1枚」は<b>未使用かつ期限内のレコード数</b>で判定。消費後の再付与条件は★先方確認<br>
+  ・<b>配布総口数上限</b>を種別ごとに設定し超過配布はエラー（「201枚配ると引けない人が出る」問題の担保）<br>
+  ・虹色フラッグはカードではなく<b>チケットとして実装</b>。フラッグ世界との接続は交換エンジン経由のみ（在庫系の二重管理を回避）</div>
+
+  <div class="concern"><span class="cttl">⚠ 懸念・制約（チケットガチャの動線）</span>
+  ・<b>チケットガチャのUIは通常ガチャと完全同一</b>：差分は「コインアイコン→チケットアイコンの動的切替」と消費表記のみ。専用画面は作らない（実装・デザインの分岐を最小化）<br>
+  ・ガチャボタンは<b>基本1連のみの1ボタン</b>。所持チケットが10枚以上のときだけ「10連ガチャ」を動的表示（10枚消費）。100連は表示しない<br>
+  ・<b>2ルート（ガチャエリア／マイページ所持チケット一覧）はどちらも同一のガチャ詳細・同一の消費エンジンに合流</b>させる。動線ごとに消費処理を分けると二重実装・整合バグの温床<br>
+  ・チケット<b>未所持時のガチャエリアでの表示</b>★要確認：非表示にするか、表示して「入手方法を見る」導線（合成・交換所へ）を出すか。入手経路がある限り表示＋導線を推奨<br>
+  ・同一チケットの同時消費（ガチャエリアとマイページを2タブで開いて同時押し）は冪等キー＋行ロックで片方のみ成立<br>
+  ・マイページ「使う」→ガチャ詳細への遷移時、対象ガチャが完売・期間外の場合の表示制御（使うボタンの非活性化）</div>
+</div>
+
+<!-- ================= U-03 ステップアップ ================= -->
+<div id="u3" class="screen phone">
+  <p class="note"><span class="badge in">スコープ内</span>U-03 ステップアップガチャ（貫き型チェーン）：STEP1〜5はそれぞれ独立した別ガチャ。前のSTEPを引いた人だけが次のSTEPに進める。各STEPで押せるのは1回だけ（1連/10連/100連から選択）。前のSTEPには戻れない。</p>
+  <h3>ステップアップガチャ 第1弾</h3>
+
+  <div class="steps">
+    <div class="step done"><span class="s">STEP 1</span><span>1口 500C ／ SSR 1.0%</span><span style="font-size:11px;color:#9AA3B2;">✓ 引き済み（10連）・戻れません</span></div>
+    <div class="step cur"><span class="s">STEP 2</span><span>1口 800C ／ SSR 3.0%</span><span style="font-size:11px;color:#F43F8E;">◀ 挑戦可能</span></div>
+    <div class="step"><span class="s">STEP 3</span><span>1口 1,200C ／ SSR 6.0%</span><span style="font-size:11px;color:#C7A9B8;">🔒 STEP2を引くと解放</span></div>
+    <div class="step"><span class="s">STEP 4</span><span>1口 2,000C ／ SSR 12.0%</span><span style="font-size:11px;color:#C7A9B8;">🔒</span></div>
+    <div class="step"><span class="s">STEP 5</span><span>1口 3,000C ／ SSR 26.0%</span><span style="font-size:11px;color:#C7A9B8;">🔒 最終</span></div>
+  </div>
+
+  <div class="gcard" style="margin-top:12px;">
+    <div class="visual" style="background:linear-gradient(135deg,#FF8A1E,#F43F8E);min-height:90px;">
+      <span class="corner">STEP 2</span>
+      <div class="t" style="font-size:19px;">ステップアップ 第2弾</div>
+      <div class="st">STEP1突破者だけの高濃度ガチャ！</div>
+    </div>
+    <div class="bodyc">
+      <div class="warnbox"><span class="wb">1回限り</span><span>このSTEPで押せるガチャボタンは1回だけです。1連・10連・100連のいずれかを選ぶと、結果に関わらずSTEP3へ進みます。</span></div>
+      <div class="pricerow">
+        <span class="pr"><span class="coin">P</span>800 <span style="font-size:11px;font-weight:700;color:var(--sub);">/ 1口</span></span>
+        <span class="zan"><small>残</small>212<span style="font-size:12px;font-weight:700;color:var(--sub);">/300</span></span>
+      </div>
+      <div class="pbar"><i style="width:71%"></i></div>
+      <div class="row split">
+        <button class="btn p" onclick="alert('（モック）1連実行 → このSTEPは終了しSTEP3が解放')">1回ガチャ</button>
+        <button class="btn p" onclick="alert('（モック）10連実行 → このSTEPは終了しSTEP3が解放')">10連ガチャ</button>
+      </div>
+      <button class="btn gold full" style="margin-top:10px;" onclick="alert('（モック）100連実行 → このSTEPは終了しSTEP3が解放')">100連ガチャ</button>
+    </div>
+  </div>
+  <p class="note" style="margin-top:12px;">※各STEPは独立ガチャ。表示中のSSR%は<b>封入設計（封入枚数÷総口数）からの自動算出値</b>で、システム上に確率入力欄はない。後半STEPほど高価格×高濃度の封入にする運用設計（数値は全てダミー★）。ガチャボタンは残口数に応じて自動出し分け（残100口未満は100連非表示・残10口未満は10連非表示）。</p>
+
+  <div class="concern"><span class="cttl">⚠ 懸念・制約（貫き型ステップアップ）</span>
+  ・各STEPは<b>独立した通常ガチャ</b>。<b>確率はシステムで指定せず、封入設計（各STEPの山に各賞を何枚入れるか）で決める</b>。表示%は封入からの自動算出のため、確率操作・表示齟齬の問題が構造的に発生しない（事前シャッフルのまま）<br>
+  ・新規実装は2点：<b>①解放条件（前STEPの購入実績で次STEPをアンロック）②1プッシュ制限</b>（1/10/100連のどれかを1回押したらそのSTEPは終了・不可逆）<br>
+  ・1プッシュ制限は<b>押した瞬間にロック確定</b>（冪等キー）。<b>残口数を下回る連数ボタンは非表示</b>（残100口未満→100連非表示等）のため、残口不足時の挙動分岐は考慮不要<br>
+  ・<b>後段STEPの売り切れ</b>：STEP1突破者がSTEP2完売で進めないケースが起こり得る。「確定」等の表現をしない限り通常の完売と同じ扱いだが、進行不能時の案内表示と救済ポリシー（なし／次弾持ち越し等)★要確認<br>
+  ・戻れない・1回限りのルールは<b>購入前に明示</b>（警告ボックス＋購入確認モーダル）。誤操作クレームの温床になるため確認ダイアログ必須<br>
+  ・2/4先方指摘の2件（口数無制限のS賞x%確率制御／10連確定枠）は<b>非採用</b>。理由説明とセットで先方合意が必要</div>
+</div>
+
+<!-- ================= U-04 2択ガチャ ================= -->
+<div id="u4" class="screen phone">
+  <p class="note"><span class="badge tbd">要判断</span>U-04 2択ガチャ：ガチャ詳細に入ると「ルート選択」が1階層挟まる。天国（高確率）か地獄（高還元）を選んで確定すると、選んだ側の通常ガチャフロー（1回/10連）へ。</p>
+
+  <div id="u4-stage1">
+    <div class="gcard">
+      <div class="visual" style="background:linear-gradient(135deg,#7C3AED 0%,#F43F8E 55%,#FF8A1E 100%);">
+        <span class="corner">チケット限定</span>
+        <div class="t">運命の2択ガチャ</div>
+        <div class="st">天国か地獄か、選ぶのはキミだ！？</div>
+      </div>
+      <div class="bodyc">
+        <div class="warnbox"><span class="wb">選択制</span><span>セレクトガチャチケット1枚でどちらか一方のルートだけに挑戦できます。決定後の変更はできません。</span></div>
+        <div class="choice" style="margin-top:12px;">
+          <div class="ch sel" onclick="pick(this)">
+            <div class="h">😇 天国ルート</div>
+            <div class="d">高当選確率 × 控えめ還元<br>SSR 8.0% / 還元85%<br>残り 67 / 100 口</div>
+          </div>
+          <div class="ch" onclick="pick(this)">
+            <div class="h">😈 地獄ルート</div>
+            <div class="d">一撃高還元 × 低当選確率<br>SSR 1.0% / 還元120%<br>残り 42 / 100 口</div>
+          </div>
+        </div>
+        <button class="btn gold full" style="margin-top:14px;" onclick="u4go(2)">このルートに決定する</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="u4-stage2" style="display:none;">
+    <div class="gcard">
+      <div class="visual" style="background:linear-gradient(135deg,#38BDF8,#818CF8);">
+        <span class="corner">😇 天国ルート</span>
+        <div class="t">運命の2択ガチャ</div>
+        <div class="st">高確率ルートで挑戦中！</div>
+      </div>
+      <div class="bodyc">
+        <div class="warnbox"><span class="wb">選択済</span><span>ルートはチケット消費時に確定しています。ここから先は通常のガチャと同じ流れです。</span></div>
+        <div class="pricerow">
+          <span class="pr"><span class="coin">P</span>555 <span style="font-size:11px;font-weight:700;color:var(--sub);">/ 1口</span></span>
+          <span class="zan"><small>残</small>67<span style="font-size:12px;font-weight:700;color:var(--sub);">/100</span></span>
+        </div>
+        <div class="pbar"><i style="width:67%"></i></div>
+        <div class="row split">
+          <button class="btn p" onclick="alert('（モック）1回抽選 → 演出 → 結果')">1回ガチャ</button>
+          <button class="btn p" onclick="alert('（モック）10連抽選 → 演出 → 結果')">10連ガチャ</button>
+        </div>
+        <button class="btn g full" style="margin-top:10px;" onclick="u4go(1)">← 選択画面を見る（モック閲覧用）</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="note" style="margin-top:10px;">※価格・確率・口数はダミー。</p>
+
+  <div class="concern"><span class="cttl">⚠ 懸念・制約（2択ガチャ）</span>
+  ・<b>スコープ採否が未決</b>（本日判断）。チケット基盤実装後なら追加工数は小（3日〜目安）<br>
+  ・ルート決定＝チケット消費で<b>不可逆</b>。決定リクエストは冪等キーで二重消費を防止（連打・二重タブ対策）<br>
+  ・配布チケットの総口数上限はチケット基盤（A-02）側で担保。両ルートの合計口数を超える配布は不可<br>
+  ・天国／地獄それぞれの提供割合・還元率は各ルートの詳細画面に正確表示（選択画面の煽り文言と齟齬がないよう法務レビュー対象）</div>
+</div>
+
+<!-- ================= U-05 ログインボーナス ================= -->
+<div id="u5" class="screen phone">
+  <p class="note"><span class="badge in">スコープ内（スコープ外→復帰）</span>U-05 ログインボーナス：連続ログインでポイントやチケットを付与。7日サイクルの通常ログボと、期間限定のイベントログボ（正月3日連続など）の2型。ログイン時にモーダル表示→受取式。</p>
+
+  <div class="gcard">
+    <div class="visual" style="background:linear-gradient(135deg,#FFC531,#FF7A1A);min-height:84px;">
+      <span class="corner">毎日もらえる</span>
+      <div class="t" style="font-size:19px;">ログインボーナス</div>
+      <div class="st">7日連続で豪華報酬！</div>
+    </div>
+    <div class="bodyc">
+      <div class="pricerow" style="margin-top:0;">
+        <span class="pr">連続ログイン <b style="font-size:17px;">3</b> 日目</span>
+        <span class="zan"><small>リセットまで</small>8:42:10</span>
+      </div>
+      <div class="flags" style="grid-template-columns:repeat(4,1fr); gap:8px;">
+        <div class="flag f-yl" style="opacity:.55;">DAY1<small>10pt ✓</small></div>
+        <div class="flag f-yl" style="opacity:.55;">DAY2<small>20pt ✓</small></div>
+        <div class="flag f-or">DAY3<small>30pt 🎁</small></div>
+        <div class="flag" style="background:#fff;border:2px dashed var(--line);color:#A98A99;">DAY4<small>50pt</small></div>
+      </div>
+      <div class="flags" style="grid-template-columns:repeat(4,1fr); gap:8px; margin-top:8px;">
+        <div class="flag" style="background:#fff;border:2px dashed var(--line);color:#A98A99;">DAY5<small>80pt</small></div>
+        <div class="flag" style="background:#fff;border:2px dashed var(--line);color:#A98A99;">DAY6<small>100pt</small></div>
+        <div class="flag f-pk" style="filter:saturate(.6);">DAY7<small>🎫 チケット</small></div>
+        <div class="flag" style="background:#fff;border:2px dashed var(--line);color:#A98A99;">🔁<small>1日目へ</small></div>
+      </div>
+      <button class="btn gold full" style="margin-top:12px;" onclick="alert('（モック）DAY3報酬 30pt を受取 → 台帳記録')">本日の報酬を受け取る</button>
+    </div>
+  </div>
+  <p class="note" style="margin-top:12px;">※日数・報酬内容・サイクルは全てコンソール（A-04）設定のダミー値。イベントログボ開催中は同画面にタブ追加で並列表示。</p>
+
+  <div class="concern"><span class="cttl">⚠ 懸念・制約（ログインボーナス）</span>
+  ・当初「完全新規で工数重（5日〜）」としてスコープ外にしていた機能の<b>復帰</b>。費用区分（既存見積内／追加）の扱いを見積提示時に明確化する<br>
+  ・<b>連続判定の定義</b>★要確認：暦日（0時リセット・JST）か直前ログインから24hか／途切れた場合は1日目に戻る／日跨ぎ深夜のログインの扱い<br>
+  ・<b>受取式を推奨</b>（自動付与でなくログイン時モーダル→受取ボタン）：付与の証跡が明確になり問い合わせ対応しやすい。未受取のまま日を跨いだ場合の扱い★（当日限り失効を推奨）<br>
+  ・チケット報酬は<b>チケット基盤の付与APIを利用</b>（ログボ専用の付与処理を作らない）。ログボ配布分が配布総口数上限のカウント対象になるか★要確認<br>
+  ・付与はユーザー×キャンペーン×日付で一意制約（同日二重受取の防止）＋全付与を台帳記録</div>
+</div>
+
+<!-- ================= U-06 マイページ ================= -->
+<div id="u6" class="screen phone">
+  <p class="note"><span class="badge in">スコープ内</span>U-02a マイページ（チケット動線の入口）：実サイトのマイページに、コイン残高と同じ表示形式で「所持チケット」ボックスを追加。メニューリストにも「所持チケット一覧」行を併設。どちらもU-02b（詳細）へ遷移する親子構成。</p>
+
+  <div class="mypg">
+    <h3>マイページ</h3>
+
+    <div class="secttl">コイン残高 <small>コイン失効期限の確認</small></div>
+    <div class="balbox">
+      <span class="mcoin">M</span><b>10,002,730</b> コイン
+      <span class="sp"></span>
+      <button class="btnchg">チャージ</button>
+    </div>
+
+    <div class="secttl">所持チケット <span class="newtag">追加</span></div>
+    <div class="balbox" style="border-color:#F0A8C8;">
+      <span class="mcoin" style="background:linear-gradient(135deg,#F973B5,#9061F9);color:#fff;">🎫</span><b>3</b> 枚<span style="font-size:11px;color:var(--sub);">（うち期限7日以内 1枚）</span>
+      <span class="sp"></span>
+      <button class="btnchg" style="background:#F43F8E;" onclick="show('u2',document.querySelectorAll('.tabs button')[2])">一覧を見る</button>
+    </div>
+
+    <div class="mlist">
+      <div class="mrow">特典クーポンを入力</div>
+      <div class="mrow" onclick="show('u2',document.querySelectorAll('.tabs button')[2])">所持チケット一覧 <span class="nw">追加 ›</span></div>
+      <div class="mrow">カード獲得履歴</div>
+      <div class="mrow">お届け先登録・変更</div>
+      <div class="mrow">LINE連携</div>
+    </div>
+  </div>
+
+  <div class="concern"><span class="cttl">⚠ 懸念・制約（マイページの所持チケット導線）</span>
+  ・<b>残高ボックス＋メニュー行の両方を併設</b>（発見性重視）。どちらもU-02所持チケット一覧（詳細）に合流し、遷移先の画面は1つだけ<br>
+  ・残高ボックスの枚数は<b>未使用かつ期限内のみ</b>をカウント。期限接近（7日以内等）の注記表示で失効前の利用を促す★閾値要確認<br>
+  ・コイン残高と同形式にするため、既存マイページのレイアウト改修は「ボックス1つ＋メニュー1行の追加」に留める（既存要素の移動はしない）<br>
+  ・枚数バッジの更新タイミング：付与・消費・失効バッチの後に即時反映（キャッシュする場合は消費時に必ず無効化）</div>
+</div>
+
+<!-- ================= A-01 交換レシピ管理 ================= -->
+<div id="a1" class="screen">
+  <div class="admin">
+    <div class="crumb">コンソール ＞ 合成ラボ ＞ レシピ管理</div>
+    <h3>A-01 交換レシピ管理 <span class="badge in">スコープ内</span></h3>
+    <div class="panel">
+      <h4 style="margin-top:0;">レシピ一覧（汎用合成エンジン）</h4>
+      <table>
+        <tr><th>レシピ名</th><th>種別</th><th>素材</th><th>成果物（タイプ）</th><th>公開期間</th><th>状態</th><th></th></tr>
+        <tr><td>フラッグX合成</td><td>フラッグ合成</td><td><span class="chip">オレンジ×1</span><span class="chip">ピンク×1</span></td><td>フラッグ：フラッグX（特殊カード）</td><td>常設</td><td>公開中</td><td><button class="btnA btnB">編集</button></td></tr>
+        <tr><td>プレミアチケット合成</td><td>チケット合成</td><td><span class="chip">虹色チケット×2</span></td><td>チケット：プレミアチケット</td><td>常設</td><td>公開中</td><td><button class="btnA btnB">編集</button></td></tr>
+        <tr><td>ゴールドチケット合成</td><td>混合（チケット＋フラッグ）</td><td><span class="chip">虹色チケット×1</span><span class="chip">フラッグX×2</span></td><td>チケット：ゴールドチケット</td><td>〜9/30</td><td>公開中</td><td><button class="btnA btnB">編集</button></td></tr>
+        <tr><td>虹色フラッグチケット生成</td><td>交換</td><td><span class="chip">オレンジ×3</span><span class="chip">ピンク×3</span><span class="chip">イエロー×3</span></td><td>チケット：虹色フラッグ</td><td>常設</td><td>公開中</td><td><button class="btnA btnB">編集</button></td></tr>
+        <tr><td>スペシャルBOX合成</td><td>パック合成</td><td><span class="chip">○○パック×10（同種）</span></td><td>カード：○○BOX（発送可・在庫5）</td><td>〜9/30</td><td>公開中</td><td><button class="btnA btnB">編集</button></td></tr>
+        <tr><td>高額カードA交換</td><td>交換</td><td><span class="chip">オレンジ×2</span><span class="chip">イエロー×4</span></td><td>カード：サイン入りA（在庫3）</td><td>〜8/31</td><td>公開中</td><td><button class="btnA btnB">編集</button></td></tr>
+      </table>
+      <div class="hint">素材は<b>カードID または 景品名</b>で指定。<b>掛け合わせは最大10種</b>×各個数。成果物タイプ：フラッグ／カード／BOX／チケット。成果物が発送可能な実物（カード/BOX）の場合は在庫連動必須。</div>
+      <div style="margin-top:10px;"><button class="btnA" onclick="alert('（モック）レシピ新規作成フォーム')">＋ レシピを追加</button></div>
+    </div>
+    <div class="panel">
+      <h4 style="margin-top:0;">レシピ作成フォーム（イメージ）</h4>
+      <table>
+        <tr><th>#</th><th>素材タイプ</th><th>素材の指定（ID or 名称）</th><th>個数</th><th></th></tr>
+        <tr><td>1</td><td><select><option>カード・景品</option><option>チケット</option></select></td><td><input class="w" style="max-width:100%;" value="C-10234（パレードフラッグ・オレンジ）"></td><td><input value="1"></td><td><button class="btnA btnB">削除</button></td></tr>
+        <tr><td>2</td><td><select><option>チケット</option><option>カード・景品</option></select></td><td><input class="w" style="max-width:100%;" value="虹色フラッグチケット"></td><td><input value="1"></td><td><button class="btnA btnB">削除</button></td></tr>
+        <tr><td>3</td><td><select><option>カード・景品</option><option>チケット</option></select></td><td><input class="w" style="max-width:100%;" placeholder="カードID・景品名・チケット名で検索…"></td><td><input value="1"></td><td><button class="btnA btnB">削除</button></td></tr>
+      </table>
+      <p style="margin-top:8px;"><button class="btnA btnB" onclick="alert('（モック）素材行を追加（最大10種まで・カード/チケット混在可）')">＋ 素材を追加（3/10）</button></p>
+      <p style="margin-top:6px;">成果物 <select><option>チケット</option><option>フラッグ</option><option>カード</option><option>BOX</option></select> <input class="w" style="max-width:220px;" value="プレミアチケット"> × <input value="1"> 個</p>
+      <p>公開期間 <input value="常設"> 　<button class="btnA" onclick="alert('（モック）バリデーション：素材1〜10種（カード/チケット混在可）・成果物必須・実物は在庫連動確認 → 保存')">レシピを保存</button></p>
+      <div class="hint">バリデーション：素材は1〜10種／<b>カード・景品とチケットの混在可</b>／同一素材の重複指定不可／素材チケットは「合成素材に使用可」設定のものだけ選択可能／成果物が実物（カード・BOX）の場合は在庫設定必須。11種以上はエラー。</div>
+    </div>
+    <div class="panel">
+      <h4 style="margin-top:0;">フラッグ共通設定</h4>
+      <p><span class="sw"><i></i> pt還元を許可する</span>　還元レート <input value="10"> pt/枚</p>
+      <p><span class="sw off"><i></i> 「全てコインに還元」の一括対象に含める</span></p>
+      <div class="hint">★仮置き：還元可・一括対象外。クライアント要望「集めきれなかった人はptにも還元したい」（2/19）に対応。デフォルト値は要確認。</div>
+    </div>
+    <div class="concern"><span class="cttl">⚠ 懸念・制約（交換まわりの実装ルール）</span>
+    ・発送可否の判定は各画面のif文ではなく<b>共通判定関数1箇所</b>に集約＋DB側でも発送申請テーブルで特殊カードを弾く制約（二重防御）。分岐の散在＝「フラッグが発送申請に出てくる」バグの温床<br>
+    ・交換実行は<b>行ロック＋冪等キー</b>。「全てコインに還元」の一括処理と合成の同時実行は同じロックを通す<br>
+    ・<b>基盤またぎの消費</b>：素材にカードとチケットが混在するレシピは、カード在庫（user_cards）とチケット在庫（user_tickets）を<b>単一トランザクションで消費</b>。片方だけ消費されて片方が失敗する部分成功を絶対に作らない（全ロールバック）<br>
+    ・素材チケットの消費順は<b>有効期限が近い順（FIFO）</b>・未使用かつ期限内のみ。消費と有効期限切れバッチの競合も同じロックを通す<br>
+    ・<b>パック合成の排他制御</b>：発送申請中・pt還元処理中のパックは素材にできない（同一レコードの二重利用防止）。逆も同じで、合成消費済みパックは発送申請不可<br>
+    ・<b>レシピ追加の運用ルール</b>：異種素材の組み合わせレシピは絵合わせ該当性の法務観点チェックを公開前フローに組み込む<br>
+    ・<b>交換ログ必須</b>：誰が・どのレシピで・どのレコードを消費し・何を得たか（問い合わせ・監査対応）<br>
+    ・レシピの成果物が物理カード/BOXの場合は在庫連動（在庫0で自動クローズ）</div>
+  </div>
+</div>
+
+<!-- ================= A-02 チケット管理 ================= -->
+<div id="a2" class="screen">
+  <div class="admin">
+    <div class="crumb">コンソール ＞ チケット ＞ チケット管理</div>
+    <h3>A-02 チケット管理 <span class="badge in">スコープ内</span></h3>
+    <div class="panel">
+      <h4 style="margin-top:0;">チケット一覧</h4>
+      <table>
+        <tr><th>チケット名</th><th>所持上限</th><th>有効期限</th><th>合成で生成</th><th>合成素材に使用</th><th>利用可能ガチャ</th><th></th></tr>
+        <tr><td>虹色フラッグチケット</td><td>1人1枚</td><td>付与から60日</td><td>可</td><td>可</td><td>限定「レインボーパレード」</td><td><button class="btnA btnB">編集</button></td></tr>
+        <tr><td>プレミアチケット</td><td>制限なし</td><td>付与から90日</td><td>可</td><td>不可</td><td>限定「プレミアパレード」</td><td><button class="btnA btnB">編集</button></td></tr>
+        <tr><td>セレクトガチャチケット</td><td>制限なし</td><td>2026.08.15</td><td>不可</td><td>不可</td><td>2択グループ「A/B」</td><td><button class="btnA btnB">編集</button></td></tr>
+        <tr><td>イベント参加チケット</td><td>制限なし</td><td>なし</td><td>不可</td><td>不可</td><td>対象イベントガチャ</td><td><button class="btnA btnB">編集</button></td></tr>
+      </table>
+      <div style="margin-top:10px;"><button class="btnA" onclick="alert('（モック）チケット新規作成フォーム')">＋ チケットを追加</button></div>
+    </div>
+    <div class="panel">
+      <h4 style="margin-top:0;">配布（セレクトガチャチケット）</h4>
+      <p>配布方法 <select><option>一括配布（全ユーザー）</option><option>個別配布</option><option>条件配布</option></select>　配布枚数 <input value="150"></p>
+      <p>配布総口数上限 <input value="200"> 枚 <span class="chip">対象2ガチャの合計口数 200</span></p>
+      <div class="hint">上限を超える配布はエラーにする。→「201枚以上配布すると引けない人が出る」問題（2/4クライアント指摘）への対応。</div>
+      <button class="btnA" onclick="alert('（モック）配布実行確認')">配布する</button>
+    </div>
+    <div class="concern"><span class="cttl">⚠ 懸念・制約（チケット基盤）</span>
+    ・既存チケット（1種）の新基盤へのデータ移行が必要。配布中・使用途中のチケットの扱いを移行設計に含める<br>
+    ・「1人1枚」チェックは配布時・消費時の両方で実施（同時配布の競合はDB一意制約で最終防御）<br>
+    ・<b>チケットが合成素材になったことで消費経路が2つに増加</b>（ガチャ参加消費／合成素材消費）。どちらも同じ消費エンジン・同じロックを通し、消費理由を台帳に記録する<br>
+    ・<b>「1人1枚」チケットを素材にした場合の再取得可否</b>（合成で消費→もう一度レシピで生成できるか）★要確認。無限ループ的なレシピ設計（Aを素材にAを生成等）はバリデーションで禁止<br>
+    ・有効期限切れチケットの失効処理（バッチ）と、失効時のユーザー通知有無★。失効バッチと合成消費の競合は同一ロックで排他<br>
+    ・フラッグ側の現行実装確認：既にカードとして存在する場合はフラッグ移行ゼロだが、<b>エンジニアへの現状ヒアリングが未実施</b>（引き継ぎ時の確認事項）</div>
+  </div>
+</div>
+
+<!-- ================= A-03 ステップアップ設定 ================= -->
+<div id="a3" class="screen">
+  <div class="admin">
+    <div class="crumb">コンソール ＞ ガチャ ＞ ステップチェーン設定（貫き型）</div>
+    <h3>A-03 ステップアップガチャ設定 <span class="badge in">スコープ内</span></h3>
+    <div class="panel">
+      <h4 style="margin-top:0;">チェーン構成（ステップアップ 第1弾）</h4>
+      <table>
+        <tr><th>順序</th><th>ガチャ（既存ガチャから選択）</th><th>価格/口</th><th>口数</th><th>SSR封入（提供割合：自動算出）</th><th>解放条件</th><th></th></tr>
+        <tr><td>STEP 1</td><td><input class="w" style="max-width:100%;" value="G-2041 ステップアップ第1弾 STEP1"></td><td>500</td><td>500</td><td>5枚（1.0%）</td><td>なし（誰でも）</td><td><button class="btnA btnB">ガチャ編集</button></td></tr>
+        <tr><td>STEP 2</td><td><input class="w" style="max-width:100%;" value="G-2042 ステップアップ第1弾 STEP2"></td><td>800</td><td>300</td><td>9枚（3.0%）</td><td>STEP1を引いた</td><td><button class="btnA btnB">ガチャ編集</button></td></tr>
+        <tr><td>STEP 3</td><td><input class="w" style="max-width:100%;" value="G-2043 ステップアップ第1弾 STEP3"></td><td>1200</td><td>200</td><td>12枚（6.0%）</td><td>STEP2を引いた</td><td><button class="btnA btnB">ガチャ編集</button></td></tr>
+        <tr><td>STEP 4</td><td><input class="w" style="max-width:100%;" value="G-2044 ステップアップ第1弾 STEP4"></td><td>2000</td><td>100</td><td>12枚（12.0%）</td><td>STEP3を引いた</td><td><button class="btnA btnB">ガチャ編集</button></td></tr>
+        <tr><td>STEP 5</td><td><input class="w" style="max-width:100%;" value="G-2045 ステップアップ第1弾 STEP5"></td><td>3000</td><td>50</td><td>13枚（26.0%）</td><td>STEP4を引いた</td><td><button class="btnA btnB">ガチャ編集</button></td></tr>
+      </table>
+      <p style="margin-top:8px;"><button class="btnA btnB" onclick="alert('（モック）STEP行を追加')">＋ STEPを追加</button></p>
+      <div class="hint">各STEPは独立した通常ガチャ（価格・口数・封入・演出は各ガチャの設定画面で管理）。チェーンは「順序＋解放条件」だけを束ねる。</div>
+    </div>
+    <div class="panel" style="border:2px solid #F5C518; background:#FFFBEB;">
+      <h4 style="margin-top:0; color:#92610D;">【重要】当選確率の考え方 — システムでは確率を指定しない</h4>
+      <ul style="padding-left:1.3em; font-size:12.5px; color:#6B5B2E; line-height:1.9; margin:0;">
+        <li>本システムに<b>「当選確率○%」を入力する項目は存在しません</b>。ステップアップの各STEPも通常ガチャと同じく、<b>封入設計（総口数と、各賞を何枚入れるか）</b>を登録するだけです。</li>
+        <li>確率は <b>封入枚数 ÷ 総口数</b> の結果として決まります。上表・ユーザー画面の提供割合（%）は封入構成からの<b>自動算出表示</b>であり、手入力できません。</li>
+        <li>「STEPが進むほど当たりやすい」は、<b>後段STEPの山にSSRを濃く封入する運用設計</b>で実現します（例：STEP5は50口に13枚封入＝26.0%）。</li>
+        <li>確率を変更したい場合は封入設計を変更してください。封入と表示が常に一致するため、<b>表示上の確率と実際の排出がズレる事故が構造的に起きません</b>。</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h4 style="margin-top:0;">チェーン共通ルール</h4>
+      <p>1STEPで押せる回数 <select><option>1回のみ（1連/10連/100連から選択）</option><option>制限なし（通常ガチャと同じ）</option></select></p>
+      <p>前STEPへの遡り <span class="sw off"><i></i> 許可する</span>（不可逆・固定）</p>
+      <p>ボタン表示ルール：<b>残口数を下回る連数ボタンは非表示</b>（残100口未満→100連非表示／残10口未満→10連非表示）。不足時の挙動分岐は発生しない</p>
+      <p>後段STEP完売時の案内 <input class="w" style="max-width:100%;" value="このSTEPは完売しました。次弾をお待ちください"> <span class="chip">救済ポリシー★</span></p>
+      <div class="hint">複数連（10連/100連）は原子的処理（途中失敗で全ロールバック）・冪等キーで二重課金防止・全抽選ログ保存。</div>
+    </div>
+    <div class="concern"><span class="cttl">⚠ 懸念・制約（ステップチェーン設定）</span>
+    ・進行状態は<b>ユーザー×チェーン単位</b>で保持（現在STEP／各STEPの押下実績）。押下と同時にロック確定（冪等キー）で連打・二重タブの二重進行を防止<br>
+    ・解放条件は「前STEPの<b>購入実績</b>」で判定。返金・キャンセルが発生した場合の進行状態の巻き戻しルール★要確認<br>
+    ・後段STEPの口数設計：STEP1の販売数から到達人数を見積もって口数を積む。<b>完売で進行不能になるユーザーが出る前提</b>の案内文・救済ポリシーを事前に決めておく<br>
+    ・<b>確率はシステム指定不可＝封入設計が運営側の運用責任</b>。各STEPの封入設計（還元率計算含む）のレビューを公開前フローに組み込む★<br>
+    ・「確定」「必ず」等の表現は各STEPの封入で裏付けられる範囲のみ使用（有利誤認回避）。提供割合は封入構成からの自動算出でSTEPごとに正確表示<br>
+    ・<b>非採用2件の先方合意が必要</b>：①口数無制限のS賞x%確率制御（方式非両立）②10連確定枠（複雑化回避のため仕様から削除）。どちらも2/4に先方が挙げた項目のため、理由説明とセットでスコープ外合意リストに載せる</div>
+  </div>
+</div>
+
+
+
+<!-- ================= A-04 ログインボーナス設定 ================= -->
+<div id="a4" class="screen">
+  <div class="admin">
+    <div class="crumb">コンソール ＞ リテンション ＞ ログインボーナス設定（新規メニュー）</div>
+    <h3>A-04 ログインボーナス設定 <span class="badge in">スコープ内（復帰）</span></h3>
+    <div class="panel">
+      <h4 style="margin-top:0;">キャンペーン一覧</h4>
+      <table>
+        <tr><th>キャンペーン名</th><th>型</th><th>期間</th><th>サイクル</th><th>状態</th><th></th></tr>
+        <tr><td>通常ログインボーナス</td><td>連続サイクル型</td><td>常設</td><td>7日（完走で1日目へ）</td><td>公開中</td><td><button class="btnA btnB">編集</button></td></tr>
+        <tr><td>お正月ログインボーナス</td><td>イベント型</td><td>2027.01.01〜01.03</td><td>3日（期間内連続）</td><td>予約</td><td><button class="btnA btnB">編集</button></td></tr>
+      </table>
+      <div style="margin-top:10px;"><button class="btnA" onclick="alert('（モック）キャンペーン新規作成')">＋ キャンペーンを追加</button></div>
+    </div>
+    <div class="panel">
+      <h4 style="margin-top:0;">日別報酬（通常ログインボーナス）</h4>
+      <table>
+        <tr><th>日</th><th>報酬タイプ</th><th>内容</th><th>数量</th></tr>
+        <tr><td>DAY1</td><td><select><option>ポイント</option><option>チケット</option></select></td><td><input class="w" style="max-width:100%;" value="—"></td><td><input value="10"></td></tr>
+        <tr><td>DAY3</td><td><select><option>ポイント</option><option>チケット</option></select></td><td><input class="w" style="max-width:100%;" value="—"></td><td><input value="30"></td></tr>
+        <tr><td>DAY7</td><td><select><option>チケット</option><option>ポイント</option></select></td><td><input class="w" style="max-width:100%;" value="イベント参加チケット"></td><td><input value="1"></td></tr>
+      </table>
+      <p style="margin-top:8px;">連続判定 <select><option>暦日・毎日0時リセット（JST）</option><option>直前ログインから24時間</option></select> <span class="chip">★要確認</span>　途切れた場合 <select><option>1日目に戻る</option><option>当日分のみスキップ</option></select></p>
+      <p>受取方式 <select><option>ログイン時モーダル→受取ボタン</option><option>自動付与</option></select>　未受取の扱い <select><option>当日限り失効</option><option>翌日まで繰越</option></select> <span class="chip">★要確認</span></p>
+    </div>
+    <div class="concern"><span class="cttl">⚠ 懸念・制約（ログボ設定）</span>
+    ・報酬付与は<b>既存の付与API経由</b>（pt＝pt加算処理／チケット＝チケット基盤の付与）。ログボ専用の付与ロジックを別に作らない<br>
+    ・同日二重受取はユーザー×キャンペーン×日付の<b>DB一意制約</b>で防止（連打・二重タブ対策）<br>
+    ・チケット報酬×「1人1枚」チケットの組合せ：所持上限到達時の受取挙動（エラー／pt代替）★要確認<br>
+    ・イベント型と通常型の<b>同時開催時は両方付与</b>（それぞれ独立カウント）。UI上の表示順・タブ分けのみ調整<br>
+    ・キャンペーン期間変更・削除時、受取済み報酬は巻き戻さない（台帳は残す）</div>
+  </div>
+</div>
+
+<div class="fnav" id="fnav">
+  <a href="#" onclick="return false;"><span class="ic">🎁</span>オリパガチャ</a>
+  <a href="#" onclick="return false;"><span class="ic">📦</span>獲得商品</a>
+  <a href="#" class="on" onclick="show('u1',document.querySelectorAll('.tabs button')[0]);return false;"><span class="ic">⚗️</span>合成ラボ</a>
+  <a href="#" onclick="return false;"><span class="ic">🕒</span>ガチャ履歴</a>
+  <a href="#" onclick="show('u6',document.querySelectorAll('.tabs button')[1]);return false;"><span class="ic">👤</span>マイページ</a>
+</div>
+
+<script>
+function show(id,btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  document.getElementById('fnav').style.display = id.charAt(0)==='u' ? '' : 'none';
+  document.querySelectorAll('#fnav a').forEach(a=>a.classList.remove('on'));
+  if(id==='u1') document.querySelectorAll('#fnav a')[2].classList.add('on');
+  if(id==='u2'||id==='u6') document.querySelectorAll('#fnav a')[4].classList.add('on');
+  window.scrollTo(0,0);
+}
+function pick(el){
+  document.querySelectorAll('.ch').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function u4go(stage){
+  document.getElementById('u4-stage1').style.display = stage===1 ? '' : 'none';
+  document.getElementById('u4-stage2').style.display = stage===2 ? '' : 'none';
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
