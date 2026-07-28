@@ -11,7 +11,7 @@ export function DepositInvoiceButton({ orderId, defaultRate }: { orderId: string
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string; href?: string } | null>(null);
 
   async function issue() {
-    if (!confirm(`保証金 ${Math.round(rate * 100)}% の請求書を発行します。よろしいですか？`)) return;
+    if (!confirm(`保証金 ${Math.round(rate * 100)}% の請求書を発行します。\n(未入金の保証金請求書が既にある場合は、この率で作り直します)\nよろしいですか？`)) return;
     setBusy(true);
     setMsg(null);
     try {

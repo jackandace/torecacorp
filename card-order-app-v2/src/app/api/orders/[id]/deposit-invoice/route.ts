@@ -5,6 +5,7 @@
 // 発行後は請求詳細の「最終精算する」で差額/返金を作成できる。
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdmin } from "@/lib/auth";
 import { calcDeposit, DEPOSIT_RATE, isValidDepositRate } from "@/lib/deposit";
 import { nextInvoiceNumber } from "@/lib/invoice-number";
@@ -37,21 +38,28 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       return NextResponse.json({ error: "保証金率が不正です (0〜100%)" }, { status: 400 });
     }
 
-    // 既存の保証金請求書があれば重複発行しない
+    // 既存の保証金請求書。未入金なら率変更のため作り直す(差し替え)、入金済みなら発行不可。
     const { data: refItems } = await supabase
       .from("invoice_items")
-      .select("invoice_id, invoices(invoice_kind, invoice_number, deleted_at)")
+      .select("invoice_id, invoices(id, invoice_kind, invoice_number, paid_amount, deleted_at)")
       .eq("order_id", order.id);
     const dup = (refItems ?? []).find((r) => {
       const inv = r.invoices as unknown as { invoice_kind?: string; deleted_at?: string | null } | null;
       return inv?.invoice_kind === "deposit" && !inv?.deleted_at;
     });
+    let replaced = false;
     if (dup) {
-      const inv = dup.invoices as unknown as { invoice_number?: string };
-      return NextResponse.json(
-        { error: `既に保証金請求書があります (${inv?.invoice_number ?? ""})`, invoiceId: dup.invoice_id, invoiceNumber: inv?.invoice_number ?? null },
-        { status: 409 },
-      );
+      const inv = dup.invoices as unknown as { id: string; invoice_number?: string; paid_amount?: number };
+      if ((inv.paid_amount ?? 0) > 0) {
+        return NextResponse.json(
+          { error: `既に入金済みの保証金請求書があります (${inv.invoice_number ?? ""})。率の変更はできません。`, invoiceId: inv.id, invoiceNumber: inv.invoice_number ?? null },
+          { status: 409 },
+        );
+      }
+      // 未入金 → 旧請求書を無効化して差し替え(率変更に対応)
+      await supabase.from("invoices").update({ deleted_at: new Date().toISOString() }).eq("id", inv.id);
+      await createAdminClient().storage.from("invoices").remove([`${inv.id}.pdf`]).catch(() => {});
+      replaced = true;
     }
 
     const qtyBox = order.requested_qty_box ?? order.requested_qty;
@@ -118,7 +126,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     });
 
     // クライアントで請求詳細へ遷移させる (生JSON画面に飛ばさない)
-    return NextResponse.json({ ok: true, invoiceId: inv.id, invoiceNumber, deposit, rate });
+    return NextResponse.json({ ok: true, invoiceId: inv.id, invoiceNumber, deposit, rate, replaced });
   } catch (e) {
     return NextResponse.json({ error: e instanceof Error ? e.message : "unknown" }, { status: 500 });
   }

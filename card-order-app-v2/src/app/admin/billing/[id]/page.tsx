@@ -93,6 +93,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
                 {(items ?? []).map((it) => {
                   const o = it.orders as {
                     confirmed_qty: number | null;
+                    requested_qty_box: number | null;
                     unit_price: number | null;
                     listed_rate: number;
                     products?: { title?: string; model_number?: string | null };
@@ -106,7 +107,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
                           <span className="text-xs text-slate-500 ml-1">({product.model_number})</span>
                         )}
                       </td>
-                      <td className="px-2 py-2 text-right">{o?.confirmed_qty ?? 0}</td>
+                      <td className="px-2 py-2 text-right">{o?.confirmed_qty ?? o?.requested_qty_box ?? 0}</td>
                       <td className="px-2 py-2 text-right">{formatYen(o?.unit_price ?? 0)}</td>
                       <td className="px-2 py-2 text-right">{formatRate(o?.listed_rate ?? 0)}</td>
                       <td className="px-2 py-2 text-right">{formatYen(it.line_total)}</td>
