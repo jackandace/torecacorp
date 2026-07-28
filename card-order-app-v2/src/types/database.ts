@@ -152,6 +152,8 @@ export type Product = {
   master_carton_box: number | null; // マスターカートンあたりのBOX数
   // 問屋紐付け (026)
   supplier_id: string | null;
+  // カット品の保証金率 (030・null=既定50%)
+  deposit_rate: number | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;

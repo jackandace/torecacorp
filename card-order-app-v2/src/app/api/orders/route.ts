@@ -143,6 +143,7 @@ export async function POST(request: NextRequest) {
             unitPrice: product.price ?? 0,
             qtyBox: m.qtyInBox,
             listedRate: getListedRate(product, shop),
+            rate: product.deposit_rate ?? undefined, // 商品ごとの保証金率(null=既定50%)
           }),
         });
       }

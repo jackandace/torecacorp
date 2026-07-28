@@ -19,20 +19,23 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     const { data: { user } } = await supabase.auth.getUser();
     if (!user || !isAdmin(user)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
-    // 保証金率 (既定50%。数量が多い発注は下げて返金リスクを抑えられる)
     const body = await request.json().catch(() => ({}));
-    const rate = typeof body?.rate === "number" ? body.rate : DEPOSIT_RATE;
-    if (!isValidDepositRate(rate)) {
-      return NextResponse.json({ error: "保証金率が不正です (0〜100%)" }, { status: 400 });
-    }
+    const bodyRate = typeof body?.rate === "number" ? body.rate : null;
 
     const { data: order } = await supabase
       .from("orders")
-      .select("*, shops(company_name), products(title)")
+      .select("*, shops(company_name), products(title, deposit_rate)")
       .eq("id", params.id)
       .is("deleted_at", null)
       .maybeSingle();
     if (!order) return NextResponse.json({ error: "発注が見つかりません" }, { status: 404 });
+
+    // 保証金率: リクエスト指定 > 商品ごとの設定 > 既定50%
+    const productRate = (order.products as unknown as { deposit_rate?: number | null } | null)?.deposit_rate ?? null;
+    const rate = bodyRate ?? productRate ?? DEPOSIT_RATE;
+    if (!isValidDepositRate(rate)) {
+      return NextResponse.json({ error: "保証金率が不正です (0〜100%)" }, { status: 400 });
+    }
 
     // 既存の保証金請求書があれば重複発行しない
     const { data: refItems } = await supabase

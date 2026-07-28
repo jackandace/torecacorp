@@ -15,6 +15,7 @@ export function ProductEditForm({ product, suppliers }: { product: Product; supp
   const [modelNumber, setModelNumber] = useState(product.model_number ?? "");
   const [category, setCategory] = useState<ProductCategory>(product.category);
   const [supplierId, setSupplierId] = useState(product.supplier_id ?? "");
+  const [depositRate, setDepositRate] = useState(product.deposit_rate != null ? String(product.deposit_rate) : "");
   const [actualRate, setActualRate] = useState(product.actual_rate);
   const [rateMarkup, setRateMarkup] = useState(product.rate_markup);
   const [price, setPrice] = useState(product.price ?? 0);
@@ -99,6 +100,7 @@ export function ProductEditForm({ product, suppliers }: { product: Product; supp
           masterCartonBox: masterCartonBox > 0 ? masterCartonBox : null,
           notes: notes || null,
           supplierId: supplierId || null,
+          depositRate: depositRate === "" ? null : Number(depositRate),
           lastUpdatedAt: product.updated_at,
         }),
       });
@@ -269,6 +271,15 @@ export function ProductEditForm({ product, suppliers }: { product: Product; supp
         <div>
           <label className="block text-xs text-slate-600 mb-1">カット種別 (任意ラベル)</label>
           <input className="input" value={cutType} onChange={(e) => setCutType(e.target.value)} />
+        </div>
+        <div>
+          <label className="block text-xs text-slate-600 mb-1">保証金率 (カット品の前受金)</label>
+          <select className="input" value={depositRate} onChange={(e) => setDepositRate(e.target.value)}>
+            <option value="">既定 (50%)</option>
+            <option value="0.5">50%</option>
+            <option value="0.4">40%</option>
+            <option value="0.3">30%</option>
+          </select>
         </div>
         <div>
           <label className="block text-xs text-slate-600 mb-1">受付状態</label>

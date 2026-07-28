@@ -13,7 +13,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
   const supabase = createClient();
   const { data: order } = await supabase
     .from("orders")
-    .select("*, shops(id, company_name, current_rank, rate_override), products(id, title, model_number, category, actual_rate, rate_markup, flow_type, planned_qty, ordered_qty, ct_to_box, min_order_box, price)")
+    .select("*, shops(id, company_name, current_rank, rate_override), products(id, title, model_number, category, actual_rate, rate_markup, flow_type, planned_qty, ordered_qty, ct_to_box, min_order_box, price, deposit_rate)")
     .eq("id", params.id)
     .is("deleted_at", null)
     .maybeSingle();
@@ -35,6 +35,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
       ct_to_box: number;
       min_order_box: number;
       price: number | null;
+      deposit_rate: number | null;
     };
   }).products;
 
@@ -68,7 +69,7 @@ export default async function OrderDetailPage({ params }: { params: { id: string
           <h1 className="text-2xl font-bold mt-1">発注詳細</h1>
         </div>
         <div className="flex items-center flex-wrap justify-end gap-2">
-          {product?.flow_type === "cut" && <DepositInvoiceButton orderId={order.id} />}
+          {product?.flow_type === "cut" && <DepositInvoiceButton orderId={order.id} defaultRate={product.deposit_rate ?? undefined} />}
           <span className="badge bg-slate-100 text-slate-700">ID: {order.id.slice(0, 8)}</span>
         </div>
       </div>

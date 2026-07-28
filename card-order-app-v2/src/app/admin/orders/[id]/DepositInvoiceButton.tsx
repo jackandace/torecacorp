@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 /** カット品の保証金(前受金)請求書を、率(50/40/30%)を選んで発行する。 */
-export function DepositInvoiceButton({ orderId }: { orderId: string }) {
+export function DepositInvoiceButton({ orderId, defaultRate }: { orderId: string; defaultRate?: number }) {
   const router = useRouter();
-  const [rate, setRate] = useState(0.5);
+  const [rate, setRate] = useState(defaultRate ?? 0.5);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string; href?: string } | null>(null);
 
