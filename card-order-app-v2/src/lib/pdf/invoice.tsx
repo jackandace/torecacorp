@@ -148,7 +148,11 @@ export function InvoicePdf({ invoice, shop, items }: InvoicePdfProps) {
                 {it.title}
                 {it.modelNumber ? `　${it.modelNumber}` : ""}
                 {it.rate ? `　掛け率${Math.round(it.rate * 100)}%` : ""}
-                {isDeposit ? `　保証金${depositPct ?? ""}分` : isFinal ? "　差額分" : ""}
+                {isDeposit
+                  ? `　保証金${depositPct ?? ""}分${it.baseAmount ? `（満額 ¥${it.baseAmount.toLocaleString()}）` : ""}`
+                  : isFinal
+                    ? "　差額分"
+                    : ""}
               </Text>
               <Text style={styles.cQty}>{it.qty} BOX</Text>
               <Text style={styles.cUnit}>¥{it.unitPrice.toLocaleString()}</Text>
