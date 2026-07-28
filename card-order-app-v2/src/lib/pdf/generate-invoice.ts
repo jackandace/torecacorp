@@ -46,7 +46,10 @@ export async function generateInvoicePdf(
       listed_rate: number | null;
       products?: { title?: string; model_number?: string | null };
     } | null;
-    const qty = o?.confirmed_qty ?? o?.requested_qty_box ?? 0;
+    // 保証金は希望数量に対する前受金なので requested を優先 (再生成時に確定数と混ざらないように)
+    const qty = isDeposit
+      ? o?.requested_qty_box ?? o?.confirmed_qty ?? 0
+      : o?.confirmed_qty ?? o?.requested_qty_box ?? 0;
     const rate = o?.listed_rate ?? 0;
     const unitPrice = o?.unit_price ?? 0;
     // 案内単価(税抜) = 定価 × 掛け率
@@ -60,6 +63,8 @@ export async function generateInvoicePdf(
       rate,
       unitPrice: unitListed,
       lineAmount,
+      // 保証金の元金(税抜満額)。「満額 × 率 = 保証金額」の内訳表示に使う
+      baseAmount: isDeposit ? Math.floor(unitPrice * qty * rate) : undefined,
     };
   });
 

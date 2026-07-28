@@ -14,6 +14,7 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import type { Invoice, Shop } from "@/types/database";
+import { inferDepositRate } from "@/lib/deposit";
 import { registerJpFont, JP_FONT_FAMILY } from "./fonts";
 import { ISSUER, BANK, INVOICE_FOOTER_NOTE, invoiceSubject, HAS_SEAL, SEAL_PATH } from "./issuer";
 
@@ -62,6 +63,7 @@ export interface InvoicePdfItem {
   rate?: number;        // 掛け率 (0.88 等)
   unitPrice: number;    // 案内単価 (税抜)
   lineAmount: number;   // 明細金額 (税抜)
+  baseAmount?: number;  // 保証金の元金 (税抜満額。deposit のみ)
 }
 
 export interface InvoicePdfProps {
@@ -84,6 +86,12 @@ export function InvoicePdf({ invoice, shop, items }: InvoicePdfProps) {
   const grossTotal = invoice.taxable_amount + invoice.tax_amount; // 確定金額(税込)
   const issued = jpDate(invoice.issued_at);
   const due = invoice.due_date ? jpDate(invoice.due_date).jp : "—";
+  // 保証金の適用率と元金(税抜満額)。deposit_rate 未保存の過去請求書は金額から推定
+  const depositBase = items.reduce((s, it) => s + (it.baseAmount ?? 0), 0);
+  const depositRate = isDeposit
+    ? invoice.deposit_rate ?? inferDepositRate(invoice.total_amount, depositBase)
+    : null;
+  const depositPct = depositRate != null ? `${Math.round(depositRate * 100)}%` : null;
 
   return (
     <Document>
@@ -140,7 +148,7 @@ export function InvoicePdf({ invoice, shop, items }: InvoicePdfProps) {
                 {it.title}
                 {it.modelNumber ? `　${it.modelNumber}` : ""}
                 {it.rate ? `　掛け率${Math.round(it.rate * 100)}%` : ""}
-                {isDeposit ? "　保証金50%分" : isFinal ? "　差額分" : ""}
+                {isDeposit ? `　保証金${depositPct ?? ""}分` : isFinal ? "　差額分" : ""}
               </Text>
               <Text style={styles.cQty}>{it.qty} BOX</Text>
               <Text style={styles.cUnit}>¥{it.unitPrice.toLocaleString()}</Text>
@@ -162,10 +170,24 @@ export function InvoicePdf({ invoice, shop, items }: InvoicePdfProps) {
         <View style={styles.totals}>
           <View style={styles.totalsBox}>
             {isDeposit ? (
-              <View style={styles.tRow}>
-                <Text style={styles.tLabel}>保証金（前受金）</Text>
-                <Text style={styles.tVal}>¥{invoice.total_amount.toLocaleString()}</Text>
-              </View>
+              <>
+                {depositBase > 0 && (
+                  <View style={styles.tRow}>
+                    <Text style={styles.tLabel}>対象金額（税抜）</Text>
+                    <Text style={styles.tVal}>¥{depositBase.toLocaleString()}</Text>
+                  </View>
+                )}
+                {depositPct && (
+                  <View style={styles.tRow}>
+                    <Text style={styles.tLabel}>保証金率</Text>
+                    <Text style={styles.tVal}>{depositPct}</Text>
+                  </View>
+                )}
+                <View style={styles.tRow}>
+                  <Text style={styles.tLabel}>保証金（前受金）</Text>
+                  <Text style={styles.tVal}>¥{invoice.total_amount.toLocaleString()}</Text>
+                </View>
+              </>
             ) : (
               <>
                 <View style={styles.tRow}>
@@ -234,7 +256,7 @@ export function InvoicePdf({ invoice, shop, items }: InvoicePdfProps) {
         {/* 計算方法の注記 (お客様向け) */}
         <Text style={styles.calcNote}>
           {isDeposit
-            ? "※ 本請求はカット対象商品の保証金（前受金）です。金額は「定価 × 希望数量 × 案内掛け率 × 50%」で算出しています。メーカーからの提供数量が確定次第、最終金額を精算し、差額のご請求（お預かりが上回った場合は返金）を行います。"
+            ? `※ 本請求はカット対象商品の保証金（前受金）です。金額は「定価 × 希望数量 × 案内掛け率 × ${depositPct ?? "保証金率"}」で算出しています。メーカーからの提供数量が確定次第、最終金額を精算し、差額のご請求（お預かりが上回った場合は返金）を行います。`
             : "※ ご請求額は「定価 × 数量 × 案内掛け率 − リベート（ランク割引）＋ 決済手数料（税抜2%）＋ 消費税10%」で算出しています。" +
               (isFinal ? "本請求は数量確定後の最終精算で、お預かりの保証金（前受金）を充当した差額分です。" : "")}
         </Text>

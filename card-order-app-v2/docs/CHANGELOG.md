@@ -1,0 +1,59 @@
+# 変更履歴 (重要な仕様変更のログ)
+
+運用に影響する仕様変更を日時付きで記録する。番号の大きいものが新しい。
+
+---
+
+## 2026-07-28 テストデータ(2026-07-15 以前の発注・請求)のアーカイブ
+
+**変更日時**: 2026-07-28（JST）
+
+2026-07-15 以前(JST)に作成された発注・請求データはテストデータのため、
+[supabase/maintenance/2026-07-28_archive_test_data.sql](../supabase/maintenance/2026-07-28_archive_test_data.sql)
+でソフトデリート(`deleted_at` セット)してアーカイブ。
+
+- 完全削除ではないため DB には残る。復元手順はスクリプト末尾に記載
+- 管理画面の一覧・KPI・レポート・売上予測・ランク集計・ショップのマイページは
+  すべて `deleted_at IS NULL` で絞られているため、集計から完全に除外される
+- 「確定」済みテスト発注が加算していた `products.ordered_qty`(発注済数)も同時に戻す
+
+---
+
+## 2026-07-28 保証金(前受金)率のデフォルトを 50% → 30% に変更
+
+**変更日時**: 2026-07-28（JST）
+**対象**: カット品の保証金(前受金)請求
+
+### 変更内容
+
+| 項目 | 変更前 | 変更後 |
+|---|---|---|
+| デフォルト保証金率 (`DEPOSIT_RATE`) | 50% | **30%** |
+| ショップ発注時の自動発行 | 常に 50% 固定 | 既定率 30% で発行 |
+| 管理画面の手動発行 | 既定 50%（30/40/50% 選択可） | 既定 **30%**（30/40/50% 選択可） |
+| 率の保存 | 保存されない | `invoices.deposit_rate` に保存 |
+| 請求詳細画面 | 保証金額のみ表示 | 満額(税抜)・保証金率・保証金額の内訳を表示。リベート率は「—（最終精算時に適用）」表記に |
+| 請求書 PDF | 「保証金50%分」固定文言 | 発行時の率を動的表示 + 対象金額(満額)を併記 |
+
+### あわせて必要な作業
+
+- **DB マイグレーション**: [supabase/migrations/030_deposit_rate.sql](../supabase/migrations/030_deposit_rate.sql) を Supabase SQL Editor で実行すること。
+  - `invoices.deposit_rate` カラム追加
+  - 過去の保証金請求書は「保証金額 ÷ 満額」から率を推定してバックフィル
+- 過去発行分の PDF は再生成（「PDFを再生成」ボタン）で新レイアウトに更新される。
+
+### 背景
+
+数量の多いカット発注で 50% 前受は負担が大きく返金も発生しやすいため、既定を 30% に引き下げ。
+50%/40% は発行時のプルダウンで引き続き選択可能。
+
+### 関連ファイル
+
+- `src/lib/deposit.ts`（既定率・推定ヘルパー）
+- `src/app/api/orders/route.ts`（発注時の自動発行）
+- `src/app/api/orders/[id]/deposit-invoice/route.ts`（手動発行）
+- `src/app/admin/orders/[id]/DepositInvoiceButton.tsx`（発行 UI）
+- `src/app/admin/billing/[id]/page.tsx`（請求詳細）
+- `src/lib/pdf/invoice.tsx` / `src/lib/pdf/generate-invoice.ts`（PDF）
+- ショップ向け文言: 発注フォーム / 発注詳細 / マイページ
+- マニュアル: `docs/MANUAL_ADMIN.md` / `src/manuals/admin.ts`

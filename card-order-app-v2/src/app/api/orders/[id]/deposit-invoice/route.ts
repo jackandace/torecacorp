@@ -1,4 +1,4 @@
-// 保証金(前受金・50%)請求書を手動発行する API (admin)
+// 保証金(前受金・既定30%)請求書を手動発行する API (admin)
 //
 // メーカー提供カット品を管理画面で手入力した場合など、ショップ発注経由の
 // 自動発行が走らないケース用。発注1件に対し保証金請求書を1通作成する。
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       .maybeSingle();
     if (!order) return NextResponse.json({ error: "発注が見つかりません" }, { status: 404 });
 
-    // 保証金率: リクエスト指定 > 商品ごとの設定 > 既定50%
+    // 保証金率: リクエスト指定 > 商品ごとの設定 > 既定30%
     const productRate = (order.products as unknown as { deposit_rate?: number | null } | null)?.deposit_rate ?? null;
     const rate = bodyRate ?? productRate ?? DEPOSIT_RATE;
     if (!isValidDepositRate(rate)) {
@@ -88,6 +88,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         invoice_number: invoiceNumber,
         rank_at_issue: shop?.current_rank ?? "standard",
         invoice_kind: "deposit",
+        deposit_rate: rate,
         subtotal: deposit,
         rebate_rate: 0,
         rebate_amount: 0,

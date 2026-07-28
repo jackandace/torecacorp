@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatJST } from "@/lib/dates";
 import { formatRate, formatYen } from "@/lib/rebate";
+import { inferDepositRate } from "@/lib/deposit";
 import { RANK_LABEL } from "@/constants/ranks";
 import { PaymentForm } from "./PaymentForm";
 import { InvoiceActions } from "./InvoiceActions";
@@ -29,6 +30,24 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
 
   const remaining = invoice.total_amount - invoice.paid_amount;
   const kind = invoice.invoice_kind;
+  const isDeposit = kind === "deposit";
+  // 保証金の元金(税抜満額)。希望BOX数ベースで再計算し「満額 × 率 = 保証金額」を表示する
+  const depositBase = isDeposit
+    ? (items ?? []).reduce((sum, it) => {
+        const o = it.orders as {
+          requested_qty_box: number | null;
+          requested_qty: number | null;
+          confirmed_qty: number | null;
+          unit_price: number | null;
+          listed_rate: number;
+        } | null;
+        const qty = o?.requested_qty_box ?? o?.requested_qty ?? o?.confirmed_qty ?? 0;
+        return sum + Math.floor((o?.unit_price ?? 0) * qty * (o?.listed_rate ?? 0));
+      }, 0)
+    : 0;
+  const depositRate = isDeposit
+    ? invoice.deposit_rate ?? inferDepositRate(invoice.total_amount, depositBase)
+    : null;
   const KIND_LABEL: Record<string, string> = {
     normal: "通常請求", deposit: "保証金(前受金)", final: "最終精算(差額)", refund: "返金",
   };
@@ -73,7 +92,13 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
               <dt className="text-slate-500">発行時ランク</dt>
               <dd>{RANK_LABEL[invoice.rank_at_issue]}</dd>
               <dt className="text-slate-500">適用リベート率</dt>
-              <dd>{formatRate(invoice.rebate_rate)}</dd>
+              <dd>{isDeposit ? "—（最終精算時に適用）" : formatRate(invoice.rebate_rate)}</dd>
+              {isDeposit && (
+                <>
+                  <dt className="text-slate-500">適用保証金率</dt>
+                  <dd>{depositRate != null ? formatRate(depositRate) : "—"}</dd>
+                </>
+              )}
             </dl>
           </section>
 
@@ -86,7 +111,8 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
                   <th className="text-right px-2 py-2">数量</th>
                   <th className="text-right px-2 py-2">単価</th>
                   <th className="text-right px-2 py-2">掛け率</th>
-                  <th className="text-right px-2 py-2">小計</th>
+                  {isDeposit && <th className="text-right px-2 py-2">満額(税抜)</th>}
+                  <th className="text-right px-2 py-2">{isDeposit ? "保証金額" : "小計"}</th>
                 </tr>
               </thead>
               <tbody>
@@ -94,11 +120,17 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
                   const o = it.orders as {
                     confirmed_qty: number | null;
                     requested_qty_box: number | null;
+                    requested_qty: number | null;
                     unit_price: number | null;
                     listed_rate: number;
                     products?: { title?: string; model_number?: string | null };
                   } | null;
                   const product = o?.products;
+                  // 保証金は希望数量に対する前受金なので requested を優先
+                  const qty = isDeposit
+                    ? o?.requested_qty_box ?? o?.requested_qty ?? o?.confirmed_qty ?? 0
+                    : o?.confirmed_qty ?? o?.requested_qty_box ?? 0;
+                  const lineBase = Math.floor((o?.unit_price ?? 0) * qty * (o?.listed_rate ?? 0));
                   return (
                     <tr key={it.id} className="border-t border-slate-100">
                       <td className="px-2 py-2">
@@ -107,9 +139,10 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
                           <span className="text-xs text-slate-500 ml-1">({product.model_number})</span>
                         )}
                       </td>
-                      <td className="px-2 py-2 text-right">{o?.confirmed_qty ?? o?.requested_qty_box ?? 0}</td>
+                      <td className="px-2 py-2 text-right">{qty}</td>
                       <td className="px-2 py-2 text-right">{formatYen(o?.unit_price ?? 0)}</td>
                       <td className="px-2 py-2 text-right">{formatRate(o?.listed_rate ?? 0)}</td>
+                      {isDeposit && <td className="px-2 py-2 text-right">{formatYen(lineBase)}</td>}
                       <td className="px-2 py-2 text-right">{formatYen(it.line_total)}</td>
                     </tr>
                   );
@@ -123,7 +156,15 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
           <section className="card p-5 space-y-2 text-sm">
             <h2 className="font-semibold mb-2">金額</h2>
             {kind === "deposit" ? (
-              <div className="flex justify-between font-bold"><span>保証金額 (前受金・税抜)</span><span>{formatYen(invoice.total_amount)}</span></div>
+              <>
+                {depositBase > 0 && (
+                  <div className="flex justify-between"><span>満額 (税抜)</span><span>{formatYen(depositBase)}</span></div>
+                )}
+                {depositRate != null && (
+                  <div className="flex justify-between"><span>保証金率</span><span>{formatRate(depositRate)}</span></div>
+                )}
+                <div className="flex justify-between font-bold border-t pt-2"><span>保証金額 (前受金・税抜)</span><span>{formatYen(invoice.total_amount)}</span></div>
+              </>
             ) : (
               <>
                 <div className="flex justify-between"><span>小計</span><span>{formatYen(invoice.subtotal)}</span></div>

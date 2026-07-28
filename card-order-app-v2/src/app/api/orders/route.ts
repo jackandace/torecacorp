@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getListedRate } from "@/lib/rebate";
 import { validateOrderQty } from "@/lib/orders";
-import { calcDeposit } from "@/lib/deposit";
+import { calcDeposit, DEPOSIT_RATE } from "@/lib/deposit";
 import { nextInvoiceNumber } from "@/lib/invoice-number";
 import { writeAudit } from "@/lib/audit";
 import { notifyShop, notifyOrderToStaff } from "@/lib/notify";
@@ -118,8 +118,8 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  // カット品の保証金(前受金): 発注ID + 保証金額を集める
-  const cutDeposits: { orderId: string; deposit: number }[] = [];
+  // カット品の保証金(前受金): 発注ID + 保証金額 + 適用率を集める
+  const cutDeposits: { orderId: string; deposit: number; rate: number }[] = [];
 
   // まとめて 1 回で insert
   if (insertRows.length > 0) {
@@ -134,17 +134,19 @@ export async function POST(request: NextRequest) {
       created.push(insertedRows[i]!.id);
       const m = rowMeta[i]!;
       createdItems.push({ series: m.series, title: m.title, qty: m.qty, unit: m.unit, qtyInBox: m.qtyInBox });
-      // カット品は保証金(希望BOX×50%)を算出
+      // カット品は保証金(希望BOX×既定率30%)を算出
       const product = productMap.get(m.productId);
       if (product?.flow_type === "cut") {
+        const rate = product.deposit_rate ?? DEPOSIT_RATE; // 商品ごとの保証金率(null=既定30%)
         cutDeposits.push({
           orderId: insertedRows[i]!.id,
           deposit: calcDeposit({
             unitPrice: product.price ?? 0,
             qtyBox: m.qtyInBox,
             listedRate: getListedRate(product, shop),
-            rate: product.deposit_rate ?? undefined, // 商品ごとの保証金率(null=既定50%)
+            rate,
           }),
+          rate,
         });
       }
       await writeAudit(supabase, {
@@ -183,6 +185,10 @@ export async function POST(request: NextRequest) {
     try {
       const adminSb = createAdminClient();
       const depositTotal = cutDeposits.reduce((s, d) => s + d.deposit, 0);
+      // 全明細の率が同一のときだけ invoices.deposit_rate に保存 (混在時は null → 表示側で明細から推定)
+      const uniformRate = cutDeposits.every((d) => d.rate === cutDeposits[0]!.rate)
+        ? cutDeposits[0]!.rate
+        : null;
       const invoiceNumber = await nextInvoiceNumber(adminSb, new Date());
       const { data: dep, error: depErr } = await adminSb
         .from("invoices")
@@ -191,6 +197,7 @@ export async function POST(request: NextRequest) {
           invoice_number: invoiceNumber,
           rank_at_issue: shop.current_rank,
           invoice_kind: "deposit",
+          deposit_rate: uniformRate,
           subtotal: depositTotal,
           rebate_rate: 0,
           rebate_amount: 0,

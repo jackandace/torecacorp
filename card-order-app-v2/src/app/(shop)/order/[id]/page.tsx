@@ -75,7 +75,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
 
           {isCut ? (
             <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
-              希望BOX数で受付（カット後に配分確定）。ご発注時に保証金50%（前受金）、配分確定後に差額を精算します。
+              希望BOX数で受付（カット後に配分確定）。ご発注時に保証金30%（前受金）、配分確定後に差額を精算します。
             </p>
           ) : (
             <p className={`text-sm ${soldOut ? "text-rose-600 font-semibold" : "text-slate-600"}`}>

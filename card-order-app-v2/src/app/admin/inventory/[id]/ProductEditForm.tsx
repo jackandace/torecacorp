@@ -275,10 +275,10 @@ export function ProductEditForm({ product, suppliers }: { product: Product; supp
         <div>
           <label className="block text-xs text-slate-600 mb-1">保証金率 (カット品の前受金)</label>
           <select className="input" value={depositRate} onChange={(e) => setDepositRate(e.target.value)}>
-            <option value="">既定 (50%)</option>
-            <option value="0.5">50%</option>
-            <option value="0.4">40%</option>
+            <option value="">既定 (30%)</option>
             <option value="0.3">30%</option>
+            <option value="0.4">40%</option>
+            <option value="0.5">50%</option>
           </select>
         </div>
         <div>

@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { DEPOSIT_RATE } from "@/lib/deposit";
 
-/** カット品の保証金(前受金)請求書を、率(50/40/30%)を選んで発行する。 */
+/** カット品の保証金(前受金)請求書を、率(既定30% / 30〜50%)を選んで発行する。商品ごとの設定率があればそれを既定にする。 */
 export function DepositInvoiceButton({ orderId, defaultRate }: { orderId: string; defaultRate?: number }) {
   const router = useRouter();
-  const [rate, setRate] = useState(defaultRate ?? 0.5);
+  const [rate, setRate] = useState<number>(defaultRate ?? DEPOSIT_RATE);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string; href?: string } | null>(null);
 
@@ -48,9 +49,9 @@ export function DepositInvoiceButton({ orderId, defaultRate }: { orderId: string
           className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
           aria-label="保証金率"
         >
-          <option value={0.5}>保証金 50%</option>
-          <option value={0.4}>保証金 40%</option>
           <option value={0.3}>保証金 30%</option>
+          <option value={0.4}>保証金 40%</option>
+          <option value={0.5}>保証金 50%</option>
         </select>
         <button type="button" className="btn-primary text-xs whitespace-nowrap" disabled={busy} onClick={issue}>
           {busy ? "発行中…" : "保証金請求書を発行"}

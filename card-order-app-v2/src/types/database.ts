@@ -152,7 +152,7 @@ export type Product = {
   master_carton_box: number | null; // マスターカートンあたりのBOX数
   // 問屋紐付け (026)
   supplier_id: string | null;
-  // カット品の保証金率 (030・null=既定50%)
+  // カット品の保証金率 (030・null=既定30%)
   deposit_rate: number | null;
   created_at: string;
   updated_at: string;
@@ -261,6 +261,7 @@ export type Invoice = {
   invoice_kind: InvoiceKind;
   parent_invoice_id: string | null; // final/refund → 元の deposit
   deposit_applied: number;          // 前受金充当額 (final/refund で使用)
+  deposit_rate: number | null;      // 保証金の適用率 (deposit のみ。過去分は推定バックフィル)
   issued_at: string;
   updated_at: string;
   deleted_at: string | null;
