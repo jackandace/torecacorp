@@ -80,7 +80,11 @@ export function ShopEditForm({ shop }: { shop: Shop }) {
       const res = await fetch(`/api/shops/${shop.id}/invite`, { method: "POST" });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "招待失敗");
-      setMessage("招待メールを送信しました");
+      setMessage(
+        json.method === "reset"
+          ? "登録済みユーザーのため、パスワード設定メールを送信しました"
+          : "招待メールを送信しました",
+      );
       router.refresh();
     } catch (e) {
       setMessage(`失敗: ${e instanceof Error ? e.message : "不明"}`);
