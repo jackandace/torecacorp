@@ -1,0 +1,1244 @@
+<meta charset="utf-8">
+<title>カード名点検ツール</title>
+<style>
+  :root{
+    --ink:#16181d;
+    --ink-2:#4a4f5a;
+    --ink-3:#868d9a;
+    --paper:#ffffff;
+    --bg:#eceae4;
+    --line:#d8d5cd;
+    --line-2:#eae7e0;
+    --accent:#1f5c4f;      /* 深緑：主操作 */
+    --warn:#b4560f;        /* 要修正 */
+    --warn-bg:#fdf1e6;
+    --miss:#8a2f3b;        /* 型番なし */
+    --miss-bg:#fbecee;
+    --ok:#2c6b4f;
+    --ok-bg:#e9f2ec;
+    --dup:#5b4bb0;
+    --dup-bg:#eeecfa;
+    --sel:#fff8dd;
+    --mono:ui-monospace,"SFMono-Regular",Menlo,Consolas,"Noto Sans Mono",monospace;
+    --jp:"Hiragino Kaku Gothic ProN","Hiragino Sans","Noto Sans JP","Yu Gothic UI",Meiryo,system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--ink);font-family:var(--jp);
+    font-size:13px;line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1440px;margin:0 auto;padding:20px 18px 80px}
+
+  /* ---- ヘッダ ---- */
+  header{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;
+    border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:16px}
+  h1{font-size:19px;letter-spacing:.06em;margin:0;font-weight:800}
+  header .sub{font-size:11px;color:var(--ink-3);letter-spacing:.08em;margin-bottom:2px}
+
+  /* ---- パネル ---- */
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:3px;margin-bottom:14px}
+  .panel > .head{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line-2);
+    font-size:11px;letter-spacing:.14em;font-weight:700;color:var(--ink-2)}
+  .panel > .body{padding:12px}
+  .muted{color:var(--ink-3)}
+  .tiny{font-size:11px}
+
+  textarea{width:100%;min-height:110px;font-family:var(--mono);font-size:11.5px;
+    border:1px solid var(--line);border-radius:2px;padding:8px;resize:vertical;background:#fcfcfa;color:var(--ink)}
+  textarea:focus,input:focus,select:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+  button{font-family:var(--jp);font-size:12px;padding:6px 12px;border-radius:2px;
+    border:1px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer}
+  button:hover{background:#f2f1ec}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+  button.primary:hover{background:#17473d}
+  button.ghost{border-color:var(--line);color:var(--ink-2)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+  /* ---- 集計バー（シグネチャ） ---- */
+  .ledger{display:flex;height:26px;border:1px solid var(--line);border-radius:2px;overflow:hidden;margin-bottom:8px}
+  .ledger span{display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;
+    color:#fff;letter-spacing:.04em;white-space:nowrap;overflow:hidden;transition:flex-grow .35s ease}
+  .lg-ok{background:var(--ok)} .lg-warn{background:var(--warn)} .lg-miss{background:var(--miss)} .lg-none{background:#c9c6be}
+
+  /* ---- フィルタ ---- */
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);background:#fbfaf7;color:var(--ink-2);padding:5px 10px;border-radius:2px;
+    cursor:pointer;font-size:12px}
+  .chip .n{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-left:6px}
+  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+  .chip[aria-pressed="true"] .n{color:#c6c9cf}
+
+  input[type=search],input[type=text],select{font-family:var(--jp);font-size:12px;padding:5px 8px;
+    border:1px solid var(--line);border-radius:2px;background:#fcfcfa;color:var(--ink)}
+  input[type=search]{min-width:220px}
+
+  /* ---- テーブル ---- */
+  .tablebox{overflow:auto;max-height:66vh;border-top:1px solid var(--line-2)}
+  table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}
+  thead th{position:sticky;top:0;z-index:2;background:#f6f5f1;border-bottom:1px solid var(--line);
+    text-align:left;padding:7px 8px;font-size:10.5px;letter-spacing:.1em;color:var(--ink-2);white-space:nowrap}
+  thead th.sortable{cursor:pointer;user-select:none}
+  thead th.sortable:hover{color:var(--ink)}
+  tbody td{border-bottom:1px solid var(--line-2);padding:5px 8px;vertical-align:top}
+  tbody tr:hover{background:#faf9f5}
+  tbody tr.selected{background:var(--sel)}
+  tbody tr.selected:hover{background:#fdf3cf}
+  td.id,td.pn{font-family:var(--mono);font-size:11px;color:var(--ink-2);white-space:nowrap}
+  td.name{min-width:240px;word-break:break-word}
+  td.num{font-family:var(--mono);text-align:right;color:var(--ink-2)}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:2px;white-space:nowrap}
+  .b-ok{background:var(--ok-bg);color:var(--ok)}
+  .b-warn{background:var(--warn-bg);color:var(--warn)}
+  .b-miss{background:var(--miss-bg);color:var(--miss)}
+  .b-dup{background:var(--dup-bg);color:var(--dup);margin-left:4px}
+  .b-sus{background:#f0eee9;color:var(--ink-2);margin-left:4px}
+  input.newname{width:100%;min-width:200px;font-family:var(--jp);font-size:12px;padding:3px 6px;
+    border:1px solid var(--line);border-radius:2px;background:#fff}
+  input.newname.changed{border-color:var(--accent);background:#f4faf7}
+  .thumb{width:38px;height:38px;object-fit:contain;background:#f4f3ef;border:1px solid var(--line-2)}
+
+  /* ---- ギャラリー表示 ---- */
+  .vtoggle{display:flex;border:1px solid var(--line);border-radius:2px;overflow:hidden}
+  .vtoggle button{border:none;border-radius:0;padding:5px 12px;font-size:12px;background:#fbfaf7;color:var(--ink-2)}
+  .vtoggle button[aria-pressed="true"]{background:var(--ink);color:#fff}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:12px}
+  .gcard{position:relative;border:1px solid var(--line);border-radius:3px;background:#fbfaf7;cursor:pointer;
+    display:flex;flex-direction:column;overflow:hidden;transition:border-color .1s}
+  .gcard:hover{border-color:var(--ink-3)}
+  .gcard.selected{border-color:var(--accent);background:var(--sel);box-shadow:0 0 0 1px var(--accent)}
+  .gcard .imgbox{aspect-ratio:63/88;background:#f0efe9;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .gcard .imgbox img{width:100%;height:100%;object-fit:contain}
+  .gcard .imgbox .noimg{font-size:11px;color:var(--ink-3)}
+  .gcard .meta{padding:6px 8px 8px;display:flex;flex-direction:column;gap:3px}
+  .gcard .gname{font-size:11.5px;font-weight:700;line-height:1.35;word-break:break-word}
+  .gcard .gpn{font-family:var(--mono);font-size:10.5px;color:var(--ink-2)}
+  .gcard .gid{font-family:var(--mono);font-size:10px;color:var(--ink-3)}
+  .gcard .gbadges{position:absolute;top:5px;left:5px;display:flex;flex-direction:column;gap:3px;align-items:flex-start}
+  .gcard .gbadges .badge{margin:0;box-shadow:0 0 0 1px rgba(255,255,255,.75)}
+  .gcard .gcheck{position:absolute;top:5px;right:5px;width:20px;height:20px;border-radius:2px;
+    border:1px solid var(--line);background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:800;color:transparent}
+  .gcard.selected .gcheck{background:var(--accent);border-color:var(--accent);color:#fff}
+  @media (max-width:520px){ .grid{grid-template-columns:repeat(auto-fill,minmax(118px,1fr))} }
+  .pager{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 12px;
+    border-top:1px solid var(--line-2);font-size:11.5px;color:var(--ink-2);flex-wrap:wrap}
+
+  /* ---- 出力 ---- */
+  .tabs{display:flex;gap:0;border-bottom:1px solid var(--line)}
+  .tab{padding:7px 14px;font-size:12px;border:1px solid transparent;border-bottom:none;cursor:pointer;color:var(--ink-3)}
+  .tab[aria-selected="true"]{background:var(--paper);border-color:var(--line);color:var(--ink);font-weight:700;
+    margin-bottom:-1px;border-bottom:1px solid var(--paper)}
+  pre.out{margin:0;padding:10px;background:#1b1e24;color:#e8e6df;font-family:var(--mono);font-size:11.5px;
+    max-height:340px;overflow:auto;border-radius:2px;white-space:pre;line-height:1.5}
+  .empty{padding:26px 12px;text-align:center;color:var(--ink-3);font-size:12.5px}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:var(--ink);color:#fff;
+    padding:8px 16px;border-radius:3px;font-size:12px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+  .toast.show{opacity:1}
+  details.help{margin-top:8px}
+  details.help summary{cursor:pointer;font-size:11.5px;color:var(--ink-2)}
+  details.help pre{background:#f6f5f1;border:1px solid var(--line-2);padding:8px;font-size:11px;
+    font-family:var(--mono);overflow:auto;white-space:pre;border-radius:2px}
+  @media (max-width:720px){ .tablebox{max-height:none} }
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+
+<div class="wrap">
+<header>
+  <h1>カード名点検ツール</h1>
+  <div class="sub">card テーブルの登録名を確認 → 修正対象を選択 → 反映用SQLを書き出し</div>
+</header>
+
+<!-- 1. 取り込み -->
+<section class="panel" id="importPanel">
+  <div class="head">1. データを取り込む</div>
+  <div class="body">
+    <div class="row" style="margin-bottom:8px">
+      <input type="file" id="file" accept=".csv,.tsv,.txt,.json">
+      <span class="tiny muted">Supabase の結果を CSV ダウンロード、または下に貼り付け（CSV / TSV / JSON）</span>
+    </div>
+    <textarea id="raw" placeholder="id,name,product_number,card_category_id,image_url&#10;..."></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="primary" id="load">読み込む</button>
+      <button class="ghost" id="demo">サンプルで試す</button>
+      <button class="ghost" id="clearAll">全部消す</button>
+      <span class="tiny muted" id="loadInfo"></span>
+    </div>
+    <details class="help">
+      <summary>取り込み用SQL（Supabase SQL Editor で実行 → CSV ダウンロード）</summary>
+<pre>-- 列名の確認（初回のみ）
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_schema='public' AND table_name='card'
+ORDER BY ordinal_position;
+
+-- 全カード抽出（排出実績つき・読み取りのみ）
+SELECT c.id,
+       c.name,
+       c.product_number,
+       c.card_category_id,
+       c.image_url,
+       COUNT(g.id)      AS gift_count,
+       MAX(g.granted_at) AS last_granted_at
+FROM card c
+LEFT JOIN gift g ON g.card_id = c.id
+GROUP BY c.id, c.name, c.product_number, c.card_category_id, c.image_url
+ORDER BY c.card_category_id NULLS FIRST, c.name;</pre>
+    </details>
+  </div>
+</section>
+
+<!-- 2. 一覧 -->
+<section class="panel" id="listPanel" hidden>
+  <div class="head">2. 登録名を点検する</div>
+  <div class="body" style="padding-bottom:0">
+    <div class="ledger" id="ledger"></div>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <div class="chips" id="chips"></div>
+      <div class="row">
+        <div class="vtoggle" role="group" aria-label="表示切替">
+          <button id="vTable" aria-pressed="true">表</button>
+          <button id="vGrid" aria-pressed="false">カード画像</button>
+        </div>
+        <input type="search" id="q" placeholder="カード名・型番・IDで絞り込み">
+        <label class="tiny muted" id="showImgWrap"><input type="checkbox" id="showImg"> 画像</label>
+      </div>
+    </div>
+    <div class="row" style="margin-bottom:8px">
+      <button id="selPage">表示中を全選択</button>
+      <button id="selFiltered">絞り込み結果を全選択</button>
+      <button class="ghost" id="selClear">選択を解除</button>
+      <span class="tiny muted" id="selInfo">0件選択中</span>
+      <span style="flex:1"></span>
+      <button class="ghost" id="fillNames">選択行に修正候補を自動入力（型番付与／＿→／変換）</button>
+    </div>
+  </div>
+  <div class="tablebox">
+    <table id="tbl">
+      <thead><tr id="thead"></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="grid" class="grid" hidden></div>
+  </div>
+  <div class="pager">
+    <div id="pageInfo"></div>
+    <div class="row">
+      <label class="tiny">表示件数
+        <select id="pageSize"><option>100</option><option selected>300</option><option>1000</option><option value="0">全件</option></select>
+      </label>
+      <button class="ghost" id="prev">前へ</button>
+      <button class="ghost" id="next">次へ</button>
+    </div>
+  </div>
+</section>
+
+<!-- 3. 出力 -->
+<section class="panel" id="outPanel" hidden>
+  <div class="head">3. 選択したカードを書き出す</div>
+  <div class="body">
+    <div class="tabs" id="tabs">
+      <div class="tab" role="tab" data-t="list" aria-selected="true">選択リスト（CSV）</div>
+      <div class="tab" role="tab" data-t="check" aria-selected="false">確認用 SELECT</div>
+      <div class="tab" role="tab" data-t="update" aria-selected="false">反映用 UPDATE</div>
+    </div>
+    <div style="border:1px solid var(--line);border-top:none;padding:10px">
+      <div class="row" style="margin-bottom:8px">
+        <button class="primary" id="copy">コピー</button>
+        <button class="ghost" id="dl">ファイルに保存</button>
+        <label class="tiny muted"><input type="checkbox" id="uuidCast" checked> ID を ::uuid でキャスト</label>
+        <span class="tiny muted" id="outInfo"></span>
+      </div>
+      <pre class="out" id="out"></pre>
+      <p class="tiny muted" style="margin:8px 0 0">
+        UPDATE は実行しません。中身を確認してから Supabase SQL Editor で流してください。
+        新カード名が空欄の行は UPDATE に含まれません。
+      </p>
+    </div>
+  </div>
+</section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+let rows = [];                 // {i,id,name,product_number,...,status,flags,newName}
+let selected = new Set();      // index
+let filter = "all", query = "", page = 0, sortKey = null, sortDir = 1, outTab = "list", view = "table";
+
+/* ---------- 取り込み ---------- */
+function detectDelim(line){
+  const t = (line.match(/\t/g)||[]).length, c = (line.match(/,/g)||[]).length;
+  return t > c ? "\t" : ",";
+}
+function parseDelimited(text, d){
+  const out=[]; let row=[], f="", i=0, q=false;
+  text = text.replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+  while(i < text.length){
+    const ch = text[i];
+    if(q){
+      if(ch === '"'){ if(text[i+1] === '"'){ f+='"'; i+=2; continue; } q=false; i++; continue; }
+      f += ch; i++; continue;
+    }
+    if(ch === '"'){ q=true; i++; continue; }
+    if(ch === d){ row.push(f); f=""; i++; continue; }
+    if(ch === "\n"){ row.push(f); f=""; out.push(row); row=[]; i++; continue; }
+    f += ch; i++;
+  }
+  row.push(f); out.push(row);
+  return out.filter(r => !(r.length===1 && r[0].trim()===""));
+}
+function toObjects(text){
+  const t = text.trim();
+  if(!t) return [];
+  if(t[0] === "[" || t[0] === "{"){
+    const j = JSON.parse(t);
+    return Array.isArray(j) ? j : (j.data || j.rows || [j]);
+  }
+  if(t[0] === "|"){ // Markdownテーブル（SQL Editorの結果コピー）
+    const lines = t.split("\n").map(l => l.trim()).filter(l => l.startsWith("|"));
+    const cells = l => l.replace(/^\|/,"").replace(/\|$/,"").split("|").map(c => c.trim());
+    const head = cells(lines[0]);
+    return lines.slice(1)
+      .filter(l => !/^\|[\s\-:|]+\|?$/.test(l))
+      .map(l => {
+        const cs = cells(l), o = {};
+        head.forEach((h,i) => { let v = cs[i] ?? ""; if(v === "null") v = ""; o[h] = v; });
+        return o;
+      });
+  }
+  const d = detectDelim(t.split("\n")[0]);
+  const table = parseDelimited(t, d);
+  const head = table.shift().map(h => h.trim().replace(/^"|"$/g,""));
+  return table.map(r => { const o={}; head.forEach((h,k)=>o[h]=r[k] ?? ""); return o; });
+}
+function pick(o, names){
+  for(const n of names){
+    const k = Object.keys(o).find(x => x.toLowerCase().trim() === n);
+    if(k !== undefined) return o[k];
+  }
+  return undefined;
+}
+
+/* ---------- 判定 ---------- */
+function norm(s){
+  if(s == null) return "";
+  let t = String(s).normalize("NFKC").toUpperCase();
+  t = t.replace(/[‐‑‒–—―−ー]/g, "-");
+  t = t.replace(/[\s\u3000]/g, "");
+  return t;
+}
+const SUSPICIOUS = /(テスト|test|ﾃｽﾄ|サンプル|sample|dummy|ダミー|仮|未設定|no ?name|untitled|新規|copy|コピー|あああ|aaa|xxx|zzz)/i;
+const DUMMY_PN = v => /^1(\/\d+)?$/.test(String(v).trim());   // "1" "1/1" 等はダミー型番
+function embedded(name){ // 名前中の（xxx_yyy）（xxx/yyy）等の型番らしき括弧内を抽出
+  const m = String(name).match(/[（(]([^（）()]*\d[^（）()]*)[）)]/);
+  return m ? m[1] : "";
+}
+
+function analyze(list){
+  const nameCount = new Map();
+  list.forEach(r => { const k = norm(r.name); if(k) nameCount.set(k, (nameCount.get(k)||0)+1); });
+
+  list.forEach(r => {
+    const n = String(r.name ?? "").trim();
+    const pnRaw = String(r.product_number ?? "").trim();
+    const dummy = pnRaw !== "" && DUMMY_PN(pnRaw);
+    const pn = (dummy || !pnRaw) ? "" : pnRaw;   // ダミーは「型番なし」と同等に扱う
+    const emb = embedded(n);
+    const flags = [];
+    let status, suggest = n;
+
+    if(pn && norm(n).includes(norm(pn)) && norm(n) !== norm(pn)){
+      status = "ok";                              // 名前に実型番が入っている
+    } else if(pn && norm(n) === norm(pn)){
+      status = "warn"; flags.push("型番のみ");     // 名前が型番だけ（カード名は人力で）
+    } else if(pn){
+      status = "warn";                            // 実型番があるのに名前に未反映
+      suggest = n + "（" + pn + "）";
+    } else if(emb){
+      status = "ok";                              // 名前側に番号情報あり（型番列はダミー/空）
+      if(/[＿_]/.test(emb)){
+        flags.push("＿区切り表記");
+        suggest = n.replace(emb, emb.replace(/[＿_]/g, "/"));
+      }
+    } else {
+      status = "miss";                            // 名前にも型番列にも型番情報なし
+    }
+    if(!n){ status = "miss"; flags.push("名称なし"); }
+    if(dummy) flags.push("ダミー型番");
+    if(n && nameCount.get(norm(n)) > 1) flags.push("名称重複");
+    if(n && n.length <= 2) flags.push("極端に短い");
+    if(SUSPICIOUS.test(n)) flags.push("要注意ワード");
+    r.status = status;
+    r.flags = flags;
+    r.suggest = suggest;
+    if(r.newName === undefined) r.newName = "";
+  });
+  return list;
+}
+
+function load(text){
+  let objs;
+  try { objs = toObjects(text); }
+  catch(e){ toast("読み込めませんでした：" + e.message); return; }
+  if(!objs.length){ toast("行が見つかりませんでした"); return; }
+  loadObjects(objs.map(o => ({
+    id: pick(o,["id","card_id"]) ?? "",
+    name: pick(o,["name","card_name","カード名"]) ?? "",
+    product_number: pick(o,["product_number","productnumber","型番","品番"]) ?? "",
+    card_category_id: pick(o,["card_category_id","category_id","カテゴリ"]) ?? "",
+    image_url: pick(o,["image_url","image","画像"]) ?? "",
+    gift_count: pick(o,["gift_count","count","排出数"]) ?? "",
+    last_granted_at: pick(o,["last_granted_at","granted_at"]) ?? ""
+  })), true);
+}
+function loadObjects(objs, scroll){
+  rows = objs.map((o,i) => ({ i, newName: "", ...o }));
+  analyze(rows);
+  selected.clear(); page = 0; filter = "all"; query = ""; $("#q").value = "";
+  $("#listPanel").hidden = false; $("#outPanel").hidden = false;
+  $("#loadInfo").textContent = rows.length.toLocaleString() + " 件を読み込みました";
+  renderAll();
+  if(scroll) $("#listPanel").scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+/* ---------- 絞り込み ---------- */
+function counts(){
+  const c = {all:rows.length, ok:0, warn:0, miss:0, dup:0, sus:0, under:0, dummy:0, sel:selected.size};
+  rows.forEach(r => {
+    c[r.status]++;
+    if(r.flags.includes("名称重複")) c.dup++;
+    if(r.flags.includes("＿区切り表記")) c.under++;
+    if(r.flags.includes("ダミー型番")) c.dummy++;
+    if(r.flags.includes("要注意ワード") || r.flags.includes("極端に短い") || r.flags.includes("型番のみ")) c.sus++;
+  });
+  c.fix = c.warn + c.miss;
+  return c;
+}
+function filtered(){
+  let list = rows.filter(r => {
+    if(filter === "fix" && r.status === "ok") return false;
+    if(filter === "warn" && r.status !== "warn") return false;
+    if(filter === "miss" && r.status !== "miss") return false;
+    if(filter === "ok" && r.status !== "ok") return false;
+    if(filter === "dup" && !r.flags.includes("名称重複")) return false;
+    if(filter === "under" && !r.flags.includes("＿区切り表記")) return false;
+    if(filter === "dummy" && !r.flags.includes("ダミー型番")) return false;
+    if(filter === "sus" && !(r.flags.includes("要注意ワード")||r.flags.includes("極端に短い")||r.flags.includes("型番のみ"))) return false;
+    if(filter === "sel" && !selected.has(r.i)) return false;
+    if(query){
+      const q = query.toLowerCase();
+      const hay = (r.name+" "+r.product_number+" "+r.id+" "+r.card_category_id).toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  if(sortKey){
+    const rank = {miss:0, warn:1, ok:2};
+    list = list.slice().sort((a,b) => {
+      let x, y;
+      if(sortKey === "status"){ x = rank[a.status]; y = rank[b.status]; }
+      else if(sortKey === "gift_count"){ x = Number(a.gift_count)||0; y = Number(b.gift_count)||0; }
+      else { x = String(a[sortKey] ?? ""); y = String(b[sortKey] ?? ""); }
+      if(x < y) return -1*sortDir;
+      if(x > y) return 1*sortDir;
+      return a.i - b.i;
+    });
+  }
+  return list;
+}
+
+/* ---------- 描画 ---------- */
+function renderAll(){ renderLedger(); renderChips(); renderTable(); renderOut(); }
+
+function renderLedger(){
+  const c = counts(), t = Math.max(c.all,1);
+  const seg = [["lg-ok",c.ok,"型番あり"],["lg-warn",c.warn,"型番未反映"],["lg-miss",c.miss,"型番なし"]];
+  $("#ledger").innerHTML = seg.filter(s => s[1] > 0).map(([cls,n,label]) =>
+    `<span class="${cls}" style="flex:${n}" title="${label} ${n}件">${n/t > .07 ? label+" "+n : ""}</span>`
+  ).join("") || '<span class="lg-none" style="flex:1"></span>';
+}
+
+function renderChips(){
+  const c = counts();
+  const defs = [["all","すべて",c.all],["fix","要修正",c.fix],["warn","型番未反映",c.warn],
+                ["miss","型番情報なし",c.miss],["under","＿区切り表記",c.under],["dummy","ダミー型番(1/1)",c.dummy],
+                ["dup","名称重複",c.dup],["sus","名前が怪しい",c.sus],
+                ["ok","型番あり",c.ok],["sel","選択中",c.sel]];
+  $("#chips").innerHTML = defs.map(([k,l,n]) =>
+    `<button class="chip" data-f="${k}" aria-pressed="${filter===k}">${l}<span class="n">${n}</span></button>`).join("");
+  $("#selInfo").textContent = selected.size.toLocaleString() + "件選択中";
+}
+
+const COLS = [
+  ["", ""], ["status","状態"], ["name","登録名"], ["product_number","型番"],
+  ["", "新カード名（修正後）"], ["card_category_id","カテゴリ"], ["gift_count","排出数"], ["id","ID"]
+];
+function renderTable(){
+  const list = filtered();
+  const size = Number($("#pageSize").value) || list.length || 1;
+  const pages = Math.max(1, Math.ceil(list.length / size));
+  if(page >= pages) page = pages - 1;
+  const viewRows = list.slice(page*size, page*size + size);
+
+  $("#tbl").hidden = view !== "table";
+  $("#grid").hidden = view !== "grid";
+  $("#showImgWrap").style.display = view === "table" ? "" : "none";
+
+  if(view === "table"){
+    $("#thead").innerHTML = COLS.map(([k,l]) =>
+      k ? `<th class="sortable" data-s="${k}">${l}${sortKey===k ? (sortDir>0?" ▲":" ▼") : ""}</th>` : `<th>${l}</th>`).join("");
+    const img = $("#showImg").checked;
+    $("#tbody").innerHTML = viewRows.length ? viewRows.map(r => {
+      const badge = r.status === "ok" ? '<span class="badge b-ok">型番あり</span>'
+        : r.status === "warn" ? '<span class="badge b-warn">型番未反映</span>'
+        : '<span class="badge b-miss">型番情報なし</span>';
+      const flags = r.flags.map(f => `<span class="badge ${f==="名称重複"?"b-dup":"b-sus"}">${f}</span>`).join("");
+      return `<tr class="${selected.has(r.i)?"selected":""}" data-i="${r.i}">
+        <td><input type="checkbox" class="cb" ${selected.has(r.i)?"checked":""}></td>
+        <td>${badge}${flags}</td>
+        <td class="name">${img && r.image_url ? `<img class="thumb" src="${esc(r.image_url)}" alt="" loading="lazy"> ` : ""}${esc(r.name) || '<span class="muted">（空）</span>'}</td>
+        <td class="pn">${esc(r.product_number) || '<span class="muted">—</span>'}</td>
+        <td><input class="newname ${r.newName?"changed":""}" value="${esc(r.newName)}" placeholder="${esc(r.suggest)}"></td>
+        <td class="num">${esc(r.card_category_id)}</td>
+        <td class="num">${esc(r.gift_count)}</td>
+        <td class="id">${esc(r.id)}</td>
+      </tr>`;
+    }).join("") : `<tr><td colspan="8"><div class="empty">条件に合うカードはありません</div></td></tr>`;
+  } else {
+    $("#grid").innerHTML = viewRows.length ? viewRows.map(r => {
+      const badge = r.status === "ok" ? '<span class="badge b-ok">型番あり</span>'
+        : r.status === "warn" ? '<span class="badge b-warn">型番未反映</span>'
+        : '<span class="badge b-miss">型番情報なし</span>';
+      const flags = r.flags.map(f => `<span class="badge ${f==="名称重複"?"b-dup":"b-sus"}">${f}</span>`).join("");
+      return `<div class="gcard ${selected.has(r.i)?"selected":""}" data-i="${r.i}" role="button" tabindex="0"
+        aria-pressed="${selected.has(r.i)}">
+        <div class="imgbox">${r.image_url
+          ? `<img src="${esc(r.image_url)}" alt="${esc(r.name)}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'noimg',textContent:'画像なし'}))">`
+          : '<span class="noimg">画像なし</span>'}</div>
+        <div class="gbadges">${badge}${flags}</div>
+        <div class="gcheck">✓</div>
+        <div class="meta">
+          <div class="gname">${esc(r.name) || '<span class="muted">（空）</span>'}</div>
+          <div class="gpn">${esc(r.product_number) || "—"}</div>
+          <div class="gid">id ${esc(r.id)}　排出 ${esc(r.gift_count)}</div>
+        </div>
+      </div>`;
+    }).join("") : `<div class="empty" style="grid-column:1/-1">条件に合うカードはありません</div>`;
+  }
+
+  $("#pageInfo").textContent = list.length
+    ? `${list.length.toLocaleString()}件中 ${(page*size+1).toLocaleString()}–${Math.min(list.length,(page+1)*size).toLocaleString()}件を表示（${page+1}/${pages}ページ）`
+    : "0件";
+  $("#prev").disabled = page === 0;
+  $("#next").disabled = page >= pages - 1;
+}
+
+/* ---------- 出力 ---------- */
+const sq = s => "'" + String(s ?? "").replace(/'/g, "''") + "'";
+function selRows(){ return rows.filter(r => selected.has(r.i)); }
+function idLit(v){
+  const cast = $("#uuidCast").checked;
+  const s = String(v);
+  if(/^\d+$/.test(s)) return s;
+  return sq(s) + (cast ? "::uuid" : "");
+}
+function buildOut(){
+  const sel = selRows();
+  if(!sel.length) return "カードを選択すると、ここに書き出し内容が出ます。";
+  if(outTab === "list"){
+    const head = "id,name,product_number,new_name,status,flags,card_category_id,gift_count";
+    const q = v => { const s = String(v ?? ""); return /[",\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s; };
+    return head + "\n" + sel.map(r => [r.id,r.name,r.product_number,r.newName,r.status,r.flags.join("/"),r.card_category_id,r.gift_count].map(q).join(",")).join("\n");
+  }
+  const ids = sel.map(r => "  " + idLit(r.id)).join(",\n");
+  if(outTab === "check"){
+    return "-- 修正対象の現状確認（読み取りのみ）\n"
+      + "SELECT id, name, product_number, card_category_id\n"
+      + "FROM card\nWHERE id IN (\n" + ids + "\n)\nORDER BY name;";
+  }
+  const tgt = sel.filter(r => r.newName.trim());
+  if(!tgt.length) return "-- 新カード名が未入力です。\n-- 「選択行に「カード名 型番」を自動入力」を押すか、表の入力欄に修正後の名前を入れてください。";
+  const vals = tgt.map(r => `  (${idLit(r.id)}, ${sq(r.newName.trim())})`).join(",\n");
+  const skipped = sel.length - tgt.length;
+  return `-- カード名の一括更新：${tgt.length}件`
+    + (skipped ? `（新カード名が空の ${skipped}件は除外）` : "")
+    + `\n-- 実行前に「確認用 SELECT」で現状を控えておくこと\nBEGIN;\n\nUPDATE card AS c\nSET name = v.new_name\nFROM (VALUES\n${vals}\n) AS v(id, new_name)\nWHERE c.id = v.id;\n\n-- 件数が ${tgt.length} であることを確認してから COMMIT;\n-- 想定と違えば ROLLBACK;\nCOMMIT;`;
+}
+function renderOut(){
+  $("#out").textContent = buildOut();
+  const sel = selRows();
+  $("#outInfo").textContent = sel.length ? sel.length + "件を書き出し中" : "";
+  document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", t.dataset.t === outTab));
+}
+
+/* ---------- イベント ---------- */
+$("#file").addEventListener("change", e => {
+  const f = e.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = () => { $("#raw").value = rd.result; load(rd.result); };
+  rd.readAsText(f, "utf-8");
+});
+$("#load").addEventListener("click", () => load($("#raw").value));
+$("#clearAll").addEventListener("click", () => {
+  rows = []; selected.clear(); $("#raw").value = ""; $("#file").value = "";
+  $("#listPanel").hidden = true; $("#outPanel").hidden = true; $("#loadInfo").textContent = "";
+});
+$("#demo").addEventListener("click", () => {
+  const s = `id,name,product_number,card_category_id,image_url,gift_count
+11111111-1111-1111-1111-111111111111,リザードンex SV8a-006,SV8a-006,2,,120
+22222222-2222-2222-2222-222222222222,ピカチュウ,SV1a-025,2,,3400
+33333333-3333-3333-3333-333333333333,テストカード,,1,,0
+44444444-4444-4444-4444-444444444444,SV8a-201,SV8a-201,2,,7
+55555555-5555-5555-5555-555555555555,ピカチュウ,SV4a-104,2,,880
+66666666-6666-6666-6666-666666666666,ミュウツーex SV3a-052,SV3a-052,2,,45`;
+  $("#raw").value = s; load(s);
+});
+$("#chips").addEventListener("click", e => {
+  const b = e.target.closest(".chip"); if(!b) return;
+  filter = b.dataset.f; page = 0; renderAll();
+});
+$("#q").addEventListener("input", e => { query = e.target.value.trim(); page = 0; renderTable(); });
+$("#showImg").addEventListener("change", renderTable);
+$("#pageSize").addEventListener("change", () => { page = 0; renderTable(); });
+$("#prev").addEventListener("click", () => { page = Math.max(0, page-1); renderTable(); });
+$("#next").addEventListener("click", () => { page++; renderTable(); });
+$("#thead").addEventListener("click", e => {
+  const th = e.target.closest("th.sortable"); if(!th) return;
+  const k = th.dataset.s;
+  if(sortKey === k) sortDir *= -1; else { sortKey = k; sortDir = 1; }
+  renderTable();
+});
+$("#vTable").addEventListener("click", () => { view = "table"; setViewBtns(); renderTable(); });
+$("#vGrid").addEventListener("click", () => { view = "grid"; setViewBtns(); renderTable(); });
+function setViewBtns(){
+  $("#vTable").setAttribute("aria-pressed", view === "table");
+  $("#vGrid").setAttribute("aria-pressed", view === "grid");
+}
+function toggleSel(i, el){
+  selected.has(i) ? selected.delete(i) : selected.add(i);
+  el.classList.toggle("selected", selected.has(i));
+  el.setAttribute("aria-pressed", selected.has(i));
+  renderChips(); renderOut();
+  if(filter === "sel") renderTable();
+}
+$("#grid").addEventListener("click", e => {
+  const g = e.target.closest(".gcard"); if(!g) return;
+  toggleSel(Number(g.dataset.i), g);
+});
+$("#grid").addEventListener("keydown", e => {
+  if(e.key !== "Enter" && e.key !== " ") return;
+  const g = e.target.closest(".gcard"); if(!g) return;
+  e.preventDefault();
+  toggleSel(Number(g.dataset.i), g);
+});
+$("#tbody").addEventListener("change", e => {
+  const tr = e.target.closest("tr"); if(!tr) return;
+  const i = Number(tr.dataset.i);
+  if(e.target.classList.contains("cb")){
+    e.target.checked ? selected.add(i) : selected.delete(i);
+    tr.classList.toggle("selected", e.target.checked);
+    renderChips(); renderOut();
+    if(filter === "sel") renderTable();
+  }
+});
+$("#tbody").addEventListener("input", e => {
+  if(!e.target.classList.contains("newname")) return;
+  const i = Number(e.target.closest("tr").dataset.i);
+  rows[i].newName = e.target.value;
+  e.target.classList.toggle("changed", !!e.target.value);
+  if(selected.has(i)) renderOut();
+});
+$("#selPage").addEventListener("click", () => {
+  document.querySelectorAll("#tbody tr[data-i], #grid .gcard[data-i]").forEach(el => selected.add(Number(el.dataset.i)));
+  renderAll();
+});
+$("#selFiltered").addEventListener("click", () => { filtered().forEach(r => selected.add(r.i)); renderAll(); });
+$("#selClear").addEventListener("click", () => { selected.clear(); renderAll(); });
+$("#fillNames").addEventListener("click", () => {
+  const sel = selRows();
+  if(!sel.length){ toast("先にカードを選択してください"); return; }
+  sel.forEach(r => { r.newName = r.suggest; });
+  renderTable(); renderOut();
+  toast(sel.length + "件に候補名を入れました");
+});
+$("#tabs").addEventListener("click", e => {
+  const t = e.target.closest(".tab"); if(!t) return;
+  outTab = t.dataset.t; renderOut();
+});
+$("#uuidCast").addEventListener("change", renderOut);
+$("#copy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText($("#out").textContent); toast("コピーしました"); }
+  catch { toast("コピーできませんでした。手動で選択してください"); }
+});
+$("#dl").addEventListener("click", () => {
+  const ext = outTab === "list" ? "csv" : "sql";
+  const name = `card_name_${outTab}_${new Date().toISOString().slice(0,10)}.${ext}`;
+  const blob = new Blob(["\uFEFF" + $("#out").textContent], {type:"text/plain;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  URL.revokeObjectURL(a.href);
+  toast(name + " を保存しました");
+});
+let tt;
+function toast(msg){
+  const el = $("#toast"); el.textContent = msg; el.classList.add("show");
+  clearTimeout(tt); tt = setTimeout(() => el.classList.remove("show"), 1800);
+}
+
+/* ========== 組み込みデータ：card全件（2026-08-03 SQL抽出） ==========
+   形式: [id, name, product_number, 画像トークン, gift_count]
+   画像トークン: 先頭x=xeipbxsiepjkqsebntuw / 先頭l=ltkwgbsbbwaduyfrczip(旧環境) */
+const IMG_X = "https://xeipbxsiepjkqsebntuw.supabase.co/storage/v1/object/public/images/cards/";
+const IMG_L = "https://ltkwgbsbbwaduyfrczip.supabase.co/storage/v1/object/public/images/cards/";
+const D = [
+[170,"16ｰ128","hb/004","x1754547765990.png",2],
+[171,"16pro256","hb/003","x1754547767439.png",1],
+[300,"25thanniversarycollectionBOX","1/1","x1768880714761.jpeg",68],
+[31,"25thピカチュウV【-】","001/015","x1752214391682.jpeg",111],
+[297,"25th 金箱","1/1","x1768706093912.jpeg",7],
+[318,"AirPodsPro3","1/1","x1769739514983.webp",32],
+[299,"DOB被り物","1/1","x1768706265492.jpeg",1],
+[457,"Favコラボ参加券（発送しない）","1/1","x1779171130539.jpeg",1000],
+[319,"iPadAir11(128gb)","1/1","x1769739525058.webp",34],
+[314,"LV015","1/1","x1769651886701.jpeg",1],
+[308,"LV016","1/1","x1769651832347.jpeg",2],
+[312,"LV022","1/1","x1769651865874.jpeg",2],
+[310,"LV024","1/1","x1769651849662.jpeg",2],
+[311,"LV032","1/1","x1769651857386.jpeg",2],
+[309,"LV033","1/1","x1769651839574.jpeg",2],
+[324,"LV13","1/1","x1769956191660.jpeg",3],
+[328,"LV16","1/1","x1769956228339.jpeg",2],
+[322,"LV19","1/1","x1769956171307.jpeg",1],
+[325,"LV21","1/1","x1769956200740.jpeg",2],
+[326,"LV22","1/1","x1769956211337.jpeg",2],
+[331,"LV24","1/1","x1769956263875.jpeg",1],
+[323,"LV30","1/1","x1769956179967.jpeg",2],
+[329,"LV31","1/1","x1769956238522.jpeg",1],
+[330,"LV32","1/1","x1769956252082.jpeg",3],
+[327,"LV33","1/1","x1769956219558.jpeg",1],
+[290,"LVAYA","1/1","x1767782459060.jpeg",1],
+[291,"LVAYAパンダ","1/1","x1767782471792.jpeg",4],
+[287,"LV桜","1/1","x1767782416350.jpeg",4],
+[292,"LV白","1/1","x1767782528613.jpeg",3],
+[293,"LV黒","1/1","x1767782542006.jpeg",3],
+[249,"MEGAプロモカードパック","1/1","x1763020626062.jpeg",5210],
+[267,"MカメックスEX【SR】","{093/087}","x1764033102005.jpeg",27],
+[261,"MゲンガーEX【P】","{079/XY-P}","x1763959581169.jpeg",11],
+[262,"MゲンガーEX【RR】","{034/088}","x1763959592010.jpeg",11],
+[263,"MゲンガーEX【UR】","{097/088}","x1763959601803.jpeg",4],
+[269,"Mドリームex","BOX/1","x1764217768794.jpeg",1269],
+[268,"MフシギバナEX【SR】","{089/087}","x1764033114304.jpeg",28],
+[404,"MミュウツーEX（063_059）","1/1","x1775736599115.jpeg",1],
+[445,"MラティオスEX（083_078）","1/1","x1776527221915.jpeg",2],
+[470,"MリザードンEX（002_021）","1/1","x1779953902260.jpeg",1],
+[471,"MリザードンEX（089_080)","1/1","x1779953906757.jpeg",1],
+[447,"MリザードンEX（091_087）","1/1","x1776527241411.jpeg",4],
+[264,"MリザードンEX(X)【-】","{011517-43/072}","x1763959610309.jpeg",26],
+[265,"MリザードンEX(X)【RR】","{055/080}","x1763959620444.jpeg",25],
+[266,"MリザードンEX(Y)【UR】","{088/080}","x1763959631389.jpeg",4],
+[462,"MレックウザEX（006_018）","1/1","x1779176382997.jpeg",1],
+[406,"MレックウザEX（095_081）","1/1","x1775736615867.jpeg",4],
+[235,"MレックウザEX(25th)【P】","024/025","x1761751395159.jpeg",130],
+[532,"Nのレシラム（109_100）","1/1","x1783749890236.jpeg",5599],
+[32,"Pikachu with Grey Felt Hat(ゴッホピカチュウ)【P】","085/SV-P","x1752214393516.jpeg",25],
+[172,"PS5Pro","hb/001","x1754547768477.png",1],
+[173,"PS5ディスクSlim","hb/002","x1754547769108.png",1],
+[482,"PSA12枚セット","1/1","x1782442312147.jpeg",1],
+[29,"pt交換専用カード","pt/001","x1764114154306.jpeg",37017448],
+[124,"pt交換専用カード1","","x1752935690548.jpeg",463348],
+[197,"Rabubu-Exciting-Macaron","rbb/001","x1755562612572.png",0],
+[138,"S","3088390","x1753110977575.jpeg",0],
+[307,"spirit","1/1","x1769651823836.jpeg",1],
+[250,"switch２","1/1","x1763103846171.avif",55],
+[26,"Switch2","134463494/0","x1763531614233.jpeg",164],
+[27,"Switch2 マリオカートワールドセット","134463495/0","x1763531637887.jpeg",167],
+[487,"アームド・ドラゴンLV7（SOD_JP015）","1/1","x1782633417306.jpeg",8],
+[394,"アイフォン17プロマックス256","1/1","x1774705710926.jpeg",34],
+[478,"アイリス（082_076）","1/1","x1781768911786.jpeg",2],
+[183,"アセロラ","056/049","l1700102248547.jpeg",0],
+[182,"アセロラ","395/SM-P","l1700102249065.jpeg",0],
+[137,"アセロラの予感","255/184","l1700102249574.jpeg",5],
+[469,"アビスアイ","1/1","x1779348225819.jpeg",702],
+[483,"アビスアイ12個セット","1/1","x1782442318431.jpeg",1],
+[557,"アルセウスVSTAR","262/172","x1785315867661.jpeg",6],
+[539,"アルセウス-ディアルガ-パルキアGX","100/095","l1700102250095.jpeg",0],
+[1,"アルセウス＆ディアルガ＆パルキアGX(SA)【SR】","100/095","x1752012775605.jpeg",12],
+[456,"イースターのピカチュウ（055_SM-P）","1/1","x1778316959683.jpeg",1],
+[66,"イーブイ【CHR】{210/184} [S8b]","{210/184} [S8b]","x1752286288836.jpeg",344],
+[418,"イーブイex（223_187）","1/1","x1776068737738.jpeg",159],
+[420,"イーブイex（224_187）","1/1","x1776068765940.jpeg",146],
+[366,"イーブイ（nagaba）","1/1","x1773001547055.jpeg",75],
+[11,"イーブイヒーローズ","box/5","x1752013868768.png",64],
+[548,"いちげきウーラオスVMAX SA","085/070","x1785304754134.jpeg",5],
+[219,"インフェルノX","box/111","x1759105998035.jpeg",1139],
+[424,"エーフィex（211_187）","1/1","x1776068815220.jpeg",66],
+[367,"エーフィ（nagaba）","1/1","x1773001553086.jpeg",73],
+[382,"エーフィVMAX","189/S-P","l1700102261073.jpeg",53],
+[83,"エーフィV(SA)【SR】","081/069","x1752798019156.jpeg",57],
+[540,"エーフィ-デオキシスGX","177/173","l1700102259702.jpeg",34],
+[203,"エリカのおもてなし","107/095","l1700102261508.jpeg",5],
+[174,"エリカのおもてなし","190/173","l1700102261990.jpeg",3],
+[373,"エリカの招待","206/165","l1700102263369.jpeg",0],
+[33,"エリカの招待【SAR】","206/165","x1752214394131.jpeg",50],
+[558,"エンテイV （213/172）","213/172","x1785315868312.jpeg",230],
+[413,"オーダイル（旧裏）","1/1","x1775738051678.jpeg",1],
+[247,"おきがえピカチュウ【P】","099/XY-P","x1762741098319.jpeg",27],
+[524,"オバラガール","1/1","x1783604136017.jpeg",4],
+[559,"オリジンディアルガVSTAR","260/172","x1785315868835.jpeg",57],
+[560,"オリジンパルキアVSTAR","259/172","x1785315869357.jpeg",59],
+[351,"お茶会ごっこピカチュウ（325_SM_P）","1/1","x1772999594453.jpeg",1],
+[34,"お誕生日 ピカチュウ(25th)【P】","007/025","x1752214395060.jpeg",276],
+[484,"カーテン（プリズマ）","1/1","x1782446914556.jpeg",15],
+[320,"カービィのエアライダー","1/1","x1769739531523.jpeg",56],
+[198,"カイ","077/067","l1700102271178.jpeg",75],
+[35,"カイ【SAR】","236/172","x1752214395699.jpeg",116],
+[549,"カイリューV SA","074/067","x1785304754466.jpeg",4],
+[356,"カオスソルジャー（UL304_054）","1/1","x1773000832842.jpeg",2],
+[530,"カオスソルジャー（ウルトラ）","1/1","x1783604206126.jpeg",3],
+[355,"カオスソルジャー開闢の使者（レリーフ）","1/1","x1773000795570.jpeg",2],
+[36,"カナザワのピカチュウ【P】","144/S-P","x1752214396285.jpeg",340],
+[544,"ガブリアス＆ギラティナGX(SA) (060_054)","1/1","x1784460557156.jpeg",6],
+[200,"カミツレのきらめ","113/100","l1700102279305.jpeg",0],
+[201,"カミツレのきらめき","246/172","l1700102280200.jpeg",164],
+[256,"カメール【AR】","1517-4371517-43/1517-4365","x1763364191439.jpeg",19],
+[37,"カメックス(25th)【P】S8A-P","003/025","x1752214396714.jpeg",245],
+[258,"カメックスex","202/165","l1700102281076.jpeg",39],
+[443,"カメックスEX（061_060）","1/1","x1776527211365.jpeg",2],
+[543,"カメックス＆ポッチャマGX(SA) (070_064)","1/1","x1784460550665.jpeg",6],
+[169,"ガラルの仲間たち","258/184","l1700102282035.jpeg",221],
+[550,"ガラルファイヤーV SA","078/070","x1785304754726.jpeg",6],
+[84,"かんこうきゃく【SR】","192/173","x1752798019805.jpeg",8],
+[348,"キャプテンピカチュウ","1/1","x1772102035066.jpeg",20],
+[157,"ギャラドスごっこピカチュウ","151/XY-P","l1700102287222.jpeg",3],
+[152,"ギラティナV","111/100","l1700102287635.jpeg",73],
+[38,"ギラティナVSTAR【UR】","261/172","x1752214397190.jpeg",55],
+[412,"キングドラ（旧裏）","1/1","x1775738047666.jpeg",1],
+[272,"クリスマス","1/1","x1766468573991.jpeg",10],
+[109,"クリムゾンヘイズ","BOX/069","x1752798699362.png",30],
+[423,"グレイシアex（206_187）","1/1","x1776068784220.jpeg",105],
+[364,"グレイシア（nagaba）","1/1","x1773001534151.jpeg",77],
+[141,"グレイシアVMAX","091/069","x1769733646426.jpeg",81],
+[85,"グレイシアV(SA)【SR】","077/069","x1752798020256.jpeg",28],
+[561,"グレイシアVSTAR","217/172","x1785315869777.jpeg",115],
+[39,"ゲッコウガex【SAR】","090/066","x1752214397724.jpeg",11],
+[542,"ゲッコウガ＆ゾロアークGX(SA) (059_055)","1/1","x1784460545080.jpeg",176],
+[214,"ゲンガー【CHR】","074/071","x1757409178738.jpeg",476],
+[340,"ゲンガーex(風船)","1/1","x1770771109829.jpeg",1],
+[347,"ゲンガーVMAX（002_019）","1/1","x1771430444704.jpeg",98],
+[154,"ゲンガーVMAX（SA）悪","020/019","x1753858932119.jpeg",32],
+[336,"ゲンガーマスターボールミラー","1/1","x1770770639551.jpeg",5],
+[507,"ゲンガー＆ミミッキュGX（102_095）","1/1","x1783492010233.jpeg",6],
+[339,"ゲンガー＆ミミッキュgxRR","1/1","x1770770658970.jpeg",16],
+[346,"ゲンガー＆ミミッキュGX（RR038_095）","1/1","x1771430440534.jpeg",34],
+[2,"ゲンガー＆ミミッキュGX(SA)【SR】","103/095","x1752012776093.jpeg",13],
+[444,"ゲンシカイオーガEX（073_070）","1/1","x1776527216497.jpeg",2],
+[402,"ゲンシカイオーガEX（093_081）","1/1","x1775736585759.jpeg",5],
+[403,"ゲンシグラードンEX（094_081）","1/1","x1775736591903.jpeg",5],
+[381,"コイキングar（080_073）","1/1","x1773790643176.jpeg",237],
+[517,"コイキングごっこピカチュウ","150/XY-P","l1700102296037.jpeg",1],
+[391,"コイキング＆ホエルオーGX（099_095）","1/1","x1774702327798.jpeg",9],
+[143,"こくばバドレックスVMAX","086/070","l1700102296877.jpeg",18],
+[551,"こくばバドレックスVMAX SA","086/070","x1785304755293.jpeg",3],
+[446,"サーナイトEX（019_032）","1/1","x1776527235199.jpeg",6],
+[3,"サーナイト＆ニンフィアGX(SA)【SR】","061/055","x1752012776645.jpeg",16],
+[12,"サイバージャッジ","box/6","x1752013869765.png",163],
+[414,"サカキのギャラドス（旧裏）","1/1","x1775738056594.jpeg",1],
+[385,"サッポロのピカチュウ（005_SM_P）","1/1","x1773907704178.jpeg",1],
+[401,"サトシゲッコウガ（218_XY_P）","1/1","x1775736579590.jpeg",5],
+[86,"サナ【SR】","077/067","x1752798020696.jpeg",14],
+[230,"サンダース【CHR】","193/184","x1761751314094.jpeg",153],
+[419,"サンダースex（209_187）","1/1","x1776068743506.jpeg",141],
+[368,"サンダース（nagaba）","1/1","x1773001559301.jpeg",78],
+[521,"サンダースVMAX","188/S-P","l1700102307930.jpeg",0],
+[119,"サンダースVMAX(SA仕様)【P】","{188/S-P} [S-P]","x1752908518172.jpeg",7],
+[87,"サンダースV(SA)【SR】","079/069","x1752798021254.jpeg",49],
+[393,"シブヤのピカチュウ（002_S_P）","1/1","x1774702338003.jpeg",1],
+[500,"シャイニースターV","1/1","x1783147264901.jpeg",20],
+[13,"シャイニートレジャー","box/9","x1752013870209.png",699],
+[231,"シャワーズ【CHR】","189/184","x1761751314787.jpeg",139],
+[421,"シャワーズex（205_187）","1/1","x1776068773288.jpeg",118],
+[361,"シャワーズ（nagaba）","1/1","x1773001518386.jpeg",77],
+[520,"シャワーズVMAX","187/S-P","l1700102310539.jpeg",0],
+[118,"シャワーズVMAX(SA仕様)【P】","{187/S-P} [S-P]","x1752908516098.jpeg",9],
+[88,"シャワーズV(SA)【SR】","075/069","x1752798021674.jpeg",21],
+[40,"シロナ【SR】","SM5M070/066","x1752214398334.jpeg",9],
+[89,"シロナ【SR】","153/150","x1752798021987.jpeg",4],
+[562,"スイクンV（215/172）","215/172","x1785315870269.jpeg",232],
+[167,"スイレン","118/114","l1700102315466.jpeg",1],
+[14,"スカーレット","box/1","x1752013870612.png",51],
+[286,"スカル団ごっこピカチュウ","013/SM-P","l1700102315862.jpeg",3],
+[41,"スズナ【SR】","113/098","x1752214398753.jpeg",306],
+[271,"スタートデッキ100","1/1","x1766105365077.webp",364],
+[15,"ステラミラクル","box/3","x1752013871285.png",252],
+[566,"ストームエメラルダ","1/1","x1785337055890.jpeg",426],
+[220,"スペシャルBOX『ポケモンセンターフクオカ』【未開封BOX】","box/001","x1759105998396.jpeg",38],
+[192,"ゼクロム（021/025）","021/025","x1755263264827.webp",198],
+[504,"ゼクロムex（169_086）","1/1","x1783156586879.jpeg",4],
+[501,"ゼクロムex（174_086）","1/1","x1783156535155.jpeg",2],
+[244,"ゼニガメ【AR】","170/165","x1762690175734.png",103],
+[184,"セレナ","081/068","l1700102320112.jpeg",0],
+[42,"セレナ【SR】","081/068","x1752214399232.jpeg",23],
+[546,"セレビィ＆フシギバナGX(SA) (097_095)","1/1","x1784460567231.jpeg",1175],
+[134,"ソルガレオ-ルナアーラGX","063/049","l1700102321512.jpeg",0],
+[4,"ソルガレオ＆ルナアーラGX(SA)【SR】","063/049","x1752012777145.jpeg",611],
+[16,"タッグボルト","box/8","x1752013871800.png",20],
+[43,"タロ【SAR】","131/102","x1752214399686.jpeg",31],
+[211,"チルタリス","074/068","l1700102324249.jpeg",0],
+[81,"チルタリス【CHR】{074/068} [S11a]","{074/068} [S11a]","x1752758584267.jpeg",1953],
+[378,"ツツジ","242/172","l1700102325353.jpeg",6],
+[212,"テールナー","069/068","l1700102326184.jpeg",1928],
+[67,"テラスタルフェス","136445968","x1752380154181.jpeg",875],
+[459,"トウホクスペシャルセット","1/1","x1779171890959.jpeg",18],
+[395,"トウホクのピカチュウ（260）","1/1","x1774857648772.jpeg",2],
+[384,"トウホクのピカチュウ（260_SV_P）","1/1","x1773907698511.jpeg",342],
+[541,"トゲピー＆ピィ＆ププリンGX(SA) (186_173)","1/1","x1784460539757.jpeg",289],
+[333,"ドラゴンクエスト7","1/1","x1770429219690.jpeg",51],
+[17,"ドリームリーグ","box/7","x1752013872194.png",20],
+[103,"トリプレットビート","BOX/016","x1752798661682.png",3],
+[538,"ナイトユニゾン（BOX）","1/1","x1784454914606.jpeg",5],
+[18,"ナイトワンダラー","box/4","x1752013872734.png",242],
+[375,"ナタネの活気","078/067","l1700102328909.jpeg",8],
+[156,"なにかのBOX①","nnk/002","x1754317697296.png",382],
+[158,"なにかのBOX⑩","nnk/011","x1754320541607.png",0],
+[450,"なにかのBOX（10000）GW","1/1","x1777714416075.jpeg",4],
+[155,"なにかのBOX（11000）","nnk/001","x1763957503400.jpeg",1610],
+[159,"なにかのBOX②","nnk/003","x1754320542578.png",0],
+[160,"なにかのBOX③","nnk/004","x1754320542998.png",0],
+[161,"なにかのBOX④","nnk/005","x1754320543583.png",0],
+[162,"なにかのBOX⑤","nnk/006","x1754320544095.png",0],
+[163,"なにかのBOX⑥","nnk/007","x1754320544613.png",0],
+[164,"なにかのBOX⑦","nnk/008","x1754320545018.png",0],
+[165,"なにかのBOX⑧","nnk/009","x1754320545385.png",0],
+[166,"なにかのBOX⑨","nnk/010","x1754320545780.png",0],
+[145,"なにかのPSA10（10000）","psa/002","x1764468007897.jpeg",34445],
+[144,"なにかのPSA10（18000）","psa/001","x1764467897181.jpeg",1593],
+[147,"なにかのPSA10④","psa/004","x1753438943744.png",41],
+[148,"なにかのPSA10⑤100000","psa/005","x1764725668450.jpeg",55],
+[149,"なにかのPSA10⑥","psa/006","x1753438944824.png",41],
+[150,"なにかのPSA10⑦","psa/007","x1753438945378.png",40],
+[146,"なにかのPSA10（8000）","psa/003","x1764468151958.jpeg",26054],
+[30,"なにかのPSA8000","psa/1","x1763957433362.jpeg",4074],
+[449,"なにかのPSA（8000）GW__1_1","1/1","x1777714368447.jpeg",5],
+[239,"ナンジャモ","091/071","l1700102331070.jpeg",71],
+[202,"ナンジャモ【SAR】","096/071","l1700102331535.jpeg",40],
+[44,"ナンジャモ【SR】","091/071","x1752214400276.jpeg",78],
+[45,"ナンジャモのハラバリーex【SAR】","125/100","x1752214401045.jpeg",15],
+[380,"ニャースar（192_SV_P）","1/1","x1773790638806.jpeg",60],
+[369,"ニンジャスピナーBOX","1/1","x1773323897124.jpeg",1176],
+[533,"ニンフィア（068_187）","1/1","x1783990753216.jpeg",271],
+[454,"ニンフィアEX","026/032","l1700102332435.jpeg",2],
+[455,"ニンフィアEX（025_032）","1/1","x1777904694545.jpeg",2],
+[425,"ニンフィアex（212_187）","1/1","x1776068836651.jpeg",136],
+[246,"ニンフィアex【SAR】（212/187）","212/187","x1762739120080.jpeg",42],
+[363,"ニンフィア（nagaba）","1/1","x1773001529286.jpeg",220],
+[140,"ニンフィアVMAX","093/069","x1782267489755.jpeg",70],
+[91,"ニンフィアV(SA)【SR】","083/069","x1752798023430.jpeg",263],
+[289,"ネオン","1/1","x1767782447089.jpeg",4],
+[19,"バイオレットex","box/12","x1752013873351.png",565],
+[223,"ハイクラスパック VSTARユニバース","BOX/013","x1760845839693.png",117],
+[180,"はくばバドレックスVMAX","085/070","l1700102336754.jpeg",2],
+[552,"はくばバドレックスVMAX SA","085/070","x1785304755663.jpeg",4],
+[553,"バシャーモVMAX SA","086/070","x1785304755893.jpeg",3],
+[193,"バトピカ2014","090/XY-P","l1700102343119.jpeg",1],
+[111,"バトルパートナー","box/21","x1752799173279.png",1404],
+[488,"ハネクリボーLV10（CRV_JP005）","1/1","x1782633431344.jpeg",8],
+[343,"バレンタインBOX","1/1","x1771159821708.jpeg",0],
+[342,"バレンタインPSA","1/1","x1771159791057.jpeg",0],
+[341,"バレンタイン袋","1/1","x1771159768157.jpeg",0],
+[554,"バンギラスV SA","077/070","x1785304756316.jpeg",5],
+[296,"パンダの親子","1/1","x1767782586354.jpeg",4],
+[516,"ピカチュウ","288/SM-P","l1700102346220.jpeg",0],
+[306,"ピカチュウ(001_SV-P）","1/1","x1769428178863.jpeg",707],
+[453,"ピカチュウ（008_032）","1/1","x1777752398406.jpeg",65],
+[52,"ピカチュウ（010/032）","010/032","x1752214404458.jpeg",40],
+[537,"ピカチュウ（073_071）","073/071","l1700102342695.jpeg",146],
+[317,"ピカチュウ(120/SV-P)","120/SV-P","x1769739503710.jpeg",321],
+[515,"ピカチュウ（279_XY_P）","279/XY-P","l1700102345805.jpeg",1],
+[92,"ピカチュウ【AR】","S12a205/172","x1752798023791.jpeg",39],
+[46,"ピカチュウ(Classicキラ)【-】","cll008/032","x1752214401545.jpeg",52],
+[194,"ピカチュウEX","094/087","l1700102348365.jpeg",2],
+[350,"ピカチュウex(234_193)","1/1","x1772103206235.jpeg",79],
+[53,"ピカチュウex【横浜P】","001/030","x1752214404976.jpeg",30],
+[50,"ピカチュウ【P】プレシャスコレクタープロモ","323/S-P","x1752214403372.jpeg",73],
+[51,"ピカチュウ【P】切手BOX","227/S-P","x1752214404035.jpeg",96],
+[477,"ピカチュウV（001_024)","1/1","x1781431770542.jpeg",2],
+[213,"ピカチュウV【CSR】","222/184","x1757393093129.jpeg",58],
+[54,"ピカチュウVMAX【CSR】","s8b223/184","x1752214405459.jpeg",78],
+[47,"ピカチュウ(YU NAGABA)【P】","208/S-P","x1752214402205.jpeg",315],
+[5,"ピカチュウ＆ゼクロムGX(SA)【SR】","101/095","x1752012777552.jpeg",67],
+[205,"ピカチュウ【セブンP】","001/S-P","l1700102339469.jpeg",13],
+[344,"ピカチュウ（ほっぺ199SMP）","1/1","x1771429404834.jpeg",7],
+[221,"ピカチュウ(マクドナルド)【P】","020/M-P","x1759105998892.jpeg",1795],
+[48,"ピカチュウ(マスボミラー)【C】","025/165","x1752214402540.jpeg",76],
+[49,"ピカチュウ(リミテッドコレクション:SR仕様)【P】","400/SM-P","x1752214402895.jpeg",7],
+[371,"ヒガナ","059/053","l1700102351167.jpeg",1],
+[229,"ひかるコイキング","010/025","l1700102352019.jpeg",0],
+[55,"ひかるコイキング(25th)【P】","S8a-P010/025","x1752214405975.jpeg",416],
+[510,"ひかるレックウザ（057_072）","1/1","x1783592775821.jpeg",3],
+[132,"ピッピ","381/S-P","l1700102354767.jpeg",24],
+[243,"ヒトカゲ【AR】","168/165","x1762690102742.png",105],
+[460,"ヒロシマスペシャルセット","1/1","x1779171900824.jpeg",18],
+[397,"ヒロシマのピカチュウ（261）","1/1","x1774857660455.jpeg",284],
+[525,"ピンクガール","1/1","x1783604147292.jpeg",4],
+[232,"ブースター【CHR】","188/184","x1761751315350.jpeg",151],
+[175,"ブースターEX","007/032","l1700102356710.jpeg",2],
+[389,"ブースターEX（006_032）","1/1","x1774308383359.jpeg",2],
+[417,"ブースターex（202_187）","1/1","x1776068732499.jpeg",129],
+[365,"ブースター（nagaba）","1/1","x1773001541241.jpeg",96],
+[176,"ブースターV","073/069","l1700102357165.jpeg",0],
+[522,"ブースターVMAX","186/S-P","l1700102357597.jpeg",0],
+[120,"ブースターVMAX(SA仕様)","186/S-P","x1752908519505.jpeg",9],
+[94,"ブースターV(SA)【SR】","073/069","x1752798025715.jpeg",22],
+[6,"ファイヤー＆サンダー＆フリーザーGX(SA)【SR】","060/054","x1752012777861.jpeg",31],
+[93,"ファイヤー＆サンダー＆フリーザーGX(SA)【SR】sm10b060-054","sm10b060/054","x1752798024125.jpeg",9],
+[121,"ブイズセット","","x1752908521039.jpeg",4],
+[376,"フウロ","195/190","l1700102359117.jpeg",0],
+[56,"フウロ【SR】","195/190","x1752214406555.jpeg",167],
+[396,"フクオカのピカチュウ（289）","1/1","x1774857653902.jpeg",1001],
+[257,"フシギソウ【AR】","1517-4367/1517-4365","x1763364259502.jpeg",19],
+[245,"フシギダネ【AR】","166/165","x1762690299487.png",106],
+[57,"フシギバナ(25th)【P】s8A-P","002/025","x1752214407052.jpeg",325],
+[259,"フシギバナex","200/165","l1700102360083.jpeg",38],
+[303,"フュージョンアーツ","1/1","x1769344008179.jpeg",36],
+[186,"ブラッキー","067/SV-P","l1700102361241.jpeg",0],
+[473,"ブラッキー（031_051）","1/1","x1780984544859.jpeg",2],
+[474,"ブラッキー（037_080）","1/1","x1780984554392.jpeg",2],
+[58,"ブラッキー☆(25th)【P】","012/025","x1752214407596.jpeg",281],
+[71,"ブラッキー☆(25th)【P】","S8a-P012/025","x1752566713089.jpeg",0],
+[475,"ブラッキーEX（042_078）","1/1","x1780984564608.jpeg",1],
+[95,"ブラッキーex【SAR】","SV8a217/187","x1752798026150.jpeg",0],
+[28,"ブラッキーex SAR [SV8a 217/187]","134463496/0","x1752037079483.jpeg",389],
+[72,"ブラッキーEX【SR】","082/078","x1752566714816.jpeg",9],
+[509,"ブラッキーGX（063_060）","1/1","x1783592741046.jpeg",3],
+[73,"ブラッキーGX【P】","125/SM-P","x1752566716073.jpeg",7],
+[74,"ブラッキーGX【SSR】","sm8b229/150","x1752566717395.jpeg",4],
+[76,"ブラッキーV【CSR】","S8b244/184","x1752566719956.jpeg",66],
+[78,"ブラッキーVMAX【CSR】","S8b245/184","x1752566723368.jpeg",40],
+[77,"ブラッキーVMAX(SA)【HR】","S6a095/069","x1752566721258.jpeg",76],
+[75,"ブラッキーV(SA)【SR】","S6a085/069","x1752566718976.jpeg",202],
+[80,"ブラッキーV【SR】","{084/069} [S6a]","x1752586538629.jpeg",58],
+[68,"ブラッキー(YU NAGABA)【P】","067/SV-P","x1752566707602.jpeg",248],
+[7,"ブラッキー＆ダークライGX(SA)【SR】","182/173","x1752012778478.jpeg",111],
+[70,"ブラッキー＆ダークライGX(SA)【SR】","sm12a182/173","x1752566711777.jpeg",1],
+[69,"ブラッキー【-】マスターボールミラー","SV8a092/187","x1752566710233.jpeg",169],
+[489,"ブラックフェザードラゴン（TSHD_JP040）","1/1","x1782633447633.jpeg",7],
+[112,"ブラックボルト","box/17","x1752799173861.png",30],
+[526,"ブラックマジシャン（LN-53）","1/1","x1783604159184.jpeg",3],
+[490,"ブラックローズドラゴン（CSOC_JP039）","1/1","x1782633459427.jpeg",7],
+[485,"ブルーアイズホワイトドラゴン（プリズマ）","1/1","x1782446939406.jpeg",11],
+[227,"ポケモンカード151","BOX/001","x1760845877226.png",1],
+[104,"ポケモンカード151","BOX/019 (1)","x1752798662329.png",365],
+[480,"ボスごっこピカチュウフレア団（196_SM-P）","1/1","x1781768947368.jpeg",3],
+[476,"ボスごっこピカチュウマグマ団（193_SM_P）","1/1","x1781430529372.jpeg",1],
+[59,"ボタン【SR】","100/078","x1752214408136.jpeg",295],
+[379,"ポッチャマ","052/049","l1700102372710.jpeg",3],
+[408,"ポリゴン2（旧裏）","1/1","x1775738026857.jpeg",1],
+[527,"ホルアクティ（JP001）","1/1","x1783604169478.jpeg",2],
+[493,"ホルスの黒炎竜LV6（SOD_JP007）","1/1","x1782633503515.jpeg",8],
+[528,"ホロガール","1/1","x1783604176646.jpeg",2],
+[110,"ホワイトフレア","box/15","x1752799172151.png",29],
+[461,"ポンチョを着たピカチュウ","230/SM-P","l1700102378418.jpeg",1],
+[479,"ポンチョを着たピカチュウ（037_SM_P）","1/1","x1781768936021.jpeg",2],
+[222,"ポンチョを着たピカチュウ【P】","203/XY-P","x1760016247766.jpeg",15],
+[168,"マオ","055/050","l1700102379707.jpeg",1],
+[335,"マギア","1/1","x1770594444473.jpeg",1],
+[492,"マジシャンオブブラックカオス（306_057）","1/1","x1782633488647.jpeg",7],
+[233,"マスクド・ピカチュウ【P】","247/XY-P","x1761751315952.jpeg",14],
+[130,"マリィ（068_060）","068/060","l1700102383210.jpeg",7],
+[536,"マリィ（140_S-P）","1/1","x1784312289874.jpeg",23],
+[96,"マリィ（198_190）","198/190","x1752798026657.jpeg",38],
+[535,"マリィのオーロンゲex（243_193）","1/1","x1784311979449.jpeg",51],
+[136,"マリィのプライド（419_414）","419/414","l1700102385294.jpeg",24],
+[534,"マリィのモルペコ（020_019）","1/1","x1784311972779.jpeg",56],
+[321,"マリオカートワールド","1/1","x1769739538225.webp",57],
+[513,"マリオピカチュウ","293/XY-P","l1700102386201.jpeg",1],
+[383,"ミミッキュ（198_SM_P）","1/1","x1773907692522.jpeg",2],
+[64,"ミミッキュ【AR】{341/190} [SV4a]","{341/190} [SV4a]","x1752286128135.jpeg",149],
+[377,"ミモザ","100/078","l1700102388961.jpeg",0],
+[188,"ミモザ","105/078","l1700102389689.jpeg",0],
+[97,"ミモザ【SAR】","105/078","x1752798027075.jpeg",9],
+[60,"ミモザ【SR】","100/078","x1752214408745.jpeg",153],
+[392,"ミュウ（017_036）","1/1","x1774702332800.jpeg",2],
+[405,"ミュウEX（024_020）","1/1","x1775736605814.jpeg",1],
+[65,"ミュウex(25th)【P】{014/025} [S8a-P]","{014/025} [S8a-P]","x1752286211986.jpeg",198],
+[237,"ミュウVMAX","119/100","x1762742051761.jpeg",35],
+[555,"ミュウV SA","106/100","x1785304756561.jpeg",21],
+[82,"ミュウV(SA)【SR】","{106/100} [S8]","x1752758584705.jpeg",83],
+[228,"ミュウツー","183/165","l1700102392879.jpeg",151],
+[481,"ミュウツー（014_032）","1/1","x1782390798044.jpeg",193],
+[563,"ミュウツーVSTAR","221/172","x1785315870816.jpeg",6],
+[8,"ミュウツー＆ミュウGX(SA)【SR】","098/094","x1752012778834.jpeg",9],
+[301,"ムニキスゼロBOX","1/1","x1769096997376.jpeg",5214],
+[195,"ムンクピカチュウ","288/SM-P","l1700102346220.jpeg",2],
+[133,"メイ","067/049","l1700102397740.jpeg",3],
+[345,"メガゲンガーex（240_193）","1/1","x1771430435773.jpeg",6],
+[338,"メガゲンガーexMA","1/1","x1770770653098.jpeg",42],
+[337,"メガゲンガーexSAR","1/1","x1770770646815.jpeg",29],
+[304,"メガシンフォニア","1/1","x1769344106499.jpeg",1012],
+[225,"メガブレイブ","box/001","x1760845840888.png",716],
+[426,"メガリザードンex（116_080MUR）","1/1","x1776146814584.jpeg",4],
+[273,"メガリザードンXex【110/080】","SAR/1","x1766471866030.jpeg",184],
+[409,"やさしいトゲチック（旧裏）","1/1","x1775738031718.jpeg",1],
+[545,"ヤドン＆コダックGX(SA) (096_094)","1/1","x1784460562212.jpeg",6],
+[185,"ユウリ","276/184","l1700102401183.jpeg",0],
+[61,"ユウリ【SR】","276/184","x1752214409620.jpeg",45],
+[547,"ヨコハマのピカチュウ (283_SM-P)","1/1","x1784869457010.jpeg",12],
+[564,"ライコウV","218/172","x1785315871323.jpeg",235],
+[9,"ラティアス＆ラティオスGX(SA)【SR】","105/095","x1752012779262.jpeg",31],
+[422,"リーフィアex（200_187）","1/1","x1776068779106.jpeg",101],
+[362,"リーフィア（nagaba）","1/1","x1773001524090.jpeg",72],
+[142,"リーフィアVMAX","089/069","l1700102407147.jpeg",169],
+[98,"リーフィアV(SA)【SR】","071/069","x1752798027880.jpeg",25],
+[565,"リーフィアVSTAR","210/172","x1785315872189.jpeg",115],
+[274,"リーリエ（がんば）","119/114","l1700102408275.jpeg",2],
+[260,"リーリエのアブリボン【AR】","151/1517-4300","x1763882831903.jpeg",190],
+[62,"リーリエのピッピex【SAR】","126/100","x1752214410042.jpeg",13],
+[131,"リーリエの全力","068/049","l1700102409404.jpeg",3],
+[236,"リーリエの決心","086/063","x1762044211361.jpeg",54],
+[218,"リーリエの決心【SAR】","091/063","x1758211203038.jpeg",62],
+[275,"リーリエ（帽子）","066/060","l1700102407858.jpeg",1],
+[255,"リザード【AR】","169/165","x1763364109055.jpeg",19],
+[354,"リザードン（003_032）","1/1","x1773000139129.jpeg",722],
+[99,"リザードン(25th)【P】","S8a-P001/025","x1752798028396.jpeg",372],
+[234,"リザードン【CHR】","187/184","x1761751316724.jpeg",1171],
+[207,"リザードンex","201/165","l1700102412760.jpeg",34],
+[208,"リザードンex","134/108","l1700102411842.jpeg",56],
+[390,"リザードンEX","090/087","l1700102410972.jpeg",1],
+[448,"リザードンEX（081_080）","1/1","x1777506315720.jpeg",2],
+[215,"リザードンex【SAR】","349/190","x1757409179289.jpeg",55],
+[151,"リザードンGX","209/150","l1700102413624.jpeg",8],
+[216,"リザードンGX【HR】","058/051","x1757409179699.jpeg",6],
+[217,"リザードンGX【SR】","052/051","x1757409180042.jpeg",7],
+[210,"リザードンV","103/100","l1700102413999.jpeg",19],
+[352,"リザードンV（211_172）","1/1","x1773000124999.jpeg",3025],
+[209,"リザードンVMAX","308/190","l1700102415076.jpeg",1183],
+[508,"リザードンVMAX（104_S_P）","1/1","x1783581359226.jpeg",1],
+[248,"リザードンV【SSR】","307/190","x1762845338225.jpeg",1564],
+[353,"リザードンVSTAR（212_172）","1/1","x1773000131953.jpeg",376],
+[472,"リザードン＆テールナーGX（068_064）","1/1","x1779953918597.jpeg",7],
+[416,"リザードン（旧裏）","1/1","x1775738067971.jpeg",1],
+[196,"ルイージピカチュウ【P】","295/XY-P","x1755562105239.jpeg",5],
+[153,"ルギアV","110/098","l1700102417033.jpeg",103],
+[129,"ルザミーネ","055/050","l1700102417689.jpeg",0],
+[128,"ルザミーネ","120/114","l1700102418139.jpeg",1],
+[100,"ルザミーネ【SR】","sm4055/050","x1752798028828.jpeg",4],
+[101,"ルチア【SR】","sm7104/096","x1752798029202.jpeg",9],
+[102,"ルチアのアピール【SAR】","091/064","x1752798029719.jpeg",7],
+[105,"レイジングサーフ","BOX/021 (1)","x1752798662997.png",31],
+[191,"レシラム","020/025","x1755263254944.webp",477],
+[506,"レシラムex（168_086）","1/1","x1783156677250.jpeg",125],
+[502,"レシラムex（174_086）","1/1","x1783156555587.jpeg",26],
+[531,"レシラム＆ゼクロムGX（064_049）","1/1","x1783749636323.jpeg",651],
+[10,"レシラム＆リザードンGX(SA)【SR】","097/095","x1752012779575.jpeg",20],
+[511,"レックウザ（101_096）","1/1","x1783592801817.jpeg",4],
+[567,"レックウザGX {109_096}","1/1","x1785337428450.jpeg",1],
+[463,"レックウザGX（240_150）","1/1","x1779176392866.jpeg",3],
+[238,"レックウザV","076/067","l1700102422468.jpeg",45],
+[464,"レックウザV（075_067）","1/1","x1779176401104.jpeg",1],
+[139,"レックウザVMAX","083/067","x1762741897489.jpeg",23],
+[512,"レックウザVMAX（252_184）","1/1","x1783592825067.jpeg",55],
+[465,"レックウザVMAX（284_184）","1/1","x1779176406436.jpeg",112],
+[514,"レッドのピカチュウ（270_SM_P）","1/1","x1783596092682.jpeg",4],
+[556,"れんげきウーラオスVMAX SA","084/070","x1785304756877.jpeg",3],
+[407,"ロケット団のおねーさん（旧裏）","1/1","x1775738022134.jpeg",1],
+[113,"ロケット団の栄光","box/19","x1752799175705.png",72],
+[370,"ロケット弾参上（006_025）","1/1","x1773418862191.jpeg",50],
+[226,"ロストアビス","BOX/010","x1760845841336.png",47],
+[20,"ワイルドフォース","box/11","x1752013873765.png",50],
+[415,"わるいエーフィ（旧裏）","1/1","x1775738061807.jpeg",1],
+[410,"わるいバンギラス（旧裏）","1/1","x1775738036413.jpeg",1],
+[411,"わるいポリゴン2（旧裏）","1/1","x1775738041825.jpeg",1],
+[494,"一周年福袋ゲージ（10000)","1/1","x1782786365371.jpeg",56],
+[496,"一周年福袋ゲージ（100000）","1/1","x1782786525312.jpeg",5],
+[499,"一周年福袋ゲージ（1000000）","1/1","x1782786619154.jpeg",1],
+[497,"一周年福袋ゲージ（200000）","1/1","x1782786564024.jpeg",4],
+[495,"一周年福袋ゲージ（50000）","1/1","x1782786417958.jpeg",15],
+[498,"一周年福袋ゲージ（500000）","1/1","x1782786592942.jpeg",2],
+[357,"万物創生龍（日版）","1/1","x1773000837601.jpeg",2],
+[294,"京都の舞妓さん","1/1","x1767782560584.jpeg",2],
+[302,"仰天のボルテッカー","1/1","x1769344002968.jpeg",23],
+[106,"古代の咆哮","BOX/023","x1752798663823.png",3],
+[63,"名探偵ピカチュウ【P】","098/SV-P","x1752214410748.jpeg",198],
+[358,"増殖するG（20thシク）","1/1","x1773000842810.jpeg",3],
+[22,"変幻の仮面","box/10","x1752013874806.png",49],
+[126,"帽子リーリエ　『SM1M』","066/060","l1700102407858.jpeg",3],
+[122,"拡張パック『クレイバースト』(SV2D)【未開封BOX】{-}","","x1752934053476.jpeg",32],
+[123,"拡張パック『スノーハザード』(SV2P)【未開封BOX】{-}","","x1752934765575.jpeg",147],
+[114,"拡張パックデラックス「ブラックボルト」","box/18","x1752799176532.png",148],
+[115,"拡張パックデラックス「ホワイトフレア」","box/16","x1752799176993.png",146],
+[241,"新ナンジャモ【SAR】","350/190","x1762654586013.jpeg",33],
+[108,"未来の一閃","BOX/022","x1752798664991.png",194],
+[386,"桜アフロのピカチュウ（211_SM_P）","1/1","x1773907712856.jpeg",3],
+[21,"楽園ドラゴーナ","box/2","x1752013874352.png",49],
+[387,"漫才ごっこピカチュウ（407_SM_P）","1/1","x1773907718256.jpeg",1],
+[466,"火消し姿のピカチュウ（209_SM_P）","1/1","x1779347653480.jpeg",1],
+[117,"熱風のアリーナ","box/22","x1752799178891.png",3],
+[305,"白熱のアルカナ","1/1","x1769344192757.jpeg",156],
+[288,"目眩を起こす背景","1/1","x1767782433308.jpeg",2],
+[359,"真紅眼の黒竜（20thシク）","1/1","x1773000847961.jpeg",2],
+[486,"破滅の女神ルイン（SOI_JP034）","1/1","x1782633403976.jpeg",8],
+[284,"福袋10000","10000/1","x1767023253187.png",3244],
+[280,"福袋100000","100000/1","x1767021863381.png",75],
+[277,"福袋1000000","1000000/1","x1767021810376.png",9],
+[452,"福袋（100000）GW","1/1","x1777714558078.jpeg",2],
+[427,"福袋_1（10000）","1","x1776516570925.jpeg",380],
+[436,"福袋_1（100000）","1","x1776516764587.jpeg",330],
+[437,"福袋_1（150000）","1","x1776516777382.jpeg",13],
+[428,"福袋_1（20000）","1","x1776516603462.jpeg",270],
+[438,"福袋_1（200000）","1","x1776516796152.jpeg",8],
+[439,"福袋_1（250000）","1","x1776516807582.jpeg",212],
+[429,"福袋_1（30000）","1","x1776516670034.jpeg",262],
+[440,"福袋_1（300000）","1","x1776516823880.jpeg",9],
+[430,"福袋_1（40000）","1","x1776516688206.jpeg",241],
+[441,"福袋_1（400000）","1","x1776516834681.jpeg",8],
+[431,"福袋_1（50000）","1","x1776516701639.jpeg",20235],
+[442,"福袋_1（500000）","1","x1776516846160.jpeg",210],
+[432,"福袋_1（60000）","1","x1776516714744.jpeg",31],
+[433,"福袋_1（70000）","1","x1776516725736.jpeg",23],
+[434,"福袋_1（80000）","1","x1776516738018.jpeg",37],
+[435,"福袋_1（90000）","1","x1776516751942.jpeg",32],
+[283,"福袋20000","20000/1","x1767023247529.png",74],
+[282,"福袋30000","30000/1","x1767023243115.png",118],
+[279,"福袋300000","300000/1","x1767021858211.png",13],
+[285,"福袋5000","5000/1","x1767023259458.png",9949],
+[281,"福袋50000","50000/1","x1767023237395.png",93],
+[278,"福袋500000","500000/1","x1767021852274.png",20],
+[451,"福袋（50000）GW","1/1","x1777714534830.jpeg",3],
+[398,"福袋（賭ケグルイ100000）","1/1","x1774971418268.jpeg",1],
+[399,"福袋（賭ケグルイ250000）","1/1","x1774971469939.jpeg",1],
+[400,"福袋（賭ケグルイ500000）","1/1","x1774971486133.jpeg",1],
+[315,"舞妓さん赤","1/1","x1769651903666.jpeg",1],
+[313,"舞妓さん青","1/1","x1769651879339.jpeg",1],
+[458,"蒼空ストリームBOX","1/1","x1779171658328.jpeg",9],
+[251,"虎袋10000","1/1","x1763882282275.jpeg",104441],
+[332,"虎袋100000","1/1","x1770368888235.jpeg",14],
+[252,"虎袋20000","1/2","x1763882343570.jpeg",72],
+[253,"虎袋30000","1/3","x1763882363248.jpeg",51],
+[254,"虎袋300000","1/30","x1763882623279.jpeg",13],
+[467,"袴姿のピカチュウ（208_SM_P）","1/1","x1779347659079.jpeg",1],
+[116,"超電ブレイカー","box/20","x1752799177467.png",3],
+[79,"趙王ブラッキーEX【SR】","082/078","x1752566724227.jpeg",0],
+[349,"遊戯王BOX","1/1","x1772102045421.webp",2678],
+[388,"遊戯王（ライバル）","1/1","x1773907723070.webp",1623],
+[295,"金に目がくらむ","1/1","x1767782574756.jpeg",4],
+[316,"銀ふすまサイン","1/1","x1769651912969.jpeg",1],
+[491,"降雷皇ハモン（SOI_JP002）","1/1","x1782633472773.jpeg",4],
+[529,"青眼の白龍（SM_51）","1/1","x1783604191996.jpeg",4],
+[360,"青眼の白龍（浮世絵）","1/1","x1773000852243.jpeg",101],
+[298,"飛行機曇とお花ちゃん","1/1","x1768706243143.jpeg",2],
+[334,"髪結ちゃん英語","1/1","x1770594432724.jpeg",1],
+[125,"黒歴史","3088390","x1752993628682.jpeg",516],
+[107,"黒炎の支配者","BOX/020 (1)","x1752798664279.png",55]
+];
+loadObjects(D.map(v => ({
+  id: v[0], name: v[1], product_number: v[2],
+  image_url: v[3] ? (v[3][0] === "x" ? IMG_X : IMG_L) + v[3].slice(1) : "",
+  card_category_id: "", gift_count: v[4], last_granted_at: ""
+})), false);
+$("#loadInfo").textContent = "組み込みデータ（2026-08-03抽出・" + rows.length + "件）を表示中。最新データを貼り直せば置き換わります";
+</script>
