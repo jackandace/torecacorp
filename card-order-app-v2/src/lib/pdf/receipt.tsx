@@ -57,7 +57,8 @@ export function ReceiptPdf({ invoice, shop, paidAt, receivedFor, issuer }: Recei
 
         <View style={styles.amountBox}>
           <Text style={styles.amount}>¥{invoice.total_amount.toLocaleString()} -</Text>
-          <Text>(税込)</Text>
+          {/* 保証金(前受金)は消費税を課さないため非課税表記 */}
+          <Text>{invoice.invoice_kind === "deposit" ? "(非課税)" : "(税込)"}</Text>
         </View>
 
         <Text style={styles.bodyText}>

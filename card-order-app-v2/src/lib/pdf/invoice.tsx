@@ -124,10 +124,10 @@ export function InvoicePdf({ invoice, shop, items }: InvoicePdfProps) {
           </View>
         </View>
 
-        {/* 合計金額 */}
+        {/* 合計金額 (保証金=前受金は消費税を課さないため非課税表記) */}
         <View style={styles.grandRow}>
           <Text style={styles.grandLabel}>
-            合計金額　<Text style={styles.grandValue}>¥{invoice.total_amount.toLocaleString()}</Text>　（税込）
+            合計金額　<Text style={styles.grandValue}>¥{invoice.total_amount.toLocaleString()}</Text>　{isDeposit ? "（非課税）" : "（税込）"}
           </Text>
           <Text>お支払期限：　{due}</Text>
         </View>
