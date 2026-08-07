@@ -2,13 +2,28 @@
 //
 // すべての呼び出し元で try/catch して使うこと前提だが、念のため内部でも
 // 失敗を握って notifications テーブルに失敗記録を残す。本処理を止めない。
+//
+// 注意: notifications / notification_templates の RLS は admin のみのため、
+// ショップ・問屋・公開コンテキストのセッションクライアントでは読み書きが
+// 42501 で弾かれる (テンプレ未取得でメール自体が飛ばない事故になる)。
+// 通知処理は呼び出し元の権限に依存させず、常に Service Role で実行する。
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { sendTemplateEmail } from "./email/send-template";
 import { sendEmail } from "./email/resend";
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/** Service Role クライアント。使えない環境 (テスト等) のみ渡されたクライアントにフォールバック */
+function elevate(fallback: SupabaseClient<Database>): SupabaseClient<Database> {
+  try {
+    return createAdminClient();
+  } catch {
+    return fallback;
+  }
 }
 
 /**
@@ -22,6 +37,7 @@ export async function notifyOrderToStaff(args: {
   items: { series: string | null; title: string; qty: number; unit: string; qtyInBox: number }[];
 }): Promise<void> {
   const { supabase, shopName, items } = args;
+  const db = elevate(supabase);
 
   const recipients = (process.env.ORDER_NOTIFY_EMAILS ?? "")
     .split(",")
@@ -73,7 +89,7 @@ export async function notifyOrderToStaff(args: {
       subject: `【発注リクエスト】${shopName} 様より ${items.length} 件`,
       html,
     });
-    await supabase.from("notifications").insert({
+    await db.from("notifications").insert({
       shop_id: null,
       template_code: "order_staff_notify",
       channel: "email",
@@ -84,7 +100,7 @@ export async function notifyOrderToStaff(args: {
     });
   } catch (e) {
     console.error("[notify] 発注スタッフ通知の送信失敗:", e instanceof Error ? e.message : e);
-    await supabase.from("notifications").insert({
+    await db.from("notifications").insert({
       shop_id: null,
       template_code: "order_staff_notify",
       channel: "email",
@@ -111,6 +127,7 @@ export async function notifyPaymentReportToStaff(args: {
   note: string | null;
 }): Promise<void> {
   const { supabase, shopName, invoiceId, invoiceNumber, kindLabel, totalAmount, remainingAmount, note } = args;
+  const db = elevate(supabase);
 
   const recipients = (process.env.ORDER_NOTIFY_EMAILS ?? "")
     .split(",")
@@ -149,7 +166,7 @@ export async function notifyPaymentReportToStaff(args: {
 
   try {
     await sendEmail({ to: recipients, subject, html });
-    await supabase.from("notifications").insert({
+    await db.from("notifications").insert({
       shop_id: null,
       template_code: "payment_report_staff_notify",
       channel: "email",
@@ -160,7 +177,7 @@ export async function notifyPaymentReportToStaff(args: {
     });
   } catch (e) {
     console.error("[notify] 振込報告スタッフ通知の送信失敗:", e instanceof Error ? e.message : e);
-    await supabase.from("notifications").insert({
+    await db.from("notifications").insert({
       shop_id: null,
       template_code: "payment_report_staff_notify",
       channel: "email",
@@ -179,6 +196,7 @@ export async function notifyShop(args: {
   vars?: Record<string, string | number>;
 }): Promise<void> {
   const { supabase, shopId, templateCode, vars } = args;
+  const db = elevate(supabase);
 
   // 開発環境などで RESEND_API_KEY 未設定ならコンソールログのみ。
   // notifications テーブルには書き込まない (ショップ側の通知履歴を汚さないため)。
@@ -187,8 +205,8 @@ export async function notifyShop(args: {
     return;
   }
 
-  // shop のメールアドレスを取得
-  const { data: shop } = await supabase
+  // shop のメールアドレスを取得 (問屋等の別コンテキストでも RLS に阻まれないよう Service Role で)
+  const { data: shop } = await db
     .from("shops")
     .select("email, status")
     .eq("id", shopId)
@@ -205,7 +223,7 @@ export async function notifyShop(args: {
 
   try {
     await sendTemplateEmail({
-      supabase,
+      supabase: db, // テンプレ読込 + notifications 記録も Service Role で行う
       templateCode,
       to: shop.email,
       shopId,

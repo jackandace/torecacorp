@@ -4,6 +4,28 @@
 
 ---
 
+## 2026-08-07 監査ログ・通知メールの RLS 権限バグを修正 (Service Role へ内部昇格)
+
+**変更日時**: 2026-08-07（JST）
+**きっかけ**: Supabase ログに `42501 new row violates row-level security policy` (audit_logs / notifications) を検知
+
+### 問題
+
+`audit_logs` / `notifications` / `notification_templates` の RLS は admin のみ許可だが、
+ショップ・問屋・公開コンテキストの API がセッション権限のまま書き込んでいた。
+
+- ショップ操作 (発注・振込報告・プロフィール変更等) の**監査ログが静かに欠落**
+- ショップ発注時の受領メール等、**テンプレート読込が RLS に阻まれメール自体が不達**の可能性
+  (スタッフ向け通知はテンプレ非依存のためメールは届いており、送信記録のみ欠落)
+
+### 修正
+
+`writeAudit` / `notifyShop` / `notifyOrderToStaff` / `notifyPaymentReportToStaff` の内部で
+常に Service Role クライアントを使うよう変更 (呼び出し元の権限に依存しない)。
+RLS ポリシー自体は変更なし (ショップに書き込み権限を開けるより安全)。
+
+---
+
 ## 2026-08-07 ショップの「振込完了報告」→「支払い確認中」表示を追加
 
 **変更日時**: 2026-08-07（JST）
