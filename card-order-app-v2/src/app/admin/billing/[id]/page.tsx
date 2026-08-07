@@ -5,7 +5,9 @@ import { formatJST } from "@/lib/dates";
 import { formatRate, formatYen } from "@/lib/rebate";
 import { inferDepositRate } from "@/lib/deposit";
 import { RANK_LABEL } from "@/constants/ranks";
+import { isAwaitingPaymentConfirm } from "@/lib/payment-report";
 import { PaymentForm } from "./PaymentForm";
+import { PaymentReportPanel } from "./PaymentReportPanel";
 import { InvoiceActions } from "./InvoiceActions";
 
 export const dynamic = "force-dynamic";
@@ -153,6 +155,13 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
         </div>
 
         <aside className="space-y-4">
+          {isAwaitingPaymentConfirm(invoice) && invoice.payment_reported_at && (
+            <PaymentReportPanel
+              invoiceId={invoice.id}
+              reportedAt={invoice.payment_reported_at}
+              note={invoice.payment_report_note}
+            />
+          )}
           <section className="card p-5 space-y-2 text-sm">
             <h2 className="font-semibold mb-2">金額</h2>
             {kind === "deposit" ? (

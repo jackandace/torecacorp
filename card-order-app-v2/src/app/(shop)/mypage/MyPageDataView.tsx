@@ -9,6 +9,16 @@ import { formatRate, formatYen, calcRebate } from "@/lib/rebate";
 import { OrderStatusBadge, ShippingStatusBadge, InvoiceStatusBadge } from "@/components/StatusBadge";
 import { Modal } from "@/components/Modal";
 import { RANK_LABEL } from "@/constants/ranks";
+import { canReportPayment, isAwaitingPaymentConfirm } from "@/lib/payment-report";
+
+/** 「支払い確認中」チップ (振込報告済み・消込待ちの請求書に表示) */
+function AwaitingConfirmChip() {
+  return (
+    <span className="inline-block text-[10px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded font-medium whitespace-nowrap">
+      支払い確認中
+    </span>
+  );
+}
 
 type OrderWithProduct = Order & {
   products?: { title?: string | null; model_number?: string | null; image_url?: string | null } | null;
@@ -179,7 +189,10 @@ export function MyPageDataView(props: Props) {
               <div className="min-w-0">
                 <div className="font-mono text-xs truncate">{inv.invoice_number}</div>
                 <div className="text-xs text-slate-500 mt-0.5">{formatJST(inv.issued_at)}</div>
-                <div className="mt-1"><InvoiceStatusBadge status={inv.status} /></div>
+                <div className="mt-1 flex items-center gap-1 flex-wrap">
+                  <InvoiceStatusBadge status={inv.status} />
+                  {isAwaitingPaymentConfirm(inv) && <AwaitingConfirmChip />}
+                </div>
               </div>
               <div className="text-right shrink-0">
                 <div className="text-sm font-medium whitespace-nowrap">{formatYen(inv.total_amount)}</div>
@@ -213,7 +226,12 @@ export function MyPageDataView(props: Props) {
                   <td className="px-3 py-2 text-xs whitespace-nowrap">{formatJST(inv.issued_at)}</td>
                   <td className="px-3 py-2 text-right whitespace-nowrap">{formatYen(inv.total_amount)}</td>
                   <td className="px-3 py-2 text-right whitespace-nowrap">{formatYen(inv.paid_amount)}</td>
-                  <td className="px-3 py-2"><InvoiceStatusBadge status={inv.status} /></td>
+                  <td className="px-3 py-2">
+                    <span className="inline-flex items-center gap-1 flex-wrap">
+                      <InvoiceStatusBadge status={inv.status} />
+                      {isAwaitingPaymentConfirm(inv) && <AwaitingConfirmChip />}
+                    </span>
+                  </td>
                   <td className="px-3 py-2 text-xs text-brand-600">詳細</td>
                 </tr>
               ))}
@@ -341,11 +359,42 @@ function OrderDetail({ order }: { order: OrderWithProduct }) {
 }
 
 function InvoiceDetail({ invoice, shopRank }: { invoice: Invoice; shopRank: RankCode }) {
+  const router = useRouter();
   const remaining = invoice.total_amount - invoice.paid_amount;
+  // 報告直後にモーダルを開いたまま状態を反映するためのローカルフラグ
+  const [reported, setReported] = useState(invoice.payment_reported_at != null);
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const awaiting = reported && invoice.status !== "入金済み";
+
+  const reportPayment = async () => {
+    if (!confirm("この請求書の振込が完了したことを報告します。よろしいですか？")) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch(`/api/invoices/${invoice.id}/payment-report`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(note.trim() ? { note: note.trim() } : {}),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json.error ?? "報告に失敗しました");
+      setReported(true);
+      setMsg("振込完了を報告しました。入金確認まで少々お待ちください。");
+      router.refresh();
+    } catch (e) {
+      setMsg(e instanceof Error ? e.message : "報告に失敗しました");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="space-y-4 text-sm">
       <div className="flex items-center gap-2 flex-wrap">
         <InvoiceStatusBadge status={invoice.status} />
+        {awaiting && <AwaitingConfirmChip />}
         <span className="text-xs text-slate-500">発行時ランク: {RANK_LABEL[invoice.rank_at_issue]}</span>
       </div>
       <dl className="grid grid-cols-3 gap-y-2 text-sm">
@@ -385,6 +434,32 @@ function InvoiceDetail({ invoice, shopRank }: { invoice: Invoice; shopRank: Rank
           )}
         </div>
       </div>
+
+      {/* 振込完了の報告 (未消込の支払対象請求書のみ) */}
+      {canReportPayment(invoice) && (
+        <div className="border-t pt-3 space-y-2">
+          {awaiting ? (
+            <p className="text-xs text-sky-800 bg-sky-50 rounded-md p-2.5">
+              振込完了の報告を受け付けました。弊社で入金を確認後「入金済み」に更新されます。
+            </p>
+          ) : (
+            <>
+              <input
+                className="input w-full text-xs"
+                placeholder="メモ (任意: 振込名義が異なる場合など)"
+                maxLength={300}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                disabled={busy}
+              />
+              <button type="button" className="btn-secondary w-full" disabled={busy} onClick={reportPayment}>
+                {busy ? "送信中…" : "振込完了を報告する"}
+              </button>
+            </>
+          )}
+          {msg && <p className="text-xs text-slate-600">{msg}</p>}
+        </div>
+      )}
 
       {/* download ルートが都度署名＆未生成なら自動生成するため常に表示・失効しない */}
       {invoice.invoice_kind === "refund" ? (

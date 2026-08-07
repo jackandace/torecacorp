@@ -96,6 +96,82 @@ export async function notifyOrderToStaff(args: {
   }
 }
 
+/**
+ * ショップの「振込完了報告」を社内スタッフへメール通知する。
+ * 宛先は ORDER_NOTIFY_EMAILS (発注リクエスト通知と同じメンバー)。
+ */
+export async function notifyPaymentReportToStaff(args: {
+  supabase: SupabaseClient<Database>;
+  shopName: string;
+  invoiceId: string;
+  invoiceNumber: string;
+  kindLabel: string;       // 通常請求 / 保証金(前受金) / 最終精算(差額)
+  totalAmount: number;
+  remainingAmount: number;
+  note: string | null;
+}): Promise<void> {
+  const { supabase, shopName, invoiceId, invoiceNumber, kindLabel, totalAmount, remainingAmount, note } = args;
+
+  const recipients = (process.env.ORDER_NOTIFY_EMAILS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (recipients.length === 0) {
+    console.log("[notify] ORDER_NOTIFY_EMAILS 未設定のため振込報告スタッフ通知をスキップ");
+    return;
+  }
+  if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY.startsWith("re_placeholder")) {
+    console.log("[notify] RESEND_API_KEY 未設定のため振込報告スタッフ通知をスキップ");
+    return;
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const subject = `【振込完了の報告】${shopName} 様 ${invoiceNumber}`;
+  const html = `
+<div style="max-width:560px;margin:0 auto;font-family:-apple-system,'Hiragino Sans','Noto Sans JP',Meiryo,sans-serif;color:#1f2937;line-height:1.8;">
+  <div style="padding:16px 0;border-bottom:2px solid #1d4ed8;">
+    <strong>【振込完了の報告】${escapeHtml(shopName)} 様</strong>
+  </div>
+  <div style="padding:16px 0;">
+    <p>ショップから振込完了の報告がありました。入金を確認のうえ、請求詳細から消込してください。</p>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;">
+      <tr><th style="border:1px solid #e2e8f0;padding:8px 12px;background:#f1f5f9;text-align:left;width:120px;">請求書番号</th><td style="border:1px solid #e2e8f0;padding:8px 12px;">${escapeHtml(invoiceNumber)}（${escapeHtml(kindLabel)}）</td></tr>
+      <tr><th style="border:1px solid #e2e8f0;padding:8px 12px;background:#f1f5f9;text-align:left;">請求額</th><td style="border:1px solid #e2e8f0;padding:8px 12px;">¥${totalAmount.toLocaleString()}</td></tr>
+      <tr><th style="border:1px solid #e2e8f0;padding:8px 12px;background:#f1f5f9;text-align:left;">未消込残額</th><td style="border:1px solid #e2e8f0;padding:8px 12px;">¥${remainingAmount.toLocaleString()}</td></tr>
+      ${note ? `<tr><th style="border:1px solid #e2e8f0;padding:8px 12px;background:#f1f5f9;text-align:left;">メモ</th><td style="border:1px solid #e2e8f0;padding:8px 12px;">${escapeHtml(note)}</td></tr>` : ""}
+    </table>
+    ${appUrl ? `<p style="margin-top:16px;"><a href="${appUrl}/admin/billing/${invoiceId}" style="color:#1d4ed8;">→ 請求詳細を開いて消込する</a></p>` : ""}
+  </div>
+  <div style="padding:12px 0;border-top:1px solid #e2e8f0;font-size:12px;color:#64748b;">
+    トレカ商事カンパニー 受発注システム (自動送信)
+  </div>
+</div>`;
+
+  try {
+    await sendEmail({ to: recipients, subject, html });
+    await supabase.from("notifications").insert({
+      shop_id: null,
+      template_code: "payment_report_staff_notify",
+      channel: "email",
+      subject,
+      body: `宛先: ${recipients.join(", ")}`,
+      status: "sent",
+      sent_at: new Date().toISOString(),
+    });
+  } catch (e) {
+    console.error("[notify] 振込報告スタッフ通知の送信失敗:", e instanceof Error ? e.message : e);
+    await supabase.from("notifications").insert({
+      shop_id: null,
+      template_code: "payment_report_staff_notify",
+      channel: "email",
+      subject: `${subject} (送信失敗)`,
+      body: `宛先: ${recipients.join(", ")}`,
+      status: "failed",
+      error_detail: e instanceof Error ? e.message : "unknown",
+    });
+  }
+}
+
 export async function notifyShop(args: {
   supabase: SupabaseClient<Database>;
   shopId: string;

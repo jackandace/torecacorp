@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatJST, firstDayOfMonth, lastDayOfMonth } from "@/lib/dates";
 import { formatYen } from "@/lib/rebate";
 import { InvoiceStatusBadge } from "@/components/StatusBadge";
+import { isAwaitingPaymentConfirm } from "@/lib/payment-report";
 import type { InvoiceStatus } from "@/types/database";
 
 export const metadata = { title: "請求・入金管理 | 管理" };
@@ -14,6 +15,7 @@ const STATUS_TABS: { v: string; label: string }[] = [
   { v: "all",      label: "すべて" },
   { v: "未入金",   label: "未入金" },
   { v: "一部入金", label: "一部入金" },
+  { v: "reported", label: "🔔 支払い確認中" },
   { v: "入金済み", label: "入金済み" },
   { v: "overdue",  label: "⚠ 期限超過" },
 ];
@@ -73,6 +75,9 @@ export default async function BillingPage({ searchParams }: { searchParams: Sear
 
   if (statusFilter === "overdue") {
     query = query.neq("status", "入金済み").lt("due_date", today);
+  } else if (statusFilter === "reported") {
+    // ショップが振込報告済みで未消込 (= 支払い確認中)
+    query = query.not("payment_reported_at", "is", null).neq("status", "入金済み");
   } else if (["未入金", "一部入金", "入金済み"].includes(statusFilter)) {
     query = query.eq("status", statusFilter as InvoiceStatus);
   }
@@ -154,7 +159,12 @@ export default async function BillingPage({ searchParams }: { searchParams: Sear
                 <div className="text-right shrink-0">
                   <div className="text-sm font-medium whitespace-nowrap">{formatYen(inv.total_amount)}</div>
                   {remaining > 0 && <div className="text-xs text-rose-700 font-semibold">残 {formatYen(remaining)}</div>}
-                  <div className="mt-1"><InvoiceStatusBadge status={inv.status} /></div>
+                  <div className="mt-1 flex items-center gap-1 justify-end flex-wrap">
+                    <InvoiceStatusBadge status={inv.status} />
+                    {isAwaitingPaymentConfirm(inv) && (
+                      <span className="text-[10px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded font-medium">🔔 確認中</span>
+                    )}
+                  </div>
                 </div>
               </div>
             </Link>
@@ -213,7 +223,14 @@ export default async function BillingPage({ searchParams }: { searchParams: Sear
                   <td className={`px-3 py-2 text-right ${remaining > 0 ? "font-semibold text-rose-700" : "text-slate-400"}`}>
                     {remaining > 0 ? formatYen(remaining) : "—"}
                   </td>
-                  <td className="px-3 py-2"><InvoiceStatusBadge status={inv.status} /></td>
+                  <td className="px-3 py-2">
+                    <span className="inline-flex items-center gap-1 flex-wrap">
+                      <InvoiceStatusBadge status={inv.status} />
+                      {isAwaitingPaymentConfirm(inv) && (
+                        <span className="text-[10px] bg-sky-100 text-sky-800 px-1.5 py-0.5 rounded font-medium whitespace-nowrap">🔔 確認中</span>
+                      )}
+                    </span>
+                  </td>
                   <td className="px-3 py-2">
                     <Link href={`/admin/billing/${inv.id}`} className="text-brand-600 hover:underline text-xs">
                       詳細・消込

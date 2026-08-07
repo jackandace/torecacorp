@@ -262,6 +262,9 @@ export type Invoice = {
   parent_invoice_id: string | null; // final/refund → 元の deposit
   deposit_applied: number;          // 前受金充当額 (final/refund で使用)
   deposit_rate: number | null;      // 保証金の適用率 (deposit のみ。過去分は推定バックフィル)
+  // ショップの振込完了報告 (031)。「支払い確認中」は reported_at != null && status != 入金済み で導出
+  payment_reported_at: string | null;
+  payment_report_note: string | null;
   issued_at: string;
   updated_at: string;
   deleted_at: string | null;
