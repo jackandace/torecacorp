@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>新規会員登録者限定ガチャ 仕様mock｜フロント確定案＋管理画面＋実装仕様（2026-08-12）</title>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E0F1A; --p:#570DF8; --s:#F000B8; --a:#2BCDBE;
+    --neon-pink:#ff3bd0; --neon-yellow:#ffd83a; --neon-cyan:#36e0ff;
+    --c-bg:#F7FAFC; --c-text:#1A202C; --c-sub:#4A5568; --c-blue:#3182CE; --c-line:#E2E8F0; --c-soft:#EDF2F7; --c-red:#C53030;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'M PLUS 1p',system-ui,sans-serif;background:#1a1c2e;min-height:100vh;color:#fff}
+
+  /* ===== sticky switcher ===== */
+  .switcher{position:sticky;top:0;z-index:50;background:#111322;border-bottom:1px solid #2a2d45;padding:10px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .switcher .ttl{color:#8b8fb3;font-size:12px;margin-right:6px}
+  .sw-btn{border:1px solid #3a3d5c;background:#1b1e33;color:#c7cae6;font-family:inherit;font-size:13px;font-weight:700;padding:7px 14px;border-radius:8px;cursor:pointer}
+  .sw-btn.on{background:linear-gradient(90deg,var(--p),var(--s));color:#fff;border-color:transparent}
+  .sep{width:1px;height:22px;background:#2a2d45;margin:0 4px}
+  #stateGroup{display:flex;gap:8px;align-items:center}
+  .hbadge{margin-left:auto;font-size:11px;font-weight:700;color:#8b8fb3;background:#1b1e33;border:1px solid #3a3d5c;border-radius:999px;padding:4px 12px}
+  .hbadge b{color:var(--neon-cyan);font-size:13px;font-variant-numeric:tabular-nums}
+  .view{display:none}.view.on{display:block}
+
+  /* ===== front page frame ===== */
+  .frame{max-width:920px;margin:26px auto 10px;background:var(--bg);border:1px solid #2a2d45;border-radius:18px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);position:relative}
+  .frame::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(107,33,168,.16) 1.6px,transparent 1.6px);background-size:28px 28px;pointer-events:none}
+  .frame > *{position:relative}
+  .ghead{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#000}
+  .glogo{display:flex;align-items:center;gap:6px;font-weight:900;font-size:15px}
+  .glogo span{color:var(--neon-pink)}
+  .pills{display:flex;gap:6px;align-items:center}
+  .pill{background:#1b1e33;border:1px solid #34375a;border-radius:999px;font-size:11px;font-weight:700;padding:4px 10px;display:flex;align-items:center;gap:4px}
+  .pill .plus{background:#e11d48;border-radius:50%;width:14px;height:14px;display:inline-flex;align-items:center;justify-content:center;font-size:10px}
+  .authbtns{display:none;gap:6px}
+  .authbtns .ab{font-size:11px;font-weight:700;border-radius:999px;padding:5px 12px;border:1px solid #34375a;background:#1b1e33;color:#fff}
+  .authbtns .ab.main{background:linear-gradient(90deg,var(--p),var(--s));border-color:transparent}
+  body.guest .authbtns{display:flex}
+  body.guest .pills{display:none}
+  .maintabs{display:flex;gap:34px;padding:14px 22px 0;font-weight:700;font-size:14px;color:#8b8fb3;border-bottom:1px solid #1e2140}
+  .maintabs .mt{padding-bottom:10px}
+  .maintabs .mt.on{color:#a78bfa;border-bottom:2px solid #a78bfa}
+  .cattabs{display:flex;gap:22px;padding:12px 22px;font-size:12.5px;font-weight:700;color:#9aa}
+  .cattabs .ct.on{color:#c084fc;border-bottom:2px solid #c084fc;padding-bottom:3px}
+  .pbody{padding:16px 18px 26px}
+
+  /* =====================================================
+     ▼▼ 確定案（案B）: 新規会員登録者限定エリア .nz-* ▼▼
+     ここのCSSが「③実装仕様」タブのコピー元と同一
+     ===================================================== */
+  .nz{
+    position:relative;
+    border-radius:18px;
+    padding:2.5px;                                  /* 枠グラデの太さ */
+    background:linear-gradient(120deg,var(--neon-pink),var(--p),var(--neon-cyan),var(--s),var(--neon-pink));
+    background-size:300% 300%;
+    animation:nz-aurora 6s linear infinite;
+    box-shadow:0 0 26px rgba(255,59,208,.35);
+    margin-bottom:8px;
+  }
+  @keyframes nz-aurora{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+
+  .nz__core{
+    position:relative;
+    border-radius:16px;                             /* 外側18 − 枠2.5 ≒ 16 */
+    overflow:hidden;
+    background:
+      linear-gradient(115deg, rgba(87,13,248,.38), rgba(14,15,26,.10) 45%, rgba(54,224,255,.20) 75%, rgba(240,0,184,.30)),
+      #141631;
+  }
+  .nz__core::before{                                 /* スキャンライン */
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.025) 3px 4px);
+  }
+  .nz__core::after{                                  /* 斜めの光スイープ */
+    content:"";position:absolute;top:-40%;left:-20%;width:55%;height:180%;
+    transform:rotate(18deg);
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.10),transparent);
+    animation:nz-sweep 4.2s ease-in-out infinite;
+  }
+  @keyframes nz-sweep{0%,55%{left:-45%}85%,100%{left:120%}}
+
+  .nz__inner{position:relative;z-index:1;padding:0 16px 18px}
+
+  .nz__badge-wrap{text-align:center}
+  .nz__badge{
+    display:inline-block;margin-top:14px;
+    font-weight:900;font-size:13px;letter-spacing:.18em;
+    padding:7px 26px;border-radius:999px;
+    background:#0e0f1a;color:var(--neon-cyan);
+    border:1.5px solid var(--neon-cyan);
+    box-shadow:0 0 12px rgba(54,224,255,.55), inset 0 0 10px rgba(54,224,255,.18);
+  }
+  .nz__title{
+    margin-top:10px;font-size:24px;font-weight:900;line-height:1.25;text-align:center;
+    background:linear-gradient(90deg,var(--neon-cyan),#fff 45%,var(--neon-pink));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 0 14px rgba(255,59,208,.45));
+  }
+  .nz__sub{margin-top:5px;font-size:11.5px;text-align:center;font-weight:700;color:#b9e8ff}
+  .nz__cd{display:flex;justify-content:center;margin-top:12px}
+  .nz__cd-chip{
+    display:inline-flex;align-items:center;gap:8px;
+    border-radius:999px;padding:7px 18px;font-size:12px;font-weight:700;
+    background:rgba(0,0,0,.45);border:1px solid var(--neon-pink);
+    box-shadow:0 0 12px rgba(255,59,208,.35);backdrop-filter:blur(2px);
+  }
+  .nz__cd-chip .nz__timer{font-size:17px;font-weight:900;color:#ff6b6b;font-variant-numeric:tabular-nums;letter-spacing:.04em}
+  .nz__note{font-size:10.5px;text-align:center;margin-top:12px;opacity:.75;line-height:1.7}
+  .nz__cta{display:none;margin-top:16px;text-align:center}
+  body.guest .nz__cta{display:block}
+  .nz__cta-btn{
+    display:inline-block;font-size:15px;font-weight:900;border-radius:999px;padding:13px 44px;
+    cursor:pointer;border:none;font-family:inherit;color:#fff;
+    background:linear-gradient(90deg,var(--p),var(--s));
+    box-shadow:0 6px 24px rgba(240,0,184,.45);
+    animation:nz-pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes nz-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+  .nz__cta-note{margin-top:8px;font-size:10.5px;font-weight:700;opacity:.85;line-height:1.7}
+  body.guest .nz-login-only{display:none}
+  body:not(.guest) .nz-guest-only{display:none}
+  @media (prefers-reduced-motion: reduce){
+    .nz,.nz__core::after,.nz__cta-btn{animation:none}
+  }
+  /* ▲▲ 確定案エリアここまで ▲▲ */
+
+  /* 既存ガチャカード（流用コンポーネント） */
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+  @media(max-width:640px){.cards{grid-template-columns:1fr}}
+  .gcard{border-radius:14px;padding:2px;background:linear-gradient(135deg,var(--neon-pink),#7c3aed 55%,var(--neon-cyan))}
+  .gcard-in{border-radius:12px;background:#12142a;overflow:hidden}
+  .banner{height:120px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .banner .bt1{font-size:21px;font-weight:900;text-shadow:0 2px 10px rgba(0,0,0,.55);z-index:1;text-align:center;line-height:1.3}
+  .banner .bt1 small{display:block;font-size:10.5px;font-weight:700;letter-spacing:.1em}
+  .banner .lim{position:absolute;top:8px;left:8px;background:#000c;border:1px solid var(--neon-yellow);color:var(--neon-yellow);font-size:9.5px;font-weight:900;border-radius:999px;padding:2px 8px;z-index:2}
+  .banner .guar{position:absolute;top:8px;right:8px;background:#000c;color:#fff;font-size:9.5px;font-weight:700;border-radius:4px;padding:2px 6px;z-index:2}
+  .b1{background:radial-gradient(circle at 30% 30%,#ffd83a55,transparent 60%),linear-gradient(135deg,#3b1d8f,#a21caf 60%,#f59e0b)}
+  .b2{background:radial-gradient(circle at 70% 25%,#36e0ff44,transparent 55%),linear-gradient(135deg,#0d3b66,#7c3aed 55%,#f000b8)}
+  .gmeta{display:flex;justify-content:space-between;align-items:center;padding:9px 12px 4px;font-size:11px;font-weight:700}
+  .gmeta .price{font-size:15px;font-weight:900}
+  .gmeta .price small{font-size:10px;font-weight:700;color:#b9bde0}
+  .bar{height:5px;background:#2a2d55;border-radius:99px;margin:6px 12px 10px;overflow:hidden}
+  .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--p),var(--s))}
+  .gbtns{display:flex;gap:8px;padding:0 12px 12px}
+  .gbtn{flex:1;text-align:center;font-size:12px;font-weight:900;border-radius:999px;padding:8px 0;border:1.5px solid #fff;background:transparent}
+  .gbtn.g10{border-color:#a3e635;color:#a3e635}
+  .after-zone{margin-top:20px}
+  .after-zone .lbl{font-size:12px;font-weight:700;color:#8b8fb3;margin-bottom:10px}
+  .plain{opacity:.55;filter:saturate(.7)}
+  .footnote{max-width:920px;margin:0 auto;font-size:11px;color:#8b8fb3;text-align:center;padding:6px 12px 42px;line-height:2}
+  .footnote b{color:#c7cae6}
+
+  /* ===== 管理画面（Chakraトーン / .console 配下） ===== */
+  .console{background:var(--c-bg);min-height:calc(100vh - 47px);color:var(--c-text);font-family:-apple-system,'Segoe UI','Hiragino Sans','M PLUS 1p',sans-serif}
+  .console .c-head{background:#fff;border-bottom:1px solid var(--c-line);padding:12px 22px;display:flex;justify-content:space-between;align-items:center}
+  .console .c-head .lg{font-weight:700;font-size:14px}
+  .console .c-head .lg span{color:var(--c-blue)}
+  .console .c-head .who{font-size:12px;color:var(--c-sub)}
+  .console .crumb{padding:14px 22px 0;font-size:12px;color:var(--c-sub)}
+  .console .wrap{padding:14px 22px 40px;max-width:720px}
+  .console .title{font-size:19px;font-weight:700;margin:6px 0 4px}
+  .console .subtitle{font-size:12px;color:var(--c-sub);margin-bottom:18px}
+  .console .card{background:#fff;border:1px solid var(--c-line);border-radius:8px;margin-bottom:16px}
+  .console .card-h{padding:12px 16px;border-bottom:1px solid var(--c-line)}
+  .console .card-h h3{font-size:14px;font-weight:700}
+  .console .card-h .hint{font-size:11px;color:var(--c-sub);margin-top:2px}
+  .console .card-b{padding:16px}
+  .console .field{margin-bottom:18px}
+  .console .field:last-child{margin-bottom:0}
+  .console .lb{font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .console .req{font-size:10px;font-weight:700;color:var(--c-red);background:#FFF5F5;border:1px solid #FED7D7;border-radius:4px;padding:1px 6px}
+  .console select,.console input[type=number]{font-family:inherit;font-size:14px;color:var(--c-text);background:#fff;border:1.5px solid var(--c-line);border-radius:8px;padding:10px 12px;width:100%;max-width:360px;outline:none;appearance:auto}
+  .console select:focus,.console input[type=number]:focus{border-color:var(--c-blue);box-shadow:0 0 0 3px rgba(49,130,206,.18)}
+  .console .help{font-size:11.5px;color:var(--c-sub);margin-top:7px;line-height:1.8}
+  .console .tg-row{display:flex;align-items:center;gap:10px;font-size:13px}
+  .console .tg{width:40px;height:22px;border-radius:999px;background:#CBD5E0;position:relative;cursor:pointer;transition:.15s;flex-shrink:0}
+  .console .tg::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+  .console .tg.on{background:#38A169}
+  .console .tg.on::after{left:20px}
+  .console .reveal{display:none;margin-top:14px;border:1.5px solid #BEE3F8;background:#F7FBFF;border-radius:8px;padding:14px}
+  .console .reveal.on{display:block;animation:slide .18s ease-out}
+  @keyframes slide{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .console .reveal .lb{font-size:12.5px}
+  .console .hour-row{display:flex;align-items:center;gap:10px}
+  .console .hour-row input{max-width:140px;font-size:16px;font-weight:600}
+  .console .hour-row .unit{font-size:13px;font-weight:700;color:var(--c-sub)}
+  .console .presets{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .console .ps{font-size:12px;font-weight:600;border:1px solid var(--c-line);background:#fff;border-radius:999px;padding:5px 14px;cursor:pointer;color:var(--c-sub);font-family:inherit}
+  .console .ps.on{background:var(--c-blue);border-color:var(--c-blue);color:#fff}
+  .console .calc{margin-top:12px;font-size:12px;background:#fff;border:1px dashed #90CDF4;border-radius:6px;padding:9px 12px;color:#2A4365;line-height:1.8}
+  .console .calc b{font-variant-numeric:tabular-nums}
+  .console .err{display:none;margin-top:8px;font-size:11.5px;color:var(--c-red);font-weight:600}
+  .console .err.on{display:block}
+  .console .info{background:#EBF8FF;border:1px solid #BEE3F8;color:#2A4365;font-size:11.5px;border-radius:6px;padding:10px 12px;margin-top:14px;line-height:1.8}
+  .console .sync{background:#F0FFF4;border:1px solid #C6F6D5;color:#22543D;font-size:11.5px;border-radius:6px;padding:10px 12px;margin-top:10px;line-height:1.8}
+  .console .actions{display:flex;gap:10px;margin-top:18px}
+  .console .btn{font-family:inherit;font-size:13px;font-weight:600;border-radius:6px;padding:9px 22px;cursor:pointer;border:1px solid transparent}
+  .console .btn-blue{background:var(--c-blue);color:#fff}
+  .console .btn-gray{background:var(--c-soft);color:var(--c-text)}
+  .console .specnote{max-width:720px;font-size:11px;color:#718096;line-height:2;padding:0 22px 40px}
+  .console .specnote b{color:var(--c-sub)}
+
+  /* ===== ③ 実装仕様タブ ===== */
+  .spec{max-width:920px;margin:26px auto 60px;padding:0 16px}
+  .spec h2{font-size:17px;font-weight:900;margin:30px 0 6px;color:#fff}
+  .spec h2:first-child{margin-top:0}
+  .spec .desc{font-size:12px;color:#8b8fb3;line-height:1.9;margin-bottom:12px}
+  .spec .desc b{color:#c7cae6}
+  .spec table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px}
+  .spec th,.spec td{border:1px solid #2a2d45;padding:8px 10px;text-align:left;vertical-align:top;line-height:1.7}
+  .spec th{background:#1b1e33;color:#c7cae6;white-space:nowrap}
+  .spec td{background:#14162b;color:#d7daf0}
+  .spec td code,.spec .desc code{background:#0e0f1a;border:1px solid #2a2d45;border-radius:4px;padding:1px 6px;font-size:11px;color:var(--neon-cyan)}
+  .codeblock{position:relative;background:#0b0c16;border:1px solid #2a2d45;border-radius:10px;margin-bottom:20px;overflow:hidden}
+  .codeblock .cb-head{display:flex;justify-content:space-between;align-items:center;background:#14162b;border-bottom:1px solid #2a2d45;padding:8px 12px;font-size:11.5px;font-weight:700;color:#c7cae6}
+  .codeblock .copy{font-family:inherit;font-size:11px;font-weight:700;background:#1b1e33;color:#c7cae6;border:1px solid #3a3d5c;border-radius:6px;padding:4px 12px;cursor:pointer}
+  .codeblock .copy.done{background:#14532d;border-color:#22c55e;color:#bbf7d0}
+  .codeblock pre{overflow-x:auto;padding:14px 16px;font-size:11.5px;line-height:1.75;color:#c8e1ff;font-family:'SF Mono',Menlo,Consolas,monospace}
+  .swatches{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .sw{display:flex;align-items:center;gap:7px;background:#14162b;border:1px solid #2a2d45;border-radius:8px;padding:6px 12px;font-size:11px;color:#d7daf0}
+  .sw i{width:16px;height:16px;border-radius:4px;display:inline-block;border:1px solid #ffffff22}
+</style>
+</head>
+<body class="guest">
+
+<div class="switcher">
+  <span class="ttl">新規会員登録者限定ガチャ 仕様mock</span>
+  <button class="sw-btn on" data-v="v-front">① フロント（確定案）</button>
+  <button class="sw-btn" data-v="v-admin">② 管理画面</button>
+  <button class="sw-btn" data-v="v-spec">③ 実装仕様（CSS/挙動）</button>
+  <span class="sep" id="stateSep"></span>
+  <span id="stateGroup">
+    <button class="sw-btn on" id="stGuest">非ログイン</button>
+    <button class="sw-btn" id="stLogin">ログイン済・期間内</button>
+  </span>
+  <span class="hbadge">管理画面の設定値: <b><span class="js-h">24</span></b> 時間</span>
+</div>
+
+<!-- ================================================================
+     ① フロント（確定案 = 旧案B ネオンオーロラ）
+     ================================================================ -->
+<div class="view on" id="v-front">
+  <div class="frame" style="margin-top:22px">
+    <div class="ghead">
+      <div class="glogo">🐱 NOVA<span>GACHA</span></div>
+      <div class="pills"><div class="pill">🪙 3,599 <span class="plus">＋</span></div><div class="pill">🔋 0</div><div class="pill">⚡ 0</div></div>
+      <div class="authbtns"><span class="ab main">新規登録</span><span class="ab">ログイン</span></div>
+    </div>
+    <div class="maintabs"><div class="mt on">ガチャ</div><div class="mt">イベント</div><div class="mt">アイテム交換所</div></div>
+    <div class="cattabs"><div class="ct on">ポケモン</div><div class="ct">Mini</div><div class="ct">バッテリー</div><div class="ct">ワンピース</div><div class="ct">デュエマ</div><div class="ct">バラエティ</div></div>
+
+    <div class="pbody">
+      <!-- ▼▼ 新規会員登録者限定エリア（.nz） ▼▼ -->
+      <section class="nz">
+        <div class="nz__core">
+          <div class="nz__inner">
+            <div class="nz__badge-wrap"><span class="nz__badge">WELCOME LIMITED</span></div>
+            <h2 class="nz__title">新規会員登録限定ガチャ</h2>
+            <p class="nz__sub">SMS認証完了から<span class="js-h">24</span>時間限定でアンロック中！</p>
+
+            <div class="nz__cd">
+              <div class="nz__cd-chip">
+                <span class="nz-guest-only">開催中｜登録後<b class="js-h">24</b>時間限定</span>
+                <span class="nz-login-only">あなたの限定期間 残り <span class="nz__timer js-cd">23:59:59</span></span>
+              </div>
+            </div>
+
+            <!-- 既存ガチャカードコンポーネント流用 -->
+            <div class="cards">
+              <div class="gcard"><div class="gcard-in">
+                <div class="banner b1"><span class="lim">1人1回限定</span><span class="guar">最低保証500コイン</span>
+                  <div class="bt1">はじめての神引きガチャ<small>PSA10 ピカチュウ確率UP</small></div></div>
+                <div class="gmeta"><span>1口 <span class="price">100 <small>コイン</small></span></span><span>残 812/1,000</span></div>
+                <div class="bar"><i style="width:81%"></i></div>
+                <div class="gbtns"><div class="gbtn">1 ガチャ</div><div class="gbtn g10">10 ガチャ</div></div>
+              </div></div>
+              <div class="gcard"><div class="gcard-in">
+                <div class="banner b2"><span class="lim">1人1回限定</span><span class="guar">必ず1,500コイン以上</span>
+                  <div class="bt1">ウェルカム3パックセット<small>登録ボーナスで引ける！</small></div></div>
+                <div class="gmeta"><span>1口 <span class="price">500 <small>コイン</small></span></span><span>残 231/300</span></div>
+                <div class="bar"><i style="width:77%"></i></div>
+                <div class="gbtns"><div class="gbtn">1 ガチャ</div><div class="gbtn g10">10 ガチャ</div></div>
+              </div></div>
+            </div>
+
+            <div class="nz__cta">
+              <button class="nz__cta-btn">無料登録して限定ガチャを引く</button>
+              <div class="nz__cta-note">※ SMS認証の完了から<span class="js-h">24</span>時間だけ表示される限定ガチャです</div>
+            </div>
+            <div class="nz__note">対象：新規会員登録（SMS認証完了）から<span class="js-h">24</span>時間以内のユーザー</div>
+          </div>
+        </div>
+      </section>
+      <!-- ▲▲ 新規会員登録者限定エリアここまで ▲▲ -->
+
+      <div class="after-zone">
+        <div class="lbl">▼ 通常ガチャ一覧（エリア外・対比用）</div>
+        <div class="cards plain">
+          <div class="gcard"><div class="gcard-in">
+            <div class="banner" style="background:linear-gradient(135deg,#312e81,#6d28d9)"><div class="bt1">アウトレット9.9</div></div>
+            <div class="gmeta"><span>1口 <span class="price">749 <small>コイン</small></span></span><span>残 6,313/9,900</span></div>
+            <div class="bar"><i style="width:64%"></i></div>
+          </div></div>
+          <div class="gcard"><div class="gcard-in">
+            <div class="banner" style="background:linear-gradient(135deg,#713f12,#ca8a04)"><div class="bt1">ピカチュウしか勝たん！</div></div>
+            <div class="gmeta"><span>1口 <span class="price">5,980 <small>コイン</small></span></span><span>残 1,405/1,800</span></div>
+            <div class="bar"><i style="width:78%"></i></div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footnote">
+    <b>表示ルール</b>：非ログイン＝全員に表示（新規登録CTA付き）／ログイン後＝SMS認証完了時刻を起点に管理画面の設定時間だけ表示。期間外・既存ユーザーにはエリアごと非表示。<br>
+    カウントダウン残り時間＝「認証完了時刻＋設定時間 − 現在時刻」。文中の時間数字（<span class="js-h">24</span>時間）はすべて設定値から動的に描画。
+  </div>
+</div>
+
+<!-- ================================================================
+     ② 管理画面
+     ================================================================ -->
+<div class="view" id="v-admin">
+  <div class="console">
+    <div class="c-head">
+      <div class="lg">stg-novagacha <span>console</span></div>
+      <div class="who">🌙&nbsp;&nbsp;admin@novagacha.jp</div>
+    </div>
+    <div class="crumb">オリパ / 一覧 / <b>編集（はじめての神引きガチャ）</b></div>
+
+    <div class="wrap">
+      <div class="title">オリパ編集｜表示対象（ユーザー条件）</div>
+      <div class="subtitle">「ユーザー条件」で<b>新規会員登録</b>を選択すると、表示期間（時間）の設定が出現します。</div>
+
+      <div class="card">
+        <div class="card-h">
+          <h3>ユーザー条件</h3>
+          <div class="hint">このオリパを表示する対象ユーザーを指定します</div>
+        </div>
+        <div class="card-b">
+          <div class="field">
+            <div class="lb">ユーザー条件</div>
+            <select id="cond">
+              <option value="none">指定なし（全ユーザーに表示）</option>
+              <option value="newuser">新規会員登録</option>
+            </select>
+
+            <div class="reveal" id="revealNew">
+              <div class="lb">表示期間（時間） <span class="req">必須</span></div>
+              <div class="hour-row">
+                <input type="number" id="hours" value="24" min="1" max="8760" step="1">
+                <span class="unit">時間</span>
+              </div>
+              <div class="presets">
+                <button class="ps on" data-h="24">24時間（1日）</button>
+                <button class="ps" data-h="72">72時間（3日）</button>
+                <button class="ps" data-h="168">168時間（1週間）</button>
+              </div>
+              <div class="err" id="hourErr">1〜8760 の整数（時間）で入力してください</div>
+              <div class="calc" id="calc"></div>
+              <div class="sync">✓ この設定値は「①フロント」タブの表示（〜時間限定・カウントダウン初期値）に即時反映されます（mock内連動デモ）</div>
+              <div class="help">起点は <b>新規会員登録（SMS認証完了）時刻</b>。起点＋設定時間を過ぎたユーザーには、このオリパはエリアごと非表示になります。</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="tg-row"><div class="tg" id="tgRank"></div>ユーザーランクを限定</div>
+          </div>
+
+          <div class="info">
+            <b>表示ルール（フロント側）</b><br>
+            ・非ログインユーザー：条件に関わらず<b>全員に表示</b>（新規登録CTA付き）<br>
+            ・ログインユーザー：SMS認証完了時刻から設定時間内のみ表示。既存ユーザー・期間経過後は非表示<br>
+            ・残り時間カウントダウン＝「認証完了時刻＋設定時間 − 現在時刻」
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-blue">保存</button>
+            <button class="btn btn-gray">キャンセル</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="specnote">
+      <b>実装メモ</b>：既存「ユーザー条件」プルダウンに選択肢「新規会員登録」を追加。選択時のみ「表示期間（時間）」入力を出現（バリデーション：1〜8760の整数）。プリセット24/72/168はショートカットで任意値も直接入力可。保存時は <code>display_hours</code>（int）として保持し、フロントは <code>sms_verified_at + display_hours</code> で表示判定。
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     ③ 実装仕様（エンジニア向け）
+     ================================================================ -->
+<div class="view" id="v-spec">
+  <div class="spec">
+
+    <h2>1. 概要・表示ロジック</h2>
+    <div class="desc">
+      ガチャ一覧（<code>/</code> ポケモンタブ等）の最上部に「新規会員登録者限定エリア」を挿入する。エリアは対象ガチャ（ユーザー条件=新規会員登録のオリパ）を内包し、<b>条件を満たさない場合はエリアごと非表示</b>にする。
+    </div>
+    <table>
+      <tr><th>状態</th><th>表示</th><th>備考</th></tr>
+      <tr><td>非ログイン</td><td>表示（全員）</td><td>カウントダウンの代わりに「登録後N時間限定」の静的表記＋新規登録CTAボタンを表示</td></tr>
+      <tr><td>ログイン済・期間内</td><td>表示</td><td>残り時間カウントダウン表示。<code>期限 = sms_verified_at + display_hours(h)</code>、<code>残り = 期限 − now</code>（1秒間隔更新、HH:MM:SS）</td></tr>
+      <tr><td>ログイン済・期間外／既存ユーザー</td><td>非表示</td><td>エリアDOMごと出力しない（サーバー側判定推奨。CSS切替のみは不可）</td></tr>
+      <tr><td>期間中に期限到達</td><td>非表示化</td><td>カウントダウン0到達でエリアをフェードアウト→リロード時は非表示</td></tr>
+    </table>
+    <div class="desc">
+      時間数字（「N時間限定」等の文言内・カウントダウン初期値）はすべて管理画面の <code>display_hours</code> から動的描画し、<b>文言にハードコードしない</b>。文言自体は仮のため、テキストはCMS/定数で差し替え可能な実装を推奨。
+    </div>
+
+    <h2>2. データ（管理画面 → API）</h2>
+    <table>
+      <tr><th>フィールド</th><th>型</th><th>内容</th></tr>
+      <tr><td><code>user_condition</code></td><td>enum</td><td><code>none</code>（指定なし） / <code>new_user</code>（新規会員登録）。既存「ユーザー条件」プルダウンに選択肢追加</td></tr>
+      <tr><td><code>display_hours</code></td><td>int</td><td><code>user_condition = new_user</code> のとき必須。1〜8760（時間）。プリセット 24 / 72 / 168 はUIショートカット</td></tr>
+      <tr><td><code>sms_verified_at</code></td><td>datetime</td><td>ユーザー側。SMS認証完了時刻（判定起点）</td></tr>
+    </table>
+    <div class="desc">表示判定（サーバー側）：<code>user_condition == 'new_user'</code> のオリパは、<code>未ログイン OR now &lt; sms_verified_at + display_hours</code> のときのみレスポンスに含める。</div>
+
+    <h2>3. デザイントークン（エリアで使用する色）</h2>
+    <div class="swatches">
+      <span class="sw"><i style="background:#570DF8"></i>--p（既存primary）#570DF8</span>
+      <span class="sw"><i style="background:#F000B8"></i>--s（既存secondary）#F000B8</span>
+      <span class="sw"><i style="background:#ff3bd0"></i>--neon-pink #ff3bd0</span>
+      <span class="sw"><i style="background:#36e0ff"></i>--neon-cyan #36e0ff</span>
+      <span class="sw"><i style="background:#141631"></i>面 #141631</span>
+      <span class="sw"><i style="background:#0e0f1a"></i>バッジ地 #0e0f1a</span>
+      <span class="sw"><i style="background:#b9e8ff"></i>サブ文字 #b9e8ff</span>
+      <span class="sw"><i style="background:#ff6b6b"></i>タイマー #ff6b6b</span>
+    </div>
+    <div class="desc">フォントはサイト共通の M PLUS 1p。角丸は外枠18px／内側16px（既存カード類の1remよりやや大きい「エリア」スケール）。</div>
+
+    <h2>4. HTML構造</h2>
+    <div class="codeblock">
+      <div class="cb-head"><span>newuser-zone.html（BEM: .nz）</span><button class="copy" data-t="html">コピー</button></div>
+      <pre id="code-html">&lt;section class="nz"&gt;
+  &lt;div class="nz__core"&gt;
+    &lt;div class="nz__inner"&gt;
+
+      &lt;div class="nz__badge-wrap"&gt;
+        &lt;span class="nz__badge"&gt;WELCOME LIMITED&lt;/span&gt;          &lt;!-- 文言仮 --&gt;
+      &lt;/div&gt;
+      &lt;h2 class="nz__title"&gt;新規会員登録限定ガチャ&lt;/h2&gt;           &lt;!-- 文言仮 --&gt;
+      &lt;p class="nz__sub"&gt;SMS認証完了から{{hours}}時間限定でアンロック中！&lt;/p&gt;
+
+      &lt;div class="nz__cd"&gt;
+        &lt;div class="nz__cd-chip"&gt;
+          &lt;!-- 非ログイン時 --&gt;
+          &lt;span&gt;開催中｜登録後{{hours}}時間限定&lt;/span&gt;
+          &lt;!-- ログイン・期間内時 --&gt;
+          &lt;span&gt;あなたの限定期間 残り &lt;span class="nz__timer"&gt;23:59:59&lt;/span&gt;&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;!-- 既存ガチャカードコンポーネントをそのまま配置 --&gt;
+      &lt;div class="cards"&gt; ... &lt;/div&gt;
+
+      &lt;!-- 非ログイン時のみ --&gt;
+      &lt;div class="nz__cta"&gt;
+        &lt;button class="nz__cta-btn"&gt;無料登録して限定ガチャを引く&lt;/button&gt;
+        &lt;div class="nz__cta-note"&gt;※ SMS認証の完了から{{hours}}時間だけ表示される限定ガチャです&lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div class="nz__note"&gt;対象：新規会員登録（SMS認証完了）から{{hours}}時間以内のユーザー&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/section&gt;</pre>
+    </div>
+
+    <h2>5. CSS（確定案：ネオンオーロラ）</h2>
+    <div class="desc">①フロントタブの表示と同一のCSS。Tailwind環境なら <code>@layer components</code> に追加、もしくはCSS Modulesへ移植。</div>
+    <div class="codeblock">
+      <div class="cb-head"><span>newuser-zone.css</span><button class="copy" data-t="css">コピー</button></div>
+      <pre id="code-css">/* ============================================================
+   新規会員登録者限定ガチャ 表示エリア（確定案: ネオンオーロラ）
+   依存トークン: --p:#570DF8; --s:#F000B8;
+   追加トークン: --neon-pink:#ff3bd0; --neon-cyan:#36e0ff;
+   ============================================================ */
+
+/* 外枠: 流動するオーロラグラデ枠 */
+.nz{
+  position: relative;
+  border-radius: 18px;
+  padding: 2.5px;                                 /* 枠グラデの太さ */
+  background: linear-gradient(120deg,
+    var(--neon-pink), var(--p), var(--neon-cyan), var(--s), var(--neon-pink));
+  background-size: 300% 300%;
+  animation: nz-aurora 6s linear infinite;
+  box-shadow: 0 0 26px rgba(255, 59, 208, .35);
+}
+@keyframes nz-aurora{
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* 内側面: 紫〜シアン〜マゼンタの斜めグラデ + ダーク面 */
+.nz__core{
+  position: relative;
+  border-radius: 16px;                            /* 外18 − 枠2.5 ≒ 16 */
+  overflow: hidden;
+  background:
+    linear-gradient(115deg,
+      rgba(87, 13, 248, .38),
+      rgba(14, 15, 26, .10) 45%,
+      rgba(54, 224, 255, .20) 75%,
+      rgba(240, 0, 184, .30)),
+    #141631;
+}
+/* スキャンライン（質感） */
+.nz__core::before{
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg,
+    transparent 0 3px, rgba(255,255,255,.025) 3px 4px);
+}
+/* 斜めの光スイープ */
+.nz__core::after{
+  content: ""; position: absolute;
+  top: -40%; left: -20%; width: 55%; height: 180%;
+  transform: rotate(18deg);
+  background: linear-gradient(90deg,
+    transparent, rgba(255,255,255,.10), transparent);
+  animation: nz-sweep 4.2s ease-in-out infinite;
+}
+@keyframes nz-sweep{
+  0%, 55%   { left: -45%; }
+  85%, 100% { left: 120%; }
+}
+
+.nz__inner{ position: relative; z-index: 1; padding: 0 16px 18px; }
+
+/* バッジ（ネオン管ピル） */
+.nz__badge-wrap{ text-align: center; }
+.nz__badge{
+  display: inline-block; margin-top: 14px;
+  font-weight: 900; font-size: 13px; letter-spacing: .18em;
+  padding: 7px 26px; border-radius: 999px;
+  background: #0e0f1a; color: var(--neon-cyan);
+  border: 1.5px solid var(--neon-cyan);
+  box-shadow: 0 0 12px rgba(54,224,255,.55),
+              inset 0 0 10px rgba(54,224,255,.18);
+}
+
+/* タイトル（シアン→白→ピンクのグラデ文字） */
+.nz__title{
+  margin-top: 10px; font-size: 24px; font-weight: 900;
+  line-height: 1.25; text-align: center;
+  background: linear-gradient(90deg,
+    var(--neon-cyan), #fff 45%, var(--neon-pink));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 14px rgba(255,59,208,.45));
+}
+.nz__sub{
+  margin-top: 5px; font-size: 11.5px; text-align: center;
+  font-weight: 700; color: #b9e8ff;
+}
+
+/* カウントダウンチップ */
+.nz__cd{ display: flex; justify-content: center; margin-top: 12px; }
+.nz__cd-chip{
+  display: inline-flex; align-items: center; gap: 8px;
+  border-radius: 999px; padding: 7px 18px;
+  font-size: 12px; font-weight: 700;
+  background: rgba(0,0,0,.45);
+  border: 1px solid var(--neon-pink);
+  box-shadow: 0 0 12px rgba(255,59,208,.35);
+  backdrop-filter: blur(2px);
+}
+.nz__timer{
+  font-size: 17px; font-weight: 900; color: #ff6b6b;
+  font-variant-numeric: tabular-nums; letter-spacing: .04em;
+}
+
+/* 注記 */
+.nz__note{
+  font-size: 10.5px; text-align: center; margin-top: 12px;
+  opacity: .75; line-height: 1.7;
+}
+
+/* 非ログイン時CTA */
+.nz__cta{ margin-top: 16px; text-align: center; }
+.nz__cta-btn{
+  display: inline-block; font-size: 15px; font-weight: 900;
+  border-radius: 999px; padding: 13px 44px;
+  cursor: pointer; border: none; color: #fff;
+  background: linear-gradient(90deg, var(--p), var(--s));
+  box-shadow: 0 6px 24px rgba(240,0,184,.45);
+  animation: nz-pulse 1.8s ease-in-out infinite;
+}
+@keyframes nz-pulse{
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.035); }
+}
+.nz__cta-note{
+  margin-top: 8px; font-size: 10.5px; font-weight: 700;
+  opacity: .85; line-height: 1.7;
+}
+
+/* アクセシビリティ: モーション低減設定時はアニメ停止 */
+@media (prefers-reduced-motion: reduce){
+  .nz, .nz__core::after, .nz__cta-btn{ animation: none; }
+}</pre>
+    </div>
+
+    <h2>6. カウントダウンJS（参考実装）</h2>
+    <div class="codeblock">
+      <div class="cb-head"><span>countdown.js（参考）</span><button class="copy" data-t="js">コピー</button></div>
+      <pre id="code-js">// expiresAt = sms_verified_at + display_hours（サーバーから期限ISO文字列で受け取る想定）
+function startCountdown(el, expiresAt, onExpire){
+  const tick = () => {
+    const remain = Math.floor((new Date(expiresAt) - Date.now()) / 1000);
+    if (remain <= 0){ clearInterval(id); onExpire(); return; }
+    const h = String(Math.floor(remain / 3600)).padStart(2, '0');
+    const m = String(Math.floor(remain % 3600 / 60)).padStart(2, '0');
+    const s = String(remain % 60).padStart(2, '0');
+    el.textContent = `${h}:${m}:${s}`;
+  };
+  tick();
+  const id = setInterval(tick, 1000);
+}
+// onExpire: エリアをフェードアウトして非表示（再取得時はサーバー側で除外される）</pre>
+    </div>
+
+    <h2>7. 補足</h2>
+    <div class="desc">
+      ・文言（バッジ・タイトル・サブ・CTA・注記・ガチャ名）はすべて<b>仮テキスト</b>（修正余地あり）。実装は文言をハードコードせず差し替え可能にすること。<br>
+      ・エリア内のガチャカード・1/10ガチャボタン等は<b>既存コンポーネントをそのまま流用</b>（本仕様の対象外）。<br>
+      ・期限判定はサーバー時刻基準。クライアント時計のズレ対策として、期限はサーバーから絶対時刻（ISO8601）で返す。
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 共有状態: 管理画面の設定時間（デフォルト24h） =====
+let displayHours = 24;
+let remain = displayHours * 3600 - 1;
+
+function syncHours(){
+  document.querySelectorAll('.js-h').forEach(el => el.textContent = displayHours);
+}
+
+// ===== ビュー切替 =====
+const stateGroup=document.getElementById('stateGroup'), stateSep=document.getElementById('stateSep');
+document.querySelectorAll('.sw-btn[data-v]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.sw-btn[data-v]').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');document.getElementById(b.dataset.v).classList.add('on');
+  const isFront=b.dataset.v==='v-front';
+  stateGroup.style.display=isFront?'flex':'none';
+  stateSep.style.display=isFront?'block':'none';
+}));
+
+// ===== フロント: 非ログイン / ログイン切替 =====
+const bG=document.getElementById('stGuest'), bL=document.getElementById('stLogin');
+bG.addEventListener('click',()=>{document.body.classList.add('guest');bG.classList.add('on');bL.classList.remove('on')});
+bL.addEventListener('click',()=>{document.body.classList.remove('guest');bL.classList.add('on');bG.classList.remove('on')});
+
+// ===== フロント: カウントダウン（設定時間と連動） =====
+setInterval(()=>{
+  if(remain>0)remain--;
+  const h=String(Math.floor(remain/3600)).padStart(2,'0');
+  const m=String(Math.floor(remain%3600/60)).padStart(2,'0');
+  const s=String(remain%60).padStart(2,'0');
+  document.querySelectorAll('.js-cd').forEach(el=>el.textContent=`${h}:${m}:${s}`);
+},1000);
+
+// ===== 管理画面: 条件出現・時間設定 =====
+const cond=document.getElementById('cond'), reveal=document.getElementById('revealNew');
+const hoursEl=document.getElementById('hours'), calc=document.getElementById('calc'), err=document.getElementById('hourErr');
+const presets=[...document.querySelectorAll('.ps')];
+function applyHours(){
+  const v=parseInt(hoursEl.value,10);
+  const bad=!(Number.isInteger(v)&&v>=1&&v<=8760);
+  err.classList.toggle('on',bad);
+  if(bad){calc.innerHTML='—';return}
+  displayHours=v;
+  remain=v*3600-1;                       // フロントのカウントダウン初期値も更新
+  syncHours();
+  const d=v/24, dTxt=Number.isInteger(d)?`${d}日間`:`約${d.toFixed(1)}日間`;
+  calc.innerHTML=`表示イメージ：SMS認証完了から <b>${v}時間</b>（${dTxt}）表示<br>例）8/12 21:00 に認証完了 → <b>${sample(v)}</b> まで表示`;
+  presets.forEach(p=>p.classList.toggle('on',parseInt(p.dataset.h,10)===v));
+}
+function sample(v){
+  const base=new Date(2026,7,12,21,0,0);
+  base.setHours(base.getHours()+v);
+  const z=n=>String(n).padStart(2,'0');
+  return `${base.getMonth()+1}/${base.getDate()} ${z(base.getHours())}:${z(base.getMinutes())}`;
+}
+cond.addEventListener('change',()=>{reveal.classList.toggle('on',cond.value==='newuser');applyHours()});
+hoursEl.addEventListener('input',applyHours);
+presets.forEach(p=>p.addEventListener('click',()=>{hoursEl.value=p.dataset.h;applyHours()}));
+document.getElementById('tgRank').addEventListener('click',e=>e.currentTarget.classList.toggle('on'));
+cond.value='newuser';reveal.classList.add('on');applyHours();
+
+// ===== ③ 実装仕様: コードコピー =====
+document.querySelectorAll('.copy').forEach(btn=>btn.addEventListener('click',()=>{
+  const src=document.getElementById('code-'+btn.dataset.t);
+  navigator.clipboard.writeText(src.textContent).then(()=>{
+    btn.textContent='✓ コピーしました';btn.classList.add('done');
+    setTimeout(()=>{btn.textContent='コピー';btn.classList.remove('done')},1600);
+  });
+}));
+</script>
+</body>
+</html>
