@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRIM様 ご対応タスク一覧(決定事項・デザイン制作物) rev.2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#d6202b;--gold:#e8c547;--dark:#1a1a1a;--maroon:#7a2030;--gray:#666;--line:#ddd;--bg:#f5f5f5;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark);font-size:14px;line-height:1.8;}
+  .page{max-width:1120px;margin:0 auto;padding:0 24px 80px;}
+  .doc-title{background:var(--dark);color:#fff;padding:26px 32px 20px;border-bottom:5px solid var(--red);margin:0 -24px;}
+  .doc-title h1{font-size:22px;font-weight:900;letter-spacing:.04em;}
+  .doc-title .sub{color:var(--gold);font-size:12.5px;font-weight:700;margin-top:4px;letter-spacing:.06em;}
+  .tabs{position:sticky;top:0;z-index:50;background:var(--dark);display:flex;overflow-x:auto;margin:0 -24px;padding:0 16px;border-bottom:3px solid var(--gold);}
+  .tab{flex:none;font-family:inherit;font-size:13px;font-weight:900;color:#bbb;background:none;border:none;padding:12px 16px 10px;cursor:pointer;border-bottom:4px solid transparent;white-space:nowrap;}
+  .tab.active{color:var(--gold);border-bottom-color:var(--red);}
+  .pane{display:none;}
+  .pane.active{display:block;}
+  section{background:#fff;border:1px solid var(--line);margin-top:24px;padding:24px 28px 28px;}
+  .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--dark);}
+  .sec-num{background:var(--red);color:#fff;font-weight:900;font-size:14px;min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;}
+  .sec-head h2{font-size:16.5px;font-weight:900;}
+  p{margin:8px 0;}
+  .note{font-size:12px;color:var(--gray);}
+  ul.dash{list-style:none;margin:8px 0;}
+  ul.dash li{padding-left:1.2em;position:relative;margin:6px 0;}
+  ul.dash li::before{content:"―";position:absolute;left:0;color:var(--red);font-weight:700;}
+  .caution{background:#fdf6dd;border:1px solid var(--gold);border-left:6px solid var(--gold);padding:12px 16px;margin:14px 0;}
+  .caution .cap{font-weight:900;font-size:13px;}
+  .caution .cap::before{content:"⚠ ";}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.5px;}
+  th{background:var(--dark);color:#fff;font-weight:700;padding:8px 10px;text-align:left;border:1px solid var(--dark);}
+  td{padding:7px 10px;border:1px solid var(--line);vertical-align:top;background:#fff;}
+  tr:nth-child(even) td{background:#fafafa;}
+  .dl{display:inline-block;font-size:10.5px;font-weight:900;padding:1px 8px;border-radius:2px;white-space:nowrap;}
+  .dl-must{background:var(--red);color:#fff;}
+  .dl-run{background:#e2e2e2;color:var(--gray);}
+  .dl-dec{background:var(--gold);color:var(--dark);}
+  .tl{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
+  .tl td{border:1px solid var(--line);padding:8px 12px;background:#fff;}
+  .tl .wk{font-weight:900;white-space:nowrap;background:#f1f1f1!important;width:120px;}
+  .tl .rd{color:var(--red);font-weight:900;}
+  .badge{display:inline-block;font-size:10px;font-weight:900;color:#fff;background:var(--maroon);padding:1px 8px;border-radius:2px;margin-left:6px;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="doc-title">
+    <h1>GRIM様 ご対応タスク一覧</h1>
+    <div class="sub">決定事項 ・ デザイン制作物 ・ テキスト制作 ｜ 機能別 ｜ rev.2(2026-08-24)｜ 10/1リニューアルオープン対応 ｜ 作成: パレットグループ PM</div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" data-p="0">📋 全体・共通</button>
+    <button class="tab" data-p="1">🍺 ギルド復興イベント</button>
+    <button class="tab" data-p="2">👑 会員ランク・マイページ</button>
+    <button class="tab" data-p="3">🎯 ミッション</button>
+    <button class="tab" data-p="4">🗝 鍵交換所</button>
+    <button class="tab" data-p="5">⏳ 別トラック(天井・レイド)</button>
+  </nav>
+
+  <!-- ============ 全体 ============ -->
+  <div class="pane active" id="p-0">
+    <section>
+      <div class="sec-head"><div class="sec-num">1</div><h2>全体スケジュール(10/1リニューアルオープンからの逆算)</h2></div>
+      <table class="tl">
+        <tr><td class="wk">8/24(月)〜8/26(水)</td><td>開発工数の確定 → フェーズ1(10/1で入れる範囲)/フェーズ2(オープン後)の切り分け → <b>8/26 お見積・ご請求内容の確定(GRIM様ご承認)</b></td></tr>
+        <tr><td class="wk">〜8/28(金)</td><td><b>構造にかかわる決定事項のご回答〆切</b>(本資料の「〆切: 8/28」印)。8/27から実装が本格化するため、手戻り防止の最重要期限です</td></tr>
+        <tr><td class="wk">〜9/4(金)</td><td><b>仕様凍結。</b>以降の仕様変更は原則リリース日とのトレードになります(「〆切: 9/4」印はここまで)</td></tr>
+        <tr><td class="wk rd">〜9/11(金)</td><td class="rd">★デザイン素材・テキストの納品〆切(本資料の「納期: 9/11必須」印のもの)。9/14〜9/18で組込を行います</td></tr>
+        <tr><td class="wk">9/18(金)</td><td><b>実装完了・テスト環境投入(連休前デッドライン)</b></td></tr>
+        <tr><td class="wk">9/19(土)〜9/23(水)</td><td>シルバーウィーク5連休(稼働なし前提で計画)</td></tr>
+        <tr><td class="wk">9/24(木)〜9/29(火)</td><td>総合テスト・修正 ／ <b>9/28(月)GRIM様 最終確認・リリース判定</b></td></tr>
+        <tr><td class="wk">9/30(水)</td><td>本番反映・切替準備</td></tr>
+        <tr><td class="wk rd">10/1(木)</td><td class="rd">リニューアルオープン 🎉</td></tr>
+      </table>
+      <div class="caution">
+        <div class="cap">大事なポイント3つ</div>
+        (1)<b>9/11(金)のデザイン納品が最大のクリティカルパス</b>です。直後にシルバーウィーク(9/19〜23)があるため、9/11を過ぎた素材は連休明け対応=10/1に間に合わないリスクが跳ね上がります。特にギルド復興は素材点数が多いため早めの着手をお願いします。9/11時点で復興素材が未納の場合、<b>復興イベントのみ開催開始日を後ろ倒しする切り離し運用</b>とさせてください(イベントは開催日を自由に設定できるため、他機能の10/1オープンには影響しません)。(2)決定事項は<b>期限までにご回答がない場合、各項目の「推奨案」を採用して進行</b>します(設定駆動設計のため、数値系はオープン後も管理画面から調整可能です)。(3)8/26のフェーズ切り分けの結果、一部機能がフェーズ2(オープン後の追加リリース)に移る可能性があります。その場合は該当タブの〆切を改めてご連絡します。
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head"><div class="sec-num">2</div><h2>デザイン制作物(全機能共通)</h2></div>
+      <p>アイテム・ランクのアイコンは全画面で使い回す共通部品です。</p>
+      <div class="caution" style="margin-top:6px;">
+        <div class="cap">納品仕様(全素材共通)</div>
+        <b>透過PNG・表示サイズの2倍解像度</b>で納品ください(推奨サイズは各表に記載。UIモックの表示サイズ基準のため、実装確定時に微調整をお願いする場合があります)。<b>WebP変換・圧縮・リサイズはシステム側で自動処理する方針のため、デザイナー様側での変換作業は不要です</b>(高画質のPNGマスターをそのままアップいただければ軽量配信されます)。ファイル名は「rank_gold2.png」のような英数字を推奨。1ファイルの目安は5MB以内(超える場合もアップは可能ですが自動圧縮されます)。
+      </div>
+      <table>
+        <tr><th style="width:26%">制作物</th><th style="width:12%">推奨サイズ</th><th style="width:8%">点数</th><th style="width:36%">用途・備考</th><th style="width:12%">納期</th></tr>
+        <tr><td>ランクアイコン(段階別)</td><td>512×512 透過</td><td>段数分(例7)</td><td>ヘッダー・マイページ・ランクページのスタンプカードのマスに使用。月間・累計で共通か別かはG-04の決定に依存</td><td><span class="dl dl-must">9/11必須</span></td></tr>
+        <tr><td>鍵アイコン(グレード別)</td><td>512×512 透過</td><td>3(通常/ゴールド/レインボー)</td><td>ヘッダー・保有アイテム・交換所・報酬表示。段数はG-10の決定に依存(初期3段推奨)</td><td><span class="dl dl-must">9/11必須</span></td></tr>
+        <tr><td>チケットアイコン(グレード別)</td><td>512×512 透過</td><td>1〜2</td><td>同上。初期は通常チケット1種でも可</td><td><span class="dl dl-must">9/11必須</span></td></tr>
+        <tr><td>コインアイコン</td><td>512×512 透過</td><td>1</td><td>現行流用可であれば制作不要</td><td><span class="dl dl-run">流用可</span></td></tr>
+        <tr><td>マイページ ランクカード背景</td><td>750×400</td><td>1</td><td>マイページ上部のランクサマリカードの背景(ダークファンタジー調)。UIモック「マイページ(改修)」参照</td><td><span class="dl dl-must">9/11必須</span></td></tr>
+      </table>
+    </section>
+
+    <section>
+      <div class="sec-head"><div class="sec-num">3</div><h2>全体にかかわる決定事項</h2></div>
+      <table>
+        <tr><th style="width:6%">ID</th><th style="width:32%">決めていただきたいこと</th><th style="width:44%">選択肢と当社推奨</th><th>〆切</th></tr>
+        <tr><td>G-10</td><td>鍵・チケットのグレード段数と名称</td><td><b>推奨=通常/ゴールド/レインボーの3段で開始</b>(後から管理画面で追加可)。名称が決まらないとアイコン制作に入れません</td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>G-04</td><td>ランクの段階数・名称(月間/累計それぞれ)</td><td>例示: ブロンズ〜VIPの7段。<b>アイコンを月間・累計で共通にするか別にするか</b>もあわせて(共通推奨=制作点数半減)</td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>G-12</td><td>ユーザー向け表記</td><td><b>推奨=「コイン」「レインボーキー」の名称は現行継続</b></td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>G-32</td><td>通知の範囲</td><td><b>推奨=サイト内(ポップ+通知欄+バッジ)で開始</b>、プッシュ通知は後日</td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>—</td><td>フッターメニューの5項目化</td><td>現行4項目に<b>「🎁報酬ボックス」を追加して5項目</b>にする案の承認(UIモック参照)</td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>G-34</td><td>新サイトへ引き継ぐデータの範囲</td><td><b>推奨=アカウント・コイン残高・保有レインボーキーは引き継ぎ</b>。累計ランクの遡及計算の要否(G-02)とセットで</td><td><span class="dl dl-dec">8/28</span></td></tr>
+      </table>
+      <p class="note">※決定事項の全量は別紙「決定依頼リスト rev.4」参照。ここでは制作・画面に直結するものを抜粋しています。</p>
+    </section>
+  </div>
+
+  <!-- ============ 復興 ============ -->
+  <div class="pane" id="p-1">
+    <section>
+      <div class="sec-head"><div class="sec-num">1</div><h2>デザイン制作物(ギルド復興イベント)</h2></div>
+      <p>素材点数が最多の機能です。UIモック「ギルド復興イベント rev.3」の各画面と対応しています。</p>
+      <table>
+        <tr><th style="width:26%">制作物</th><th style="width:13%">推奨サイズ</th><th style="width:10%">点数</th><th style="width:35%">用途・備考</th><th style="width:12%">納期</th></tr>
+        <tr><td>イベントバナー(横長)</td><td>1200×640</td><td>イベント毎1</td><td>イベントページ最上部。初回=「グリムギルド復興祭 第1章」</td><td><span class="dl dl-must">9/11必須</span></td></tr>
+        <tr><td>追従スクエアバナー</td><td>400×400</td><td>イベント毎1</td><td>全ページ右下に固定表示される正方形バナー(モック参照)。視認性重視でシンプルに</td><td><span class="dl dl-must">9/11必須</span></td></tr>
+        <tr><td>施設バナー(復興済み)</td><td>600×500</td><td>施設数分(初回2〜4)</td><td>ステージカードの施設画像。<b>未復興状態はシステム側で自動暗転</b>するため復興済み1枚/施設でOK(未復興専用画像を作る場合は2枚/施設)</td><td><span class="dl dl-must">9/11必須</span></td></tr>
+        <tr><td>Coming Soon用ビジュアル</td><td>—</td><td>0〜1</td><td>イベントバナーの流用で可(暗転表示)。専用に作る場合のみ</td><td><span class="dl dl-run">任意</span></td></tr>
+        <tr><td>予告編動画</td><td>YouTube</td><td>イベント毎1</td><td>YouTubeに限定公開等でアップいただきURL連携。<b>制作有無と納期を8/7までにご回答ください</b>(動画なしでの開始も可)</td><td><span class="dl dl-dec">8/28回答</span></td></tr>
+      </table>
+    </section>
+    <section>
+      <div class="sec-head"><div class="sec-num">2</div><h2>決定事項(設計判断が分かれる箇所)</h2></div>
+      <table>
+        <tr><th style="width:6%">ID</th><th style="width:32%">決めていただきたいこと</th><th style="width:44%">選択肢と当社推奨</th><th>〆切</th></tr>
+        <tr><td>G-19</td><td>復興ゲージの進み方</td><td><b>推奨=対象オリパのコイン消費を自動集計</b>(モックの方式。ご指示の「カンスト消費コイン数」ベース)。※当初案の「復興Pt投入」方式との最終確認</td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>G-23</td><td>初回イベントの規模</td><td>ステージ(施設)数: <b>推奨=2〜4</b> ／ 開催期間: <b>推奨=3〜4週間</b> ／ カンスト消費コイン数の目安(数値は後決め可)</td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>—</td><td>ステージの開放方式</td><td><b>推奨=順次開放</b>(前ステージのカンストで次が開放・未開放は暗転)。全ステージ同時開放も選択可</td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>G-21</td><td>初回を個別イベにするか全体イベにするか</td><td><b>推奨=初回はユーザー単位イベント</b>(全体イベは集計負荷検証後の第2弾で)。管理画面は両対応で作ります</td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>—</td><td>報酬スロット上限</td><td><b>推奨=5スロット</b>(上限値は設定で10まで拡張可能な作り)</td><td><span class="dl dl-dec">8/28</span></td></tr>
+      </table>
+    </section>
+    <section>
+      <div class="sec-head"><div class="sec-num">3</div><h2>テキスト制作</h2></div>
+      <ul class="dash">
+        <li><b>イベント名・章タイトル・世界観コピー</b>(例:「グリムギルド復興祭 第1章 酒場のともしび」)― <span class="dl dl-must">9/11必須</span></li>
+        <li><b>施設名</b>(酒場・市場など初回分)― <span class="dl dl-must">9/11必須</span></li>
+        <li><b>店主のお礼コメント</b>(推奨=酒場のみ・2〜3行)― <span class="dl dl-run">任意</span></li>
+      </ul>
+    </section>
+  </div>
+
+  <!-- ============ ランク ============ -->
+  <div class="pane" id="p-2">
+    <section>
+      <div class="sec-head"><div class="sec-num">1</div><h2>デザイン制作物(会員ランク・マイページ)</h2></div>
+      <p>ランクアイコン・ランクカード背景は「全体・共通」タブに記載(共用部品)。本機能固有の追加素材は少なめです。</p>
+      <table>
+        <tr><th style="width:26%">制作物</th><th style="width:13%">推奨サイズ</th><th style="width:10%">点数</th><th style="width:35%">用途・備考</th><th style="width:12%">納期</th></tr>
+        <tr><td>スタンプカードの達成スタンプ</td><td>200×200 透過</td><td>1</td><td>達成マスに押される印。<b>システム標準の印(モックの赤丸)で開始も可</b>=その場合制作不要</td><td><span class="dl dl-run">任意</span></td></tr>
+        <tr><td>累計ゲージの装飾</td><td>—</td><td>0</td><td>ゲージ・目盛りはシステム描画のため<b>制作不要</b></td><td>—</td></tr>
+      </table>
+      <div class="caution"><div class="cap">現行マイページのすごろくバナー画像について</div>現行の「丘すごろく」画像バナー(0%/25%/50%…)は新ランクページ(スタンプカード式)に置き換わるため、新サイトでは使用しません。世界観の踏襲はランクアイコン・ランクカード背景で行う方針です。</div>
+    </section>
+    <section>
+      <div class="sec-head"><div class="sec-num">2</div><h2>決定事項</h2></div>
+      <table>
+        <tr><th style="width:6%">ID</th><th style="width:32%">決めていただきたいこと</th><th style="width:44%">選択肢と当社推奨</th><th>〆切</th></tr>
+        <tr><td>G-04</td><td>段階数・名称・アイコン共通化</td><td>全体タブ参照(月間/累計で共通アイコン推奨)</td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>G-02</td><td>累計ランクの初期値</td><td>(a)過去チャージ履歴から遡及 (b)全員ゼロスタート。<b>新サイトのためどちらも選択可</b>。G-34(引き継ぎ範囲)とセットで</td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>G-05</td><td>ランク未達の限定ガチャの見せ方</td><td>(a)非表示 (b)ロック表示。<b>推奨=(b)</b>(上位ランクへの動機付け)</td><td><span class="dl dl-dec">9/4</span></td></tr>
+        <tr><td>—</td><td>マイページ改修案の承認</td><td>保有アイテム3枠/ランクカード/ミッションクイック/フッター5項目化(UIモック「マイページ(改修)」の構成)</td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>—</td><td>月間ランク到達報酬の内容</td><td>マスごとの報酬(鍵・チケットの数量)。<b>数値はリリース後も変更可のため仮決めでOK</b></td><td><span class="dl dl-run">9/16</span></td></tr>
+      </table>
+    </section>
+  </div>
+
+  <!-- ============ ミッション ============ -->
+  <div class="pane" id="p-3">
+    <section>
+      <div class="sec-head"><div class="sec-num">1</div><h2>デザイン制作物(ミッション)</h2></div>
+      <table>
+        <tr><th style="width:26%">制作物</th><th style="width:13%">推奨サイズ</th><th style="width:10%">点数</th><th style="width:35%">用途・備考</th><th style="width:12%">納期</th></tr>
+        <tr><td>ミッション行のアイコン</td><td>—</td><td>0</td><td><b>推奨=汎用アイコンセット(システム側)を使用し個別制作なし</b>。ミッションは毎月増えるため、個別画像にすると運用が回りません。個別画像方式を希望される場合のみご相談</td><td>—</td></tr>
+        <tr><td>ヘッダーのミッションアイコン(🎯相当)</td><td>128×128 透過</td><td>1</td><td>全ページヘッダー常設。サイトのトンマナに合わせたもの(システム標準でも可)</td><td><span class="dl dl-run">任意</span></td></tr>
+      </table>
+      <p class="note">※ミッションはデザイン制作がほぼ不要な設計にしています(運用継続性を優先)。</p>
+    </section>
+    <section>
+      <div class="sec-head"><div class="sec-num">2</div><h2>決定事項</h2></div>
+      <table>
+        <tr><th style="width:6%">ID</th><th style="width:32%">決めていただきたいこと</th><th style="width:44%">選択肢と当社推奨</th><th>〆切</th></tr>
+        <tr><td>G-16</td><td>種別構成の承認</td><td><b>当社案=デイリー4/ウィークリー4/マンスリー3/累計10(コンプ報酬付き)</b>。イベント・復興ミッションを初回から入れるかもご判断ください(当社案=復興イベントと同時に開始)</td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>G-18</td><td>デイリーの切替時刻</td><td>(a)0:00 (b)朝5:00等。<b>推奨=0:00</b></td><td><span class="dl dl-dec">9/4</span></td></tr>
+        <tr><td>G-17</td><td>課金条件ミッションの採否</td><td><b>推奨=マンスリーに1本のみ</b>(法務確認の結果とセットで最終判断)</td><td><span class="dl dl-dec">9/4</span></td></tr>
+        <tr><td>—</td><td>ミッション名・文言の承認</td><td>当社サンプルセット(「今日もGRIMへようこそ」等)をベースに修正指示をください</td><td><span class="dl dl-run">9/16</span></td></tr>
+      </table>
+    </section>
+  </div>
+
+  <!-- ============ 交換所 ============ -->
+  <div class="pane" id="p-4">
+    <section>
+      <div class="sec-head"><div class="sec-num">1</div><h2>デザイン制作物(鍵交換所)</h2></div>
+      <table>
+        <tr><th style="width:26%">制作物</th><th style="width:13%">推奨サイズ</th><th style="width:10%">点数</th><th style="width:35%">用途・備考</th><th style="width:12%">納期</th></tr>
+        <tr><td>交換商品の画像</td><td>600×600</td><td>初回ラインナップ分</td><td>カード現物の撮影画像 or 商品ビジュアル。<b>以降は運用で随時追加</b>(管理画面からアップ)</td><td><span class="dl dl-must">9/11必須</span></td></tr>
+        <tr><td>鍵アイコン(グレード別)</td><td>—</td><td>—</td><td>「全体・共通」タブの共用部品を使用</td><td>—</td></tr>
+      </table>
+    </section>
+    <section>
+      <div class="sec-head"><div class="sec-num">2</div><h2>決定事項</h2></div>
+      <table>
+        <tr><th style="width:6%">ID</th><th style="width:32%">決めていただきたいこと</th><th style="width:44%">選択肢と当社推奨</th><th>〆切</th></tr>
+        <tr><td>G-10</td><td>グレード段数・名称・換算</td><td>全体タブ参照(3段推奨)。<b>商品の必要数は「グレード+個数」の直接指定</b>(例: レインボーキー×2)で進めます</td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>—</td><td>初回の交換ラインナップ</td><td>商品リスト(商品名・必要グレード×数・在庫数・掲載期間)。市場限定枠(復興連動)を作るかも含めて</td><td><span class="dl dl-run">9/16</span></td></tr>
+        <tr><td>—</td><td>在庫が0になった時の表示</td><td>(a)SOLD OUT表示で残す (b)自動で非表示。<b>推奨=(a)</b>(交換所の賑わい維持)</td><td><span class="dl dl-dec">9/4</span></td></tr>
+        <tr><td>G-09</td><td>既存レインボーキー保有分の扱い</td><td><b>推奨=保有分は引き継ぎ、失効は旧ルール(3ヶ月後の15日)のまま消化し、新規獲得分から新ルール</b></td><td><span class="dl dl-dec">8/28</span></td></tr>
+        <tr><td>G-11</td><td>鍵専用ガチャ(レインボーキータブ)の扱い</td><td><b>推奨=新交換所の公開と同時に廃止</b>(移行告知はL-05のヘルプ改訂とセット)</td><td><span class="dl dl-dec">9/4</span></td></tr>
+      </table>
+    </section>
+  </div>
+
+  <!-- ============ 別トラック ============ -->
+  <div class="pane" id="p-5">
+    <section>
+      <div class="sec-head"><div class="sec-num">1</div><h2>天井・レイドオリパ(ガチャカスタム要件・別トラック)</h2></div>
+      <p>この2機能はオリパ(ガチャ)本体のカスタム要件として、本タスク一覧とは別トラックで仕様書化・調整を進めます。現時点でGRIM様にご準備いただくものは以下です。</p>
+      <table>
+        <tr><th style="width:6%">ID</th><th style="width:34%">決めていただきたいこと</th><th style="width:44%">選択肢と当社推奨</th><th>〆切</th></tr>
+        <tr><td>G-28</td><td>天井のカウント方式</td><td>(a)連続型: 設定ランク以上が出たらリセット (b)累積型。<b>推奨=(a)</b></td><td><span class="dl dl-dec">別途</span></td></tr>
+        <tr><td>G-30</td><td>天井目前で完売した場合のルール</td><td>(a)救済なし+購入前に明記 (b)Pt還元 (c)持越し。<b>推奨=(a)</b>。苦情に直結するため必ず事前決定</td><td><span class="dl dl-dec">別途</span></td></tr>
+        <tr><td>G-25〜27</td><td>レイドの集計基準・表示・締めルール</td><td>推奨=購入口数ベース/上位10+自分の順位(名前は一部マスク)/完売時即締め・同率は先着</td><td><span class="dl dl-dec">別途</span></td></tr>
+        <tr><td>—</td><td>法務確認(順位報酬・天井報酬の景表法整理)</td><td>当社からも論点整理をお渡しします。<b>結果が出るまでレイドのリリース日は確定できません</b></td><td><span class="dl dl-dec">最優先</span></td></tr>
+      </table>
+      <p class="note">※デザイン制作物は現時点なし(オリパ詳細画面への表示はシステムUI)。開催時のオリパバナーは通常の運用フローで。</p>
+    </section>
+  </div>
+
+  <div style="background:#fff;border:1px solid var(--line);margin-top:24px;padding:12px 28px;font-size:12px;color:var(--gray);">
+    <b style="color:var(--dark);">改訂履歴:</b> rev.1(2026-08-05)初版作成(9/1リリース前提) ／ rev.2(2026-08-24)<b>10/1リニューアルオープンのスケジュールに全面更新</b>・納品仕様を明記(WebP変換等はシステム側で自動処理、デザイナー様の変換作業は不要): 決定〆切 8/28・仕様凍結 9/4・デザイン素材納品 9/11(シルバーウィーク前が絶対条件)・数値系 9/16。フェーズ1/2切り分け(8/26確定)の注記を追加 ／ 参照: UIモック統合版(各画面の見た目)・決定依頼リストrev.4(決定事項の全量)・リニューアル全体スケジュール(8/24版)
+  </div>
+
+</div>
+<script>
+document.querySelectorAll('.tab').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active');});
+    document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('active');});
+    b.classList.add('active');
+    document.getElementById('p-'+b.dataset.p).classList.add('active');
+    window.scrollTo(0,0);
+  });
+});
+</script>
+</body>
+</html>
