@@ -19,6 +19,8 @@ interface CartItem {
 interface Props {
   products: Product[];
   shop: Shop | null;
+  /** 商品ID → このショップが発注中(未確定)のBOX数。配分品のショップ別上限判定に使う */
+  pendingByProduct?: Record<string, number>;
 }
 
 type CategoryFilter = "all" | ProductCategory;
@@ -30,7 +32,7 @@ const CATEGORY_LABEL: Record<ProductCategory, string> = {
   other:    "その他",
 };
 
-export function OrderForm({ products: initialProducts, shop }: Props) {
+export function OrderForm({ products: initialProducts, shop, pendingByProduct = {} }: Props) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -182,7 +184,12 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
   }, [products]);
 
   const addToCart = (product: Product, unit: OrderUnit, qtyRaw: number) => {
-    const result = validateOrderQty({ product, orderUnit: unit, qty: qtyRaw });
+    const result = validateOrderQty({
+      product,
+      orderUnit: unit,
+      qty: qtyRaw,
+      shopPendingBox: pendingByProduct[product.id] ?? 0,
+    });
     if (!result.ok) {
       setMessage(result.error ?? "入力に誤りがあります");
       return;
@@ -328,6 +335,7 @@ export function OrderForm({ products: initialProducts, shop }: Props) {
               listedRate={getListedRate(p, shop)}
               onAdd={addToCart}
               compact={view === "grid"}
+              pendingBox={pendingByProduct[p.id] ?? 0}
             />
           ))}
         </div>
@@ -516,11 +524,14 @@ function ProductCard({
   listedRate,
   onAdd,
   compact = false,
+  pendingBox = 0,
 }: {
   product: Product;
   listedRate: number;
   onAdd: (p: Product, unit: OrderUnit, qty: number) => void;
   compact?: boolean;
+  /** このショップが発注中(未確定)のBOX数 */
+  pendingBox?: number;
 }) {
   // 単位ごとの初期数量: BOX=1カートン分(=ct_to_box、最低発注数を下回らない) / CT=1
   const defaultBox = Math.max(product.min_order_box, product.ct_to_box);
@@ -535,6 +546,8 @@ function ProductCard({
   const available = (product.planned_qty ?? 0) - product.ordered_qty;
   // カット品は在庫上限の概念が無く希望BOX数を受け付けるため SOLD OUT にしない
   const soldOut = !isCut && available <= 0;
+  // 配分品はショップごとに発注可能数まで。発注中の数量が上限に達したら受付停止表示
+  const maxReached = !isCut && !soldOut && pendingBox >= available;
   const flowBadge = isCut ? "カット割" : "配分品";
 
   return (
@@ -603,6 +616,13 @@ function ProductCard({
                 : `残 ${available} BOX / ${product.planned_qty ?? 0} BOX (1CT = ${product.ct_to_box} BOX)`}
             </p>
           )}
+          {!isCut && !soldOut && pendingBox > 0 && (
+            <p className={`text-xs mt-1 ${maxReached ? "text-amber-700 font-semibold" : "text-slate-500"}`}>
+              {maxReached
+                ? `発注可能数までご注文済みです (発注中 ${pendingBox} BOX)。配分確定をお待ちください`
+                : `発注中 ${pendingBox} BOX (あと ${available - pendingBox} BOX まで注文できます)`}
+            </p>
+          )}
           {!compact && product.notes && (
             <p className="text-xs text-slate-500 mt-1 line-clamp-2">{product.notes}</p>
           )}
@@ -626,9 +646,9 @@ function ProductCard({
               <button
                 key={u}
                 type="button"
-                disabled={soldOut}
+                disabled={soldOut || maxReached}
                 className={`px-2 py-1 rounded border ${
-                  soldOut
+                  soldOut || maxReached
                     ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
                     : unit === u
                       ? "bg-brand-600 text-white border-brand-600"
@@ -643,7 +663,7 @@ function ProductCard({
           <input
             type="number"
             min={1}
-            disabled={soldOut}
+            disabled={soldOut || maxReached}
             className="input w-24 sm:w-full text-right disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
             value={qty}
             onChange={(e) => setQty(parseInt(e.target.value || "0", 10))}
@@ -651,14 +671,14 @@ function ProductCard({
           <button
             type="button"
             className={`text-sm whitespace-nowrap ${
-              soldOut
+              soldOut || maxReached
                 ? "inline-flex items-center justify-center rounded-md bg-slate-200 px-4 py-2 font-semibold text-slate-400 cursor-not-allowed"
                 : "btn-primary"
             }`}
-            disabled={soldOut}
+            disabled={soldOut || maxReached}
             onClick={() => onAdd(product, unit, qty)}
           >
-            {soldOut ? "売り切れ" : "カートに追加"}
+            {soldOut ? "売り切れ" : maxReached ? "ご注文上限" : "カートに追加"}
           </button>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { rankAtLeast } from "@/constants/ranks";
 import { addDaysISO, ORDER_CUTOFF_DAYS, todayISOInJST } from "@/lib/dates";
+import { fetchShopPendingBox } from "@/lib/pending-orders";
 import { OrderForm } from "./OrderForm";
 
 export const metadata = { title: "発注 | トレカ商事" };
@@ -56,13 +57,19 @@ export default async function OrderPage() {
     return true;
   });
 
+  // 配分品のショップ別上限表示用: 発注中(未確定)のBOX数
+  const pendingMap = shop
+    ? await fetchShopPendingBox(supabase, shop.id, visibleProducts.map((p) => p.id))
+    : new Map<string, number>();
+  const pendingByProduct = Object.fromEntries(pendingMap);
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-2">発注フォーム</h1>
       <p className="text-sm text-slate-500 mb-6">
-        BOX 単位は最低 12 BOX、CT 単位は 1 CT 以上で発注できます。
+        最低発注数は商品ごとに異なります (各商品の表示をご確認ください)。CT 単位は 1 CT 以上で発注できます。
       </p>
-      <OrderForm products={visibleProducts} shop={shop ?? null} />
+      <OrderForm products={visibleProducts} shop={shop ?? null} pendingByProduct={pendingByProduct} />
     </div>
   );
 }

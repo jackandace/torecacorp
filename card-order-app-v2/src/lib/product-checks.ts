@@ -33,6 +33,17 @@ export function checkProductPublishable(p: Partial<ProductCheckInput>): ProductC
     errors.push("配分品の発注可能数(在庫)が0です");
   }
 
+  // 配分数より最低発注数が大きいと誰も発注できない (取込既定12のまま少数配分を公開する事故の検知)
+  if (
+    p.flow_type === "haibun" &&
+    p.planned_qty != null && p.planned_qty > 0 &&
+    p.min_order_box != null && p.min_order_box > p.planned_qty
+  ) {
+    warnings.push(
+      `最低発注数(${p.min_order_box}BOX)が発注可能数(${p.planned_qty}BOX)を超えており、このままでは誰も発注できません。最低発注数を下げてください`,
+    );
+  }
+
   // 推奨 (warnings)
   if (!p.order_deadline) warnings.push("発注締切が未設定です(締切なしで公開されます)");
   if (!p.jan_code) warnings.push("JANコードが未設定です");

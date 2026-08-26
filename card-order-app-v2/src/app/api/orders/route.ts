@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getListedRate } from "@/lib/rebate";
 import { validateOrderQty } from "@/lib/orders";
+import { fetchShopPendingBox } from "@/lib/pending-orders";
 import { calcDeposit, DEPOSIT_RATE } from "@/lib/deposit";
 import { nextInvoiceNumber } from "@/lib/invoice-number";
 import { writeAudit } from "@/lib/audit";
@@ -77,6 +78,9 @@ export async function POST(request: NextRequest) {
     .is("deleted_at", null);
   const productMap = new Map((productList ?? []).map((p) => [p.id, p]));
 
+  // 配分品のショップ別上限判定用: このショップの発注中(未確定)BOX数
+  const pendingMap = await fetchShopPendingBox(supabase, shop.id, productIds);
+
   // バリデーション → insert 行をまとめて構築
   const created: string[] = [];
   const createdItems: { series: string | null; title: string; qty: number; unit: string; qtyInBox: number }[] = [];
@@ -90,7 +94,12 @@ export async function POST(request: NextRequest) {
       errors.push({ productId: item.productId, error: "product not found" });
       continue;
     }
-    const v = validateOrderQty({ product, orderUnit: item.unit, qty: item.qty });
+    const v = validateOrderQty({
+      product,
+      orderUnit: item.unit,
+      qty: item.qty,
+      shopPendingBox: pendingMap.get(item.productId) ?? 0,
+    });
     if (!v.ok) {
       errors.push({ productId: item.productId, error: v.error ?? "invalid" });
       continue;

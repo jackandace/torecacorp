@@ -47,4 +47,12 @@ describe("checkProductPublishable", () => {
     const r = checkProductPublishable({ ...base, carton_delivery: true, master_carton_box: null });
     expect(r.warnings.some((w) => w.includes("マスターカートン"))).toBe(true);
   });
+  it("配分品で最低発注数 > 発注可能数は警告 (誰も発注できない状態の検知)", () => {
+    const r = checkProductPublishable({ ...base, flow_type: "haibun", planned_qty: 8, min_order_box: 12 });
+    expect(r.warnings.some((w) => w.includes("誰も発注できません"))).toBe(true);
+  });
+  it("最低発注数 <= 発注可能数なら警告なし", () => {
+    const r = checkProductPublishable({ ...base, flow_type: "haibun", planned_qty: 12, min_order_box: 12 });
+    expect(r.warnings.some((w) => w.includes("誰も発注できません"))).toBe(false);
+  });
 });

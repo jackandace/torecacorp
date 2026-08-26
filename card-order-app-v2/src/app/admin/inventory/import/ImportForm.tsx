@@ -9,6 +9,7 @@ interface ImportResult {
   updated: { title: string; changes: string[] }[];
   skipped: { title: string; reason: string }[];
   errors: string[];
+  notice?: string | null;
 }
 
 export function ImportForm() {
@@ -122,6 +123,12 @@ export function ImportForm() {
             <StatCard label="スキップ" value={result.summary.skipped} tone="neutral" />
             <StatCard label="エラー" value={result.summary.errors} tone={result.summary.errors > 0 ? "err" : "neutral"} />
           </div>
+
+          {result.notice && (
+            <div className="rounded-md border border-amber-300 bg-amber-50 text-amber-900 text-sm p-3">
+              ⚠ {result.notice}
+            </div>
+          )}
 
           {result.inserted.length > 0 && (
             <Section title={`✓ 新規追加 (${result.inserted.length} 件)`} initiallyOpen>

@@ -95,6 +95,28 @@ describe("validateOrderQty", () => {
       validateOrderQty({ product: { ...cut, status: "受付停止" as const }, orderUnit: "BOX", qty: 12 }).ok,
     ).toBe(false);
   });
+
+  describe("ショップ別上限 (shopPendingBox)", () => {
+    it("発注中と合わせて発注可能数以内なら OK", () => {
+      // 残100・発注中50 → あと50まで
+      const r = validateOrderQty({ product: baseProduct, orderUnit: "BOX", qty: 50, shopPendingBox: 50 });
+      expect(r.ok).toBe(true);
+    });
+    it("発注中と合わせて超過は NG (残数を案内)", () => {
+      const r = validateOrderQty({ product: baseProduct, orderUnit: "BOX", qty: 60, shopPendingBox: 50 });
+      expect(r.ok).toBe(false);
+      expect(r.error).toMatch(/あと50BOXまで/);
+    });
+    it("発注可能数まで注文済みならこれ以上 NG", () => {
+      const r = validateOrderQty({ product: baseProduct, orderUnit: "BOX", qty: 12, shopPendingBox: 100 });
+      expect(r.ok).toBe(false);
+      expect(r.error).toMatch(/これ以上ご注文いただけません/);
+    });
+    it("カット品は shopPendingBox の影響を受けない", () => {
+      const cut = { ...baseProduct, flow_type: "cut" as const, planned_qty: 0 };
+      expect(validateOrderQty({ product: cut, orderUnit: "BOX", qty: 100, shopPendingBox: 9999 }).ok).toBe(true);
+    });
+  });
 });
 
 describe("calcCartSubtotal", () => {
