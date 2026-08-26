@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRIM 新機能UIモック統合版 v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#d6202b;--gold:#e8c547;--dark:#1a1a1a;--gray:#666;--line:#ddd;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP',sans-serif;background:#e8e8ea;color:#1a1a1a;}
+  .head{background:var(--dark);color:#fff;padding:16px 20px 12px;border-bottom:5px solid var(--red);}
+  .head h1{font-size:18px;font-weight:900;letter-spacing:.04em;}
+  .head .sub{color:var(--gold);font-size:11.5px;font-weight:700;margin-top:2px;}
+  .ftabs{position:sticky;top:0;z-index:100;background:var(--dark);display:flex;overflow-x:auto;padding:0 10px;border-bottom:3px solid var(--gold);}
+  .ftab{flex:none;font-family:inherit;font-size:13.5px;font-weight:900;color:#bbb;background:none;border:none;padding:13px 18px 11px;cursor:pointer;border-bottom:4px solid transparent;white-space:nowrap;line-height:1.3;}
+  .ftab small{display:block;font-size:9px;font-weight:700;color:#888;}
+  .ftab:hover{color:#fff;}
+  .ftab.active{color:var(--gold);border-bottom-color:var(--red);}
+  .fsec{display:none;}
+  .fsec.active{display:block;}
+  .fdesc{max-width:900px;margin:14px auto 10px;font-size:12px;color:var(--gray);background:#fff;border:1px dashed #bbb;border-radius:6px;padding:9px 14px;}
+  .fdesc b{color:var(--red);}
+  .mockframe{display:block;width:100%;height:calc(100vh - 130px);min-height:820px;border:none;background:#f0f0f2;}
+</style>
+</head>
+<body>
+<div class="head">
+  <h1>GRIM 新機能 UIモック統合版</h1>
+  <div class="sub">ギルド復興 ／ 会員ランク・マイページ ／ ミッション ／ 鍵交換所 ｜ v2(2026-08-26)｜ フッター6項目化・マイページのアプリホーム風改訂を反映 ｜ 上段=機能・下段=各機能内の画面切替</div>
+</div>
+<nav class="ftabs">
+<button class="ftab active" data-f="0">🍺 ギルド復興イベント<small>rev.11</small></button><button class="ftab" data-f="1">👑 会員ランク・マイページ<small>rev.12</small></button><button class="ftab" data-f="2">🎯 ミッション<small>rev.6</small></button><button class="ftab" data-f="3">🗝 鍵交換所<small>rev.3</small></button>
+</nav>
+<div class="fsec active" id="f-0">
+  <div class="fdesc"><b>🍺 ギルド復興イベント rev.11</b> ― ユーザー3画面+🗺トップからの遷移(TOP画面イメージ・3経路)+管理2画面。個別イベント画面: 街の全体マップ(状態×時間帯・動き付き)+追従表示2案の切替比較(このモック内の画面タブ・ボタン・フィルタはすべて動作します)</div>
+  <iframe class="mockframe" srcdoc="<!DOCTYPE html>
+<html lang=&quot;ja&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
+<title>GRIM ギルド復興イベント UIモック rev.11</title>
+<link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;>
+<link href=&quot;https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
+<style>
+  :root{--red:#d6202b;--gold:#e8c547;--dark:#1a1a1a;--maroon:#7a2030;--gray:#666;--line:#ddd;--bg:#f0f0f2;
+    --site-red:#e8442e;--site-maroon:#8a1f1f;--site-gold:#d4af37;--site-bg:#fff;--site-line:#ececec;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark);font-size:14px;line-height:1.7;}
+
+  /* ===== モックシェル ===== */
+  .shell-bar{position:sticky;top:0;z-index:100;background:var(--dark);border-bottom:4px solid var(--red);display:flex;overflow-x:auto;padding:0 8px;}
+  .shell-btn{flex:none;font-family:inherit;font-size:12.5px;font-weight:700;color:#bbb;background:none;border:none;padding:12px 14px 10px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
+  .shell-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+  .view{display:none;padding:24px 12px 60px;}
+  .view.active{display:block;}
+  .mock-note{max-width:760px;margin:0 auto 16px;font-size:12px;color:var(--gray);background:#fff;border:1px dashed #bbb;border-radius:6px;padding:10px 14px;}
+  .mock-note b{color:var(--red);}
+
+  /* ===== スマホフレーム ===== */
+  .phone{width:390px;max-width:100%;margin:0 auto;background:#fff;border:10px solid var(--dark);border-radius:28px;overflow:hidden;position:relative;box-shadow:0 8px 30px rgba(0,0,0,.18);}
+  .ph-scroll{height:720px;overflow-y:auto;position:relative;}
+  .ph-head{position:sticky;top:0;z-index:20;background:#fff;padding:8px 12px 0;border-bottom:1px solid var(--site-line);}
+  .ph-head .brand{display:flex;justify-content:space-between;align-items:center;}
+  .logo{width:34px;height:34px;border-radius:6px;background:linear-gradient(135deg,#a01818,#6a0f0f);border:1.5px solid var(--site-gold);color:var(--site-gold);font-weight:900;font-size:17px;display:flex;align-items:center;justify-content:center;font-family:serif;}
+  .ph-head .bal{font-size:11px;color:#333;display:flex;gap:6px;align-items:center;font-weight:700;}
+  .bal .coin{background:#fff;border:1px solid var(--site-line);border-radius:14px;padding:2px 10px;display:flex;gap:4px;align-items:center;box-shadow:0 1px 2px rgba(0,0,0,.05);}
+  .bal .g{width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe9a0,#d4af37 70%);display:inline-block;border:1px solid #b8952a;}
+  .cats{display:flex;gap:0;overflow-x:auto;padding:8px 0 0;background:#fff;}
+  .cat{flex:none;font-size:13px;font-weight:900;color:#555;padding:8px 14px;border-bottom:3px solid transparent;position:relative;white-space:nowrap;}
+  .cat.on{color:var(--site-red);border-bottom-color:var(--site-red);}
+  .cat .nb{position:absolute;top:2px;right:0;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;padding:0 4px;border-radius:6px;}
+  /* 子カテゴリ(2段目) */
+  .cats-c{display:flex;gap:6px;overflow-x:auto;padding:7px 10px;background:#f7f7f8;border-top:1px solid var(--site-line);margin:0 -12px;}
+  .catc{flex:none;font-size:11px;font-weight:700;color:#666;padding:3px 12px;border:1px solid #ddd;border-radius:14px;background:#fff;white-space:nowrap;}
+  .catc.on{color:#fff;background:var(--site-red);border-color:var(--site-red);}
+  .catc.cs{color:#999;border-style:dashed;}
+  /* 下部固定フッターナビ(実サイト準拠) */
+  .ph-foot{position:sticky;bottom:0;z-index:25;background:#fff;border-top:1px solid var(--site-line);display:flex;box-shadow:0 -2px 8px rgba(0,0,0,.06);}
+  .ph-foot a{flex:1;text-align:center;padding:7px 0 8px;font-size:9.5px;font-weight:700;color:#777;text-decoration:none;line-height:1.5;}
+  .ph-foot a .ic{display:block;font-size:17px;}
+  .ph-foot a.on{color:var(--site-red);}
+
+  /* 仮画像 */
+  .ph-img{position:relative;display:flex;align-items:center;justify-content:center;color:#fff;overflow:hidden;}
+  .ph-img::after{content:&quot;仮画像&quot;;position:absolute;right:6px;bottom:4px;font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.1em;border:1px solid rgba(255,255,255,.5);padding:0 4px;border-radius:2px;}
+  .img-ev{background:linear-gradient(120deg,#2b1215,#7a2030 45%,#1a1a1a);height:150px;flex-direction:column;}
+  .img-ev .t1{font-size:11px;letter-spacing:.3em;color:var(--gold);font-weight:700;}
+  .img-ev .t2{font-size:22px;font-weight:900;text-shadow:0 2px 8px rgba(0,0,0,.6);}
+  .img-ev .t3{font-size:11px;color:#eee;}
+  .img-sq{background:linear-gradient(135deg,#7a2030,#d6202b);}
+  .img-fac{height:92px;flex:none;width:110px;border-radius:8px;font-size:34px;}
+  .f-bar{background:linear-gradient(160deg,#4a2c14,#8a5a2b);}
+  .f-mkt{background:linear-gradient(160deg,#143a4a,#2b7a8a);}
+  .f-wpn{background:linear-gradient(160deg,#3a3a3a,#6f6f6f);}
+  .f-cas{background:linear-gradient(160deg,#2b1a4a,#6a4a9a);}
+  .img-mov{background:#000;height:190px;flex-direction:column;gap:8px;cursor:pointer;}
+  .img-mov .play{width:56px;height:56px;border-radius:50%;background:rgba(214,32,43,.92);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;padding-left:4px;}
+  .img-mov .cap{font-size:11px;color:#bbb;}
+
+  .sec-t{font-size:13px;font-weight:900;padding:14px 14px 6px;display:flex;align-items:center;gap:8px;}
+  .sec-t::before{content:&quot;&quot;;width:4px;height:14px;background:var(--site-red);border-radius:2px;}
+  .pill{font-size:10px;font-weight:900;color:#fff;background:var(--site-red);padding:1px 8px;border-radius:10px;}
+  .pill.gd{background:var(--gold);color:var(--dark);}
+  .row{padding:0 14px;}
+  .kv{display:flex;justify-content:space-between;font-size:12px;padding:8px 14px;border-bottom:1px solid #f0f0f0;}
+  .kv b{color:var(--maroon);}
+
+  /* ステージカード */
+  .stg{display:flex;gap:10px;margin:0 14px 12px;border:1px solid var(--line);border-radius:10px;padding:10px;position:relative;background:#fff;}
+  .stg-info{flex:1;min-width:0;}
+  .stg-name{font-size:13px;font-weight:900;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .bignum{font-size:16px;font-weight:900;letter-spacing:.02em;}
+  .bignum small{font-size:11px;font-weight:700;color:var(--gray);}
+  .gauge{height:14px;background:#eee;border-radius:7px;overflow:hidden;margin:6px 0 2px;position:relative;}
+  .gauge i{display:block;height:100%;background:linear-gradient(90deg,#ff6a3c,var(--site-red));border-radius:7px;}
+  .gauge.full i{background:linear-gradient(90deg,#c9a227,var(--gold));}
+  .gnum{font-size:10.5px;color:var(--gray);}
+  .gnum b{color:var(--site-red);}
+  .rw{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+  .rchip{font-size:10px;font-weight:700;border:1px solid var(--line);border-radius:9px;padding:1px 7px;background:#fafafa;white-space:nowrap;}
+  .rchip.done{background:var(--gold);border-color:#c9a227;}
+  .stg.locked .ph-img,.stg.locked .stg-info{filter:brightness(.32) grayscale(.6);}
+  .stg .lock{position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;color:#fff;font-weight:900;font-size:12px;gap:2px;text-shadow:0 1px 6px #000;}
+  .stg.locked .lock{display:flex;}
+  .btn{display:inline-block;font-size:11px;font-weight:900;color:#fff;background:var(--red);border:none;border-radius:4px;padding:5px 12px;cursor:pointer;font-family:inherit;}
+  .btn.gd{background:var(--gold);color:var(--dark);}
+  .btn.gr{background:#bbb;}
+  .gacha-chips{display:flex;gap:6px;flex-wrap:wrap;padding:4px 14px 16px;}
+  .gc{font-size:10.5px;font-weight:700;border:1.5px solid var(--site-red);color:var(--site-red);border-radius:12px;padding:2px 10px;background:#fff;}
+
+  /* 追従スクエアバナー */
+  .float-bn{position:absolute;right:10px;bottom:72px;width:92px;height:92px;border-radius:14px;box-shadow:0 5px 16px rgba(0,0,0,.35);z-index:40;border:2px solid var(--site-gold);flex-direction:column;font-size:9.5px;font-weight:900;text-align:center;line-height:1.3;cursor:pointer;}
+  .float-bn .x{position:absolute;top:-7px;left:-7px;width:16px;height:16px;background:var(--dark);color:#fff;border-radius:50%;font-size:9px;display:flex;align-items:center;justify-content:center;}
+  .float-bn .big{font-size:15px;}
+  /* 案B: アイコンスタック(アプリ風) */
+  .float-stack{position:absolute;right:8px;bottom:80px;display:none;flex-direction:column;gap:11px;align-items:center;z-index:40;}
+  .fs-item{position:relative;width:62px;height:62px;border-radius:14px;border:2px solid var(--site-gold);box-shadow:0 4px 12px rgba(0,0,0,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:8.5px;font-weight:900;color:#fff;cursor:pointer;text-align:center;line-height:1.25;}
+  .fs-ev{background:linear-gradient(135deg,#7a2030,#d6202b);}
+  .fs-ev::after{content:&quot;仮画像&quot;;position:absolute;right:2px;bottom:1px;font-size:7px;color:rgba(255,255,255,.6);}
+  .fs-box{background:linear-gradient(135deg,#3a2a0a,#8a6a1a);font-size:22px;}
+  .fs-ms{background:linear-gradient(135deg,#14304a,#2b6a8a);font-size:22px;}
+  .fs-bdg{position:absolute;top:-6px;right:-6px;background:var(--site-red);color:#fff;font-size:8.5px;font-weight:900;min-width:15px;height:15px;border-radius:8px;display:flex;align-items:center;justify-content:center;border:1.5px solid #fff;}
+  .fs-co{position:absolute;top:-15px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;font-size:8px;font-weight:900;padding:1px 8px;border-radius:8px;white-space:nowrap;}
+  .fs-lb{background:rgba(255,255,255,.95);border:1px solid #ddd;border-radius:8px;padding:0 6px;font-size:8px;font-weight:900;color:#555;margin-top:3px;}
+  .abtn{display:inline-block;font-size:11px;font-weight:900;color:var(--maroon);border:1.5px solid var(--maroon);border-radius:14px;padding:2px 12px;background:#fff;cursor:pointer;margin:2px 4px 0 0;}
+  .abtn.on{color:#fff;background:var(--site-red);border-color:var(--site-red);}
+  /* 遷移フロー */
+  .flow{max-width:760px;margin:14px auto 0;}
+  .fbox{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:12px 16px;margin:0 auto;max-width:440px;}
+  .fbox .t{font-size:13.5px;font-weight:900;}
+  .fbox .d{font-size:11.5px;color:var(--gray);}
+  .fbox.goal{border:2px solid var(--site-red);}
+  .farr{text-align:center;font-size:18px;color:#999;padding:2px 0;}
+  .froutes{display:flex;gap:10px;margin:6px auto;max-width:760px;}
+  .fr{flex:1;background:#fff;border:1.5px dashed #bbb;border-radius:10px;padding:10px 12px;text-align:center;}
+  .fr .n{display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--site-red);color:#fff;font-size:11px;font-weight:900;line-height:20px;margin-bottom:4px;}
+  .fr .t{font-size:12px;font-weight:900;}
+  .fr .d{font-size:10.5px;color:var(--gray);}
+  .hl{outline:3px solid var(--site-red);outline-offset:2px;border-radius:8px;animation:hlp 1.6s infinite;}
+  @keyframes hlp{0%,100%{outline-color:rgba(232,68,46,.9);}50%{outline-color:rgba(232,68,46,.25);}}
+  /* 街の全体マップ(状態別差し替え) */
+  .gmap-tabs{display:flex;gap:6px;padding:6px 14px 0;}
+  .gtab{flex:none;font-size:10px;font-weight:900;color:#666;border:1px solid #ccc;border-radius:12px;padding:2px 10px;background:#fff;cursor:pointer;}
+  .gtab.on{color:#fff;background:var(--site-maroon);border-color:var(--site-maroon);}
+  .gmap{position:relative;margin:8px 14px 4px;height:190px;border-radius:12px;overflow:hidden;border:2px solid var(--site-gold);background:linear-gradient(180deg,#232838 0%,#1c1712 52%,#0e0b07 100%);box-shadow:0 4px 12px rgba(0,0,0,.25);}
+  .gmap::after{content:&quot;仮画像(街の全体マップ・状態別差し替え)&quot;;position:absolute;right:6px;top:5px;font-size:8.5px;color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.35);padding:0 5px;border-radius:2px;}
+  .gm-b{position:absolute;font-size:26px;filter:grayscale(1) brightness(.4);transition:filter .3s;}
+  .gm-b .nm{display:block;font-size:7.5px;font-weight:900;color:rgba(255,255,255,.45);text-align:center;letter-spacing:.05em;}
+  .gm-b.lit{filter:none;text-shadow:0 0 16px rgba(255,200,80,.95),0 0 34px rgba(255,160,40,.5);}
+  .gm-b.lit .nm{color:var(--site-gold);}
+  .gm-cap{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);color:#fff;font-size:9.5px;font-weight:700;padding:4px 10px;text-align:center;}
+  .gm-b.lit{animation:gflick 2.8s ease-in-out infinite;}
+  @keyframes gflick{0%,100%{text-shadow:0 0 16px rgba(255,200,80,.95),0 0 34px rgba(255,160,40,.5);}50%{text-shadow:0 0 9px rgba(255,200,80,.65),0 0 20px rgba(255,160,40,.3);}}
+  .gm-cloud{position:absolute;top:8%;font-size:20px;opacity:.28;animation:gdrift 22s linear infinite;pointer-events:none;}
+  @keyframes gdrift{from{left:-12%;}to{left:104%;}}
+  .gm-star{position:absolute;font-size:9px;opacity:0;transition:opacity .4s;pointer-events:none;}
+  .gmap.t-night .gm-star{opacity:.85;animation:gflick 3.4s ease-in-out infinite;}
+  .gmap{transition:background .5s;}
+
+  /* 全体イベ ランキング */
+  .rk{display:flex;align-items:center;gap:8px;padding:6px 14px;border-bottom:1px solid #f3f3f3;font-size:12px;}
+  .rk .no{width:26px;font-weight:900;color:var(--maroon);}
+  .rk .no.top{color:var(--site-red);font-size:14px;}
+  .rk .nm{flex:1;}
+  .rk .pt{font-weight:700;font-size:11px;color:var(--gray);}
+  .me{background:#fdf6dd;border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);}
+  .rwtab{display:flex;margin:6px 14px 0;border:1px solid var(--line);border-radius:6px;overflow:hidden;}
+  .rwtab button{flex:1;font-family:inherit;font-size:11px;font-weight:900;padding:7px 0;border:none;background:#f4f4f4;color:var(--gray);cursor:pointer;}
+  .rwtab button.on{background:var(--dark);color:var(--gold);}
+
+  /* Coming soon */
+  .cs-wrap{height:100%;background:#141414;color:#fff;display:flex;flex-direction:column;align-items:center;padding:40px 20px;text-align:center;}
+  .cs-badge{font-size:10px;letter-spacing:.35em;color:var(--gold);border:1px solid var(--gold);padding:3px 14px;margin-bottom:18px;}
+  .cs-t{font-size:26px;font-weight:900;letter-spacing:.06em;line-height:1.4;}
+  .cs-sub{font-size:12px;color:#bbb;margin:8px 0 20px;}
+  .cs-cd{display:flex;gap:8px;margin:14px 0 24px;}
+  .cs-cd div{background:#222;border:1px solid #444;border-radius:8px;width:58px;padding:8px 0;}
+  .cs-cd b{display:block;font-size:20px;color:var(--gold);}
+  .cs-cd span{font-size:9px;color:#999;}
+
+  /* ===== 管理画面 ===== */
+  .admin{max-width:860px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .ad-head{background:var(--dark);color:#fff;padding:14px 22px;font-weight:900;display:flex;justify-content:space-between;align-items:center;}
+  .ad-head .sub{color:var(--gold);font-size:11px;font-weight:700;}
+  .ad-body{padding:20px 24px 28px;}
+  .fg{margin-bottom:16px;}
+  .fg label.t{display:block;font-size:12.5px;font-weight:900;margin-bottom:5px;}
+  .fg label.t .req{color:var(--red);font-size:10px;margin-left:6px;}
+  .fg input[type=text],.fg input[type=number],.fg input[type=datetime-local],.fg select,.fg textarea{width:100%;font-family:inherit;font-size:13px;padding:8px 10px;border:1px solid #ccc;border-radius:5px;background:#fff;}
+  .fg .hint{font-size:11px;color:var(--gray);margin-top:3px;}
+  .inline{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .inline > *{flex:1;min-width:160px;}
+  .radio-cards{display:flex;gap:10px;}
+  .rc{flex:1;border:2px solid var(--line);border-radius:8px;padding:12px 14px;cursor:pointer;}
+  .rc.on{border-color:var(--red);background:#fbe9ea;}
+  .rc b{display:block;font-size:13.5px;}
+  .rc span{font-size:11px;color:var(--gray);}
+  .ad-sec{border-top:2px solid var(--dark);margin-top:22px;padding-top:14px;}
+  .ad-sec > .st{font-size:14px;font-weight:900;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .ad-sec > .st::before{content:&quot;&quot;;width:5px;height:15px;background:var(--red);}
+  .uploader{border:2px dashed #ccc;border-radius:8px;padding:14px;text-align:center;font-size:12px;color:var(--gray);background:#fafafa;}
+  .uploader b{color:var(--dark);}
+  .searchbox{position:relative;}
+  .sr{border:1px solid #ccc;border-top:none;border-radius:0 0 6px 6px;max-height:150px;overflow-y:auto;background:#fff;}
+  .sr div{padding:7px 12px;font-size:12.5px;cursor:pointer;border-bottom:1px solid #f2f2f2;}
+  .sr div:hover{background:#fbe9ea;}
+  .sr .sid{color:var(--gray);font-size:11px;margin-right:8px;}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+  .chip{font-size:11.5px;font-weight:700;background:#fbe9ea;border:1px solid var(--red);color:var(--maroon);border-radius:12px;padding:2px 8px 2px 10px;display:flex;align-items:center;gap:6px;}
+  .chip i{font-style:normal;cursor:pointer;color:var(--red);font-weight:900;}
+  .slot{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .slot select,.slot input{font-family:inherit;font-size:12.5px;padding:6px 8px;border:1px solid #ccc;border-radius:5px;}
+  .slot .no{width:22px;font-weight:900;color:var(--red);font-size:12px;flex:none;}
+  .slot .del{color:var(--red);font-weight:900;cursor:pointer;flex:none;}
+  .fac-list{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+  .fac-card{width:130px;border:1px solid var(--line);border-radius:8px;overflow:hidden;cursor:pointer;}
+  .fac-card.on{border:2px solid var(--red);}
+  .fac-card .nm{font-size:12px;font-weight:700;padding:5px 8px;display:flex;justify-content:space-between;}
+  .save-bar{background:#f6f6f6;border-top:1px solid var(--line);padding:12px 24px;display:flex;justify-content:flex-end;gap:10px;}
+  .badge-mock{font-size:10px;color:#fff;background:var(--maroon);padding:1px 8px;border-radius:2px;}
+  @media (max-width:640px){.ad-body{padding:16px 14px 22px;}.radio-cards{flex-direction:column;}}
+</style>
+</head>
+<body>
+
+<nav class=&quot;shell-bar&quot;>
+  <button class=&quot;shell-btn active&quot; data-v=&quot;0&quot;>📱 イベントページ(個別)</button>
+  <button class=&quot;shell-btn&quot; data-v=&quot;5&quot;>🗺 トップからの遷移</button>
+  <button class=&quot;shell-btn&quot; data-v=&quot;1&quot;>📱 イベントページ(全体イベ)</button>
+  <button class=&quot;shell-btn&quot; data-v=&quot;2&quot;>📱 Coming Soon(予約中)</button>
+  <button class=&quot;shell-btn&quot; data-v=&quot;3&quot;>🛠 管理:イベント作成</button>
+  <button class=&quot;shell-btn&quot; data-v=&quot;4&quot;>🛠 管理:施設登録</button>
+</nav>
+
+<!-- ============ V0: 個別イベ ============ -->
+<div class=&quot;view active&quot; id=&quot;v-0&quot;>
+  <div class=&quot;mock-note&quot;><b>ユーザー画面(ユーザー単位イベント)</b> ― rev.2: 実サイトのUI準拠に変更(白基調ヘッダー/親カテゴリ2段構成(1段目: オリパ/イベント、2段目: 選択した親の子カテゴリ=オリパならポケモン等・イベントなら開催中イベント一覧)/下部固定フッターナビ再現)。PC版は左サイドバー「オリパ」配下に「イベント」を追加する想定。<b>追従バナーはフッターナビの真上・右下(親指の届く位置)に固定</b>、×で閉じられる。ゲージは自分の対象ガチャ消費コインで進行、未開放ステージは暗転。画像はすべて仮。 <br>rev.9: <b>ヘッダーカテゴリから「イベント」を撤去し独立ページ化</b>(遷移=フッター🍺/追従バナー/マイページ大上段の3経路・ヘッダーカテゴリは現行の商品カテゴリ専用に)。ページ上部のチップは開催中イベントの切替タブ(カテゴリナビではない)。開催期間は<b>日時を表示せず「残り◯日」のみ</b>(終了日時から自動計算・延長時は残り日数が自動で増える)。 <b>追従表示の検討2案(切替して比較):</b> <span class=&quot;abtn&quot; id=&quot;ab-a&quot; onclick=&quot;fltAB('a')&quot;>案A: スクエアバナー1枚(比較用)</span><span class=&quot;abtn on&quot; id=&quot;ab-b&quot; onclick=&quot;fltAB('b')&quot;>案B: アイコンスタック(採用方向・8/26FB)</span> ― 案Bはゲームアプリのホーム画面のように右端へ縦積み(①イベント ②報酬ボックス「回収可能」 ③ミッション)。バッジ・「回収可能」表示はシステム側で自動制御。</div>
+  <div class=&quot;phone&quot;><div class=&quot;ph-scroll&quot;>
+    <div class=&quot;ph-head&quot;>
+      <div class=&quot;brand&quot;><span class=&quot;logo&quot;>G</span><span class=&quot;bal&quot;><span>◉ゴールドⅡ</span><span class=&quot;coin&quot;><span class=&quot;g&quot;></span>12,400</span><span style=&quot;position:relative;&quot;>🎁<span style=&quot;position:absolute;top:-5px;right:-7px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:flex;align-items:center;justify-content:center;&quot;>6</span></span><span>🔔</span></span></div>
+      <div style=&quot;display:flex;align-items:center;gap:8px;padding:9px 4px 7px;font-weight:900;font-size:14.5px;&quot;><span style=&quot;color:#aaa;font-size:18px;line-height:1;&quot;>‹</span>🍺 イベント</div>
+      <div class=&quot;cats-c&quot;><span class=&quot;catc on&quot;>🍺 ギルド復興祭</span><span class=&quot;catc&quot;>🏰 王国復興 大作戦</span><span class=&quot;catc cs&quot;>⏳ 次回イベント</span><span class=&quot;catc&quot;>過去のイベント</span></div>
+    </div>
+
+    <div class=&quot;ph-img img-ev&quot;><div class=&quot;t1&quot;>GRIM GUILD</div><div class=&quot;t2&quot;>グリムギルド復興祭</div><div class=&quot;t3&quot;>― 第1章 酒場のともしび ―</div></div>
+    <div class=&quot;kv&quot;><span>開催期間</span><b><span class=&quot;pill&quot;>残り12日</span></b></div>
+
+    <div class=&quot;sec-t&quot;>🗺 ギルドの街(復興マップ)</div>
+    <div class=&quot;gmap-tabs&quot;>
+      <span class=&quot;gtab&quot; id=&quot;gt-0&quot; onclick=&quot;gmap(0)&quot;>復興前</span>
+      <span class=&quot;gtab on&quot; id=&quot;gt-1&quot; onclick=&quot;gmap(1)&quot;>現在(酒場 復興済み)</span>
+      <span class=&quot;gtab&quot; id=&quot;gt-2&quot; onclick=&quot;gmap(2)&quot;>市場 復興後(プレビュー)</span>
+    </div>
+    <div class=&quot;gmap-tabs&quot; style=&quot;padding-top:4px;&quot;>
+      <span class=&quot;gtab&quot; id=&quot;tt-0&quot; onclick=&quot;gtime(0)&quot;>🌅 朝</span>
+      <span class=&quot;gtab on&quot; id=&quot;tt-1&quot; onclick=&quot;gtime(1)&quot;>🌤 昼</span>
+      <span class=&quot;gtab&quot; id=&quot;tt-2&quot; onclick=&quot;gtime(2)&quot;>🌇 夕方</span>
+      <span class=&quot;gtab&quot; id=&quot;tt-3&quot; onclick=&quot;gtime(3)&quot;>🌙 夜</span>
+    </div>
+    <div class=&quot;gmap&quot; id=&quot;gmap-el&quot;>
+      <span class=&quot;gm-b&quot; id=&quot;gb-c&quot; style=&quot;left:44%;top:14%;font-size:38px;&quot;>🏰<span class=&quot;nm&quot;>ギルド本部</span></span>
+      <span class=&quot;gm-b lit&quot; id=&quot;gb-1&quot; style=&quot;left:12%;top:44%;&quot;>🍺<span class=&quot;nm&quot;>酒場</span></span>
+      <span class=&quot;gm-b&quot; id=&quot;gb-2&quot; style=&quot;left:66%;top:40%;&quot;>🏪<span class=&quot;nm&quot;>市場</span></span>
+      <span class=&quot;gm-b&quot; id=&quot;gb-3&quot; style=&quot;left:30%;top:62%;&quot;>⚔️<span class=&quot;nm&quot;>武器屋</span></span>
+      <span class=&quot;gm-b&quot; id=&quot;gb-4&quot; style=&quot;left:74%;top:64%;&quot;>🛡️<span class=&quot;nm&quot;>防具屋</span></span>
+      <span class=&quot;gm-cloud&quot;>☁️</span>
+      <span class=&quot;gm-star&quot; style=&quot;left:18%;top:12%;&quot;>✦</span><span class=&quot;gm-star&quot; style=&quot;left:58%;top:8%;&quot;>✦</span><span class=&quot;gm-star&quot; style=&quot;left:84%;top:18%;&quot;>✦</span>
+      <div class=&quot;gm-cap&quot; id=&quot;gm-cap&quot;>酒場に灯りがともった! 次は市場の復興(68%)</div>
+    </div>
+    <div style=&quot;padding:0 16px 6px;font-size:10px;color:var(--gray);&quot;>※マップは<b>復興状態×時間帯(朝/昼/夕/夜)で自動切替</b>。時間帯はシステム時刻で判定(境界時刻は管理画面設定・未登録時間帯は昼にフォールバック)。動きはアニメ素材(GIF入稿→システムで軽量WebPに自動変換)または静止画+システム側エフェクト(灯りの明滅等)で表現。切替タブはモック用のデモ</div>
+
+    <div class=&quot;sec-t&quot;>予告編</div>
+    <div class=&quot;row&quot;><div class=&quot;ph-img img-mov&quot; title=&quot;タップでYouTube埋込を読込(遅延ロード)&quot;><div class=&quot;play&quot;>▶</div><div class=&quot;cap&quot;>タップで再生(YouTube)</div></div></div>
+
+    <div class=&quot;sec-t&quot;>ギルド復興ステージ <span class=&quot;pill gd&quot;>あなたの復興状況</span></div>
+
+    <div class=&quot;stg&quot;>
+      <div class=&quot;ph-img img-fac f-bar&quot;>🍺</div>
+      <div class=&quot;stg-info&quot;>
+        <div class=&quot;stg-name&quot;>STAGE 1 酒場 <span class=&quot;pill gd&quot;>復興済み</span></div>
+        <div class=&quot;gauge full&quot;><i style=&quot;width:100%&quot;></i></div>
+        <div class=&quot;gnum bignum&quot;>500,000<small> / 500,000 コイン</small> <b>カンスト!</b></div>
+        <div class=&quot;rw&quot;><span class=&quot;rchip done&quot;>✔ コイン×5,000</span><span class=&quot;rchip done&quot;>✔ 通常キー×30</span></div>
+      </div>
+    </div>
+
+    <div class=&quot;stg&quot;>
+      <div class=&quot;ph-img img-fac f-mkt&quot;>🏪</div>
+      <div class=&quot;stg-info&quot;>
+        <div class=&quot;stg-name&quot;>STAGE 2 市場 <span class=&quot;pill&quot;>復興中</span></div>
+        <div class=&quot;gauge&quot;><i style=&quot;width:68%&quot;></i></div>
+        <div class=&quot;gnum bignum&quot;>340,000<small> / 500,000 コイン(68%)</small></div>
+        <div class=&quot;rw&quot;><span class=&quot;rchip&quot;>コイン×8,000</span><span class=&quot;rchip&quot;>ゴールドキー×1</span><span class=&quot;rchip&quot;>チケット×1</span></div>
+      </div>
+    </div>
+
+    <div class=&quot;stg locked&quot;>
+      <div class=&quot;ph-img img-fac f-wpn&quot;>⚔️</div>
+      <div class=&quot;stg-info&quot;>
+        <div class=&quot;stg-name&quot;>STAGE 3 武器屋</div>
+        <div class=&quot;gauge&quot;><i style=&quot;width:0%&quot;></i></div>
+        <div class=&quot;gnum&quot;>??? コイン</div>
+        <div class=&quot;rw&quot;><span class=&quot;rchip&quot;>？？？</span></div>
+      </div>
+      <div class=&quot;lock&quot;>🔒<span>STAGE 2 復興で開放</span></div>
+    </div>
+
+    <div class=&quot;stg locked&quot;>
+      <div class=&quot;ph-img img-fac f-cas&quot;>🏰</div>
+      <div class=&quot;stg-info&quot;>
+        <div class=&quot;stg-name&quot;>STAGE 4 グリム城</div>
+        <div class=&quot;gauge&quot;><i style=&quot;width:0%&quot;></i></div>
+        <div class=&quot;gnum&quot;>??? コイン</div>
+        <div class=&quot;rw&quot;><span class=&quot;rchip&quot;>？？？</span></div>
+      </div>
+      <div class=&quot;lock&quot;>🔒<span>STAGE 3 復興で開放</span></div>
+    </div>
+
+    <div class=&quot;sec-t&quot;>対象オリパ <span class=&quot;pill&quot;>これを引くとゲージが進む</span></div>
+    <div class=&quot;gacha-chips&quot;><span class=&quot;gc&quot;>#1024 グリム限定オリパ 第1弾</span><span class=&quot;gc&quot;>#1031 PSA10確定オリパ</span><span class=&quot;gc&quot;>#1044 レインボー神殿</span></div>
+    <div style=&quot;height:12px;&quot;></div>
+    <div class=&quot;ph-foot&quot;><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🃏</span>ガチャ</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>📦</span>獲得景品</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🎯</span>ミッション<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>3</span></a><a href=&quot;#&quot; style=&quot;position:relative;color:var(--site-red);font-weight:900;&quot;><span class=&quot;ic&quot;>🍺</span>イベント<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-gold);color:#3d2f00;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>!</span></a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🗝</span>交換所</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>👤</span>マイページ</a></div>
+  </div>
+  <div class=&quot;ph-img img-sq float-bn&quot; id=&quot;flt-a&quot; style=&quot;display:none;&quot;><span class=&quot;x&quot;>×</span><span>ギルド復興祭</span><span class=&quot;big&quot;>開催中!</span><span>タップで移動</span></div>
+  <div class=&quot;float-stack&quot; id=&quot;flt-b&quot; style=&quot;display:flex;&quot;>
+    <div><div class=&quot;fs-item fs-ev&quot;><span>ギルド</span><span>復興祭</span><span class=&quot;fs-bdg&quot;>!</span></div><div class=&quot;fs-lb&quot;>イベント</div></div>
+    <div><div class=&quot;fs-item fs-box&quot;>🎁<span class=&quot;fs-co&quot;>回収可能</span><span class=&quot;fs-bdg&quot;>6</span></div><div class=&quot;fs-lb&quot;>報酬ボックス</div></div>
+    <div><div class=&quot;fs-item fs-ms&quot;>🎯<span class=&quot;fs-bdg&quot;>3</span></div><div class=&quot;fs-lb&quot;>ミッション</div></div>
+  </div>
+  </div>
+</div>
+
+<!-- ============ V1: 全体イベ ============ -->
+<div class=&quot;view&quot; id=&quot;v-1&quot;>
+  <div class=&quot;mock-note&quot;><b>ユーザー画面(全体イベント)</b> ― 集計は全ユーザー合算。全体ゲージ+貢献度ランキング(上位10+自分の順位・名前は一部マスク)。報酬は「全員報酬/ランキング報酬」の2タブで出し分け。</div>
+  <div class=&quot;phone&quot;><div class=&quot;ph-scroll&quot;>
+    <div class=&quot;ph-head&quot;>
+      <div class=&quot;brand&quot;><span class=&quot;logo&quot;>G</span><span class=&quot;bal&quot;><span>◉ゴールドⅡ</span><span class=&quot;coin&quot;><span class=&quot;g&quot;></span>12,400</span><span style=&quot;position:relative;&quot;>🎁<span style=&quot;position:absolute;top:-5px;right:-7px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:flex;align-items:center;justify-content:center;&quot;>6</span></span><span>🔔</span></span></div>
+      <div style=&quot;display:flex;align-items:center;gap:8px;padding:9px 4px 7px;font-weight:900;font-size:14.5px;&quot;><span style=&quot;color:#aaa;font-size:18px;line-height:1;&quot;>‹</span>🍺 イベント</div>
+      <div class=&quot;cats-c&quot;><span class=&quot;catc&quot;>🍺 ギルド復興祭</span><span class=&quot;catc on&quot;>🏰 王国復興 大作戦</span><span class=&quot;catc cs&quot;>⏳ 次回イベント</span><span class=&quot;catc&quot;>過去のイベント</span></div>
+    </div>
+
+    <div class=&quot;ph-img img-ev&quot; style=&quot;background:linear-gradient(120deg,#10222b,#2b7a8a 45%,#1a1a1a);&quot;><div class=&quot;t1&quot;>ALL GRIM MEMBERS</div><div class=&quot;t2&quot;>王国復興 大作戦</div><div class=&quot;t3&quot;>― みんなで城を取り戻せ ―</div></div>
+    <div class=&quot;kv&quot;><span>開催期間</span><b><span class=&quot;pill&quot;>残り8日</span></b></div>
+
+    <div class=&quot;sec-t&quot;>王国全体の復興ゲージ <span class=&quot;pill&quot;>全グリムメンバー合算</span></div>
+    <div class=&quot;stg&quot;>
+      <div class=&quot;ph-img img-fac f-cas&quot;>🏰</div>
+      <div class=&quot;stg-info&quot;>
+        <div class=&quot;stg-name&quot;>STAGE 2 城壁の再建 <span class=&quot;pill&quot;>復興中</span></div>
+        <div class=&quot;gauge&quot;><i style=&quot;width:42%&quot;></i></div>
+        <div class=&quot;gnum bignum&quot;>12,600,000<small> / 30,000,000 コイン(42%)</small></div>
+        <div class=&quot;rw&quot;><span class=&quot;rchip&quot;>カンストで全員に: チケット×1</span></div>
+      </div>
+    </div>
+
+    <div class=&quot;sec-t&quot;>あなたの貢献度</div>
+    <div class=&quot;kv&quot;><span>消費コイン(対象オリパ)</span><b>86,000 コイン ｜ 現在 24位</b></div>
+
+    <div class=&quot;sec-t&quot;>貢献度ランキング</div>
+    <div class=&quot;rk&quot;><span class=&quot;no top&quot;>1</span><span class=&quot;nm&quot;>タカ****さん</span><span class=&quot;pt&quot;>1,240,000</span></div>
+    <div class=&quot;rk&quot;><span class=&quot;no top&quot;>2</span><span class=&quot;nm&quot;>GRIM****さん</span><span class=&quot;pt&quot;>980,500</span></div>
+    <div class=&quot;rk&quot;><span class=&quot;no top&quot;>3</span><span class=&quot;nm&quot;>ポケ****さん</span><span class=&quot;pt&quot;>877,000</span></div>
+    <div class=&quot;rk&quot;><span class=&quot;no&quot;>4</span><span class=&quot;nm&quot;>シン****さん</span><span class=&quot;pt&quot;>640,200</span></div>
+    <div class=&quot;rk&quot;><span class=&quot;no&quot;>5</span><span class=&quot;nm&quot;>まる****さん</span><span class=&quot;pt&quot;>512,900</span></div>
+    <div class=&quot;rk me&quot;><span class=&quot;no&quot;>24</span><span class=&quot;nm&quot;><b>あなた</b></span><span class=&quot;pt&quot;>86,000</span></div>
+
+    <div class=&quot;sec-t&quot;>報酬</div>
+    <div class=&quot;rwtab&quot;><button class=&quot;on&quot; onclick=&quot;rwtab(this,0)&quot;>全員報酬</button><button onclick=&quot;rwtab(this,1)&quot;>ランキング報酬</button></div>
+    <div class=&quot;row&quot; id=&quot;rw-0&quot; style=&quot;padding:10px 14px 20px;&quot;>
+      <div class=&quot;rw&quot;><span class=&quot;rchip&quot;>STAGE1カンスト: コイン×1,000(全員)</span></div>
+      <div class=&quot;rw&quot;><span class=&quot;rchip&quot;>STAGE2カンスト: チケット×1(全員)</span></div>
+      <div class=&quot;rw&quot;><span class=&quot;rchip&quot;>STAGE3カンスト: ゴールドキー×1(全員)</span></div>
+    </div>
+    <div class=&quot;row&quot; id=&quot;rw-1&quot; style=&quot;display:none;padding:10px 14px 20px;&quot;>
+      <div class=&quot;rw&quot;><span class=&quot;rchip done&quot;>1位: レインボーキー×5+限定カード</span></div>
+      <div class=&quot;rw&quot;><span class=&quot;rchip&quot;>2〜3位: レインボーキー×2</span></div>
+      <div class=&quot;rw&quot;><span class=&quot;rchip&quot;>4〜10位: ゴールドキー×3</span></div>
+      <div class=&quot;rw&quot;><span class=&quot;rchip&quot;>11〜50位: 通常キー×10</span></div>
+    </div>
+
+    <div class=&quot;sec-t&quot;>対象オリパ</div>
+    <div class=&quot;gacha-chips&quot;><span class=&quot;gc&quot;>#1050 王国復興オリパ</span><span class=&quot;gc&quot;>#1051 城下町オリパ</span></div>
+    <div style=&quot;height:12px;&quot;></div>
+    <div class=&quot;ph-foot&quot;><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🃏</span>ガチャ</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>📦</span>獲得景品</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🎯</span>ミッション<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>3</span></a><a href=&quot;#&quot; style=&quot;position:relative;color:var(--site-red);font-weight:900;&quot;><span class=&quot;ic&quot;>🍺</span>イベント<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-gold);color:#3d2f00;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>!</span></a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🗝</span>交換所</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>👤</span>マイページ</a></div>
+  </div>
+  <div class=&quot;ph-img img-sq float-bn&quot; style=&quot;background:linear-gradient(135deg,#143a4a,#2b7a8a);&quot;><span class=&quot;x&quot;>×</span><span>王国復興</span><span class=&quot;big&quot;>42%</span><span>あと17,400,000</span></div>
+  </div>
+</div>
+
+<!-- ============ V2: Coming Soon ============ -->
+<div class=&quot;view&quot; id=&quot;v-2&quot;>
+  <div class=&quot;mock-note&quot;><b>予約(Coming Soon)ページ</b> ― イベント作成時に「予約公開」を選ぶと、公開日〜開始日の間このページが表示される。予告動画のみ視聴可、ステージ・報酬は伏せる。追従バナーも「COMING SOON」表示に。</div>
+  <div class=&quot;phone&quot;><div class=&quot;ph-scroll&quot; style=&quot;background:#141414;&quot;>
+    <div class=&quot;ph-head&quot;>
+      <div class=&quot;brand&quot;><span class=&quot;logo&quot;>G</span><span class=&quot;bal&quot;><span>◉ゴールドⅡ</span><span class=&quot;coin&quot;><span class=&quot;g&quot;></span>12,400</span><span style=&quot;position:relative;&quot;>🎁<span style=&quot;position:absolute;top:-5px;right:-7px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:flex;align-items:center;justify-content:center;&quot;>6</span></span><span>🔔</span></span></div>
+      <div style=&quot;display:flex;align-items:center;gap:8px;padding:9px 4px 7px;font-weight:900;font-size:14.5px;&quot;><span style=&quot;color:#aaa;font-size:18px;line-height:1;&quot;>‹</span>🍺 イベント</div>
+      <div class=&quot;cats-c&quot;><span class=&quot;catc on cs&quot; style=&quot;color:#fff;background:#555;border-color:#555;&quot;>⏳ ギルド復興祭(8/10〜)</span><span class=&quot;catc&quot;>開催中のイベント</span><span class=&quot;catc&quot;>過去のイベント</span></div>
+    </div>
+    <div class=&quot;cs-wrap&quot;>
+      <div class=&quot;cs-badge&quot;>COMING SOON</div>
+      <div class=&quot;ph-img img-ev&quot; style=&quot;width:100%;border-radius:10px;filter:brightness(.55);&quot;><div class=&quot;t1&quot;>GRIM GUILD</div><div class=&quot;t2&quot;>グリムギルド復興祭</div><div class=&quot;t3&quot;>― 第1章 ―</div></div>
+      <div class=&quot;cs-t&quot; style=&quot;margin-top:18px;&quot;>8/10(月) 12:00<br>開幕</div>
+      <div class=&quot;cs-sub&quot;>グリムメンバー諸君、ギルドの復興が始まる。</div>
+      <div class=&quot;cs-cd&quot;><div><b>04</b><span>DAYS</span></div><div><b>11</b><span>HOURS</span></div><div><b>32</b><span>MIN</span></div></div>
+      <div class=&quot;ph-img img-mov&quot; style=&quot;width:100%;border-radius:10px;&quot;><div class=&quot;play&quot;>▶</div><div class=&quot;cap&quot;>予告編を見る(YouTube)</div></div>
+    </div>
+    <div class=&quot;ph-foot&quot;><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🃏</span>ガチャ</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>📦</span>獲得景品</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🎯</span>ミッション<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>3</span></a><a href=&quot;#&quot; style=&quot;position:relative;color:var(--site-red);font-weight:900;&quot;><span class=&quot;ic&quot;>🍺</span>イベント<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-gold);color:#3d2f00;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>!</span></a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🗝</span>交換所</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>👤</span>マイページ</a></div>
+  </div>
+  <div class=&quot;ph-img img-sq float-bn&quot; style=&quot;filter:brightness(.85);&quot;><span class=&quot;x&quot;>×</span><span>ギルド復興祭</span><span class=&quot;big&quot;>8/10</span><span>COMING SOON</span></div>
+  </div>
+</div>
+
+<!-- ============ V3: 管理 イベント作成 ============ -->
+<div class=&quot;view&quot; id=&quot;v-3&quot;>
+  <div class=&quot;mock-note&quot;><b>管理画面:イベント作成</b> ― <b>終了日時は終了前に限り延長可能</b>(残り日数表示に自動反映・短縮不可・緊急停止は中止操作・変更は監査ログ記録)。 ― 種別(ユーザー単位/全体)の選択で登録フォームが分岐。全体を選ぶと「ランキング報酬」セクションが出現します(実際に切り替わります)。対象ガチャはID・名前のインクリメンタル検索+ID一括貼付。</div>
+  <div class=&quot;admin&quot;>
+    <div class=&quot;ad-head&quot;><span>イベント作成 <span class=&quot;badge-mock&quot;>新規</span></span><span class=&quot;sub&quot;>イベント管理 &amp;gt; 新規作成</span></div>
+    <div class=&quot;ad-body&quot;>
+
+      <div class=&quot;fg&quot;>
+        <label class=&quot;t&quot;>イベント名 <span class=&quot;req&quot;>必須</span></label>
+        <input type=&quot;text&quot; value=&quot;グリムギルド復興祭 第1章&quot;>
+      </div>
+
+      <div class=&quot;fg&quot;>
+        <label class=&quot;t&quot;>イベント種別 <span class=&quot;req&quot;>必須</span></label>
+        <div class=&quot;radio-cards&quot;>
+          <div class=&quot;rc on&quot; id=&quot;rc-user&quot; onclick=&quot;evType('user')&quot;><b>👤 ユーザー単位イベント</b><span>各ユーザーが自分のゲージを進める。報酬は個人のカンスト達成ごとに付与</span></div>
+          <div class=&quot;rc&quot; id=&quot;rc-all&quot; onclick=&quot;evType('all')&quot;><b>🌍 全体イベント</b><span>全ユーザーの消費を合算して1本のゲージを進める。全員報酬+貢献度ランキング報酬</span></div>
+        </div>
+      </div>
+
+      <div class=&quot;fg&quot;>
+        <label class=&quot;t&quot;>開催期間 <span class=&quot;req&quot;>必須</span></label>
+        <div class=&quot;inline&quot;>
+          <input type=&quot;datetime-local&quot; value=&quot;2026-08-10T12:00&quot;>
+          <input type=&quot;datetime-local&quot; value=&quot;2026-08-31T23:59&quot;>
+        </div>
+      </div>
+
+      <div class=&quot;fg&quot;>
+        <label class=&quot;t&quot;>公開設定</label>
+        <div class=&quot;inline&quot;>
+          <select><option>予約公開(Coming Soonページを表示)</option><option>開始と同時に公開</option><option>下書き</option></select>
+          <input type=&quot;datetime-local&quot; value=&quot;2026-08-06T12:00&quot;>
+        </div>
+        <div class=&quot;hint&quot;>予約公開の場合、上記日時からComing Soonページと追従バナー(COMING SOON表示)が有効になります</div>
+      </div>
+
+      <div class=&quot;ad-sec&quot;>
+        <div class=&quot;st&quot;>バナー・動画</div>
+        <div class=&quot;inline&quot;>
+          <div class=&quot;fg&quot;><label class=&quot;t&quot;>イベントバナー(横長)</label><div class=&quot;uploader&quot;>📁 ドラッグ&amp;ドロップ / <b>ファイル選択</b><br>推奨 1200×640px</div></div>
+          <div class=&quot;fg&quot;><label class=&quot;t&quot;>追従バナー(スクエア)</label><div class=&quot;uploader&quot;>📁 ドラッグ&amp;ドロップ / <b>ファイル選択</b><br>推奨 400×400px</div></div>
+        </div>
+        <div class=&quot;fg&quot;>
+          <label class=&quot;t&quot;>予告動画(YouTube URL)</label>
+          <input type=&quot;text&quot; value=&quot;https://www.youtube.com/watch?v=xxxxxxxx&quot;>
+          <div class=&quot;hint&quot;>サムネイル+タップで埋込プレイヤーを読込(遅延ロード)。再生ボタンは動画タップ再生のため不要</div>
+        </div>
+      </div>
+
+      <div class=&quot;ad-sec&quot;>
+        <div class=&quot;st&quot;>対象ガチャ(消費カウントに含めるオリパ) <span class=&quot;req&quot; style=&quot;color:var(--red);font-size:11px;&quot;>必須</span></div>
+        <div class=&quot;fg searchbox&quot;>
+          <input type=&quot;text&quot; id=&quot;gsearch&quot; placeholder=&quot;ID または 名前で検索(例: 1024 / グリム)&quot; oninput=&quot;gs(this.value)&quot;>
+          <div class=&quot;sr&quot; id=&quot;gres&quot; style=&quot;display:none;&quot;></div>
+          <div class=&quot;chips&quot; id=&quot;gsel&quot;>
+            <span class=&quot;chip&quot;>#1024 グリム限定オリパ 第1弾 <i onclick=&quot;this.parentNode.remove()&quot;>×</i></span>
+            <span class=&quot;chip&quot;>#1031 PSA10確定オリパ <i onclick=&quot;this.parentNode.remove()&quot;>×</i></span>
+          </div>
+          <div class=&quot;hint&quot;>💡 ID一括貼付も可: カンマ区切りで入力しEnter(例: 1024,1031,1044)。「開催中のみ」「カテゴリ」での絞り込みフィルタ付き</div>
+        </div>
+      </div>
+
+      <div class=&quot;ad-sec&quot;>
+        <div class=&quot;st&quot;>復興ステージ構成(最大5スロット)</div>
+        <div class=&quot;slot&quot;><span class=&quot;no&quot;>S1</span><select><option>🍺 酒場(施設登録から)</option><option>🏪 市場</option><option>⚔️ 武器屋</option><option>🏰 グリム城</option></select><input type=&quot;number&quot; value=&quot;500000&quot; style=&quot;width:130px;&quot;><span style=&quot;font-size:11px;color:var(--gray);&quot;>コインでカンスト</span></div>
+        <div class=&quot;slot&quot;><span class=&quot;no&quot;>S2</span><select><option>🏪 市場</option><option>🍺 酒場</option><option>⚔️ 武器屋</option><option>🏰 グリム城</option></select><input type=&quot;number&quot; value=&quot;500000&quot; style=&quot;width:130px;&quot;><span style=&quot;font-size:11px;color:var(--gray);&quot;>コインでカンスト</span><span class=&quot;del&quot;>✕</span></div>
+        <div class=&quot;slot&quot;><span class=&quot;no&quot;>S3</span><select><option>⚔️ 武器屋</option></select><input type=&quot;number&quot; value=&quot;800000&quot; style=&quot;width:130px;&quot;><span style=&quot;font-size:11px;color:var(--gray);&quot;>コインでカンスト</span><span class=&quot;del&quot;>✕</span></div>
+        <button class=&quot;btn gd&quot; onclick=&quot;addSlot()&quot;>+ ステージを追加</button>
+        <div class=&quot;hint&quot;>ステージは順次開放(前ステージのカンストで次が開放)。カンスト時の報酬テーブルは各施設の「施設登録」で設定した内容を使用。上限スロット数はシステム設定値(初期値5、負荷検証後に10へ拡張可)</div>
+      </div>
+
+      <div class=&quot;ad-sec&quot; id=&quot;sec-ranking&quot; style=&quot;display:none;&quot;>
+        <div class=&quot;st&quot;>🌍 全体イベント専用:報酬の出し分け</div>
+        <div class=&quot;fg&quot;>
+          <label class=&quot;t&quot;>全員報酬(ステージカンストごと)</label>
+          <div class=&quot;slot&quot;><span class=&quot;no&quot;>S1</span><select><option>コイン</option><option>鍵</option><option>チケット</option><option>カード</option></select><input type=&quot;number&quot; value=&quot;1000&quot; style=&quot;width:100px;&quot;><span style=&quot;font-size:11px;color:var(--gray);&quot;>個</span></div>
+          <div class=&quot;slot&quot;><span class=&quot;no&quot;>S2</span><select><option>チケット</option><option>コイン</option><option>鍵</option><option>カード</option></select><input type=&quot;number&quot; value=&quot;1&quot; style=&quot;width:100px;&quot;><span style=&quot;font-size:11px;color:var(--gray);&quot;>個</span></div>
+        </div>
+        <div class=&quot;fg&quot;>
+          <label class=&quot;t&quot;>貢献度ランキング報酬</label>
+          <div class=&quot;slot&quot;><span class=&quot;no&quot; style=&quot;width:64px;&quot;>1位</span><select><option>レインボーキー</option><option>ゴールドキー</option><option>チケット</option><option>カード</option></select><input type=&quot;number&quot; value=&quot;5&quot; style=&quot;width:80px;&quot;><span style=&quot;font-size:11px;color:var(--gray);&quot;>個 +カード(任意)</span></div>
+          <div class=&quot;slot&quot;><span class=&quot;no&quot; style=&quot;width:64px;&quot;>2〜3位</span><select><option>レインボーキー</option></select><input type=&quot;number&quot; value=&quot;2&quot; style=&quot;width:80px;&quot;></div>
+          <div class=&quot;slot&quot;><span class=&quot;no&quot; style=&quot;width:64px;&quot;>4〜10位</span><select><option>ゴールドキー</option></select><input type=&quot;number&quot; value=&quot;3&quot; style=&quot;width:80px;&quot;></div>
+          <button class=&quot;btn gd&quot;>+ 順位帯を追加</button>
+          <div class=&quot;hint&quot;>締め後の確定バッチで報酬ボックスへ一括付与(冪等)。同率は先着上位</div>
+        </div>
+      </div>
+
+    </div>
+    <div class=&quot;save-bar&quot;><button class=&quot;btn gr&quot;>下書き保存</button><button class=&quot;btn&quot;>この内容で登録</button></div>
+  </div>
+</div>
+
+<!-- ============ V4: 管理 施設登録 ============ -->
+<div class=&quot;view&quot; id=&quot;v-4&quot;>
+  <div class=&quot;mock-note&quot;><b>管理画面:施設登録</b> ― 施設はマスタとして登録し、イベント作成のステージ構成から呼び出して使い回す。報酬スロットは種別(コイン/鍵/チケット/カード)×個数を任意登録、<b>最大5スロット(設定値)</b>。「+スロット追加」で上限制御が動きます。</div>
+  <div class=&quot;admin&quot;>
+    <div class=&quot;ad-head&quot;><span>施設登録 <span class=&quot;badge-mock&quot;>編集</span></span><span class=&quot;sub&quot;>イベント管理 &amp;gt; 施設マスタ</span></div>
+    <div class=&quot;ad-body&quot;>
+
+      <div class=&quot;fg&quot;><label class=&quot;t&quot;>登録済み施設</label>
+        <div class=&quot;fac-list&quot;>
+          <div class=&quot;fac-card on&quot;><div class=&quot;ph-img img-fac f-bar&quot; style=&quot;width:100%;&quot;>🍺</div><div class=&quot;nm&quot;>酒場 <span>✎</span></div></div>
+          <div class=&quot;fac-card&quot;><div class=&quot;ph-img img-fac f-mkt&quot; style=&quot;width:100%;&quot;>🏪</div><div class=&quot;nm&quot;>市場 <span>✎</span></div></div>
+          <div class=&quot;fac-card&quot;><div class=&quot;ph-img img-fac f-wpn&quot; style=&quot;width:100%;&quot;>⚔️</div><div class=&quot;nm&quot;>武器屋 <span>✎</span></div></div>
+          <div class=&quot;fac-card&quot;><div class=&quot;ph-img img-fac f-cas&quot; style=&quot;width:100%;&quot;>🏰</div><div class=&quot;nm&quot;>グリム城 <span>✎</span></div></div>
+          <div class=&quot;fac-card&quot; style=&quot;display:flex;align-items:center;justify-content:center;height:120px;color:var(--gray);font-weight:900;&quot;>+ 新規施設</div>
+        </div>
+      </div>
+
+      <div class=&quot;fg&quot;><label class=&quot;t&quot;>施設名 <span class=&quot;req&quot;>必須</span></label><input type=&quot;text&quot; value=&quot;酒場&quot;></div>
+
+      <div class=&quot;fg&quot;>
+        <label class=&quot;t&quot;>施設バナー <span class=&quot;req&quot;>必須</span></label>
+        <div class=&quot;inline&quot;>
+          <div class=&quot;uploader&quot;>🌑 <b>未復興(暗転用)</b><br>推奨 600×500px</div>
+          <div class=&quot;uploader&quot;>🌕 <b>復興済み</b><br>推奨 600×500px</div>
+        </div>
+        <div class=&quot;hint&quot;>未開放時はシステム側で自動暗転も可能(その場合は復興済み画像1枚でOK)</div>
+      </div>
+
+      <div class=&quot;ad-sec&quot;>
+        <div class=&quot;st&quot;>街の全体マップ画像(状態×時間帯マトリクス・差し替え式)</div>
+        <div class=&quot;fg&quot;>
+          <div class=&quot;hint&quot; style=&quot;margin-bottom:8px;&quot;>💡 縦=復興状態(ステージ数+1)、横=時間帯。<b>昼のみ必須</b>・他の時間帯は任意(未登録は昼にフォールバック)。静止画(PNG)/アニメ(GIF・アニメWebP)どちらも可 ― GIFはシステムが軽量WebPに自動変換します。ステージのカンストを検知すると次の状態へ自動切替</div>
+          <div class=&quot;slot&quot;><span class=&quot;no&quot;>状態0</span><span style=&quot;font-size:12px;flex:1;&quot;>復興前</span><span class=&quot;mini&quot;>🌤 昼(必須)</span><span class=&quot;mini&quot; style=&quot;color:#999;border-color:#bbb;&quot;>🌅 朝</span><span class=&quot;mini&quot; style=&quot;color:#999;border-color:#bbb;&quot;>🌇 夕</span><span class=&quot;mini&quot; style=&quot;color:#999;border-color:#bbb;&quot;>🌙 夜</span></div>
+          <div class=&quot;slot&quot;><span class=&quot;no&quot;>状態1</span><span style=&quot;font-size:12px;flex:1;&quot;>STAGE1(酒場)復興後</span><span class=&quot;mini&quot;>🌤 昼(必須)</span><span class=&quot;mini&quot; style=&quot;color:#999;border-color:#bbb;&quot;>🌅 朝</span><span class=&quot;mini&quot; style=&quot;color:#999;border-color:#bbb;&quot;>🌇 夕</span><span class=&quot;mini&quot; style=&quot;color:#999;border-color:#bbb;&quot;>🌙 夜</span></div>
+          <div class=&quot;slot&quot;><span class=&quot;no&quot;>状態2</span><span style=&quot;font-size:12px;flex:1;&quot;>STAGE2(市場)復興後</span><span class=&quot;mini&quot;>🌤 昼(必須)</span><span class=&quot;mini&quot; style=&quot;color:#999;border-color:#bbb;&quot;>🌅 朝</span><span class=&quot;mini&quot; style=&quot;color:#999;border-color:#bbb;&quot;>🌇 夕</span><span class=&quot;mini&quot; style=&quot;color:#999;border-color:#bbb;&quot;>🌙 夜</span></div>
+          <div class=&quot;slot&quot;><span class=&quot;no&quot;>＋</span><span style=&quot;font-size:12px;flex:1;color:var(--gray);&quot;>ステージ追加に応じて状態枠が自動で増えます</span></div>
+          <div class=&quot;hint&quot; style=&quot;margin-top:8px;&quot;>⏰ 時間帯の境界(設定値): 朝 05:00〜 ／ 昼 10:00〜 ／ 夕 16:00〜 ／ 夜 19:00〜(管理画面から変更可)</div>
+        </div>
+      </div>
+
+      <div class=&quot;ad-sec&quot;>
+        <div class=&quot;st&quot;>カンスト時の報酬テーブル(最大5スロット)</div>
+        <div id=&quot;fac-slots&quot;>
+          <div class=&quot;slot&quot;><span class=&quot;no&quot;>1</span><select><option>コイン</option><option>鍵</option><option>チケット</option><option>カード</option></select><select><option>―(グレードなし)</option><option>通常キー</option><option>ゴールドキー</option><option>レインボーキー</option></select><input type=&quot;number&quot; value=&quot;5000&quot; style=&quot;width:100px;&quot;><span style=&quot;font-size:11px;color:var(--gray);&quot;>個</span><span class=&quot;del&quot; onclick=&quot;this.parentNode.remove()&quot;>✕</span></div>
+          <div class=&quot;slot&quot;><span class=&quot;no&quot;>2</span><select><option>鍵</option><option>コイン</option><option>チケット</option><option>カード</option></select><select><option>通常キー</option><option>ゴールドキー</option><option>レインボーキー</option></select><input type=&quot;number&quot; value=&quot;30&quot; style=&quot;width:100px;&quot;><span style=&quot;font-size:11px;color:var(--gray);&quot;>個</span><span class=&quot;del&quot; onclick=&quot;this.parentNode.remove()&quot;>✕</span></div>
+        </div>
+        <button class=&quot;btn gd&quot; onclick=&quot;addFacSlot()&quot;>+ スロットを追加</button>
+        <div class=&quot;hint&quot;>「カード」を選択した場合は在庫商品IDを指定(在庫引当)。付与はすべて報酬ボックス経由</div>
+      </div>
+
+      <div class=&quot;fg&quot; style=&quot;margin-top:18px;&quot;><label class=&quot;t&quot;>店主のお礼コメント(任意)</label><textarea rows=&quot;2&quot;>よくぞ酒場を復興してくれた!ギルドメンバーの憩いの場が戻ったよ。</textarea></div>
+
+    </div>
+    <div class=&quot;save-bar&quot;><button class=&quot;btn gr&quot;>キャンセル</button><button class=&quot;btn&quot;>保存</button></div>
+  </div>
+</div>
+
+<!-- ============ V5: トップからの遷移 ============ -->
+<div class=&quot;view&quot; id=&quot;v-5&quot;>
+  <div class=&quot;mock-note&quot;><b>トップからの遷移(TOP画面イメージ)</b> ― ヘッダーカテゴリは<b>現行踏襲の商品カテゴリ専用(イベントは置かない)</b>。ギルド復興への入口は3経路: <b>①フッター🍺イベント(常設・!バッジ)</b> ②フローティングアイコンスタック(案B採用方向・イベントは開催/予約中のみ表示) ③マイページ大上段のギルドカード。下のTOP画面ではフッターの🍺と追従バナーがハイライトされています(赤点滅)。</div>
+
+  <div class=&quot;phone&quot;><div class=&quot;ph-scroll&quot; style=&quot;height:640px;&quot;>
+    <div class=&quot;ph-head&quot;>
+      <div class=&quot;brand&quot;><span class=&quot;logo&quot;>G</span><span class=&quot;bal&quot;><span>◉ゴールドⅡ</span><span class=&quot;coin&quot;><span class=&quot;g&quot;></span>12,400</span><span style=&quot;position:relative;&quot;>🎁<span style=&quot;position:absolute;top:-5px;right:-7px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:flex;align-items:center;justify-content:center;&quot;>6</span></span><span>🔔</span></span></div>
+      <div class=&quot;cats&quot;><span class=&quot;cat on&quot;>オリパ</span><span class=&quot;cat&quot;>スーパー <span class=&quot;nb&quot;>NEW</span></span></div>
+      <div class=&quot;cats-c&quot;><span class=&quot;catc on&quot;>ポケモン</span><span class=&quot;catc&quot;>ワンピース</span><span class=&quot;catc&quot;>遊戯王</span><span class=&quot;catc&quot;>レア</span></div>
+    </div>
+    <div style=&quot;height:88px;background:linear-gradient(120deg,#7a2030,#d6202b);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;position:relative;&quot;>オリパバナー(仮)<span style=&quot;position:absolute;right:6px;bottom:4px;font-size:9px;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.5);padding:0 4px;border-radius:2px;&quot;>仮画像</span></div>
+    <div style=&quot;margin:10px 12px;border:1px solid var(--site-line);border-radius:10px;overflow:hidden;&quot;>
+      <div style=&quot;height:84px;background:linear-gradient(120deg,#1a1a2b,#3a3a6a);display:flex;align-items:center;justify-content:center;color:#889;font-size:11px;&quot;>オリパカード(仮)</div>
+      <div style=&quot;display:flex;justify-content:space-between;padding:6px 10px;font-size:13px;font-weight:900;&quot;><span>1口 💰500</span><span>残 21,639/120,000</span></div>
+    </div>
+    <div style=&quot;margin:0 12px;border:1px solid var(--site-line);border-radius:10px;height:70px;display:flex;align-items:center;justify-content:center;color:#bbb;font-size:11px;&quot;>(オリパ一覧が続く)</div>
+
+    <div class=&quot;float-stack hl&quot; style=&quot;display:flex;bottom:84px;&quot;>
+      <div><div class=&quot;fs-item fs-ev&quot;><span>ギルド</span><span>復興祭</span><span class=&quot;fs-bdg&quot;>!</span></div><div class=&quot;fs-lb&quot;>イベント</div></div>
+      <div><div class=&quot;fs-item fs-box&quot;>🎁<span class=&quot;fs-co&quot;>回収可能</span><span class=&quot;fs-bdg&quot;>6</span></div><div class=&quot;fs-lb&quot;>報酬ボックス</div></div>
+      <div><div class=&quot;fs-item fs-ms&quot;>🎯<span class=&quot;fs-bdg&quot;>3</span></div><div class=&quot;fs-lb&quot;>ミッション</div></div>
+    </div>
+
+    <div class=&quot;ph-foot&quot; style=&quot;position:absolute;left:0;right:0;bottom:0;&quot;><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🃏</span>ガチャ</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>📦</span>獲得景品</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🎯</span>ミッション<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>3</span></a><a href=&quot;#&quot; class=&quot;hl&quot; style=&quot;position:relative;color:var(--site-red);font-weight:900;&quot;><span class=&quot;ic&quot;>🍺</span>イベント<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-gold);color:#3d2f00;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>!</span></a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🗝</span>交換所</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>👤</span>マイページ</a></div>
+  </div></div>
+
+  <div class=&quot;flow&quot;>
+    <div class=&quot;fbox&quot;><div class=&quot;t&quot;>サイトTOP(オリパ一覧)/ 任意のページ</div><div class=&quot;d&quot;>ヘッダーカテゴリは商品カテゴリ専用・フッターとバナーは全ページ共通</div></div>
+    <div class=&quot;farr&quot;>▼</div>
+    <div class=&quot;froutes&quot;>
+      <div class=&quot;fr&quot;><span class=&quot;n&quot;>1</span><div class=&quot;t&quot;>フッター🍺イベント</div><div class=&quot;d&quot;>常設。開催・予約中は「!」バッジで誘導</div></div>
+      <div class=&quot;fr&quot;><span class=&quot;n&quot;>2</span><div class=&quot;t&quot;>追従バナー/アイコンスタック</div><div class=&quot;d&quot;>開催・予約中のみ右下に表示(案A/案B検討中)</div></div>
+      <div class=&quot;fr&quot;><span class=&quot;n&quot;>3</span><div class=&quot;t&quot;>マイページ → ギルドカード</div><div class=&quot;d&quot;>大上段の街ビジュアル+進捗ゲージから直行</div></div>
+    </div>
+    <div class=&quot;farr&quot;>▼</div>
+    <div class=&quot;fbox goal&quot;><div class=&quot;t&quot;>🍺 イベントページ</div><div class=&quot;d&quot;>開催中イベントへ直行(複数開催時は最新を初期表示・上部チップで切替)→ マップ確認 → 対象オリパへ</div></div>
+  </div>
+</div>
+
+<script>
+// タブ切替
+document.querySelectorAll('.shell-btn').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.shell-btn').forEach(function(x){x.classList.remove('active');});
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+    b.classList.add('active');
+    document.getElementById('v-'+b.dataset.v).classList.add('active');
+    window.scrollTo(0,0);
+  });
+});
+// イベント種別分岐
+function evType(t){
+  document.getElementById('rc-user').classList.toggle('on', t==='user');
+  document.getElementById('rc-all').classList.toggle('on', t==='all');
+  document.getElementById('sec-ranking').style.display = (t==='all') ? 'block' : 'none';
+}
+// ガチャ検索(デモ)
+var GACHAS = [
+  {id:1024,n:'グリム限定オリパ 第1弾'},{id:1031,n:'PSA10確定オリパ'},{id:1044,n:'レインボー神殿'},
+  {id:1050,n:'王国復興オリパ'},{id:1051,n:'城下町オリパ'},{id:1060,n:'グリム秋の大感謝祭'},{id:1061,n:'シュリンク付BOXオリパ'}
+];
+function gs(q){
+  var box = document.getElementById('gres');
+  if(!q){ box.style.display='none'; return; }
+  var hits = GACHAS.filter(function(g){ return String(g.id).indexOf(q)>-1 || g.n.indexOf(q)>-1; }).slice(0,5);
+  box.innerHTML = hits.length ? hits.map(function(g){
+    return '<div onclick=&quot;gadd('+g.id+',\''+g.n+'\')&quot;><span class=&quot;sid&quot;>#'+g.id+'</span>'+g.n+'</div>';
+  }).join('') : '<div style=&quot;color:#999;&quot;>該当なし</div>';
+  box.style.display='block';
+}
+function gadd(id,n){
+  var c=document.createElement('span'); c.className='chip';
+  c.innerHTML='#'+id+' '+n+' <i onclick=&quot;this.parentNode.remove()&quot;>×</i>';
+  document.getElementById('gsel').appendChild(c);
+  document.getElementById('gres').style.display='none';
+  document.getElementById('gsearch').value='';
+}
+// スロット上限デモ
+function addSlot(){
+  var n=document.querySelectorAll('#v-3 .ad-sec .slot').length;
+  alert('デモ: ステージスロットを追加します(現在の上限設定=5)。上限到達時は「システム設定の上限に達しています」を表示');
+}
+function addFacSlot(){
+  var wrap=document.getElementById('fac-slots');
+  if(wrap.children.length>=5){ alert('報酬スロットの上限(5)に達しています。上限値はシステム設定から変更できます。'); return; }
+  var no=wrap.children.length+1;
+  var d=document.createElement('div'); d.className='slot';
+  d.innerHTML='<span class=&quot;no&quot;>'+no+'</span><select><option>コイン</option><option>鍵</option><option>チケット</option><option>カード</option></select><select><option>―(グレードなし)</option><option>通常キー</option><option>ゴールドキー</option><option>レインボーキー</option></select><input type=&quot;number&quot; value=&quot;1&quot; style=&quot;width:100px;&quot;><span style=&quot;font-size:11px;color:#666;&quot;>個</span><span class=&quot;del&quot; onclick=&quot;this.parentNode.remove()&quot;>✕</span>';
+  wrap.appendChild(d);
+}
+// 全体イベ報酬タブ
+function rwtab(btn,i){
+  btn.parentNode.querySelectorAll('button').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  document.getElementById('rw-0').style.display = i===0?'block':'none';
+  document.getElementById('rw-1').style.display = i===1?'block':'none';
+}
+
+function gmap(n){
+  var states={0:[],1:['gb-1'],2:['gb-1','gb-2']};
+  var caps={0:'荒廃した街… 復興はこれから',1:'酒場に灯りがともった! 次は市場の復興(68%)',2:'市場が再建! 街に賑わいが戻ってきた'};
+  ['gb-1','gb-2','gb-3','gb-4'].forEach(function(id){
+    document.getElementById(id).classList.toggle('lit', states[n].indexOf(id)>=0);
+  });
+  document.getElementById('gb-c').classList.toggle('lit', n>=2);
+  [0,1,2].forEach(function(i){document.getElementById('gt-'+i).classList.toggle('on', i===n);});
+  document.getElementById('gm-cap').textContent=caps[n];
+}
+function gtime(t){
+  var bg={
+    0:'linear-gradient(180deg,#6a7d9a 0%,#c9a06a 45%,#2a2015 100%)',
+    1:'linear-gradient(180deg,#8fa8c4 0%,#4a4436 50%,#241d12 100%)',
+    2:'linear-gradient(180deg,#8a4a3a 0%,#5a2a2a 45%,#1a1210 100%)',
+    3:'linear-gradient(180deg,#232838 0%,#1c1712 52%,#0e0b07 100%)'
+  };
+  var el=document.getElementById('gmap-el');
+  el.style.background=bg[t];
+  el.classList.toggle('t-night', t===3);
+  [0,1,2,3].forEach(function(i){document.getElementById('tt-'+i).classList.toggle('on', i===t);});
+}
+function fltAB(mode){
+  document.getElementById('flt-a').style.display = (mode==='a') ? '' : 'none';
+  document.getElementById('flt-b').style.display = (mode==='b') ? 'flex' : 'none';
+  document.getElementById('ab-a').classList.toggle('on', mode==='a');
+  document.getElementById('ab-b').classList.toggle('on', mode==='b');
+}
+</script>
+</body>
+</html>
+"></iframe>
+</div><div class="fsec" id="f-1">
+  <div class="fdesc"><b>👑 会員ランク・マイページ rev.12</b> ― マイページ(アプリホーム風・累計ランク帯+今月のドット進行)/会員ランク/報酬ボックス(プレゼントボックス型UI・モーダル付き)(このモック内の画面タブ・ボタン・フィルタはすべて動作します)</div>
+  <iframe class="mockframe" srcdoc="<!DOCTYPE html>
+<html lang=&quot;ja&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
+<title>GRIM 会員ランクページ UIモック rev.12</title>
+<link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;>
+<link href=&quot;https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
+<style>
+  :root{--red:#d6202b;--gold:#e8c547;--dark:#1a1a1a;--maroon:#7a2030;--gray:#666;--line:#ddd;--bg:#f0f0f2;
+    --site-red:#e8442e;--site-maroon:#8a1f1f;--site-gold:#d4af37;--site-line:#ececec;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark);font-size:14px;line-height:1.7;}
+  .shell-bar{position:sticky;top:0;z-index:100;background:var(--dark);border-bottom:4px solid var(--red);display:flex;overflow-x:auto;padding:0 8px;}
+  .shell-btn{flex:none;font-family:inherit;font-size:12.5px;font-weight:700;color:#bbb;background:none;border:none;padding:12px 14px 10px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
+  .shell-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+  .view{display:none;padding:24px 12px 60px;}
+  .view.active{display:block;}
+  .mock-note{max-width:760px;margin:0 auto 16px;font-size:12px;color:var(--gray);background:#fff;border:1px dashed #bbb;border-radius:6px;padding:10px 14px;}
+  .mock-note b{color:var(--red);}
+
+  .phone{width:390px;max-width:100%;margin:0 auto;background:#fff;border:10px solid var(--dark);border-radius:28px;overflow:hidden;position:relative;box-shadow:0 8px 30px rgba(0,0,0,.18);}
+  .ph-scroll{height:720px;overflow-y:auto;position:relative;background:#fff;}
+  .ph-head{position:sticky;top:0;z-index:20;background:#fff;padding:8px 12px;border-bottom:1px solid var(--site-line);display:flex;justify-content:space-between;align-items:center;}
+  .logo{width:34px;height:34px;border-radius:6px;background:linear-gradient(135deg,#a01818,#6a0f0f);border:1.5px solid var(--site-gold);color:var(--site-gold);font-weight:900;font-size:17px;display:flex;align-items:center;justify-content:center;font-family:serif;flex:none;}
+  .hd-r{display:flex;gap:7px;align-items:center;font-size:11px;font-weight:700;}
+  .coin{background:#fff;border:1px solid var(--site-line);border-radius:14px;padding:2px 8px;display:flex;gap:4px;align-items:center;box-shadow:0 1px 2px rgba(0,0,0,.05);}
+  .g{width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe9a0,#d4af37 70%);display:inline-block;border:1px solid #b8952a;flex:none;}
+  .coin .plus{width:15px;height:15px;border-radius:50%;background:var(--site-red);color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:900;}
+  .ico{position:relative;font-size:17px;}
+  .ico .bd{position:absolute;top:-4px;right:-7px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+  .rk-ico{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe9a0,#c9962a);border:2px solid #8a6d00;display:flex;align-items:center;justify-content:center;font-size:12px;flex:none;}
+  .back-head{position:sticky;top:0;z-index:20;background:#fff;padding:11px 12px;border-bottom:1px solid var(--site-line);display:flex;align-items:center;gap:10px;font-weight:900;font-size:14.5px;}
+  .back-head .bk{color:var(--gray);font-size:16px;}
+
+  .h1{font-size:20px;font-weight:900;padding:14px 14px 4px;}
+  .sec-t{font-size:13px;font-weight:900;padding:16px 14px 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .sec-t::before{content:&quot;&quot;;width:4px;height:14px;background:var(--site-red);border-radius:2px;}
+  .sec-t .lk{margin-left:auto;font-size:11px;color:var(--gray);font-weight:700;}
+  .pill{font-size:10px;font-weight:900;color:#fff;background:var(--site-red);padding:1px 8px;border-radius:10px;}
+  .pill.gd{background:var(--gold);color:var(--dark);}
+  .pill.gr{background:#999;}
+  .ph-foot{position:sticky;bottom:0;z-index:25;background:#fff;border-top:1px solid var(--site-line);display:flex;box-shadow:0 -2px 8px rgba(0,0,0,.06);}
+  .ph-foot a{flex:1;text-align:center;padding:7px 0 8px;font-size:9.5px;font-weight:700;color:#777;text-decoration:none;line-height:1.5;}
+  .ph-foot a .ic{display:block;font-size:17px;}
+  .ph-foot a.on{color:var(--site-red);}
+  .ph-img{position:relative;display:flex;align-items:center;justify-content:center;color:#fff;overflow:hidden;}
+  .ph-img::after{content:&quot;仮画像&quot;;position:absolute;right:6px;bottom:4px;font-size:9px;color:rgba(255,255,255,.7);letter-spacing:.1em;border:1px solid rgba(255,255,255,.5);padding:0 4px;border-radius:2px;}
+  .btn{display:inline-block;font-size:11px;font-weight:900;color:#fff;background:var(--site-red);border:none;border-radius:5px;padding:6px 14px;cursor:pointer;font-family:inherit;}
+  .btn.gd{background:var(--site-gold);color:#3d2f00;}
+  .btn.dk{background:var(--site-maroon);border:1.5px solid var(--site-gold);color:#ffeec2;}
+
+  /* マイページ: ギルドカード(大上段・アプリホーム風) */
+  .guildcard{margin:10px 14px 12px;border-radius:14px;overflow:hidden;position:relative;cursor:pointer;border:2px solid var(--site-gold);box-shadow:0 4px 14px rgba(0,0,0,.25);}
+  .gc-vis{height:150px;background:linear-gradient(180deg,#2a2f3f 0%,#1f1a14 55%,#0f0c08 100%);position:relative;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;}
+  .gc-vis::after{content:&quot;仮画像(ギルドの街 コンセプトアート)&quot;;position:absolute;right:8px;top:6px;font-size:9px;color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.4);padding:0 5px;border-radius:2px;}
+  .gc-town{font-size:34px;letter-spacing:6px;padding-bottom:26px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.6));}
+  .gc-town .c{font-size:46px;}
+  .gc-fog{position:absolute;inset:auto 0 0 0;height:56px;background:linear-gradient(180deg,transparent,rgba(0,0,0,.75));}
+  .gc-title{position:absolute;left:12px;top:10px;color:#fff;}
+  .gc-title .t1{font-size:10px;letter-spacing:.3em;color:var(--site-gold);font-weight:700;}
+  .gc-title .t2{font-size:17px;font-weight:900;text-shadow:0 2px 6px rgba(0,0,0,.7);}
+  .gc-live{position:absolute;right:10px;bottom:64px;background:var(--site-red);color:#fff;font-size:10px;font-weight:900;padding:2px 10px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.4);}
+  .gc-bar{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);padding:8px 12px 9px;color:#fff;}
+  .gc-bar .row{display:flex;justify-content:space-between;align-items:center;font-size:10.5px;font-weight:700;}
+  .gc-bar .row b{color:var(--site-gold);}
+  .gc-g{height:9px;background:rgba(255,255,255,.22);border-radius:5px;overflow:hidden;margin-top:4px;}
+  .gc-g i{display:block;height:100%;width:68%;background:linear-gradient(90deg,#ff6a3c,var(--site-red));border-radius:5px;}
+  .gc-go{position:absolute;right:10px;top:44px;color:#fff;font-size:22px;text-shadow:0 2px 4px rgba(0,0,0,.6);}
+  /* マイページ: ランクバナー(累計メイン・ダーク帯) */
+  .rankband2{margin:10px 14px 8px;border-radius:12px;background:linear-gradient(120deg,#4a1420 0%,#6a1c2a 45%,#2a0c12 100%);display:flex;align-items:center;gap:12px;padding:13px 14px;color:#fff;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.22);position:relative;overflow:hidden;}
+  .rankband2::after{content:&quot;仮画像(背景)&quot;;position:absolute;right:7px;top:6px;font-size:8.5px;color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.35);padding:0 5px;border-radius:2px;}
+  .rb2-ico{width:52px;height:52px;flex:none;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6d8,#e8c96a 70%);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 2px 6px rgba(0,0,0,.3);}
+  .rb2-cap{font-size:10px;font-weight:900;color:#e8c547;letter-spacing:.08em;}
+  .rb2-rank{font-size:21px;font-weight:900;letter-spacing:.05em;text-shadow:0 1px 4px rgba(0,0,0,.4);line-height:1.25;}
+  .rb2-sub{font-size:9.5px;font-weight:700;opacity:.85;}
+  .rb2-go{margin-left:auto;font-size:20px;font-weight:900;flex:none;}
+  .month-dots{margin:0 14px 12px;background:#fff;border:1px solid var(--site-line);border-radius:10px;padding:9px 13px 11px;cursor:pointer;}
+  .md-cap{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:900;margin-bottom:7px;}
+  .md-cap b{color:var(--site-maroon);}
+  .md-cap .lk{font-size:10px;color:var(--gray);font-weight:700;}
+  .md-row{display:flex;justify-content:space-between;align-items:center;position:relative;}
+  .md-row::before{content:&quot;&quot;;position:absolute;left:9px;right:9px;top:50%;height:2px;background:#e8e8e8;z-index:0;}
+  .md-d{width:19px;height:19px;border-radius:50%;background:#ddd;position:relative;z-index:1;border:2px solid #fff;box-shadow:0 0 0 1px #ccc;}
+  .md-d.on{background:radial-gradient(circle at 35% 30%,#ffe9a0,#d4af37 70%);box-shadow:0 0 0 1px #b8952a;}
+  .md-d.me{background:var(--site-red);box-shadow:0 0 0 2px rgba(232,68,46,.35);transform:scale(1.18);}
+  /* マイページ: 月間ランク帯(現行金帯踏襲) */
+  .rankband{margin:10px 14px 12px;border-radius:12px;background:linear-gradient(135deg,#e0b93a,#d4a52a 60%,#c8971e);display:flex;align-items:center;gap:12px;padding:12px 14px;color:#fff;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.15);position:relative;overflow:hidden;}
+  .rankband::after{content:&quot;&quot;;position:absolute;right:-18px;bottom:-26px;width:90px;height:90px;background:rgba(255,255,255,.14);transform:rotate(35deg);}
+  .rb-ico{width:52px;height:52px;flex:none;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6d8,#e8c96a 70%);border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 2px 6px rgba(0,0,0,.2);}
+  .rb-body{flex:1;min-width:0;}
+  .rb-cap{font-size:10px;font-weight:900;opacity:.9;letter-spacing:.06em;}
+  .rb-rank{font-size:20px;font-weight:900;letter-spacing:.04em;text-shadow:0 1px 3px rgba(0,0,0,.18);line-height:1.2;}
+  .rb-sub{font-size:10px;font-weight:700;opacity:.95;}
+  .rb-go{font-size:20px;font-weight:900;flex:none;}
+  /* マイページ: ランクカード */
+  .rankcard{margin:10px 14px;border-radius:12px;overflow:hidden;background:linear-gradient(120deg,#2b1215,#7a2030 55%,#1a1a1a);color:#fff;padding:14px;position:relative;}
+  .rankcard::after{content:&quot;仮画像(背景)&quot;;position:absolute;right:8px;top:6px;font-size:9px;color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.4);padding:0 4px;border-radius:2px;}
+  .rc-top{display:flex;gap:12px;align-items:center;}
+  .rc-ico{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe9a0,#c9962a);border:3px solid var(--site-gold);display:flex;align-items:center;justify-content:center;font-size:26px;flex:none;}
+  .rc-nm{font-size:11px;color:#ddc;}
+  .rc-nm b{display:block;font-size:17px;color:#fff;}
+  .rc-mini{margin-top:10px;font-size:10.5px;color:#eed;}
+  .mini-g{height:8px;background:rgba(255,255,255,.2);border-radius:4px;overflow:hidden;margin:3px 0 8px;}
+  .mini-g i{display:block;height:100%;width:62%;background:linear-gradient(90deg,#c9a227,var(--gold));}
+  .mini-s{display:flex;gap:4px;align-items:center;margin-top:3px;}
+  .mini-s b{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.25);flex:none;}
+  .mini-s b.on{background:var(--gold);}
+  .mini-s b.me{outline:2px solid #fff;background:var(--site-red);}
+  .rc-link{margin-top:10px;text-align:right;font-size:11.5px;font-weight:900;color:var(--gold);}
+
+  /* 保有アイテム3枠 */
+  .assets{display:flex;gap:8px;padding:4px 14px;}
+  .as{flex:1;border:1px solid var(--site-line);border-radius:10px;padding:9px 8px;text-align:center;background:#fafafa;}
+  .as .ic{font-size:19px;}
+  .as .nm{font-size:9.5px;color:var(--gray);font-weight:700;}
+  .as .vl{font-size:16px;font-weight:900;letter-spacing:.02em;}
+  .as .ex{font-size:8.5px;color:var(--site-red);font-weight:700;min-height:12px;}
+  .as .go{display:block;margin-top:4px;font-size:9.5px;font-weight:900;color:#fff;background:var(--site-red);border-radius:4px;padding:2px 0;}
+  .as .go.gd{background:var(--site-gold);color:#3d2f00;}
+  .as .go.dk{background:#555;}
+
+  /* ミッション/ボックス導線 */
+  .quick{display:flex;gap:8px;padding:8px 14px 4px;}
+  .qk{flex:1;display:flex;align-items:center;gap:8px;border:1.5px solid var(--site-line);border-radius:10px;padding:9px 10px;font-size:12px;font-weight:900;position:relative;background:#fff;}
+  .qk .ic{font-size:18px;}
+  .qk .bd{position:absolute;top:-6px;right:-4px;background:var(--site-red);color:#fff;font-size:9px;font-weight:900;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+  .qk small{display:block;font-size:9px;color:var(--gray);font-weight:700;}
+
+  /* メニューリスト */
+  .menu{margin:8px 0 0;}
+  .menu a{display:block;padding:13px 16px;border-bottom:1px solid #f0f0f0;color:var(--dark);text-decoration:none;font-size:13.5px;position:relative;}
+  .menu a::after{content:&quot;›&quot;;position:absolute;right:16px;color:#bbb;}
+  .menu a .nb{background:var(--site-red);color:#fff;font-size:9px;font-weight:900;padding:0 6px;border-radius:8px;margin-left:8px;}
+
+  /* 月間ランク: スタンプカード式 */
+  .stampgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:8px 14px 4px;}
+  .stamp{position:relative;border:1.5px solid var(--site-line);border-radius:10px;padding:10px 4px 8px;text-align:center;background:#fafafa;}
+  .stamp .ic{font-size:26px;line-height:1.2;position:relative;display:inline-block;}
+  .stamp .ic i{position:absolute;right:-8px;bottom:-2px;font-style:normal;font-size:10px;font-weight:900;color:#fff;background:rgba(0,0,0,.5);border-radius:7px;padding:0 4px;}
+  .stamp .nm{font-size:10px;font-weight:900;margin-top:2px;white-space:nowrap;}
+  .stamp .rw{font-size:8.5px;color:var(--gray);white-space:nowrap;}
+  .stamp.done{background:#fdf6dd;border-color:var(--site-gold);}
+  .stamp.done::after{content:&quot;達成&quot;;position:absolute;inset:auto;top:2px;right:3px;width:30px;height:30px;border:2px solid rgba(214,32,43,.65);border-radius:50%;color:rgba(214,32,43,.75);font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;transform:rotate(-14deg);background:rgba(255,255,255,.55);}
+  .stamp.cur{border:2px solid var(--site-red);background:#fff;}
+  .stamp.cur .nowbar{position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:8.5px;font-weight:900;color:#fff;background:var(--site-red);border-radius:8px;padding:0 7px;white-space:nowrap;}
+  .stamp.lk{opacity:.55;}
+  .nowtag{display:inline-block;font-size:9px;font-weight:900;color:#fff;background:var(--site-red);border-radius:8px;padding:0 6px;margin-left:3px;vertical-align:1px;}
+  .prog-line{display:flex;justify-content:space-between;padding:8px 14px 0;font-size:11.5px;font-weight:700;color:var(--gray);}
+  .prog-line b{color:var(--site-red);font-size:14px;}
+
+  /* 累計ゲージ */
+  .tg-wrap{padding:8px 14px;}
+  .tg{height:20px;background:#eee;border-radius:10px;overflow:hidden;position:relative;}
+  .tg i{display:block;height:100%;width:62%;background:linear-gradient(90deg,#c9a227,var(--gold));border-radius:10px;}
+  .tg .tick{position:absolute;top:0;bottom:0;width:1.5px;background:rgba(0,0,0,.14);}
+  .tg-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--gray);font-weight:700;margin-top:3px;}
+  .tokuten{display:flex;flex-wrap:wrap;gap:6px;padding:2px 14px 8px;}
+  .tk{font-size:10.5px;font-weight:700;border:1px solid var(--site-line);border-radius:12px;padding:3px 10px;background:#fafafa;}
+  .tk.on{border-color:#2a8a2a;color:#2a8a2a;background:#f0f8f0;}
+  .tk.off{color:#aaa;}
+  .rowlist{margin:0 14px 8px;border:1px solid var(--site-line);border-radius:10px;overflow:hidden;}
+  .rl{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid #f2f2f2;font-size:12px;background:#fff;}
+  .rl:last-child{border-bottom:none;}
+  .rl .ic{font-size:17px;flex:none;}
+  .rl .tx{flex:1;min-width:0;}
+  .rl .tx small{display:block;font-size:10px;color:var(--gray);}
+  .rl .ex{font-size:9.5px;color:var(--site-red);font-weight:700;flex:none;margin-right:4px;}
+  .boxtabs{display:flex;gap:6px;overflow-x:auto;padding:10px 14px 4px;}
+  .bt2{flex:none;font-size:11.5px;font-weight:900;color:#666;padding:5px 14px;border:1px solid #ddd;border-radius:16px;background:#fff;}
+  .bt2.on{color:#fff;background:var(--site-red);border-color:var(--site-red);}
+  /* 報酬ボックス: アプリ風ダークパネル */
+  .bxwrap{background:linear-gradient(180deg,#23232e,#17171f);min-height:640px;padding:10px 10px 14px;}
+  .bxpanel{border:2px solid #6a6a80;outline:1px solid #3a3a4a;border-radius:14px;background:#1f1f2a;padding:12px 10px 12px;position:relative;}
+  .bx-title{text-align:center;color:#fff;font-size:15px;font-weight:900;letter-spacing:.12em;padding-bottom:6px;}
+  .bx-orn{height:8px;background:radial-gradient(ellipse at center,var(--site-gold) 0%,transparent 68%);opacity:.7;margin:0 60px 10px;}
+  .bx-tabs{display:flex;border:1.5px solid #55556a;border-radius:9px;overflow:hidden;margin-bottom:12px;}
+  .bx-tab{flex:1;text-align:center;font-size:12.5px;font-weight:900;color:#aab;padding:8px 0;background:#26263a;position:relative;cursor:pointer;}
+  .bx-tab.on{color:#fff;background:linear-gradient(180deg,#3a4a9a,#26317a);}
+  .bx-tab .bd{position:absolute;top:2px;right:16px;background:var(--site-red);color:#fff;font-size:9px;font-weight:900;min-width:15px;height:15px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;}
+  .gift{display:flex;gap:10px;align-items:stretch;background:linear-gradient(180deg,#f4e8cf,#e8d8b4);border:2px solid var(--site-gold);border-radius:10px;padding:9px 10px;margin-bottom:10px;position:relative;}
+  .gift .gic{width:64px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff;border:1.5px solid #d8c48a;border-radius:9px;font-size:26px;line-height:1.1;}
+  .gift .gic small{font-size:10px;font-weight:900;color:#333;}
+  .gift .gbody{flex:1;min-width:0;}
+  .gift .gtx{font-size:11.5px;font-weight:700;color:#2a2416;line-height:1.5;}
+  .gift .gdiv{height:1px;background:linear-gradient(90deg,transparent,#a8926a,transparent);margin:5px 0 4px;position:relative;}
+  .gift .gterm{font-size:10px;font-weight:700;color:#6a5a3a;}
+  .gift .gterm b{color:var(--site-red);font-size:11px;}
+  .gift .gact{display:flex;align-items:flex-end;}
+  .bxbtn{font-family:inherit;font-size:12px;font-weight:900;color:#ffeec2;background:linear-gradient(180deg,#8a2a2a,#5a1515);border:1.5px solid var(--site-gold);border-radius:8px;padding:7px 16px;cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.4);}
+  .bxbtn.gd{color:#3d2f00;background:linear-gradient(180deg,#f0d488,#d4af37);}
+  .bx-pager{display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 4px;color:#ccd;}
+  .bx-pager .pg{width:30px;height:26px;border:1.5px solid #55556a;border-radius:6px;background:#26263a;color:#aab;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .bx-pager .cur{flex:1;max-width:150px;text-align:center;background:#14141c;border-radius:6px;font-size:11.5px;font-weight:900;padding:4px 0;}
+  .bx-actions{display:flex;gap:10px;justify-content:center;margin-top:8px;}
+  .bx-note{font-size:9.5px;color:#99a;padding:6px 6px 0;line-height:1.6;}
+  /* 報酬ボックス: 確認/完了モーダル */
+  .bxmodal{position:absolute;inset:0;background:rgba(10,10,16,.62);display:none;align-items:center;justify-content:center;z-index:60;padding:16px;}
+  .bxmodal.show{display:flex;}
+  .bxm-panel{width:100%;background:#2b2b38;border:2px solid #8a8aa0;outline:1.5px solid #3a3a4a;border-radius:16px;padding:16px 16px 18px;box-shadow:0 10px 30px rgba(0,0,0,.6);}
+  .bxm-title{text-align:center;color:#fff;font-size:15px;font-weight:900;letter-spacing:.14em;}
+  .bxm-orn{height:8px;background:radial-gradient(ellipse at center,var(--site-gold) 0%,transparent 68%);opacity:.75;margin:4px 40px 14px;}
+  .bxm-msg{text-align:center;color:#eee;font-size:12.5px;font-weight:700;line-height:1.8;padding:8px 0 14px;}
+  .bxm-items{display:flex;flex-wrap:wrap;gap:8px;padding:0 2px 14px;}
+  .bxm-chip{width:60px;background:linear-gradient(180deg,#f4e8cf,#e8d8b4);border:1.5px solid var(--site-gold);border-radius:9px;display:flex;flex-direction:column;align-items:center;padding:6px 0 4px;font-size:22px;line-height:1.1;}
+  .bxm-chip small{font-size:9.5px;font-weight:900;color:#333;}
+  .bxm-btns{display:flex;gap:12px;justify-content:center;}
+  .bxbtn.br{color:#f0e0c0;background:linear-gradient(180deg,#6a4a2a,#3a2512);}
+  .bxbtn.bl{color:#fff;background:linear-gradient(180deg,#3a5acA,#22348a);padding:8px 30px;}
+  .bxm-sub{font-size:9px;color:#99a;text-align:center;padding-bottom:10px;}
+</style>
+</head>
+<body>
+
+<nav class=&quot;shell-bar&quot;>
+  <button class=&quot;shell-btn active&quot; data-v=&quot;0&quot;>📱 マイページ(改修)</button>
+  <button class=&quot;shell-btn&quot; data-v=&quot;1&quot;>📱 会員ランクページ</button>
+  <button class=&quot;shell-btn&quot; data-v=&quot;2&quot;>📱 報酬ボックス(独立ページ)</button>
+</nav>
+
+<!-- ============ V0: マイページ ============ -->
+<div class=&quot;view active&quot; id=&quot;v-0&quot;>
+  <div class=&quot;mock-note&quot;><b>マイページ(改修版・アプリホーム風)</b> ― rev.6: ゲームアプリのホーム画面を参考に、<b>最上段に「ギルドの街」大型カード</b>(コンセプトアート系の仮画像スロット+開催中バッジ+復興進捗ゲージ+タップでイベントページへ)を配置。構成は上から<b>①ギルド ②ランク ③保有アイテム</b>。rev.11: ランク表示=<b>①ダーク帯バナー(累計ランクを大きく主役に・仮画像背景スロット・付与率併記)+②直下に「今月のランク」の等間隔ドット進行</b>(達成=金丸/現在=赤/未達=グレー・すごろく/スタンプカードのミニ表現・タップで詳細へ)。累計=普遍的ステータスを帯で、月間=進んでる感をドットで、の役割分担。詳細ページのデザインは変更なし。ギルド復興への遷移経路は「マイページ大上段/イベント親カテゴリ/追従バナー」の3本に。既存の提案: ①ヘッダーは現行踏襲で<b>コインのみ+ランクアイコン+🎯ミッション+🔔</b>(鍵・チケットまで並べない)。②<b>保有アイテム3枠</b>(コイン/鍵/チケット+失効予定+行き先ボタン)を新設。③ミッションはバッジ付きクイック導線+フッター🎯常設。<b>報酬ボックスはヘッダー🎁(未受取バッジ)+マイページ内導線に変更(rev.7・フッター6項目化に伴う)</b>。ガチャ履歴はマイページのメニュー内へ。既存メニューリストは維持し「会員ランク詳細」がS1へ。</div>
+  <div class=&quot;phone&quot;><div class=&quot;ph-scroll&quot;>
+    <div class=&quot;ph-head&quot;>
+      <span class=&quot;logo&quot;>G</span>
+      <span class=&quot;hd-r&quot;>
+        <span class=&quot;rk-ico&quot;>👑</span>
+        <span class=&quot;coin&quot;><span class=&quot;g&quot;></span>1,999<span class=&quot;plus&quot;>+</span></span>
+        <span class=&quot;ico&quot;>🎁<span class=&quot;bd&quot;>6</span></span>
+        <span class=&quot;ico&quot;>🔔<span class=&quot;bd&quot;>2</span></span>
+      </span>
+    </div>
+    <div class=&quot;h1&quot;>マイページ</div>
+
+    <!-- ①大上段: ギルド(復興イベント) -->
+    <div class=&quot;guildcard&quot;>
+      <div class=&quot;gc-vis&quot;>
+        <div class=&quot;gc-title&quot;><div class=&quot;t1&quot;>GRIM GUILD</div><div class=&quot;t2&quot;>グリムギルドの街</div></div>
+        <div class=&quot;gc-town&quot;>🏚️🍺<span class=&quot;c&quot;>🏰</span>⚔️🏪</div>
+        <div class=&quot;gc-fog&quot;></div>
+        <span class=&quot;gc-live&quot;>🍺 復興祭 開催中!</span>
+        <span class=&quot;gc-go&quot;>›</span>
+        <div class=&quot;gc-bar&quot;>
+          <div class=&quot;row&quot;><span>STAGE 2 市場 を復興中</span><b>340,000 / 500,000(68%)</b></div>
+          <div class=&quot;gc-g&quot;><i></i></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ②ランク -->
+    <div class=&quot;rankband2&quot;>
+      <div class=&quot;rb2-ico&quot;>👑</div>
+      <div>
+        <div class=&quot;rb2-cap&quot;>あなたのランク(累計)</div>
+        <div class=&quot;rb2-rank&quot;>プラチナ</div>
+        <div class=&quot;rb2-sub&quot;>チャージ付与率 +3%</div>
+      </div>
+      <div class=&quot;rb2-go&quot;>›</div>
+    </div>
+    <div class=&quot;month-dots&quot;>
+      <div class=&quot;md-cap&quot;><span>今月のランク <b>ゴールドⅡ</b></span><span class=&quot;lk&quot;>タップで詳細 ›</span></div>
+      <div class=&quot;md-row&quot;>
+        <span class=&quot;md-d on&quot;></span><span class=&quot;md-d on&quot;></span><span class=&quot;md-d on&quot;></span><span class=&quot;md-d me&quot;></span><span class=&quot;md-d&quot;></span><span class=&quot;md-d&quot;></span><span class=&quot;md-d&quot;></span>
+      </div>
+    </div>
+
+    <div class=&quot;sec-t&quot;>保有アイテム <span class=&quot;lk&quot;>コイン失効期限の確認 ›</span></div>
+    <div class=&quot;assets&quot;>
+      <div class=&quot;as&quot;><div class=&quot;ic&quot;>💰</div><div class=&quot;nm&quot;>コイン</div><div class=&quot;vl&quot;>1,999</div><div class=&quot;ex&quot;></div><span class=&quot;go&quot;>チャージ</span></div>
+      <div class=&quot;as&quot;><div class=&quot;ic&quot;>🔑</div><div class=&quot;nm&quot;>鍵</div><div class=&quot;vl&quot;>128</div><div class=&quot;ex&quot;>30個 8/15失効</div><span class=&quot;go gd&quot;>交換所へ</span></div>
+      <div class=&quot;as&quot;><div class=&quot;ic&quot;>🎫</div><div class=&quot;nm&quot;>チケット</div><div class=&quot;vl&quot;>3</div><div class=&quot;ex&quot;></div><span class=&quot;go dk&quot;>限定ガチャへ</span></div>
+    </div>
+
+    <div class=&quot;quick&quot;>
+      <div class=&quot;qk&quot;><span class=&quot;ic&quot;>🎯</span><span>ミッション<small>デイリーあと3件・タップでミッションページへ</small></span><span class=&quot;bd&quot;>3</span></div>
+    </div>
+
+    <div class=&quot;menu&quot;>
+      <a href=&quot;#&quot;>カード獲得履歴</a>
+      <a href=&quot;#&quot;>コイン購入履歴</a>
+      <a href=&quot;#&quot;>ガチャ履歴</a>
+      <a href=&quot;#&quot;>お届け先登録・変更</a>
+      <a href=&quot;#&quot;>クレジットカード管理</a>
+      <a href=&quot;#&quot;>会員ランク詳細<span class=&quot;nb&quot;>NEW</span></a>
+      <a href=&quot;#&quot;>メールアドレスの変更</a>
+      <a href=&quot;#&quot;>パスワードの変更</a>
+      <a href=&quot;#&quot;>お問い合わせ</a>
+    </div>
+
+    <div style=&quot;height:12px;&quot;></div>
+    <div class=&quot;ph-foot&quot;><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🃏</span>ガチャ</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>📦</span>獲得景品</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🎯</span>ミッション<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>3</span></a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🍺</span>イベント<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-gold);color:#3d2f00;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>!</span></a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🗝</span>交換所</a><a href=&quot;#&quot; style=&quot;position:relative;color:var(--site-red);font-weight:900;&quot;><span class=&quot;ic&quot;>👤</span>マイページ</a></div>
+  </div></div>
+</div>
+
+<!-- ============ V1: 会員ランクページ ============ -->
+<div class=&quot;view&quot; id=&quot;v-1&quot;>
+  <div class=&quot;mock-note&quot;><b>会員ランクページ(S1)</b> ― rev.12: 上部バナーをマイページと同じ<b>累計メインのダーク帯(累計ランクを大きく・付与率併記・仮画像背景)</b>に統一(月間/累計の並記は廃止=折り返し問題も解消。月間は直下のスタンプカードが担当)。上=<b>月間ランク(スタンプカード式・毎月1日リセット)</b>: rev.5でスクロール不要のグリッドに変更。全ランクが1画面に収まり、達成マスは金背景+「達成」スタンプ押印、現在地は赤枠+「いまここ」。段階数は設定で増減(グリッドが自動で並ぶ)。演出はランクアップ時のスタンプ押印アニメ程度の軽量想定。下=<b>累計ランク(ゲージ式・リセットなし)</b>: 細かい刻みの目盛り+進捗で変わる背景画像3段+特典チェック。どちらも課金(チャージ)額で進行、報酬は報酬ボックスへ。</div>
+  <div class=&quot;phone&quot;><div class=&quot;ph-scroll&quot;>
+    <div class=&quot;back-head&quot;><span class=&quot;bk&quot;>‹</span>会員ランク</div>
+
+    <div class=&quot;rankband2&quot; style=&quot;margin-top:12px;&quot;>
+      <div class=&quot;rb2-ico&quot;>👑</div>
+      <div>
+        <div class=&quot;rb2-cap&quot;>あなたのランク(累計)</div>
+        <div class=&quot;rb2-rank&quot;>プラチナ</div>
+        <div class=&quot;rb2-sub&quot;>チャージ付与率 +3%</div>
+      </div>
+      <div class=&quot;rb2-go&quot; style=&quot;visibility:hidden;&quot;>›</div>
+    </div>
+
+    <div class=&quot;sec-t&quot;>月間ランク <span class=&quot;pill&quot;>すごろく式</span><span class=&quot;pill gr&quot;>毎月1日リセット</span></div>
+    <div class=&quot;stampgrid&quot;>
+      <div class=&quot;stamp done&quot;><span class=&quot;ic&quot;>🥉</span><div class=&quot;nm&quot;>ブロンズ</div><div class=&quot;rw&quot;>🔑×5</div></div>
+      <div class=&quot;stamp done&quot;><span class=&quot;ic&quot;>🥈</span><div class=&quot;nm&quot;>シルバー</div><div class=&quot;rw&quot;>🔑×10</div></div>
+      <div class=&quot;stamp done&quot;><span class=&quot;ic&quot;>🥇<i>Ⅰ</i></span><div class=&quot;nm&quot;>ゴールドⅠ</div><div class=&quot;rw&quot;>🔑×20</div></div>
+      <div class=&quot;stamp done cur&quot;><span class=&quot;nowbar&quot;>いまここ</span><span class=&quot;ic&quot;>🥇<i>Ⅱ</i></span><div class=&quot;nm&quot;>ゴールドⅡ</div><div class=&quot;rw&quot;>🔑×30</div></div>
+      <div class=&quot;stamp&quot;><span class=&quot;ic&quot;>💠</span><div class=&quot;nm&quot;>プラチナ</div><div class=&quot;rw&quot;>🔑G×1 🎫×1</div></div>
+      <div class=&quot;stamp&quot;><span class=&quot;ic&quot;>💎</span><div class=&quot;nm&quot;>ダイヤ</div><div class=&quot;rw&quot;>🔑R×1</div></div>
+      <div class=&quot;stamp lk&quot;><span class=&quot;ic&quot;>👑</span><div class=&quot;nm&quot;>VIP</div><div class=&quot;rw&quot;>🔑R×3 🎫×2</div></div>
+      <div class=&quot;stamp lk&quot; style=&quot;border-style:dashed;&quot;><span class=&quot;ic&quot; style=&quot;opacity:.5;&quot;>✨</span><div class=&quot;nm&quot; style=&quot;color:#aaa;&quot;>段階は設定で増減</div><div class=&quot;rw&quot;>&amp;nbsp;</div></div>
+    </div>
+    <div class=&quot;prog-line&quot;><span>今月のチャージ <b>34,000</b> コイン</span><span>次のプラチナまで <b>16,000</b></span></div>
+    <div class=&quot;prog-line&quot; style=&quot;padding-top:2px;&quot;><span class=&quot;pill gr&quot; style=&quot;font-size:9px;&quot;>リセットまで 26日</span><span style=&quot;font-size:10px;&quot;>※ランクアップ時はスタンプ押印の軽い演出のみ</span></div>
+
+    <div class=&quot;sec-t&quot;>累計ランク <span class=&quot;pill gd&quot;>ゲージ式</span><span class=&quot;pill gr&quot;>リセットなし</span></div>
+    <div class=&quot;tg-wrap&quot;>
+      <div class=&quot;tg&quot;>
+        <i></i>
+        <span class=&quot;tick&quot; style=&quot;left:10%&quot;></span><span class=&quot;tick&quot; style=&quot;left:20%&quot;></span><span class=&quot;tick&quot; style=&quot;left:30%&quot;></span><span class=&quot;tick&quot; style=&quot;left:40%&quot;></span><span class=&quot;tick&quot; style=&quot;left:50%&quot;></span><span class=&quot;tick&quot; style=&quot;left:60%&quot;></span><span class=&quot;tick&quot; style=&quot;left:70%&quot;></span><span class=&quot;tick&quot; style=&quot;left:80%&quot;></span><span class=&quot;tick&quot; style=&quot;left:90%&quot;></span>
+      </div>
+      <div class=&quot;tg-lbl&quot;><span>プラチナ</span><span>62%(累計 1,240,000)</span><span>ダイヤまで 260,000</span></div>
+      <div class=&quot;tg-lbl&quot; style=&quot;margin-top:0;&quot;><span style=&quot;font-size:9px;color:#999;&quot;>※刻みの位置・本数は管理画面から細かく設定可(25%固定ではない)</span></div>
+    </div>
+
+    <div class=&quot;sec-t&quot;>累計ランク特典(プラチナ)</div>
+    <div class=&quot;tokuten&quot;>
+      <span class=&quot;tk on&quot;>✔ チャージ付与率 +3%</span>
+      <span class=&quot;tk on&quot;>✔ 鍵の所持上限 500</span>
+      <span class=&quot;tk on&quot;>✔ 限定ガチャ解放</span>
+      <span class=&quot;tk off&quot;>🔒 VIPイベント参加権(ダイヤ〜)</span>
+    </div>
+
+    <div class=&quot;sec-t&quot;>到達報酬の受取状況 <span class=&quot;lk&quot;>報酬ボックスへ ›</span></div>
+    <div class=&quot;rowlist&quot;>
+      <div class=&quot;rl&quot;><span class=&quot;ic&quot;>🔑</span><span class=&quot;tx&quot;>通常キー×30<small>月間 ゴールドⅡ 到達</small></span><span class=&quot;pill gd&quot;>受取済</span></div>
+      <div class=&quot;rl&quot;><span class=&quot;ic&quot;>🎫</span><span class=&quot;tx&quot;>チケット×1 + ゴールドキー×1<small>月間 プラチナ 到達で獲得</small></span><span class=&quot;pill gr&quot;>未到達</span></div>
+    </div>
+
+    <div style=&quot;height:12px;&quot;></div>
+    <div class=&quot;ph-foot&quot;><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🃏</span>ガチャ</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>📦</span>獲得景品</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🎯</span>ミッション<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>3</span></a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🍺</span>イベント<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-gold);color:#3d2f00;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>!</span></a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🗝</span>交換所</a><a href=&quot;#&quot; style=&quot;position:relative;color:var(--site-red);font-weight:900;&quot;><span class=&quot;ic&quot;>👤</span>マイページ</a></div>
+  </div></div>
+</div>
+
+<!-- ============ V2: 報酬ボックス ============ -->
+<div class=&quot;view&quot; id=&quot;v-2&quot;>
+  <div class=&quot;mock-note&quot;><b>報酬ボックス(独立ページ・アプリ風UI)</b> ― rev.8: プレゼントボックス型UIに刷新(構成踏襲: タブ「未受取一覧/りれき」・金枠行カード・獲得元の説明文・受け取り期間「あと◯日」・一括受取・ページ送り)。<b>全報酬の受取はこのページに一本化</b>: ミッション達成・ランク到達・イベントカンストの報酬は<b>自動でここへ投入</b>され、残高への反映は本ページの「受け取る」のみ(ミッションページでの直接受取は廃止)。物理カードは「発送手続きへ」で獲得景品(未選択)フローに引き渡し。期限起点はC案(受け取ってからグレード別期間がフル起算)。導線=ヘッダー🎁(バッジ)+マイページ+🔔通知。rev.9: <b>確認モーダル(一括受取時)と受け取り完了モーダル</b>をアプリ風パネルで追加(「受け取る」「一括受取」タップで動作)。一括受取は発送必要カードを対象外とする仕様。</div>
+  <div class=&quot;phone&quot;><div class=&quot;ph-scroll&quot;>
+    <div class=&quot;back-head&quot;><span class=&quot;bk&quot;>‹</span>🎁 報酬ボックス</div>
+    <div class=&quot;bxwrap&quot;>
+      <div class=&quot;bxpanel&quot;>
+        <div class=&quot;bx-title&quot;>報酬ボックス</div>
+        <div class=&quot;bx-orn&quot;></div>
+        <div class=&quot;bx-tabs&quot;>
+          <span class=&quot;bx-tab on&quot;>未受取一覧<span class=&quot;bd&quot;>6</span></span>
+          <span class=&quot;bx-tab&quot;>りれき</span>
+        </div>
+
+        <div class=&quot;gift&quot;><div class=&quot;gic&quot;>🔑<small>×30</small></div><div class=&quot;gbody&quot;><div class=&quot;gtx&quot;>ウィークリーミッション「コンプリート」の報酬です。</div><div class=&quot;gdiv&quot;></div><div class=&quot;gterm&quot;>受け取り期間　<b>あと 5日</b></div></div><div class=&quot;gact&quot;><button class=&quot;bxbtn&quot; onclick=&quot;bxOne('🔑','×30')&quot;>受け取る</button></div></div>
+        <div class=&quot;gift&quot;><div class=&quot;gic&quot;>🎫<small>×1</small></div><div class=&quot;gbody&quot;><div class=&quot;gtx&quot;>月間ランク「ゴールドⅡ」到達の報酬です。</div><div class=&quot;gdiv&quot;></div><div class=&quot;gterm&quot;>受け取り期間　<b>あと 5日</b></div></div><div class=&quot;gact&quot;><button class=&quot;bxbtn&quot; onclick=&quot;bxOne('🎫','×1')&quot;>受け取る</button></div></div>
+        <div class=&quot;gift&quot;><div class=&quot;gic&quot;>💰<small>×1,000</small></div><div class=&quot;gbody&quot;><div class=&quot;gtx&quot;>ギルド復興祭 STAGE1「酒場」復興の報酬です。</div><div class=&quot;gdiv&quot;></div><div class=&quot;gterm&quot;>受け取り期間　<b>あと 10日</b></div></div><div class=&quot;gact&quot;><button class=&quot;bxbtn&quot; onclick=&quot;bxOne('💰','×1,000')&quot;>受け取る</button></div></div>
+        <div class=&quot;gift&quot;><div class=&quot;gic&quot;>🔑<small>×1</small></div><div class=&quot;gbody&quot;><div class=&quot;gtx&quot;>ギルド復興祭 STAGE2「市場」復興の報酬です。(ゴールドキー)</div><div class=&quot;gdiv&quot;></div><div class=&quot;gterm&quot;>受け取り期間　<b>あと 10日</b></div></div><div class=&quot;gact&quot;><button class=&quot;bxbtn&quot; onclick=&quot;bxOne('🔑','×1')&quot;>受け取る</button></div></div>
+        <div class=&quot;gift&quot;><div class=&quot;gic&quot;>🃏<small>PSA10</small></div><div class=&quot;gbody&quot;><div class=&quot;gtx&quot;>王国復興 大作戦 貢献度3位の報酬です。手続き後は獲得景品へ移動します。</div><div class=&quot;gdiv&quot;></div><div class=&quot;gterm&quot;>手続き期間　<b>あと 15日</b></div></div><div class=&quot;gact&quot;><button class=&quot;bxbtn gd&quot;>発送手続きへ</button></div></div>
+        <div class=&quot;gift&quot;><div class=&quot;gic&quot;>💰<small>×10</small></div><div class=&quot;gbody&quot;><div class=&quot;gtx&quot;>デイリーミッション「ログイン」の報酬です。</div><div class=&quot;gdiv&quot;></div><div class=&quot;gterm&quot;>受け取り期間　<b>あと 1日</b></div></div><div class=&quot;gact&quot;><button class=&quot;bxbtn&quot; onclick=&quot;bxOne('💰','×10')&quot;>受け取る</button></div></div>
+
+        <div class=&quot;bx-pager&quot;><span class=&quot;pg&quot;>|‹</span><span class=&quot;pg&quot;>‹</span><span class=&quot;cur&quot;>1/1</span><span class=&quot;pg&quot;>›</span><span class=&quot;pg&quot;>›|</span></div>
+        <div class=&quot;bx-actions&quot;><button class=&quot;bxbtn gd&quot; style=&quot;padding:8px 26px;&quot; onclick=&quot;bxConfirm()&quot;>一括受取</button></div>
+        <div class=&quot;bx-note&quot;>※鍵・チケットは受け取った時点からグレード別の有効期限が起算されます ／ 物理カードは「発送手続きへ」で獲得景品(未選択)に移動し、以降は通常の発送フロー(お届け先登録が必要)</div>
+      </div>
+    </div>
+
+    
+    <!-- 確認モーダル -->
+    <div class=&quot;bxmodal&quot; id=&quot;bxm-conf&quot;>
+      <div class=&quot;bxm-panel&quot;>
+        <div class=&quot;bxm-title&quot;>確認</div>
+        <div class=&quot;bxm-orn&quot;></div>
+        <div class=&quot;bxm-msg&quot;>報酬をまとめて受け取りますか?</div>
+        <div class=&quot;bxm-sub&quot;>※発送が必要なカード報酬は一括受取の対象外です。「発送手続きへ」から個別にお手続きください</div>
+        <div class=&quot;bxm-btns&quot;><button class=&quot;bxbtn br&quot; onclick=&quot;bxClose()&quot;>やめる</button><button class=&quot;bxbtn bl&quot; onclick=&quot;bxTakeAll()&quot;>うけとる</button></div>
+      </div>
+    </div>
+    <!-- 受け取り完了モーダル -->
+    <div class=&quot;bxmodal&quot; id=&quot;bxm-done&quot;>
+      <div class=&quot;bxm-panel&quot;>
+        <div class=&quot;bxm-title&quot;>受け取り完了</div>
+        <div class=&quot;bxm-orn&quot;></div>
+        <div class=&quot;bxm-msg&quot; style=&quot;padding-bottom:8px;&quot;>以下の報酬を受け取りました。</div>
+        <div class=&quot;bxm-items&quot; id=&quot;bxm-items&quot;></div>
+        <div class=&quot;bxm-sub&quot;>※鍵・チケットの有効期限は受け取った今この時点から起算されます</div>
+        <div class=&quot;bxm-btns&quot;><button class=&quot;bxbtn bl&quot; onclick=&quot;bxClose()&quot;>OK</button></div>
+      </div>
+    </div>
+
+    <div class=&quot;ph-foot&quot;><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🃏</span>ガチャ</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>📦</span>獲得景品</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🎯</span>ミッション<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>3</span></a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🍺</span>イベント<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-gold);color:#3d2f00;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>!</span></a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🗝</span>交換所</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>👤</span>マイページ</a></div>
+  </div></div>
+</div>
+
+<script>
+document.querySelectorAll('.shell-btn').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.shell-btn').forEach(function(x){x.classList.remove('active');});
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+    b.classList.add('active');
+    document.getElementById('v-'+b.dataset.v).classList.add('active');
+    window.scrollTo(0,0);
+  });
+});
+
+function bxChip(ic,q){return '<div class=&quot;bxm-chip&quot;>'+ic+'<small>'+q+'</small></div>';}
+function bxConfirm(){document.getElementById('bxm-conf').classList.add('show');}
+function bxClose(){document.querySelectorAll('.bxmodal').forEach(function(m){m.classList.remove('show');});}
+function bxTakeAll(){
+  bxClose();
+  document.getElementById('bxm-items').innerHTML=bxChip('🔑','×30')+bxChip('🎫','×1')+bxChip('💰','×1,000')+bxChip('🔑','×1')+bxChip('💰','×10');
+  document.getElementById('bxm-done').classList.add('show');
+}
+function bxOne(ic,q){
+  document.getElementById('bxm-items').innerHTML=bxChip(ic,q);
+  document.getElementById('bxm-done').classList.add('show');
+}
+</script>
+</body>
+</html>
+"></iframe>
+</div><div class="fsec" id="f-2">
+  <div class="fdesc"><b>🎯 ミッション rev.6</b> ― ミッションページ(受取はBOXに一本化)/遷移フロー/🎉ログインボーナス(ポップアップ)/管理(一覧・作成)(このモック内の画面タブ・ボタン・フィルタはすべて動作します)</div>
+  <iframe class="mockframe" srcdoc="<!DOCTYPE html>
+<html lang=&quot;ja&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
+<title>GRIM ミッションページ UIモック rev.6</title>
+<link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;>
+<link href=&quot;https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
+<style>
+  :root{--red:#d6202b;--gold:#e8c547;--dark:#1a1a1a;--maroon:#7a2030;--gray:#666;--line:#ddd;--bg:#f0f0f2;
+    --site-red:#e8442e;--site-maroon:#8a1f1f;--site-gold:#d4af37;--site-line:#ececec;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark);font-size:14px;line-height:1.7;}
+  .shell-bar{position:sticky;top:0;z-index:100;background:var(--dark);border-bottom:4px solid var(--red);display:flex;overflow-x:auto;padding:0 8px;}
+  .shell-btn{flex:none;font-family:inherit;font-size:12.5px;font-weight:700;color:#bbb;background:none;border:none;padding:12px 14px 10px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
+  .shell-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+  .view{display:none;padding:24px 12px 60px;}
+  .view.active{display:block;}
+  .mock-note{max-width:760px;margin:0 auto 16px;font-size:12px;color:var(--gray);background:#fff;border:1px dashed #bbb;border-radius:6px;padding:10px 14px;}
+  .mock-note b{color:var(--red);}
+
+  .phone{width:390px;max-width:100%;margin:0 auto;background:#fff;border:10px solid var(--dark);border-radius:28px;overflow:hidden;position:relative;box-shadow:0 8px 30px rgba(0,0,0,.18);}
+  .ph-scroll{height:720px;overflow-y:auto;position:relative;background:#fff;}
+  .back-head{position:sticky;top:0;z-index:20;background:#fff;padding:11px 12px;border-bottom:1px solid var(--site-line);display:flex;align-items:center;gap:10px;font-weight:900;font-size:14.5px;}
+  .back-head .bk{color:var(--gray);font-size:16px;}
+  .back-head .tm{margin-left:auto;font-size:10px;color:var(--site-red);font-weight:900;}
+  .ph-foot{position:sticky;bottom:0;z-index:25;background:#fff;border-top:1px solid var(--site-line);display:flex;box-shadow:0 -2px 8px rgba(0,0,0,.06);}
+  .ph-foot a{flex:1;text-align:center;padding:7px 0 8px;font-size:9.5px;font-weight:700;color:#777;text-decoration:none;line-height:1.5;}
+  .ph-foot a .ic{display:block;font-size:17px;}
+  .btn{display:inline-block;font-size:11px;font-weight:900;color:#fff;background:var(--site-red);border:none;border-radius:5px;padding:6px 14px;cursor:pointer;font-family:inherit;}
+  .btn.gd{background:var(--site-gold);color:#3d2f00;}
+  .btn.gr{background:#ccc;color:#888;cursor:default;}
+  .pill{font-size:10px;font-weight:900;color:#fff;background:var(--site-red);padding:1px 8px;border-radius:10px;}
+  .pill.gr{background:#999;}
+
+  /* 種別タブ */
+  .mtabs{display:flex;gap:6px;overflow-x:auto;padding:10px 14px 4px;position:sticky;top:45px;background:#fff;z-index:15;}
+  .mt{flex:none;font-size:11.5px;font-weight:900;color:#666;padding:5px 13px;border:1px solid #ddd;border-radius:16px;background:#fff;cursor:pointer;position:relative;}
+  .mt.on{color:#fff;background:var(--site-red);border-color:var(--site-red);}
+  .mt .bd{position:absolute;top:-5px;right:-3px;background:var(--site-gold);color:#3d2f00;font-size:8.5px;font-weight:900;min-width:14px;height:14px;border-radius:7px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+
+  /* コンプバー */
+  .comp{margin:10px 14px 4px;border:1.5px solid var(--site-gold);background:#fdf6dd;border-radius:10px;padding:10px 12px;}
+  .comp .t{font-size:12px;font-weight:900;display:flex;justify-content:space-between;align-items:center;}
+  .comp .t b{color:var(--maroon);}
+  .cg{height:10px;background:#fff;border:1px solid #e5d9a8;border-radius:5px;overflow:hidden;margin-top:6px;}
+  .cg i{display:block;height:100%;background:linear-gradient(90deg,#c9a227,var(--site-gold));}
+
+  /* ミッション行 */
+  .ml{margin:8px 14px;border:1px solid var(--site-line);border-radius:10px;overflow:hidden;}
+  .mrow{display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid #f2f2f2;background:#fff;}
+  .mrow:last-child{border-bottom:none;}
+  .mrow .ic{font-size:20px;flex:none;}
+  .mrow .tx{flex:1;min-width:0;}
+  .mrow .tt{font-size:12.5px;font-weight:900;}
+  .mrow .rw{font-size:10px;color:var(--gray);}
+  .mg{height:7px;background:#eee;border-radius:4px;overflow:hidden;margin-top:4px;}
+  .mg i{display:block;height:100%;background:linear-gradient(90deg,#ff6a3c,var(--site-red));}
+  .mg.fl i{background:linear-gradient(90deg,#c9a227,var(--site-gold));}
+  .mrow .st{flex:none;text-align:center;}
+  .mrow.done-bg{background:#fafafa;}
+  .mnote{padding:2px 18px 10px;font-size:10px;color:var(--gray);}
+
+  /* 管理 */
+  .admin{max-width:860px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .ad-head{background:var(--dark);color:#fff;padding:14px 22px;font-weight:900;display:flex;justify-content:space-between;align-items:center;}
+  .ad-head .sub{color:var(--gold);font-size:11px;font-weight:700;}
+  .ad-body{padding:20px 24px 28px;}
+  .fg{margin-bottom:15px;}
+  .fg label.t{display:block;font-size:12.5px;font-weight:900;margin-bottom:5px;}
+  .fg label.t .req{color:var(--red);font-size:10px;margin-left:6px;}
+  .fg input[type=text],.fg input[type=number],.fg input[type=datetime-local],.fg select{width:100%;font-family:inherit;font-size:13px;padding:8px 10px;border:1px solid #ccc;border-radius:5px;background:#fff;}
+  .fg .hint{font-size:11px;color:var(--gray);margin-top:3px;}
+  .inline{display:flex;gap:10px;flex-wrap:wrap;}
+  .inline > *{flex:1;min-width:150px;}
+  .ad-sec{border-top:2px solid var(--dark);margin-top:20px;padding-top:14px;}
+  .ad-sec > .st{font-size:14px;font-weight:900;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .ad-sec > .st::before{content:&quot;&quot;;width:5px;height:15px;background:var(--red);}
+  table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:6px;}
+  th{background:var(--dark);color:#fff;font-weight:700;padding:7px 10px;text-align:left;border:1px solid var(--dark);}
+  td{padding:6px 10px;border:1px solid var(--line);vertical-align:middle;background:#fff;}
+  .tag{display:inline-block;font-size:10px;font-weight:900;padding:1px 8px;border-radius:2px;white-space:nowrap;}
+  .tag-d{background:#fbe9ea;color:var(--red);border:1px solid var(--red);}
+  .tag-w{background:#fdf6dd;color:#8a6d00;border:1px solid var(--site-gold);}
+  .tag-g{background:#eee;color:#666;border:1px solid #bbb;}
+  .slot{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
+  .slot select,.slot input{font-family:inherit;font-size:12.5px;padding:6px 8px;border:1px solid #ccc;border-radius:5px;}
+  .slot .no{width:22px;font-weight:900;color:var(--red);font-size:12px;flex:none;}
+  .slot .del{color:var(--red);font-weight:900;cursor:pointer;flex:none;}
+  .toggle{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;}
+  .tg-sw{width:44px;height:24px;border-radius:12px;background:var(--site-red);position:relative;flex:none;cursor:pointer;}
+  .tg-sw::after{content:&quot;&quot;;position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;}
+  .tg-sw.off{background:#ccc;}
+  .tg-sw.off::after{right:auto;left:3px;}
+  .save-bar{background:#f6f6f6;border-top:1px solid var(--line);padding:12px 24px;display:flex;justify-content:flex-end;gap:10px;}
+  .btn2{font-family:inherit;font-size:12px;font-weight:900;border:none;border-radius:5px;padding:8px 18px;cursor:pointer;}
+  .btn2.pr{background:var(--red);color:#fff;}
+  .btn2.gr{background:#ddd;color:#555;}
+  .mini{font-size:10.5px;font-weight:900;color:var(--maroon);border:1px solid var(--maroon);border-radius:4px;padding:1px 8px;background:#fff;cursor:pointer;}
+  /* 遷移フロー */
+  .flow{max-width:760px;margin:0 auto;}
+  .fbox{background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:12px 16px;margin:0 auto;max-width:420px;}
+  .fbox .t{font-size:13.5px;font-weight:900;}
+  .fbox .d{font-size:11.5px;color:var(--gray);}
+  .fbox.goal{border:2px solid var(--site-red);}
+  .farr{text-align:center;font-size:18px;color:#999;padding:2px 0;}
+  .froutes{display:flex;gap:10px;margin:6px auto;max-width:760px;}
+  .fr{flex:1;background:#fff;border:1.5px dashed #bbb;border-radius:10px;padding:10px 12px;text-align:center;}
+  .fr .n{display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--site-red);color:#fff;font-size:11px;font-weight:900;line-height:20px;margin-bottom:4px;}
+  .fr .t{font-size:12px;font-weight:900;}
+  .fr .d{font-size:10.5px;color:var(--gray);}
+  /* ログインボーナス ポップアップ */
+  .lb-ov{position:absolute;inset:0;background:rgba(8,8,14,.66);display:flex;align-items:center;justify-content:center;z-index:70;padding:14px;}
+  .lb-panel{width:100%;background:#2b2b38;border:2px solid #8a8aa0;outline:1.5px solid #3a3a4a;border-radius:16px;padding:12px 12px 14px;box-shadow:0 12px 34px rgba(0,0,0,.65);}
+  .lb-bn{height:76px;border-radius:10px;border:2px solid var(--site-gold);background:linear-gradient(120deg,#7a2030,#d6202b 60%,#8a1f1f);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;position:relative;overflow:hidden;}
+  .lb-bn .t1{font-size:9.5px;letter-spacing:.24em;color:var(--site-gold);font-weight:700;}
+  .lb-bn .t2{font-size:14.5px;font-weight:900;text-shadow:0 2px 5px rgba(0,0,0,.5);}
+  .lb-bn::after{content:&quot;仮画像&quot;;position:absolute;right:5px;bottom:3px;font-size:8px;color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.4);padding:0 4px;border-radius:2px;}
+  .lb-days{background:#14141c;color:#fff;text-align:center;font-size:11px;font-weight:900;border-radius:14px;padding:3px 0;margin:9px 24px;}
+  .lb-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;background:linear-gradient(180deg,#f4e8cf,#e8d8b4);border:2px solid var(--site-gold);border-radius:10px;padding:10px 9px;}
+  .lb-c{position:relative;background:#fff;border:1.5px solid #d8c48a;border-radius:8px;display:flex;flex-direction:column;align-items:center;padding:10px 0 4px;font-size:20px;line-height:1.1;}
+  .lb-c small{font-size:9px;font-weight:900;color:#333;}
+  .lb-c .dn{position:absolute;top:-1px;right:-1px;background:#26317a;color:#fff;font-size:8px;font-weight:900;padding:0 5px;border-radius:0 7px 0 7px;}
+  .lb-c.got{filter:grayscale(.35) brightness(.82);}
+  .lb-c.got::after{content:&quot;✓&quot;;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--site-red);font-weight:900;text-shadow:0 0 6px #fff,0 0 10px #fff;}
+  .lb-c.today{border:2px solid var(--site-red);box-shadow:0 0 0 2px rgba(232,68,46,.25),0 0 14px rgba(232,68,46,.5);animation:lbpop .5s ease-out;}
+  .lb-c.today::before{content:&quot;本日&quot;;position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--site-red);color:#fff;font-size:8px;font-weight:900;padding:0 7px;border-radius:7px;}
+  @keyframes lbpop{0%{transform:scale(1.5);opacity:0;}60%{transform:scale(.95);}100%{transform:scale(1);}}
+  .lb-talk{display:flex;gap:9px;align-items:flex-start;background:#14141c;border:1.5px solid #3a3a4a;border-radius:10px;padding:9px 11px;margin-top:10px;}
+  .lb-talk .fc{font-size:24px;flex:none;}
+  .lb-talk .tx{font-size:10.5px;color:#eee;font-weight:700;line-height:1.7;}
+  .lb-close{display:block;margin:11px auto 0;font-family:inherit;font-size:12px;font-weight:900;color:#fff;background:linear-gradient(180deg,#3a5aca,#22348a);border:1.5px solid var(--site-gold);border-radius:8px;padding:7px 34px;cursor:pointer;}
+  .hl{outline:3px solid var(--site-red);outline-offset:2px;border-radius:8px;animation:hlp 1.6s infinite;}
+  @keyframes hlp{0%,100%{outline-color:rgba(232,68,46,.9);}50%{outline-color:rgba(232,68,46,.25);}}
+  .topmini{width:390px;max-width:100%;margin:0 auto 14px;background:#fff;border:10px solid var(--dark);border-radius:28px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.18);}
+  .tm-head{background:#fff;padding:8px 12px;border-bottom:1px solid var(--site-line);display:flex;justify-content:space-between;align-items:center;}
+  .tm-bal{display:flex;gap:7px;align-items:center;font-size:11px;font-weight:700;}
+  .tm-bn{height:96px;background:linear-gradient(120deg,#7a2030,#d6202b);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;position:relative;}
+  .tm-bn::after{content:&quot;仮画像&quot;;position:absolute;right:6px;bottom:4px;font-size:9px;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.5);padding:0 4px;border-radius:2px;}
+  .tm-card{margin:10px 12px;border:1px solid var(--site-line);border-radius:10px;overflow:hidden;}
+  .tm-card .im{height:80px;background:linear-gradient(120deg,#1a1a2b,#3a3a6a);display:flex;align-items:center;justify-content:center;color:#889;font-size:11px;}
+  .tm-card .pr{display:flex;justify-content:space-between;padding:6px 10px;font-size:13px;font-weight:900;}
+  .tm-foot{border-top:1px solid var(--site-line);display:flex;background:#fff;}
+  .tm-foot span{flex:1;text-align:center;padding:6px 0 7px;font-size:9px;font-weight:700;color:#777;line-height:1.5;}
+  .tm-foot span i{display:block;font-style:normal;font-size:15px;}
+</style>
+</head>
+<body>
+
+<nav class=&quot;shell-bar&quot;>
+  <button class=&quot;shell-btn active&quot; data-v=&quot;0&quot;>📱 ミッションページ</button>
+  <button class=&quot;shell-btn&quot; data-v=&quot;2&quot;>🗺 トップからの遷移フロー</button>
+  <button class=&quot;shell-btn&quot; data-v=&quot;3&quot;>🎉 ログインボーナス(ポップアップ)</button>
+  <button class=&quot;shell-btn&quot; data-v=&quot;1&quot;>🛠 管理:ミッション一覧・作成</button>
+</nav>
+
+<!-- ============ V0: ユーザー ============ -->
+<div class=&quot;view active&quot; id=&quot;v-0&quot;>
+  <div class=&quot;mock-note&quot;><b>ミッションページ</b> ― 導線はヘッダー🎯とマイページのクイックボタン。種別タブ(デイリー/ウィークリー/マンスリー/累計、イベント・復興は開催時のみ出現)は<b>実際に切り替わります</b>。上部にコンプ報酬バー、達成ミッションの「受け取る」も動きます(押すと受取済みに)。<b>受取は報酬ボックスに一本化(rev.5変更)</b>: ここで達成すると報酬は自動で報酬ボックスへ投入され、残高への反映はボックスの「受け取る」のみ(ミッションページでの直接受取は廃止・行のボタンはBOXへの導線)。リセットタイマーは右上。</div>
+  <div class=&quot;phone&quot;><div class=&quot;ph-scroll&quot;>
+    <div class=&quot;back-head&quot;><span class=&quot;bk&quot;>‹</span>🎯 ミッション<span class=&quot;tm&quot; id=&quot;timer&quot;>デイリー更新まで 09:42:11</span></div>
+
+    <div class=&quot;mtabs&quot;>
+      <span class=&quot;mt on&quot; onclick=&quot;mtab(this,'d')&quot;>デイリー<span class=&quot;bd&quot;>2</span></span>
+      <span class=&quot;mt&quot; onclick=&quot;mtab(this,'w')&quot;>ウィークリー<span class=&quot;bd&quot;>1</span></span>
+      <span class=&quot;mt&quot; onclick=&quot;mtab(this,'m')&quot;>マンスリー</span>
+      <span class=&quot;mt&quot; onclick=&quot;mtab(this,'r')&quot;>累計</span>
+      <span class=&quot;mt&quot; onclick=&quot;mtab(this,'e')&quot;>🍺イベント<span class=&quot;bd&quot;>1</span></span>
+    </div>
+
+    <!-- デイリー -->
+    <div id=&quot;mp-d&quot;>
+      <div class=&quot;comp&quot;>
+        <div class=&quot;t&quot;><span>🏆 デイリーコンプリート</span><b>2 / 4 達成</b></div>
+        <div class=&quot;cg&quot;><i style=&quot;width:50%&quot;></i></div>
+        <div style=&quot;font-size:10px;color:#8a6d00;margin-top:4px;&quot;>全達成で 🔑通常キー×2 をゲット!</div>
+      </div>
+      <div class=&quot;ml&quot;>
+        <div class=&quot;mrow done-bg&quot;><span class=&quot;ic&quot;>☀️</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>今日もGRIMへようこそ</div><div class=&quot;rw&quot;>ログインする ・ 💰Pt×10</div></span><span class=&quot;st&quot;><span class=&quot;pill gr&quot;>受取済</span></span></div>
+        <div class=&quot;mrow&quot;><span class=&quot;ic&quot;>🃏</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>オリパを引いてみよう</div><div class=&quot;rw&quot;>オリパを1回利用 ・ 🔑通常キー×1</div><div class=&quot;mg fl&quot;><i style=&quot;width:100%&quot;></i></div></span><span class=&quot;st&quot;><button class=&quot;btn&quot; onclick=&quot;uke(this)&quot;>🎁 BOXで受取 ›</button></span></div>
+        <div class=&quot;mrow&quot;><span class=&quot;ic&quot;>🔥</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>今日のオリパ活動</div><div class=&quot;rw&quot;>オリパを5回利用(2/5) ・ 💰Pt×20</div><div class=&quot;mg&quot;><i style=&quot;width:40%&quot;></i></div></span><span class=&quot;st&quot;><button class=&quot;btn gr&quot;>未達成</button></span></div>
+        <div class=&quot;mrow&quot;><span class=&quot;ic&quot;>🏆</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>デイリーコンプリート</div><div class=&quot;rw&quot;>デイリーを全達成(2/4) ・ 🔑通常キー×2</div><div class=&quot;mg&quot;><i style=&quot;width:50%&quot;></i></div></span><span class=&quot;st&quot;><button class=&quot;btn gr&quot;>未達成</button></span></div>
+      </div>
+      <div class=&quot;mnote&quot;>※毎日 0:00 に自動更新(同内容で再生成) ／ 未達成報酬は🎁報酬ボックスに自動で届きます(受取はBOXから)</div>
+    </div>
+
+    <!-- ウィークリー -->
+    <div id=&quot;mp-w&quot; style=&quot;display:none;&quot;>
+      <div class=&quot;comp&quot;>
+        <div class=&quot;t&quot;><span>🏆 ウィークリーコンプリート</span><b>2 / 4 達成</b></div>
+        <div class=&quot;cg&quot;><i style=&quot;width:50%&quot;></i></div>
+        <div style=&quot;font-size:10px;color:#8a6d00;margin-top:4px;&quot;>全達成で 🔑通常キー×5 をゲット!</div>
+      </div>
+      <div class=&quot;ml&quot;>
+        <div class=&quot;mrow&quot;><span class=&quot;ic&quot;>📅</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>週間皆勤賞</div><div class=&quot;rw&quot;>7日間で5日ログイン(5/5) ・ 🔑通常キー×5</div><div class=&quot;mg fl&quot;><i style=&quot;width:100%&quot;></i></div></span><span class=&quot;st&quot;><button class=&quot;btn&quot; onclick=&quot;uke(this)&quot;>🎁 BOXで受取 ›</button></span></div>
+        <div class=&quot;mrow done-bg&quot;><span class=&quot;ic&quot;>✅</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>デイリーマスター</div><div class=&quot;rw&quot;>デイリーを15回達成 ・ 🔑通常キー×5</div></span><span class=&quot;st&quot;><span class=&quot;pill gr&quot;>受取済</span></span></div>
+        <div class=&quot;mrow&quot;><span class=&quot;ic&quot;>🃏</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>今週のオリパ活動</div><div class=&quot;rw&quot;>オリパを合計10回利用(6/10) ・ 🎫通常チケット×1</div><div class=&quot;mg&quot;><i style=&quot;width:60%&quot;></i></div></span><span class=&quot;st&quot;><button class=&quot;btn gr&quot;>未達成</button></span></div>
+        <div class=&quot;mrow&quot;><span class=&quot;ic&quot;>🏆</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>ウィークリーコンプリート</div><div class=&quot;rw&quot;>ウィークリーを全達成(2/4) ・ 🔑通常キー×5</div><div class=&quot;mg&quot;><i style=&quot;width:50%&quot;></i></div></span><span class=&quot;st&quot;><button class=&quot;btn gr&quot;>未達成</button></span></div>
+      </div>
+      <div class=&quot;mnote&quot;>※毎週月曜 0:00 に自動更新 ／ デイリー達成が自動でここに積み上がります(入れ子)</div>
+    </div>
+
+    <!-- マンスリー -->
+    <div id=&quot;mp-m&quot; style=&quot;display:none;&quot;>
+      <div class=&quot;ml&quot; style=&quot;margin-top:10px;&quot;>
+        <div class=&quot;mrow&quot;><span class=&quot;ic&quot;>🗓️</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>月間ログインボーナス+</div><div class=&quot;rw&quot;>月間20日ログイン(12/20) ・ 🔑ゴールドキー×1</div><div class=&quot;mg&quot;><i style=&quot;width:60%&quot;></i></div></span><span class=&quot;st&quot;><button class=&quot;btn gr&quot;>未達成</button></span></div>
+        <div class=&quot;mrow&quot;><span class=&quot;ic&quot;>🏅</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>ウィークリー制覇</div><div class=&quot;rw&quot;>ウィークリーを12回達成(5/12) ・ 🎫上位チケット×1</div><div class=&quot;mg&quot;><i style=&quot;width:42%&quot;></i></div></span><span class=&quot;st&quot;><button class=&quot;btn gr&quot;>未達成</button></span></div>
+        <div class=&quot;mrow&quot;><span class=&quot;ic&quot;>💪</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>今月のGRIM活動</div><div class=&quot;rw&quot;>オリパを合計40回利用(18/40) ・ 🔑ゴールドキー×1</div><div class=&quot;mg&quot;><i style=&quot;width:45%&quot;></i></div></span><span class=&quot;st&quot;><button class=&quot;btn gr&quot;>未達成</button></span></div>
+      </div>
+      <div class=&quot;mnote&quot;>※毎月1日 0:00 に更新</div>
+    </div>
+
+    <!-- 累計 -->
+    <div id=&quot;mp-r&quot; style=&quot;display:none;&quot;>
+      <div class=&quot;ml&quot; style=&quot;margin-top:10px;&quot;>
+        <div class=&quot;mrow done-bg&quot;><span class=&quot;ic&quot;>🌱</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>GRIMの常連 Ⅰ</div><div class=&quot;rw&quot;>累計ログイン10日 ・ 🔑通常キー×5</div></span><span class=&quot;st&quot;><span class=&quot;pill gr&quot;>受取済</span></span></div>
+        <div class=&quot;mrow&quot;><span class=&quot;ic&quot;>🌿</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>GRIMの常連 Ⅱ</div><div class=&quot;rw&quot;>累計ログイン50日(34/50) ・ 🔑ゴールドキー×1</div><div class=&quot;mg&quot;><i style=&quot;width:68%&quot;></i></div></span><span class=&quot;st&quot;><button class=&quot;btn gr&quot;>未達成</button></span></div>
+        <div class=&quot;mrow&quot;><span class=&quot;ic&quot;>🃏</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>オリパコレクター Ⅰ</div><div class=&quot;rw&quot;>累計オリパ100回(100/100) ・ 🎫チケット×1</div><div class=&quot;mg fl&quot;><i style=&quot;width:100%&quot;></i></div></span><span class=&quot;st&quot;><button class=&quot;btn&quot; onclick=&quot;uke(this)&quot;>🎁 BOXで受取 ›</button></span></div>
+        <div class=&quot;mrow&quot;><span class=&quot;ic&quot;>👹</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>ミッションの鬼</div><div class=&quot;rw&quot;>累計ミッション達成500回(121/500) ・ 🔑レインボーキー×1</div><div class=&quot;mg&quot;><i style=&quot;width:24%&quot;></i></div></span><span class=&quot;st&quot;><button class=&quot;btn gr&quot;>未達成</button></span></div>
+      </div>
+      <div class=&quot;mnote&quot;>※リセットなしの常設マイルストーン。節目ごとに追加されます</div>
+    </div>
+
+    <!-- イベント -->
+    <div id=&quot;mp-e&quot; style=&quot;display:none;&quot;>
+      <div class=&quot;comp&quot; style=&quot;border-color:var(--site-red);background:#fbe9ea;&quot;>
+        <div class=&quot;t&quot;><span>🍺 ギルド復興祭 ミッション</span><b>残り12日</b></div>
+        <div style=&quot;font-size:10px;color:var(--maroon);margin-top:2px;&quot;>開催期間中のみ出現(復興イベントと連動)</div>
+      </div>
+      <div class=&quot;ml&quot;>
+        <div class=&quot;mrow&quot;><span class=&quot;ic&quot;>🍺</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>【依頼】店主の頼みごと</div><div class=&quot;rw&quot;>対象オリパを3回利用(1/3) ・ 🔑通常キー×3</div><div class=&quot;mg&quot;><i style=&quot;width:33%&quot;></i></div></span><span class=&quot;st&quot;><button class=&quot;btn gr&quot;>未達成</button></span></div>
+        <div class=&quot;mrow&quot;><span class=&quot;ic&quot;>🏪</span><span class=&quot;tx&quot;><div class=&quot;tt&quot;>【依頼】市場に活気を</div><div class=&quot;rw&quot;>酒場復興後に3日ログイン(3/3) ・ 💰Pt×50</div><div class=&quot;mg fl&quot;><i style=&quot;width:100%&quot;></i></div></span><span class=&quot;st&quot;><button class=&quot;btn&quot; onclick=&quot;uke(this)&quot;>🎁 BOXで受取 ›</button></span></div>
+      </div>
+      <div class=&quot;mnote&quot;>※施設の復興状況で出現が変わります(復興フラグ条件)</div>
+    </div>
+
+    <div style=&quot;height:12px;&quot;></div>
+    <div class=&quot;ph-foot&quot;><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🃏</span>ガチャ</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>📦</span>獲得景品</a><a href=&quot;#&quot; style=&quot;position:relative;color:var(--site-red);font-weight:900;&quot;><span class=&quot;ic&quot;>🎯</span>ミッション<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>3</span></a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🍺</span>イベント<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-gold);color:#3d2f00;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>!</span></a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🗝</span>交換所</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>👤</span>マイページ</a></div>
+  </div></div>
+</div>
+
+<!-- ============ V1: 管理 ============ -->
+<div class=&quot;view&quot; id=&quot;v-1&quot;>
+  <div class=&quot;mock-note&quot;><b>管理画面:ミッション一覧・作成</b> ― 一覧は「複製」ボタンでテンプレ運用(毎月の見直しは複製→条件・報酬だけ変更)。作成フォームは<b>条件タイプの選択で入力欄が分岐</b>(「オリパをn回利用」を選ぶと対象オリパ指定が出現・実際に動きます)。繰り返し(自動再生成)トグルと報酬スロット(最大5)付き。種別に<b>「ログインボーナス(シート型)」</b>を追加(選択時はマス数・各マス報酬・表示バナーの設定欄に分岐)。rev.2: <b>途中変更の版管理ルール</b>を反映(変更は次回生成分から適用の注意書き+一覧に「中止」操作)。</div>
+  <div class=&quot;admin&quot;>
+    <div class=&quot;ad-head&quot;><span>ミッション管理</span><span class=&quot;sub&quot;>ミッション管理 &amp;gt; 一覧・新規作成</span></div>
+    <div class=&quot;ad-body&quot;>
+
+      <div class=&quot;ad-sec&quot; style=&quot;border-top:none;margin-top:0;padding-top:0;&quot;>
+        <div class=&quot;st&quot;>登録済みミッション</div>
+        <table>
+          <tr><th style=&quot;width:10%&quot;>種別</th><th>ミッション名</th><th style=&quot;width:26%&quot;>条件</th><th style=&quot;width:20%&quot;>報酬</th><th style=&quot;width:9%&quot;>繰り返し</th><th style=&quot;width:13%&quot;>操作</th></tr>
+          <tr><td><span class=&quot;tag tag-d&quot;>デイリー</span></td><td>今日もGRIMへようこそ</td><td>ログイン×1</td><td>💰Pt×10</td><td>毎日</td><td><span class=&quot;mini&quot;>複製</span> <span class=&quot;mini&quot;>編集</span> <span class=&quot;mini&quot; style=&quot;color:#999;border-color:#bbb;&quot;>中止</span></td></tr>
+          <tr><td><span class=&quot;tag tag-d&quot;>デイリー</span></td><td>オリパを引いてみよう</td><td>オリパ利用×1</td><td>🔑通常キー×1</td><td>毎日</td><td><span class=&quot;mini&quot;>複製</span> <span class=&quot;mini&quot;>編集</span></td></tr>
+          <tr><td><span class=&quot;tag tag-w&quot;>週間</span></td><td>週間皆勤賞</td><td>期間内ログイン×5日</td><td>🔑通常キー×5</td><td>毎週月曜</td><td><span class=&quot;mini&quot;>複製</span> <span class=&quot;mini&quot;>編集</span></td></tr>
+          <tr><td><span class=&quot;tag tag-g&quot;>累計</span></td><td>GRIMの常連 Ⅱ</td><td>累計ログイン×50日</td><td>🔑ゴールドキー×1</td><td>―</td><td><span class=&quot;mini&quot;>複製</span> <span class=&quot;mini&quot;>編集</span></td></tr>
+          <tr><td><span class=&quot;tag tag-d&quot;>イベント</span></td><td>【依頼】店主の頼みごと</td><td>対象オリパ利用×3</td><td>🔑通常キー×3</td><td>―(期間)</td><td><span class=&quot;mini&quot;>複製</span> <span class=&quot;mini&quot;>編集</span></td></tr>
+        </table>
+      </div>
+
+      <div class=&quot;ad-sec&quot;>
+        <div class=&quot;st&quot;>新規作成</div>
+        <div class=&quot;inline&quot;>
+          <div class=&quot;fg&quot;><label class=&quot;t&quot;>ミッション名 <span class=&quot;req&quot;>必須</span></label><input type=&quot;text&quot; value=&quot;【依頼】武器屋の試し打ち&quot;></div>
+          <div class=&quot;fg&quot;><label class=&quot;t&quot;>種別 <span class=&quot;req&quot;>必須</span></label>
+            <select><option>イベント</option><option>デイリー</option><option>ウィークリー</option><option>マンスリー</option><option>累計</option><option>復興</option></select>
+          </div>
+        </div>
+
+        <div class=&quot;fg&quot;>
+          <label class=&quot;t&quot;>達成条件 <span class=&quot;req&quot;>必須</span></label>
+          <div class=&quot;inline&quot;>
+            <select id=&quot;cond&quot; onchange=&quot;condChange(this.value)&quot;>
+              <option value=&quot;gacha&quot;>オリパをn回利用</option>
+              <option value=&quot;login&quot;>ログイン(期間内n日)</option>
+              <option value=&quot;charge&quot;>チャージする(n回/金額)</option>
+              <option value=&quot;nest&quot;>ミッションをn回達成(入れ子/コンプ)</option>
+              <option value=&quot;fukko&quot;>復興を進める</option>
+            </select>
+            <input type=&quot;number&quot; value=&quot;3&quot; style=&quot;max-width:110px;&quot;><span style=&quot;align-self:center;font-size:12px;flex:none;&quot;>回</span>
+          </div>
+          <div id=&quot;cond-gacha&quot; style=&quot;margin-top:8px;&quot;>
+            <input type=&quot;text&quot; placeholder=&quot;対象オリパ: ID または 名前で検索(未指定=全オリパ)&quot; style=&quot;width:100%;font-family:inherit;font-size:13px;padding:8px 10px;border:1px solid #ccc;border-radius:5px;&quot;>
+            <div class=&quot;hint&quot;>※判定は抽選確定イベントのみ(サーバーサイド)。対象指定でイベント・復興ミッションに流用可</div>
+          </div>
+        </div>
+
+        <div class=&quot;fg&quot;>
+          <label class=&quot;t&quot;>出現条件(任意)</label>
+          <select><option>なし(常時出現)</option><option>施設「酒場」復興済みのユーザーのみ</option><option>施設「市場」復興済みのユーザーのみ</option></select>
+        </div>
+
+        <div class=&quot;fg&quot;>
+          <label class=&quot;t&quot;>開催期間(イベント/復興のみ)</label>
+          <div class=&quot;inline&quot;><input type=&quot;datetime-local&quot; value=&quot;2026-08-10T12:00&quot;><input type=&quot;datetime-local&quot; value=&quot;2026-08-31T23:59&quot;></div>
+        </div>
+
+        <div class=&quot;fg&quot;>
+          <label class=&quot;t&quot;>繰り返し(自動再生成)</label>
+          <div class=&quot;toggle&quot;><span class=&quot;tg-sw off&quot; onclick=&quot;this.classList.toggle('off')&quot;></span><span>種別の周期で同内容を自動再生成(デイリー=毎日 / ウィークリー=毎週月曜 / マンスリー=毎月1日)</span></div>
+        </div>
+
+        <div class=&quot;fg&quot;>
+          <label class=&quot;t&quot;>報酬(最大5スロット)</label>
+          <div id=&quot;mslots&quot;>
+            <div class=&quot;slot&quot;><span class=&quot;no&quot;>1</span><select><option>鍵</option><option>コイン</option><option>チケット</option><option>カード</option></select><select><option>通常キー</option><option>ゴールドキー</option><option>レインボーキー</option></select><input type=&quot;number&quot; value=&quot;3&quot; style=&quot;width:90px;&quot;><span style=&quot;font-size:11px;color:#666;&quot;>個</span><span class=&quot;del&quot; onclick=&quot;this.parentNode.remove()&quot;>✕</span></div>
+          </div>
+          <button class=&quot;btn gd&quot; onclick=&quot;addMSlot()&quot;>+ スロットを追加</button>
+          <div class=&quot;hint&quot;>付与はすべて冪等付与エンジン経由で報酬ボックスへ。「カード」は在庫商品IDを指定(在庫引当)</div>
+        </div>
+      </div>
+
+      <div class=&quot;fg&quot; style=&quot;background:#fdf6dd;border:1px solid var(--site-gold);border-radius:8px;padding:10px 14px;&quot;>
+        <div style=&quot;font-size:12px;font-weight:900;&quot;>⚠ 変更の適用タイミング</div>
+        <div style=&quot;font-size:11.5px;color:#5a4a00;&quot;>保存した変更(条件・報酬)は<b>次回の自動生成分から</b>適用されます。進行中の当日/当週分には影響しません。進行中分を止める場合は一覧の「中止」を使用してください(達成済み・受取済みの報酬は変わりません)。</div>
+      </div>
+    </div>
+    <div class=&quot;save-bar&quot;><button class=&quot;btn2 gr&quot;>下書き保存</button><button class=&quot;btn2 pr&quot;>この内容で登録</button></div>
+  </div>
+</div>
+
+<!-- ============ V2: 遷移フロー ============ -->
+<div class=&quot;view&quot; id=&quot;v-2&quot;>
+  <div class=&quot;mock-note&quot;><b>トップからの遷移フロー</b> ― ミッションページへの入口は3経路。メインは<b>フッター🎯ミッション(6項目フッター・全ページ常設・未達成バッジ)</b>で、TOPを含むどの画面からも1タップで到達。下のTOP画面イメージではフッターの🎯がハイライトされています(赤点滅)。フッターは6項目(ガチャ/獲得景品/ミッション/イベント/交換所/マイページ)・アイコン画像表示。ミッションはフッター常設が正式決定(ヘッダーの🎯は🎁報酬ボックスに置き換え)。</div>
+
+  <div class=&quot;topmini&quot;>
+    <div class=&quot;tm-head&quot;>
+      <span style=&quot;width:34px;height:34px;border-radius:6px;background:linear-gradient(135deg,#a01818,#6a0f0f);border:1.5px solid var(--site-gold);color:var(--site-gold);font-weight:900;font-size:17px;display:flex;align-items:center;justify-content:center;font-family:serif;&quot;>G</span>
+      <span class=&quot;tm-bal&quot;>
+        <span>◉ゴールドⅡ</span>
+        <span style=&quot;background:#fff;border:1px solid var(--site-line);border-radius:14px;padding:2px 8px;&quot;>💰1,999 ＋</span>
+        <span style=&quot;position:relative;font-size:17px;&quot;>🎁<span style=&quot;position:absolute;top:-5px;right:-6px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:flex;align-items:center;justify-content:center;&quot;>6</span></span>
+        <span style=&quot;font-size:17px;&quot;>🔔</span>
+      </span>
+    </div>
+    <div class=&quot;tm-bn&quot;>GRIMオリパ TOP(バナー)</div>
+    <div class=&quot;tm-card&quot;><div class=&quot;im&quot;>オリパカード(仮)</div><div class=&quot;pr&quot;><span>1口 💰100</span><span>残 35,000/35,000</span></div></div>
+    <div class=&quot;tm-foot&quot;><span><i>🃏</i>ガチャ</span><span><i>📦</i>獲得景品</span><span class=&quot;hl&quot; style=&quot;position:relative;color:var(--site-red);&quot;><i>🎯</i>ミッション</span><span><i>🍺</i>イベント</span><span><i>🗝</i>交換所</span><span><i>👤</i>マイページ</span></div>
+  </div>
+
+  <div class=&quot;flow&quot;>
+    <div class=&quot;fbox&quot;><div class=&quot;t&quot;>サイトTOP(オリパ一覧)/ 任意のページ</div><div class=&quot;d&quot;>ヘッダーとフッターは全ページ共通</div></div>
+    <div class=&quot;farr&quot;>▼</div>
+    <div class=&quot;froutes&quot;>
+      <div class=&quot;fr&quot;><span class=&quot;n&quot;>1</span><div class=&quot;t&quot;>フッター🎯ミッションをタップ</div><div class=&quot;d&quot;>メイン経路。未達成数バッジで毎日誘導(全ページ常設)</div></div>
+      <div class=&quot;fr&quot;><span class=&quot;n&quot;>2</span><div class=&quot;t&quot;>マイページ → 🎯クイック</div><div class=&quot;d&quot;>フッター👤 → 「ミッション/デイリーあと3件」カード</div></div>
+      <div class=&quot;fr&quot;><span class=&quot;n&quot;>3</span><div class=&quot;t&quot;>🔔通知 / 達成トースト</div><div class=&quot;d&quot;>「ウィークリー達成!」→ 該当タブへ直行</div></div>
+    </div>
+    <div class=&quot;farr&quot;>▼</div>
+    <div class=&quot;fbox goal&quot;><div class=&quot;t&quot;>🎯 ミッションページ(種別タブ)</div><div class=&quot;d&quot;>通知経由は該当種別タブを初期表示。それ以外はデイリータブを初期表示</div></div>
+    <div class=&quot;farr&quot;>▼</div>
+    <div class=&quot;fbox&quot;><div class=&quot;t&quot;>達成 → 報酬は自動で🎁報酬ボックスへ</div><div class=&quot;d&quot;>残高への反映は報酬ボックスの「受け取る」に一本化(ヘッダー🎁バッジ・期限「あと◯日」で回収を促す)</div></div>
+  </div>
+</div>
+
+<!-- ============ V3: ログインボーナス ============ -->
+<div class=&quot;view&quot; id=&quot;v-3&quot;>
+  <div class=&quot;mock-note&quot;><b>ログインボーナス(ポップアップ)</b> ― <b>当日初回ログイン時に全ページ共通で自動表示</b>。本日分のスタンプが押印アニメで押され、<b>報酬は報酬ボックスへ自動投入</b>(受取一本化と同じ流れ・タップ操作不要)。シートはミッション基盤に載せる: マス数・各マスの報酬・期間・繰り返し(イベント連動/月次)は<b>管理画面の設定駆動</b>、テンプレート/インスタンス版管理(M-10)適用。表示は1日1回・「とじる」後は🔔通知やイベントページから再確認可。バナーは画像スロット。</div>
+  <div class=&quot;phone&quot;><div class=&quot;ph-scroll&quot; style=&quot;background:#555;&quot;>
+    <div class=&quot;lb-ov&quot;>
+      <div class=&quot;lb-panel&quot;>
+        <div class=&quot;lb-bn&quot;><span class=&quot;t1&quot;>GRIM GUILD</span><span class=&quot;t2&quot;>ギルド復興祭 ログインボーナス</span></div>
+        <div class=&quot;lb-days&quot;>あと 26日</div>
+        <div class=&quot;lb-grid&quot;>
+          <div class=&quot;lb-c got&quot;><span class=&quot;dn&quot;>1</span>💰<small>×100</small></div>
+          <div class=&quot;lb-c got&quot;><span class=&quot;dn&quot;>2</span>💰<small>×100</small></div>
+          <div class=&quot;lb-c got&quot;><span class=&quot;dn&quot;>3</span>💰<small>×100</small></div>
+          <div class=&quot;lb-c got&quot;><span class=&quot;dn&quot;>4</span>💰<small>×100</small></div>
+          <div class=&quot;lb-c got&quot;><span class=&quot;dn&quot;>5</span>💰<small>×100</small></div>
+          <div class=&quot;lb-c got&quot;><span class=&quot;dn&quot;>6</span>💰<small>×100</small></div>
+          <div class=&quot;lb-c got&quot;><span class=&quot;dn&quot;>7</span>🔑<small>×5</small></div>
+          <div class=&quot;lb-c got&quot;><span class=&quot;dn&quot;>8</span>💰<small>×100</small></div>
+          <div class=&quot;lb-c today&quot;><span class=&quot;dn&quot;>9</span>💰<small>×100</small></div>
+          <div class=&quot;lb-c&quot;><span class=&quot;dn&quot;>10</span>🎫<small>×1</small></div>
+          <div class=&quot;lb-c&quot;><span class=&quot;dn&quot;>11</span>💰<small>×200</small></div>
+          <div class=&quot;lb-c&quot;><span class=&quot;dn&quot;>12</span>🔑<small>×10</small></div>
+        </div>
+        <div class=&quot;lb-talk&quot;><span class=&quot;fc&quot;>🍺</span><span class=&quot;tx&quot;>今日もギルドへようこそ!<br>本日の報酬は <b>🎁報酬ボックス</b> に届けておいたぜ。忘れず受け取ってくれよな!</span></div>
+        <button class=&quot;lb-close&quot;>とじる</button>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<script>
+document.querySelectorAll('.shell-btn').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.shell-btn').forEach(function(x){x.classList.remove('active');});
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+    b.classList.add('active');
+    document.getElementById('v-'+b.dataset.v).classList.add('active');
+    window.scrollTo(0,0);
+  });
+});
+// 種別タブ切替
+function mtab(el,k){
+  document.querySelectorAll('.mt').forEach(function(t){t.classList.remove('on');});
+  el.classList.add('on');
+  ['d','w','m','r','e'].forEach(function(x){document.getElementById('mp-'+x).style.display = (x===k)?'block':'none';});
+  var tm=document.getElementById('timer');
+  tm.textContent = k==='d' ? 'デイリー更新まで 09:42:11' : k==='w' ? 'ウィークリー更新まで 2日 09:42' : k==='m' ? '月次更新まで 26日' : k==='e' ? 'イベント終了まで 12日' : '常設(リセットなし)';
+}
+// 受取デモ
+function uke(btn){
+  var st=btn.parentNode;
+  st.innerHTML='<span class=&quot;pill gr&quot;>受取済</span>';
+}
+// 管理: 条件タイプ分岐
+function condChange(v){
+  document.getElementById('cond-gacha').style.display = (v==='gacha')?'block':'none';
+}
+// 管理: 報酬スロット上限
+function addMSlot(){
+  var w=document.getElementById('mslots');
+  if(w.children.length>=5){alert('報酬スロットの上限(5)に達しています。上限値はシステム設定から変更できます。');return;}
+  var no=w.children.length+1;
+  var d=document.createElement('div');d.className='slot';
+  d.innerHTML='<span class=&quot;no&quot;>'+no+'</span><select><option>コイン</option><option>鍵</option><option>チケット</option><option>カード</option></select><select><option>―</option><option>通常キー</option><option>ゴールドキー</option><option>レインボーキー</option></select><input type=&quot;number&quot; value=&quot;1&quot; style=&quot;width:90px;&quot;><span style=&quot;font-size:11px;color:#666;&quot;>個</span><span class=&quot;del&quot; onclick=&quot;this.parentNode.remove()&quot;>✕</span>';
+  w.appendChild(d);
+}
+</script>
+</body>
+</html>
+"></iframe>
+</div><div class="fsec" id="f-3">
+  <div class="fdesc"><b>🗝 鍵交換所 rev.3</b> ― 交換所(独立ページ化・グレード別フィルタ・交換モーダル)/管理(商品登録)(このモック内の画面タブ・ボタン・フィルタはすべて動作します)</div>
+  <iframe class="mockframe" srcdoc="<!DOCTYPE html>
+<html lang=&quot;ja&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
+<title>GRIM 鍵交換所 UIモック rev.2</title>
+<link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;>
+<link href=&quot;https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
+<style>
+  :root{--red:#d6202b;--gold:#e8c547;--dark:#1a1a1a;--maroon:#7a2030;--gray:#666;--line:#ddd;--bg:#f0f0f2;
+    --site-red:#e8442e;--site-maroon:#8a1f1f;--site-gold:#d4af37;--site-line:#ececec;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--dark);font-size:14px;line-height:1.7;}
+  .shell-bar{position:sticky;top:0;z-index:100;background:var(--dark);border-bottom:4px solid var(--red);display:flex;overflow-x:auto;padding:0 8px;}
+  .shell-btn{flex:none;font-family:inherit;font-size:12.5px;font-weight:700;color:#bbb;background:none;border:none;padding:12px 14px 10px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
+  .shell-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+  .view{display:none;padding:24px 12px 60px;}
+  .view.active{display:block;}
+  .mock-note{max-width:760px;margin:0 auto 16px;font-size:12px;color:var(--gray);background:#fff;border:1px dashed #bbb;border-radius:6px;padding:10px 14px;}
+  .mock-note b{color:var(--red);}
+
+  .phone{width:390px;max-width:100%;margin:0 auto;background:#fff;border:10px solid var(--dark);border-radius:28px;overflow:hidden;position:relative;box-shadow:0 8px 30px rgba(0,0,0,.18);}
+  .ph-scroll{height:720px;overflow-y:auto;position:relative;background:#fff;}
+  .ph-head{position:sticky;top:0;z-index:20;background:#fff;padding:8px 12px 0;border-bottom:1px solid var(--site-line);}
+  .ph-head .brand{display:flex;justify-content:space-between;align-items:center;}
+  .logo{width:34px;height:34px;border-radius:6px;background:linear-gradient(135deg,#a01818,#6a0f0f);border:1.5px solid var(--site-gold);color:var(--site-gold);font-weight:900;font-size:17px;display:flex;align-items:center;justify-content:center;font-family:serif;}
+  .bal{font-size:11px;color:#333;display:flex;gap:6px;align-items:center;font-weight:700;}
+  .coin{background:#fff;border:1px solid var(--site-line);border-radius:14px;padding:2px 10px;display:flex;gap:4px;align-items:center;box-shadow:0 1px 2px rgba(0,0,0,.05);}
+  .g{width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe9a0,#d4af37 70%);display:inline-block;border:1px solid #b8952a;}
+  .cats{display:flex;gap:0;overflow-x:auto;padding:8px 0 0;background:#fff;}
+  .cat{flex:none;font-size:13px;font-weight:900;color:#555;padding:8px 14px;border-bottom:3px solid transparent;white-space:nowrap;}
+  .cat.on{color:var(--site-red);border-bottom-color:var(--site-red);}
+  .cats-c{display:flex;gap:6px;overflow-x:auto;padding:7px 10px;background:#f7f7f8;border-top:1px solid var(--site-line);margin:0 -12px;}
+  .catc{flex:none;font-size:11px;font-weight:700;color:#666;padding:3px 12px;border:1px solid #ddd;border-radius:14px;background:#fff;white-space:nowrap;cursor:pointer;}
+  .catc.on{color:#fff;background:var(--site-red);border-color:var(--site-red);}
+  .catc.cs{color:#999;border-style:dashed;}
+  .ph-foot{position:sticky;bottom:0;z-index:25;background:#fff;border-top:1px solid var(--site-line);display:flex;box-shadow:0 -2px 8px rgba(0,0,0,.06);}
+  .ph-foot a{flex:1;text-align:center;padding:7px 0 8px;font-size:9.5px;font-weight:700;color:#777;text-decoration:none;line-height:1.5;}
+  .ph-foot a .ic{display:block;font-size:17px;}
+
+  .sec-t{font-size:13px;font-weight:900;padding:14px 14px 6px;display:flex;align-items:center;gap:8px;}
+  .sec-t::before{content:&quot;&quot;;width:4px;height:14px;background:var(--site-red);border-radius:2px;}
+  .sec-t .lk{margin-left:auto;font-size:11px;color:var(--gray);font-weight:700;}
+  .pill{font-size:10px;font-weight:900;color:#fff;background:var(--site-red);padding:1px 8px;border-radius:10px;}
+  .btn{display:inline-block;font-size:11px;font-weight:900;color:#fff;background:var(--site-red);border:none;border-radius:5px;padding:6px 14px;cursor:pointer;font-family:inherit;}
+  .btn.gd{background:var(--site-gold);color:#3d2f00;}
+  .btn.gr{background:#ccc;color:#888;cursor:default;}
+  .btn.dk{background:var(--site-maroon);border:1.5px solid var(--site-gold);color:#ffeec2;}
+
+  /* 保有鍵サマリ */
+  .keysum{display:flex;gap:8px;padding:4px 14px;}
+  .ks{flex:1;border:1px solid var(--site-line);border-radius:10px;padding:8px 6px;text-align:center;background:#fafafa;}
+  .ks .ic{font-size:18px;}
+  .ks .nm{font-size:9px;color:var(--gray);font-weight:700;white-space:nowrap;}
+  .ks .vl{font-size:16px;font-weight:900;}
+  .ks .ex{font-size:8.5px;color:var(--site-red);font-weight:700;min-height:12px;}
+
+  /* 商品グリッド */
+  .goods{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:8px 14px 16px;}
+  .gd{border:1px solid var(--site-line);border-radius:10px;overflow:hidden;background:#fff;position:relative;}
+  .gd .im{height:110px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:30px;position:relative;}
+  .gd .im::after{content:&quot;仮画像&quot;;position:absolute;right:5px;bottom:3px;font-size:8.5px;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.5);padding:0 4px;border-radius:2px;}
+  .gd .bd{position:absolute;top:6px;left:6px;font-size:9px;font-weight:900;color:#fff;background:rgba(0,0,0,.55);border-radius:8px;padding:1px 7px;}
+  .gd .body{padding:7px 9px 9px;}
+  .gd .nm{font-size:11.5px;font-weight:900;line-height:1.4;min-height:31px;}
+  .gd .cost{font-size:11px;font-weight:900;color:var(--maroon);margin:3px 0 1px;}
+  .gd .stk{font-size:9.5px;color:var(--gray);}
+  .gd .btn{width:100%;margin-top:5px;text-align:center;padding:6px 0;}
+  .gd.lk .im,.gd.lk .body{filter:grayscale(.6) brightness(.75);}
+  .gd .lock{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:11px;background:rgba(0,0,0,.45);z-index:3;text-shadow:0 1px 4px #000;}
+  .gd.lk .lock{display:flex;}
+
+  /* モーダル */
+  .modal{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;z-index:50;}
+  .modal.show{display:flex;}
+  .msheet{background:#fff;width:100%;border-radius:18px 18px 0 0;padding:18px 18px 22px;}
+  .msheet h4{font-size:15px;font-weight:900;margin-bottom:8px;}
+  .mrow2{display:flex;justify-content:space-between;font-size:12.5px;padding:7px 0;border-bottom:1px solid #f2f2f2;}
+  .mrow2 b{color:var(--maroon);}
+  .mnote2{font-size:10.5px;color:var(--gray);background:#f7f7f8;border-radius:8px;padding:8px 10px;margin:10px 0;}
+  .mbtns{display:flex;gap:10px;margin-top:6px;}
+  .mbtns .btn{flex:1;text-align:center;padding:11px 0;font-size:13px;}
+  .mdone{text-align:center;padding:14px 0 4px;display:none;}
+  .mdone .big{font-size:34px;}
+  .mdone .t{font-size:14px;font-weight:900;margin:4px 0;}
+  .mdone .d{font-size:11px;color:var(--gray);}
+
+  /* 管理 */
+  .admin{max-width:860px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .ad-head{background:var(--dark);color:#fff;padding:14px 22px;font-weight:900;display:flex;justify-content:space-between;align-items:center;}
+  .ad-head .sub{color:var(--gold);font-size:11px;font-weight:700;}
+  .ad-body{padding:20px 24px 28px;}
+  .fg{margin-bottom:15px;}
+  .fg label.t{display:block;font-size:12.5px;font-weight:900;margin-bottom:5px;}
+  .fg label.t .req{color:var(--red);font-size:10px;margin-left:6px;}
+  .fg input,.fg select{width:100%;font-family:inherit;font-size:13px;padding:8px 10px;border:1px solid #ccc;border-radius:5px;background:#fff;}
+  .fg .hint{font-size:11px;color:var(--gray);margin-top:3px;}
+  .inline{display:flex;gap:10px;flex-wrap:wrap;}
+  .inline > *{flex:1;min-width:150px;}
+  .ad-sec{border-top:2px solid var(--dark);margin-top:20px;padding-top:14px;}
+  .ad-sec > .st{font-size:14px;font-weight:900;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .ad-sec > .st::before{content:&quot;&quot;;width:5px;height:15px;background:var(--red);}
+  table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:6px;}
+  th{background:var(--dark);color:#fff;font-weight:700;padding:7px 10px;text-align:left;border:1px solid var(--dark);}
+  td{padding:6px 10px;border:1px solid var(--line);vertical-align:middle;background:#fff;}
+  .mini{font-size:10.5px;font-weight:900;color:var(--maroon);border:1px solid var(--maroon);border-radius:4px;padding:1px 8px;background:#fff;cursor:pointer;}
+  .uploader{border:2px dashed #ccc;border-radius:8px;padding:14px;text-align:center;font-size:12px;color:var(--gray);background:#fafafa;}
+  .save-bar{background:#f6f6f6;border-top:1px solid var(--line);padding:12px 24px;display:flex;justify-content:flex-end;gap:10px;}
+  .btn2{font-family:inherit;font-size:12px;font-weight:900;border:none;border-radius:5px;padding:8px 18px;cursor:pointer;}
+  .btn2.pr{background:var(--red);color:#fff;}
+  .btn2.gr{background:#ddd;color:#555;}
+</style>
+</head>
+<body>
+
+<nav class=&quot;shell-bar&quot;>
+  <button class=&quot;shell-btn active&quot; data-v=&quot;0&quot;>📱 鍵交換所</button>
+  <button class=&quot;shell-btn&quot; data-v=&quot;1&quot;>🛠 管理:交換商品登録</button>
+</nav>
+
+<!-- ============ V0: 交換所 ============ -->
+<div class=&quot;view active&quot; id=&quot;v-0&quot;>
+  <div class=&quot;mock-note&quot;><b>鍵交換所</b> ― 親カテゴリ第3枠「交換所」に配置(既存「キー交換」カテゴリの後継)。導線は①親カテゴリ ②マイページ保有アイテムの「交換所へ」 ③鍵の失効警告から。商品は<b>「必要グレード×必要数」の直接指定</b>(換算での合算崩しはしない)。子カテゴリのフィルタは動作します。<b>「交換する」を押すと確認モーダル</b>が開き、失効が近い鍵から自動消費(古い順)を明示。交換した物理カードは獲得景品(発送待ち)へ。</div>
+  <div class=&quot;phone&quot;><div class=&quot;ph-scroll&quot; id=&quot;exwrap&quot;>
+    <div class=&quot;ph-head&quot;>
+      <div class=&quot;brand&quot;><span class=&quot;logo&quot;>G</span><span class=&quot;bal&quot;><span>◉ゴールドⅡ</span><span class=&quot;coin&quot;><span class=&quot;g&quot;></span>1,999</span><span style=&quot;position:relative;&quot;>🎁<span style=&quot;position:absolute;top:-5px;right:-7px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:flex;align-items:center;justify-content:center;&quot;>6</span></span><span>🔔</span></span></div>
+      <div class=&quot;cats&quot;><span class=&quot;cat&quot;>オリパ</span><span class=&quot;cat&quot;>イベント</span><span class=&quot;cat on&quot;>交換所</span></div>
+      <div class=&quot;cats-c&quot;>
+        <span class=&quot;catc on&quot; onclick=&quot;exf(this,'all')&quot;>すべて</span>
+        <span class=&quot;catc&quot; onclick=&quot;exf(this,'n')&quot;>🔑通常キー</span>
+        <span class=&quot;catc&quot; onclick=&quot;exf(this,'g')&quot;>🔑ゴールド限定</span>
+        <span class=&quot;catc&quot; onclick=&quot;exf(this,'r')&quot;>🌈レインボー限定</span>
+        <span class=&quot;catc cs&quot; onclick=&quot;exf(this,'mk')&quot;>🏪市場限定</span>
+      </div>
+    </div>
+
+    <div class=&quot;sec-t&quot;>保有している鍵 <span class=&quot;lk&quot;>失効期限の確認 ›</span></div>
+    <div class=&quot;keysum&quot;>
+      <div class=&quot;ks&quot;><div class=&quot;ic&quot;>🔑</div><div class=&quot;nm&quot;>通常キー</div><div class=&quot;vl&quot;>128</div><div class=&quot;ex&quot;>30個 8/15失効</div></div>
+      <div class=&quot;ks&quot;><div class=&quot;ic&quot;>🔑</div><div class=&quot;nm&quot;>ゴールドキー</div><div class=&quot;vl&quot;>4</div><div class=&quot;ex&quot;></div></div>
+      <div class=&quot;ks&quot;><div class=&quot;ic&quot;>🌈</div><div class=&quot;nm&quot;>レインボーキー</div><div class=&quot;vl&quot;>2</div><div class=&quot;ex&quot;></div></div>
+    </div>
+
+    <div class=&quot;sec-t&quot;>交換ラインナップ <span class=&quot;pill&quot;>残り期間 12日</span></div>
+    <div class=&quot;goods&quot;>
+      <div class=&quot;gd&quot; data-c=&quot;r&quot;><div class=&quot;im&quot; style=&quot;background:linear-gradient(135deg,#2b1a4a,#6a4a9a);&quot;>🃏<span class=&quot;bd&quot;>🌈レインボー限定</span></div><div class=&quot;body&quot;><div class=&quot;nm&quot;>PSA10 特選カード A</div><div class=&quot;cost&quot;>🌈レインボーキー ×2</div><div class=&quot;stk&quot;>在庫 1</div><button class=&quot;btn&quot; onclick=&quot;exmodal()&quot;>交換する</button></div></div>
+      <div class=&quot;gd&quot; data-c=&quot;g&quot;><div class=&quot;im&quot; style=&quot;background:linear-gradient(135deg,#4a3a14,#8a7a2b);&quot;>📦<span class=&quot;bd&quot;>🔑ゴールド限定</span></div><div class=&quot;body&quot;><div class=&quot;nm&quot;>シュリンク付BOX</div><div class=&quot;cost&quot;>🔑ゴールドキー ×3</div><div class=&quot;stk&quot;>在庫 5</div><button class=&quot;btn gr&quot;>あと🔑G 2個足りない</button></div></div>
+      <div class=&quot;gd&quot; data-c=&quot;n&quot;><div class=&quot;im&quot; style=&quot;background:linear-gradient(135deg,#14304a,#2b6a8a);&quot;>🎴</div><div class=&quot;body&quot;><div class=&quot;nm&quot;>プロモパック(未開封)</div><div class=&quot;cost&quot;>🔑通常キー ×20</div><div class=&quot;stk&quot;>在庫 32</div><button class=&quot;btn&quot; onclick=&quot;exmodal()&quot;>交換する</button></div></div>
+      <div class=&quot;gd&quot; data-c=&quot;n&quot;><div class=&quot;im&quot; style=&quot;background:linear-gradient(135deg,#3a3a3a,#6f6f6f);&quot;>🛡️</div><div class=&quot;body&quot;><div class=&quot;nm&quot;>GRIM限定スリーブ</div><div class=&quot;cost&quot;>🔑通常キー ×50</div><div class=&quot;stk&quot;>在庫 10</div><button class=&quot;btn&quot; onclick=&quot;exmodal()&quot;>交換する</button></div></div>
+      <div class=&quot;gd lk&quot; data-c=&quot;mk&quot;><div class=&quot;im&quot; style=&quot;background:linear-gradient(135deg,#143a4a,#2b7a8a);&quot;>🏪</div><div class=&quot;body&quot;><div class=&quot;nm&quot;>市場の特選カード B</div><div class=&quot;cost&quot;>🔑ゴールドキー ×1</div><div class=&quot;stk&quot;>在庫 3</div><button class=&quot;btn gr&quot;>未解放</button></div><div class=&quot;lock&quot;>🔒<span>市場を復興すると解放</span></div></div>
+      <div class=&quot;gd&quot; data-c=&quot;r&quot;><div class=&quot;im&quot; style=&quot;background:linear-gradient(135deg,#4a1425,#8a2b4a);&quot;>🃏<span class=&quot;bd&quot;>🌈レインボー限定</span></div><div class=&quot;body&quot;><div class=&quot;nm&quot;>PSA10 特選カード C</div><div class=&quot;cost&quot;>🌈レインボーキー ×5</div><div class=&quot;stk&quot;>在庫 2</div><button class=&quot;btn gr&quot;>あと🌈 3個足りない</button></div></div>
+    </div>
+    <div style=&quot;padding:0 16px 8px;font-size:10px;color:var(--gray);&quot;>※交換した物理カードは「獲得景品(発送待ち)」に入ります ／ 交換履歴はマイページから確認できます</div>
+
+    <div style=&quot;height:12px;&quot;></div>
+    <div class=&quot;ph-foot&quot;><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🃏</span>ガチャ</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>📦</span>獲得景品</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🎯</span>ミッション<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-red);color:#fff;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>3</span></a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>🍺</span>イベント<span style=&quot;position:absolute;top:1px;right:8px;background:var(--site-gold);color:#3d2f00;font-size:8px;font-weight:900;min-width:13px;height:13px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;&quot;>!</span></a><a href=&quot;#&quot; style=&quot;position:relative;color:var(--site-red);font-weight:900;&quot;><span class=&quot;ic&quot;>🗝</span>交換所</a><a href=&quot;#&quot; style=&quot;position:relative;&quot;><span class=&quot;ic&quot;>👤</span>マイページ</a></div>
+
+    <!-- 交換確認モーダル -->
+    <div class=&quot;modal&quot; id=&quot;exm&quot;>
+      <div class=&quot;msheet&quot;>
+        <div id=&quot;exm-conf&quot;>
+          <h4>交換の確認</h4>
+          <div class=&quot;mrow2&quot;><span>商品</span><b>PSA10 特選カード A</b></div>
+          <div class=&quot;mrow2&quot;><span>消費する鍵</span><b>🌈レインボーキー ×2</b></div>
+          <div class=&quot;mrow2&quot;><span>交換後の残数</span><b>🌈 2 → 0</b></div>
+          <div class=&quot;mnote2&quot;>🔑 鍵は<b>失効が近いものから自動で消費</b>されます(古い順)。今回の消費内訳: 9/15失効分×1、10/15失効分×1</div>
+          <div class=&quot;mbtns&quot;><button class=&quot;btn gr&quot; style=&quot;cursor:pointer;&quot; onclick=&quot;exclose()&quot;>キャンセル</button><button class=&quot;btn&quot; onclick=&quot;exdone()&quot;>交換する</button></div>
+        </div>
+        <div class=&quot;mdone&quot; id=&quot;exm-done&quot;>
+          <div class=&quot;big&quot;>🎉</div>
+          <div class=&quot;t&quot;>交換が完了しました!</div>
+          <div class=&quot;d&quot;>「獲得景品(発送待ち)」に追加されました。<br>発送依頼はお届け先登録の完了後に行えます。</div>
+          <div class=&quot;mbtns&quot; style=&quot;margin-top:12px;&quot;><button class=&quot;btn dk&quot; onclick=&quot;exclose()&quot;>閉じる</button><button class=&quot;btn gd&quot;>獲得景品を見る</button></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- ============ V1: 管理 ============ -->
+<div class=&quot;view&quot; id=&quot;v-1&quot;>
+  <div class=&quot;mock-note&quot;><b>管理画面:交換商品登録</b> ― 商品は「必要グレード+必要数」で登録(グレードは鍵登録メニューのマスタから選択)。出現条件(復興フラグ/ランク条件)と掲載期間で出し分けエンジンに接続。在庫が0になった時の表示も設定式。</div>
+  <div class=&quot;admin&quot;>
+    <div class=&quot;ad-head&quot;><span>交換所管理</span><span class=&quot;sub&quot;>交換所 &amp;gt; 商品一覧・新規登録</span></div>
+    <div class=&quot;ad-body&quot;>
+
+      <div class=&quot;ad-sec&quot; style=&quot;border-top:none;margin-top:0;padding-top:0;&quot;>
+        <div class=&quot;st&quot;>登録済み商品</div>
+        <table>
+          <tr><th>商品名</th><th style=&quot;width:18%&quot;>必要な鍵</th><th style=&quot;width:8%&quot;>在庫</th><th style=&quot;width:18%&quot;>掲載期間</th><th style=&quot;width:20%&quot;>出現条件</th><th style=&quot;width:12%&quot;>操作</th></tr>
+          <tr><td>PSA10 特選カード A</td><td>🌈レインボー×2</td><td>1</td><td>8/1〜8/31</td><td>なし</td><td><span class=&quot;mini&quot;>複製</span> <span class=&quot;mini&quot;>編集</span></td></tr>
+          <tr><td>シュリンク付BOX</td><td>🔑ゴールド×3</td><td>5</td><td>8/1〜8/31</td><td>なし</td><td><span class=&quot;mini&quot;>複製</span> <span class=&quot;mini&quot;>編集</span></td></tr>
+          <tr><td>市場の特選カード B</td><td>🔑ゴールド×1</td><td>3</td><td>8/10〜8/31</td><td>🏪市場 復興済み</td><td><span class=&quot;mini&quot;>複製</span> <span class=&quot;mini&quot;>編集</span></td></tr>
+        </table>
+      </div>
+
+      <div class=&quot;ad-sec&quot;>
+        <div class=&quot;st&quot;>新規登録</div>
+        <div class=&quot;inline&quot;>
+          <div class=&quot;fg&quot;><label class=&quot;t&quot;>商品名 <span class=&quot;req&quot;>必須</span></label><input type=&quot;text&quot; value=&quot;PSA10 特選カード D&quot;></div>
+          <div class=&quot;fg&quot;><label class=&quot;t&quot;>在庫数 <span class=&quot;req&quot;>必須</span></label><input type=&quot;number&quot; value=&quot;2&quot;></div>
+        </div>
+        <div class=&quot;fg&quot;><label class=&quot;t&quot;>商品画像 <span class=&quot;req&quot;>必須</span></label><div class=&quot;uploader&quot;>📁 ドラッグ&amp;ドロップ / <b>ファイル選択</b>(推奨 600×600px)</div></div>
+        <div class=&quot;fg&quot;>
+          <label class=&quot;t&quot;>必要な鍵 <span class=&quot;req&quot;>必須</span></label>
+          <div class=&quot;inline&quot;>
+            <select><option>🌈レインボーキー</option><option>🔑ゴールドキー</option><option>🔑通常キー</option></select>
+            <input type=&quot;number&quot; value=&quot;3&quot; style=&quot;max-width:120px;&quot;>
+          </div>
+          <div class=&quot;hint&quot;>グレードは「鍵登録メニュー」のマスタから選択。必要数はグレードごとの直接指定(換算合算はしない)</div>
+        </div>
+        <div class=&quot;inline&quot;>
+          <div class=&quot;fg&quot;><label class=&quot;t&quot;>掲載期間</label><input type=&quot;text&quot; value=&quot;2026-09-01 12:00 〜 2026-09-30 23:59&quot;></div>
+          <div class=&quot;fg&quot;><label class=&quot;t&quot;>在庫が0になった時の表示</label><select><option>SOLD OUT表示で残す</option><option>自動で非表示</option></select></div>
+        </div>
+        <div class=&quot;fg&quot;>
+          <label class=&quot;t&quot;>出現条件(任意)</label>
+          <select><option>なし(全員に表示)</option><option>🏪市場 復興済みのユーザーのみ</option><option>累計ランク プラチナ以上のみ</option><option>月間ランク ゴールド以上のみ</option></select>
+          <div class=&quot;hint&quot;>復興フラグ・ランク条件は出し分けエンジンで制御(未達ユーザーにはロック表示 or 非表示を選択可)</div>
+        </div>
+      </div>
+
+    </div>
+    <div class=&quot;save-bar&quot;><button class=&quot;btn2 gr&quot;>下書き保存</button><button class=&quot;btn2 pr&quot;>この内容で登録</button></div>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.shell-btn').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.shell-btn').forEach(function(x){x.classList.remove('active');});
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+    b.classList.add('active');
+    document.getElementById('v-'+b.dataset.v).classList.add('active');
+    window.scrollTo(0,0);
+  });
+});
+function exf(el,c){
+  document.querySelectorAll('.catc').forEach(function(x){x.classList.remove('on');});
+  el.classList.add('on');
+  document.querySelectorAll('.gd').forEach(function(g){
+    g.style.display = (c==='all' || g.dataset.c===c) ? 'block' : 'none';
+  });
+}
+function exmodal(){document.getElementById('exm').classList.add('show');document.getElementById('exm-conf').style.display='block';document.getElementById('exm-done').style.display='none';}
+function exclose(){document.getElementById('exm').classList.remove('show');}
+function exdone(){document.getElementById('exm-conf').style.display='none';document.getElementById('exm-done').style.display='block';}
+</script>
+</body>
+</html>
+"></iframe>
+</div>
+<script>
+document.querySelectorAll('.ftab').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.ftab').forEach(function(x){x.classList.remove('active');});
+    document.querySelectorAll('.fsec').forEach(function(s){s.classList.remove('active');});
+    b.classList.add('active');
+    document.getElementById('f-'+b.dataset.f).classList.add('active');
+    window.scrollTo(0,0);
+  });
+});
+</script>
+</body>
+</html>
