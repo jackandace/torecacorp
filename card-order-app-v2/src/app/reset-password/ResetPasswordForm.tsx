@@ -3,9 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import type { EmailOtpType } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 
 const MIN_LEN = 8;
+
+// token_hash リンクで受け付ける type (メールテンプレートから渡る)
+const OTP_TYPES: EmailOtpType[] = ["recovery", "invite", "signup", "magiclink", "email"];
 
 export function ResetPasswordForm() {
   const router = useRouter();
@@ -13,10 +17,15 @@ export function ResetPasswordForm() {
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
-  // null = 判定中, true = セッション確立, false = リンク無効
+  // null = 判定中, true = セッション確立(またはtoken_hash方式で入力可), false = リンク無効
   const [sessionReady, setSessionReady] = useState<boolean | null>(null);
+  // token_hash 方式: リンクを開いただけではトークンを消費せず、
+  // 「パスワードを設定」ボタン押下時に verifyOtp で初めて有効化する。
+  // メールのセキュリティスキャナがリンクを自動アクセスしても無害になる。
+  const [pendingOtp, setPendingOtp] = useState<{ tokenHash: string; type: EmailOtpType } | null>(null);
 
   // メールリンクからのセッション確立は複数の経路がある:
+  //   0. token_hash フロー: ?token_hash=xxx&type=recovery → ボタン押下時に verifyOtp (推奨)
   //   1. PKCE フロー: ?code=xxx → exchangeCodeForSession
   //   2. implicit フロー: #access_token=... → supabase-js が自動処理 (非同期)
   //   3. onAuthStateChange の PASSWORD_RECOVERY / SIGNED_IN イベント
@@ -24,6 +33,16 @@ export function ResetPasswordForm() {
   useEffect(() => {
     const supabase = createClient();
     let settled = false;
+
+    // token_hash 方式ならこの時点では何も検証しない (スキャナ対策)
+    const url = new URL(window.location.href);
+    const tokenHash = url.searchParams.get("token_hash");
+    const typeParam = url.searchParams.get("type") as EmailOtpType | null;
+    if (tokenHash && typeParam && OTP_TYPES.includes(typeParam)) {
+      setPendingOtp({ tokenHash, type: typeParam });
+      setSessionReady(true);
+      return;
+    }
 
     const settle = (ok: boolean) => {
       if (settled && ok === false) return; // 一度 OK になったら戻さない
@@ -39,7 +58,6 @@ export function ResetPasswordForm() {
 
     (async () => {
       // PKCE (?code=) 形式
-      const url = new URL(window.location.href);
       const code = url.searchParams.get("code");
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
@@ -82,6 +100,23 @@ export function ResetPasswordForm() {
     setBusy(true);
     try {
       const supabase = createClient();
+
+      // token_hash 方式: ここで初めてトークンを消費してセッションを張る
+      if (pendingOtp) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          const { error: vErr } = await supabase.auth.verifyOtp({
+            type: pendingOtp.type,
+            token_hash: pendingOtp.tokenHash,
+          });
+          if (vErr) {
+            // 期限切れ・使用済みは「リンク無効」画面へ (再送導線を見せる)
+            setSessionReady(false);
+            return;
+          }
+        }
+      }
+
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw new Error(error.message);
       setMessage({ kind: "ok", text: "パスワードを設定しました。ログインへ移動します…" });
