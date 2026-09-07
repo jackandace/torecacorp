@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isAdmin, isSuperAdmin } from "@/lib/auth";
+import { isAdmin, isSuperAdmin, isSupplier } from "@/lib/auth";
 import { AdminSidebar } from "@/components/AdminSidebar";
 
 const NAV = [
@@ -35,6 +35,7 @@ export default async function AdminLayout({
   } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+  if (isSupplier(user)) redirect("/supplier");
   if (!isAdmin(user)) redirect("/mypage");
 
   return (

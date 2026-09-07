@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isAdmin } from "@/lib/auth";
+import { isAdmin, isSupplier } from "@/lib/auth";
 import { ShopNav } from "@/components/ShopNav";
 import { ReceiptEnforcer } from "@/components/ReceiptEnforcer";
 
@@ -16,6 +16,8 @@ export default async function ShopLayout({
 
   if (!user) redirect("/login");
   if (isAdmin(user)) redirect("/admin");
+  // 問屋ユーザーはショップ画面に入れない (middleware が素通りした場合の防衛線)
+  if (isSupplier(user)) redirect("/supplier");
 
   // 納品済み・未受領の発注 → 受領強制モーダル用
   const { data: shop } = await supabase.from("shops").select("id").eq("user_id", user.id).is("deleted_at", null).maybeSingle();

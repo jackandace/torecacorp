@@ -66,7 +66,12 @@ export async function middleware(request: NextRequest) {
       },
     });
 
-    const { data: { user } } = await supabase.auth.getUser();
+    // ルーティング判定は Cookie 内セッションのローカル読取で行う (ネットワーク不要)。
+    // getUser() は Edge から Auth API への外部フェッチを伴い、失敗すると catch で
+    // 素通りしてロール分離が無効化されるため使わない。トークンの真正性検証は
+    // 各 layout / API ルートの getUser() が担う (ここは振り分けのみ)。
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user ?? null;
 
     // 未ログインは /login へ
     if (!user) {
