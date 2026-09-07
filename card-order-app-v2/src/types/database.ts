@@ -152,6 +152,8 @@ export type Product = {
   master_carton_box: number | null; // マスターカートンあたりのBOX数
   // 問屋紐付け (026)
   supplier_id: string | null;
+  // 問屋の入荷登録メモ (032・承認者向け)
+  intake_note: string | null;
   // カット品の保証金率 (030・null=既定30%)
   deposit_rate: number | null;
   created_at: string;
@@ -169,6 +171,8 @@ export type Supplier = {
   phone: string | null;
   address: string | null;
   active: boolean;
+  // テスト問屋 (032)。true の問屋の登録商品は承認・公開できない
+  is_test: boolean;
   note: string | null;
   created_at: string;
   updated_at: string;

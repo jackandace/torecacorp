@@ -29,9 +29,14 @@ export default async function SupplierLayout({ children }: { children: React.Rea
           <Link href="/supplier" className="py-2 border-b-2 border-transparent hover:border-white/70 whitespace-nowrap">ダッシュボード</Link>
           <Link href="/supplier/shipments" className="py-2 border-b-2 border-transparent hover:border-white/70 whitespace-nowrap">出荷更新</Link>
           <Link href="/supplier/deliveries" className="py-2 border-b-2 border-transparent hover:border-white/70 whitespace-nowrap">納品完了</Link>
-          {/* フェーズ4で追加: 入荷登録 */}
+          <Link href="/supplier/intake" className="py-2 border-b-2 border-transparent hover:border-white/70 whitespace-nowrap">入荷登録</Link>
         </nav>
       </header>
+      {ctx?.supplier.is_test && (
+        <div className="bg-amber-500 text-amber-950 text-center text-sm font-semibold py-1.5 px-4">
+          🧪 テストモード — このアカウントの登録データは検証用で、ショップには公開されません
+        </div>
+      )}
       <main className="max-w-5xl mx-auto px-4 py-6">
         {ctx ? (
           children
