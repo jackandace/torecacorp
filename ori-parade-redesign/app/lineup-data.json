@@ -1,0 +1,566 @@
+{
+  "22": [
+    {
+      "label": "1等",
+      "columns": 2,
+      "cards": [
+        {
+          "image": "/assets/lineup/1700102386570.jpeg",
+          "name": "1等 景品1",
+          "quantity": 1,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102408694.jpeg",
+          "name": "1等 景品2",
+          "quantity": 1,
+          "psa": true
+        }
+      ]
+    },
+    {
+      "label": "2等",
+      "columns": 3,
+      "cards": [
+        {
+          "image": "/assets/lineup/1700102287222.jpeg",
+          "name": "2等 景品1",
+          "quantity": 1,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102296037.jpeg",
+          "name": "2等 景品2",
+          "quantity": 1,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102339469.jpeg",
+          "name": "2等 景品3",
+          "quantity": 1,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102315862.jpeg",
+          "name": "2等 景品4",
+          "quantity": 1,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102341793.jpeg",
+          "name": "2等 景品5",
+          "quantity": 1,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102343119.jpeg",
+          "name": "2等 景品6",
+          "quantity": 1,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102346655.jpeg",
+          "name": "2等 景品7",
+          "quantity": 1,
+          "psa": true
+        }
+      ]
+    },
+    {
+      "label": "3等",
+      "columns": 3,
+      "cards": [
+        {
+          "image": "/assets/lineup/1700102159147.jpeg",
+          "name": "3等 景品1",
+          "quantity": 1,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102253644.jpeg",
+          "name": "3等 景品2",
+          "quantity": 1,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102376252.jpeg",
+          "name": "3等 景品3",
+          "quantity": 1,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102375893.jpeg",
+          "name": "3等 景品4",
+          "quantity": 1,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102375508.jpeg",
+          "name": "3等 景品5",
+          "quantity": 1,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102375112.jpeg",
+          "name": "3等 景品6",
+          "quantity": 1,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102374648.jpeg",
+          "name": "3等 景品7",
+          "quantity": 1,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102274187.jpeg",
+          "name": "3等 景品8",
+          "quantity": 1,
+          "psa": true
+        }
+      ]
+    },
+    {
+      "label": "4等",
+      "columns": 4,
+      "cards": [
+        {
+          "image": "/assets/lineup/1700102361241.jpeg",
+          "name": "4等 景品1",
+          "quantity": 5,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102341369.jpeg",
+          "name": "4等 景品2",
+          "quantity": 5,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102340900.jpeg",
+          "name": "4等 景品3",
+          "quantity": 5,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102342695.jpeg",
+          "name": "4等 景品4",
+          "quantity": 5,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102344382.jpeg",
+          "name": "4等 景品5",
+          "quantity": 5,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102159147.jpeg",
+          "name": "4等 景品6",
+          "quantity": 5,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102253644.jpeg",
+          "name": "4等 景品7",
+          "quantity": 5,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102274187.jpeg",
+          "name": "4等 景品8",
+          "quantity": 10,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102376252.jpeg",
+          "name": "4等 景品9",
+          "quantity": 5,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102375893.jpeg",
+          "name": "4等 景品10",
+          "quantity": 5,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102375508.jpeg",
+          "name": "4等 景品11",
+          "quantity": 5,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102375112.jpeg",
+          "name": "4等 景品12",
+          "quantity": 5,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102374648.jpeg",
+          "name": "4等 景品13",
+          "quantity": 5,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102376696.jpeg",
+          "name": "4等 景品14",
+          "quantity": 5,
+          "psa": false
+        }
+      ]
+    },
+    {
+      "label": "5等",
+      "columns": 4,
+      "cards": [
+        {
+          "image": "/assets/lineup/1771403444029.png",
+          "name": "5等 景品1",
+          "quantity": 11899,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1771403460373.png",
+          "name": "5等 景品2",
+          "quantity": 1000,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1771403472895.png",
+          "name": "5等 景品3",
+          "quantity": 1000,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1771403486418.png",
+          "name": "5等 景品4",
+          "quantity": 1000,
+          "psa": false
+        }
+      ]
+    },
+    {
+      "label": "ラストワン賞",
+      "columns": 2,
+      "cards": [
+        {
+          "image": "/assets/lineup/1700102386201.jpeg",
+          "name": "ラストワン賞 景品1",
+          "quantity": 1,
+          "psa": true
+        }
+      ]
+    },
+    {
+      "label": "キリ番賞",
+      "columns": 2,
+      "cards": [
+        {
+          "image": "/assets/lineup/1700102416188.jpeg",
+          "name": "キリ番賞 景品1",
+          "quantity": 1,
+          "psa": true
+        }
+      ]
+    }
+  ],
+  "21": [
+    {
+      "label": "1等",
+      "columns": 2,
+      "cards": [
+        {
+          "image": "/assets/lineup/1700102386570.jpeg",
+          "name": "1等 景品1",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102408694.jpeg",
+          "name": "1等 景品2",
+          "quantity": null,
+          "psa": true
+        }
+      ]
+    },
+    {
+      "label": "2等",
+      "columns": 3,
+      "cards": [
+        {
+          "image": "/assets/lineup/1700102287222.jpeg",
+          "name": "2等 景品1",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102296037.jpeg",
+          "name": "2等 景品2",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102339469.jpeg",
+          "name": "2等 景品3",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102315862.jpeg",
+          "name": "2等 景品4",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102341793.jpeg",
+          "name": "2等 景品5",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102343119.jpeg",
+          "name": "2等 景品6",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102346655.jpeg",
+          "name": "2等 景品7",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102347081.jpeg",
+          "name": "2等 景品8",
+          "quantity": null,
+          "psa": true
+        }
+      ]
+    },
+    {
+      "label": "3等",
+      "columns": 3,
+      "cards": [
+        {
+          "image": "/assets/lineup/1700102159147.jpeg",
+          "name": "3等 景品1",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102253644.jpeg",
+          "name": "3等 景品2",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102376252.jpeg",
+          "name": "3等 景品3",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102375893.jpeg",
+          "name": "3等 景品4",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102375508.jpeg",
+          "name": "3等 景品5",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102375112.jpeg",
+          "name": "3等 景品6",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102374648.jpeg",
+          "name": "3等 景品7",
+          "quantity": null,
+          "psa": true
+        },
+        {
+          "image": "/assets/lineup/1700102274187.jpeg",
+          "name": "3等 景品8",
+          "quantity": null,
+          "psa": true
+        }
+      ]
+    },
+    {
+      "label": "4等",
+      "columns": 4,
+      "cards": [
+        {
+          "image": "/assets/lineup/1700102361241.jpeg",
+          "name": "4等 景品1",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102341369.jpeg",
+          "name": "4等 景品2",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102340900.jpeg",
+          "name": "4等 景品3",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102342695.jpeg",
+          "name": "4等 景品4",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102344382.jpeg",
+          "name": "4等 景品5",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102159147.jpeg",
+          "name": "4等 景品6",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102253644.jpeg",
+          "name": "4等 景品7",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102274187.jpeg",
+          "name": "4等 景品8",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102376252.jpeg",
+          "name": "4等 景品9",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102375893.jpeg",
+          "name": "4等 景品10",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102375508.jpeg",
+          "name": "4等 景品11",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102375112.jpeg",
+          "name": "4等 景品12",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102374648.jpeg",
+          "name": "4等 景品13",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1700102376696.jpeg",
+          "name": "4等 景品14",
+          "quantity": null,
+          "psa": false
+        }
+      ]
+    },
+    {
+      "label": "5等",
+      "columns": 4,
+      "cards": [
+        {
+          "image": "/assets/lineup/1771403444029.png",
+          "name": "5等 景品1",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1771403460373.png",
+          "name": "5等 景品2",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1771403472895.png",
+          "name": "5等 景品3",
+          "quantity": null,
+          "psa": false
+        },
+        {
+          "image": "/assets/lineup/1771403486418.png",
+          "name": "5等 景品4",
+          "quantity": null,
+          "psa": false
+        }
+      ]
+    },
+    {
+      "label": "ラストワン賞",
+      "columns": 2,
+      "cards": [
+        {
+          "image": "/assets/lineup/1700102386201.jpeg",
+          "name": "ラストワン賞 景品1",
+          "quantity": null,
+          "psa": true
+        }
+      ]
+    },
+    {
+      "label": "キリ番賞",
+      "columns": 2,
+      "cards": [
+        {
+          "image": "/assets/lineup/1700102416188.jpeg",
+          "name": "キリ番賞 景品1",
+          "quantity": null,
+          "psa": true
+        }
+      ]
+    }
+  ],
+  "13": [
+    {
+      "label": "1等",
+      "columns": 2,
+      "cards": [
+        {
+          "image": "/assets/lineup/1768912730308.png",
+          "name": "1等 景品1",
+          "quantity": null,
+          "psa": false
+        }
+      ]
+    },
+    {
+      "label": "5等",
+      "columns": 4,
+      "cards": [
+        {
+          "image": "/assets/lineup/1769563881596.png",
+          "name": "5等 景品1",
+          "quantity": null,
+          "psa": false
+        }
+      ]
+    }
+  ]
+}

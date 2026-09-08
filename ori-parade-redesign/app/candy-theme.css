@@ -1,0 +1,175 @@
+@font-face {
+  font-family: 'M PLUS Rounded 1c';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/rounded-400.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'M PLUS Rounded 1c';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(/fonts/rounded-700.woff2) format('woff2');
+}
+@font-face {
+  font-family: 'M PLUS Rounded 1c';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url(/fonts/rounded-800.woff2) format('woff2');
+}
+
+/* One palette and one rounded family across all existing layouts. */
+:root {
+ --parade-pink:#d81766;--parade-pink-hover:#b90e53;--parade-ink:#292238;--parade-muted:#665c72;
+ --parade-yellow:#ffdc4c;--parade-lilac:#eee7ff;--parade-line:#eadff0;
+ --primary:var(--parade-pink);--primary-deep:#b90e53;--secondary:#ffe4f0;
+ --background:#fff7fc;--foreground:var(--parade-ink);--card:#fff;--muted:#f3eef8;--muted-foreground:var(--parade-muted);--border:var(--parade-line);
+ --reference-accent:var(--parade-pink);--reference-ink:var(--parade-ink);--reference-border:var(--parade-line);
+ --font-sans:'M PLUS Rounded 1c','Hiragino Maru Gothic ProN',sans-serif;
+}
+body {font-family:var(--font-sans);font-size:16px;line-height:1.75;color:var(--parade-ink);background:#fff7fc;}
+button,input,select,textarea,h1,h2,h3,.button,.eyebrow,.coin,.category-pills,.reference-category-nav,.account-shortcuts {font-family:var(--font-sans);}
+h1,h2,h3 {color:var(--parade-ink);font-weight:800;letter-spacing:.01em;text-shadow:none;}
+p {color:inherit;}
+.button.primary-button,.button.draw-button,.direct-draw-buttons .draw-button {background:var(--parade-pink);color:#fff;border:1px solid var(--parade-pink);box-shadow:0 3px 0 #a70d4c;border-radius:12px;text-shadow:none;font-weight:800;font-size:15px;}
+.button.primary-button:hover,.button.draw-button:hover {background:var(--parade-pink-hover);color:white;border-color:var(--parade-pink-hover);}
+.button.outline-button,.button.secondary-button {background:#fff;color:#a90c4b;border:1px solid #e58db3;box-shadow:none;border-radius:12px;font-size:15px;font-weight:700;}
+.button.outline-button:hover,.button.secondary-button:hover {background:#fff0f7;color:#a90c4b;}
+.button:disabled,.button[disabled] {background:#ede8f1;color:#736a7e;border-color:#e0d8e8;box-shadow:none;opacity:1;}
+:focus-visible {outline-color:var(--parade-pink);}
+.catalog-shell .site-header {background:#fff;border-bottom-color:var(--parade-line);}
+.logo img,.site-header .logo img {filter:hue-rotate(305deg) saturate(1.45);}
+.wallet,.coin,.coin strong,.gacha-summary .coin,.gacha-summary>span,.gacha-summary>span b {color:var(--parade-ink);}
+.wallet-plus {background:var(--parade-pink);color:#fff;}.header-utility,.account-menu-trigger,.page-back {color:var(--parade-pink);}
+.reference-sidebar h2 {font-size:15px;font-weight:800;color:var(--parade-ink);}.reference-sidebar a{color:#5b506a;font-size:14px;}
+.reference-sidebar a[aria-current='page'] {background:#ffe4f0;color:#af0f50;border-radius:10px;}
+.reference-category-nav {background:#fff;border-color:var(--parade-line);}.reference-category-nav a {color:#51455f;font-size:14px;font-weight:800;}.reference-category-nav a[aria-current='page'] {color:#b50e53;background:#fff0f7;border-color:var(--parade-pink);}
+.catalog-title h1 {font-size:26px;font-weight:800;}.catalog-title span{color:var(--parade-muted);font-size:14px;}
+.catalog-shell .catalog-sort[data-slot='select-trigger'] {font-family:var(--font-sans);font-size:14px;color:var(--parade-ink);background:#fff;border-color:#dacde5;border-radius:10px;}
+.catalog-shell .gacha-card {background:#fff;border-color:#eadbed;box-shadow:0 4px 14px #78347907;border-radius:14px;}
+.catalog-shell .catalog-card-labels {background:#f1eaff;}.catalog-shell .catalog-card-labels span {font-size:13px;font-weight:700;color:#614088;}
+.gacha-summary>div>span,.gacha-summary>span {font-size:14px;}.gacha-summary .coin{font-size:28px;font-weight:800;}.gacha-summary>span b{font-size:23px;font-weight:800;}
+[data-slot='progress'] {background:#f0e7f2;}
+[data-slot='progress-indicator'],.gacha-content [data-slot='progress-indicator'],.detail-draw-dock [data-slot='progress-indicator'] {background:var(--parade-pink);}
+.lineup-link,.small-link,.text-link {color:#ae1050;font-size:14px;text-underline-offset:4px;}
+.screen-shell .page-heading h1 {font-size:23px!important;color:var(--parade-ink);font-weight:800;}
+.panel,.purchase-panel,.recipe-card,.route-card,.ticket-card,.bonus-card,.form-card,.reference-utility .panel {background:#fff;border-color:var(--parade-line);box-shadow:0 4px 16px #5b2a6d05;}
+.panel>h2,.member-settings h2,.member-invite h2,.rank-explanation h2 {font-size:20px;font-weight:800;color:var(--parade-ink);}
+.small-note,.small-link,.small-badge,.expiry,.rank-bonus {font-size:14px;line-height:1.7;}
+.small-note,.expiry,.footer-preview-note,.small-muted {color:var(--parade-muted);}
+.small-badge,.rank-psa {background:var(--parade-lilac);color:#604184;border-color:#d9c6f3;}
+.screen-shell .gacha-conditions{background:#fff;border-color:var(--parade-line);}.gacha-conditions h2{font-size:20px;}.screen-shell .gacha-conditions p{font-size:16px;line-height:1.8;}.gacha-conditions svg{color:var(--parade-pink);}
+.prize-rank {background:#fff;border-color:#e4d5eb;}.prize-rank>header {background:var(--parade-yellow);border-color:#e9c53d;}.prize-rank>header h3{font-family:var(--font-sans);color:var(--parade-ink);text-shadow:none;-webkit-text-fill-color:currentColor;font-weight:800;}.prize-rank>header>span{color:#4c3e2b;font-size:14px;font-weight:700;}
+.rank-card-grid {background:#fffdf5;}.rank-quantity{color:var(--parade-ink);font-size:17px;}.rank-quantity small{font-size:14px;}.lineup-title{color:var(--parade-ink);font-size:24px;}
+.gacha-notes{background:white;border-color:var(--parade-line);}.gacha-notes h2{font-size:20px;color:var(--parade-ink);}.gacha-notes h3{font-size:16px;color:var(--parade-ink);}.gacha-notes p{font-size:14px;line-height:1.9;color:#574d64;}
+.detail-draw-dock,.collection-shell .selection-panel.collection-dock {background:#fff;border-color:var(--parade-line);box-shadow:0 -4px 20px #5d326c0b;}
+.member-profile>span{background:#ffe4f0;color:var(--parade-pink);}.member-profile strong{font-size:18px;}.member-profile small{color:var(--parade-muted);font-size:13px;}
+.member-status,.member-wallet,.member-ticket-line,.member-settings .account-menu{background:#fff;border-color:var(--parade-line);}
+.member-summary{background:#f4efff;border-left-color:#9564db;}.member-summary>svg:first-child{color:#7b49b6;}.member-summary small,.member-summary span{color:#635174;font-size:14px;}.member-summary strong{font-size:24px;color:#342344;}.member-progress{background:#fff8dc;}.member-progress>div:first-child,.member-progress p{font-size:14px;}
+.member-boost{background:var(--parade-yellow);border-color:#eec837;color:#352833;}.member-boost strong{font-size:19px;}.member-boost span{font-size:14px;}
+.member-page .account-page-shortcuts a{background:#fff;border-color:var(--parade-line);font-size:14px;}.member-page .account-page-shortcuts svg{color:var(--parade-pink);}.member-ticket-line{font-size:15px;}.member-settings .account-menu a{font-size:15px;color:#4a3b58;}.member-settings .account-menu a>svg:first-child{color:#9564bd;}
+.member-wallet>div>span,.member-wallet .small-link{font-size:14px;}.member-wallet .button{font-size:15px;}.member-invite small{font-size:13px;color:var(--parade-muted);}.logout-button{color:#665875;font-size:15px;}
+.collection-shell .parade-tabs [data-active] {color:#b60e53;border-bottom-color:var(--parade-pink);}.collection-shell .parade-tabs [data-slot='tabs-trigger']{font-weight:700;}
+.collection-shell .item-card{background:#fff;border-color:var(--parade-line);}.collection-shell .item-selected{background:#fff2f8;border-color:#db4e8e;}.collection-shell .item-card h3{font-size:16px;color:var(--parade-ink);}.collection-shell .item-card .expiry{font-size:13px;color:var(--parade-muted);}.collection-shell .small-badge{font-size:13px;}.collection-dock-summary,.collection-dock-summary a{font-size:14px;}.collection-shell .collection-dock>p{font-size:13px;color:var(--parade-muted);}.collection-dock-actions .button{font-size:15px;}
+.reference-utility .parade-table th{background:#f3edfb;color:#50445e;font-weight:700;}.reference-utility .parade-table td{color:#382e44;}.parade-table tr{border-color:var(--parade-line);}
+input,textarea,[data-slot='select-trigger']{color:var(--parade-ink);border-color:#d9cde3;background:#fff;}
+[data-slot='dialog-content'],[data-slot='select-popup'],[data-slot='select-content']{background:#fff;color:var(--parade-ink);border-color:var(--parade-line);}
+[data-slot='radio-group-item'][data-checked],[data-slot='checkbox'][data-checked]{background:var(--parade-pink);border-color:var(--parade-pink);color:white;}
+.feature-heading,.boost-banner {background:#ffdc4c;color:var(--parade-ink);border-color:#edc539;}.rank-card{background:#f0e7ff;color:var(--parade-ink);border-color:#d7c2f4;}.rank-emblem{background:#ffdc4c;border-color:#e8c337;color:#594120;}
+footer {color:#655772;background:transparent;border-color:var(--parade-line);}.catalog-shell footer a{font-size:14px;}
+@media(max-width:700px){
+ .catalog-title h1{font-size:20px;}.catalog-title span{font-size:13px;}.catalog-shell .catalog-sort[data-slot='select-trigger']{font-size:13px;}.reference-category-nav a{font-size:14px;}
+ .screen-shell .page-heading h1{font-size:20px!important;}.direct-draw-buttons .draw-button,.detail-draw-dock .draw-button{font-size:14px;}
+ .gacha-summary .coin{font-size:26px;}.gacha-summary>span b{font-size:22px;}.gacha-summary>span{font-size:14px;}
+ .member-summary strong{font-size:22px;}.member-summary small,.member-summary span{font-size:13px;}.member-page .account-page-shortcuts a{font-size:13px;}.member-boost strong{font-size:18px;}.member-boost span{font-size:14px;}.member-ticket-line{font-size:14px;}.member-wallet .small-link{font-size:13px;}
+ .collection-shell .item-card h3{font-size:14px;}.collection-shell .item-card .expiry{font-size:13px;}.collection-dock-summary a{font-size:12px;}.collection-shell .collection-dock>p{font-size:12px;}.collection-shell{padding-bottom:185px;}
+ .reference-utility .membership-table th,.reference-utility .membership-table td,.membership-table .rank-label{font-size:13px;}.reference-utility .membership-table td{overflow-wrap:anywhere;}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}}
+.play-dialog .draw-options label {background:#fff;border-color:#ded1e8;color:var(--parade-ink);}
+.play-dialog .draw-options label.chosen {background:#ffe9f3;border-color:var(--parade-pink);color:#a20d48;}
+.play-dialog .draw-options label>span {font-size:12px;}
+.feature-heading.lilac,.feature-heading.mint,.feature-heading.peach {background:#f0e7ff;color:var(--parade-ink);border-color:#d5bff3;}
+.feature-heading.yellow {background:var(--parade-yellow);color:var(--parade-ink);border-color:#e8c333;}
+
+/* White action surfaces with a clear brand-colored outline. */
+.button.primary-button,.button.draw-button,.direct-draw-buttons .draw-button {
+ background:#fff;color:var(--parade-pink);border:2px solid var(--parade-pink);box-shadow:none;text-shadow:none;
+}
+.button.primary-button::before,.button.primary-button::after,.button.draw-button::before,.button.draw-button::after {display:none;}
+.button.primary-button:hover,.button.draw-button:hover {background:#fff0f7;color:var(--parade-pink-hover);border-color:var(--parade-pink-hover);box-shadow:none;}
+.button.primary-button:disabled,.button.draw-button:disabled,.button.primary-button[disabled],.button.draw-button[disabled] {background:#fff;color:#8a8193;border-color:#dcd5e3;box-shadow:none;}
+
+/* Restrained white-and-coral palette; one accent throughout. */
+:root {--parade-pink:#c83e32;--parade-pink-hover:#ab3027;--parade-ink:#29272b;--parade-muted:#676269;--parade-yellow:#fff3ef;--parade-lilac:#fff3ef;--parade-line:#eadfdd;--background:#faf9f8;--secondary:#fff1ed;--muted:#f4f1ef;--primary-deep:#ab3027;}
+body {background:#faf9f8;}
+.logo img,.site-header .logo img {filter:saturate(1.15);}
+.reference-sidebar a,.reference-category-nav a {color:#514b4e;}
+.reference-sidebar a[aria-current='page'],.reference-category-nav a[aria-current='page'] {background:#fff0eb;color:#b6372d;border-color:var(--parade-pink);}
+.catalog-shell .catalog-card-labels {background:#fff3ef;}.catalog-shell .catalog-card-labels span {color:#79544d;}
+.catalog-shell .gacha-card {border-color:var(--parade-line);box-shadow:none;}
+.catalog-shell .catalog-sort[data-slot='select-trigger'] {border-color:var(--parade-line);}
+.button.outline-button,.button.secondary-button {background:#fff;color:var(--parade-pink);border-color:var(--parade-pink);}
+.button.outline-button:hover,.button.secondary-button:hover,.button.primary-button:hover,.button.draw-button:hover {background:#fff3ef;color:var(--parade-pink-hover);}
+.button:disabled,.button[disabled] {background:#f3f1f0;color:#817c80;border-color:#e0dcda;}
+.lineup-link,.small-link,.text-link {color:#b3372c;}
+[data-slot='progress'] {background:#eee7e4;}
+.prize-rank,.rank-card-grid {background:#fff;border-color:var(--parade-line);}.prize-rank>header {background:#fff3ef;border-color:#e3c8c2;}.prize-rank>header>span {color:#625854;}
+.small-badge,.rank-psa {background:#f6f2f0;color:#635650;border-color:#e5d9d4;}
+.member-profile>span {background:#fff0eb;color:var(--parade-pink);}
+.member-summary {background:#fff;border-left-color:var(--parade-pink);}.member-summary>svg:first-child{color:var(--parade-pink);}.member-summary strong{color:var(--parade-ink);}.member-summary small,.member-summary span{color:var(--parade-muted);}
+.member-progress {background:#faf6f4;}
+.member-boost,.feature-heading,.boost-banner,.feature-heading.yellow,.feature-heading.lilac,.feature-heading.mint,.feature-heading.peach {background:#fff;border-color:var(--parade-line);color:var(--parade-ink);}
+.member-boost>svg:first-child {color:var(--parade-pink);}
+.member-settings .account-menu a {color:#494347;}.member-settings .account-menu a>svg:first-child{color:#9b6258;}
+.collection-shell .item-selected {background:#fff6f2;border-color:var(--parade-pink);}.collection-shell .parade-tabs [data-active]{color:var(--parade-pink);}
+.reference-utility .parade-table th {background:#f8f4f2;color:#51484b;}.reference-utility .parade-table td{color:var(--parade-ink);}
+input,textarea,[data-slot='select-trigger'] {border-color:#ded5d2;}
+.play-dialog .draw-options label.chosen {background:#fff0eb;border-color:var(--parade-pink);color:#a32f25;}
+.rank-card,.rank-emblem {background:#fff3ef;border-color:#e3c8c2;color:var(--parade-ink);}
+footer,.logout-button {color:var(--parade-muted);}
+
+/* A quiet dotted backdrop gives character without adding more UI colors. */
+body {
+ background-color:#fff;
+ background-image:radial-gradient(circle,rgba(200,62,50,.085) 1.3px,transparent 1.6px);
+ background-size:22px 22px;
+}
+.catalog-shell .site-header,.reference-category-nav,.gacha-card,
+.screen-shell .gacha-conditions,.detail-draw-dock,
+.collection-shell .selection-panel.collection-dock,
+.member-status,.member-wallet,.member-ticket-line,.member-settings .account-menu,
+.member-page .account-page-shortcuts a,.collection-shell .item-card,
+.panel,.form-card,.gacha-notes {background-color:#fff;}
+
+/* Special gacha keeps the product entry, with branching or a single depth stack. */
+.branch-entry,.step-depth {position:relative;margin:0 0 24px;}
+.special-front-card {position:relative;z-index:1;background:#fff;border:1px solid var(--parade-line);border-radius:14px;overflow:hidden;}
+.special-cover {display:block;width:100%;height:auto;}
+.special-card-info {padding:20px;}.special-card-info h2 {font-size:20px;margin:0 0 12px;}.special-card-info p {font-size:14px;color:var(--parade-muted);margin:12px 0 0;}
+.branch-buttons {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}.branch-buttons .button {width:100%;min-height:48px;}
+.branch-back {display:flex;align-items:center;gap:6px;font-size:14px;color:var(--parade-pink);margin:-8px 0 18px;}
+.step-depth {padding-top:34px;isolation:isolate;}
+.step-next-layer {position:absolute;top:0;left:24px;right:24px;bottom:24px;border:1px solid #d9b8af;border-radius:14px;background:#fff2ed;}
+.step-next-layer>span {display:block;text-align:center;font-size:13px;font-weight:800;line-height:32px;color:#85534a;}
+.step-current-label {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;background:#fff;color:var(--parade-pink);border-bottom:1px solid var(--parade-line);}.step-current-label strong {font-size:20px;}.step-current-label span {font-size:13px;color:var(--parade-muted);}
+.special-preview-note {font-size:13px;color:var(--parade-muted);text-align:center;margin:24px 12px;}
+@media(max-width:700px){.branch-entry,.step-depth{margin-inline:12px;}.special-card-info{padding:16px;}.special-card-info h2{font-size:18px;}.branch-buttons{gap:8px;}.branch-buttons .button{font-size:14px;padding-inline:8px;}.branch-back{margin-left:12px;}.step-next-layer{left:16px;right:16px;}}
+
+/* Small, deliberate accents keep the white surfaces light. */
+.catalog-title h1 {border-left:5px solid var(--parade-pink);padding-left:10px;}
+.reference-category-nav a[aria-current='page'] {background:#c83e32;color:#fff;border-bottom-color:#972c24;}
+.reference-sidebar a[aria-current='page'] {box-shadow:inset 3px 0 var(--parade-pink);font-weight:800;}
+.catalog-shell .catalog-card-labels {background:#fff1ec;border-bottom:1px solid #f0d7cf;}
+.catalog-shell .catalog-card-labels span {color:#843c32;}
+.gacha-summary .coin,.member-wallet .coin {color:#b3352b;}
+.gacha-summary>span b {color:#29272b;}
+.prize-rank>header {border-left:5px solid var(--parade-pink);background:#fff1ec;}
+.prize-rank>header h3 {color:#29272b;}
+.member-summary {background:#fff3ef;border-left:5px solid var(--parade-pink);}
+.member-settings h2,.member-invite h2,.gacha-conditions h2,.gacha-notes h2 {border-left:4px solid var(--parade-pink);padding-left:10px;}
+.step-current-label {border-top:3px solid var(--parade-pink);}
+.detail-draw-dock,.collection-shell .selection-panel.collection-dock {border-top:2px solid #ebc4ba;}
+.button.primary-button,.button.draw-button,.direct-draw-buttons .draw-button {color:#b3352b;border-color:#c83e32;}
