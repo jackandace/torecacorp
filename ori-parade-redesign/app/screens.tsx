@@ -1,4 +1,6 @@
 'use client';
+import {sitePath} from "../lib/site-path";
+
 import {GachaSummary} from './gacha-summary';
 import { useState, useEffect, type FormEvent } from 'react';
 import {
@@ -170,7 +172,7 @@ function Action({
 }
 function Back() {
   return (
-    <a className="text-link" href="/mypage">
+    <a className="text-link" href={sitePath("/mypage")}>
       <ArrowLeft size={16} />
       マイページへ戻る
     </a>
@@ -227,12 +229,12 @@ function Detail({ id, routeLabel }: { id: number; routeLabel?: string }) {
   return (
     <>
       <PageHeading title={routeLabel||p.name} kicker="GACHA DETAIL" />
-      {routeLabel&&<a className="branch-back" href="/choice-gacha?groupId=1"><ArrowLeft size={16}/>ルート選択へ戻る</a>}
+      {routeLabel&&<a className="branch-back" href={sitePath("/choice-gacha?groupId=1")}><ArrowLeft size={16}/>ルート選択へ戻る</a>}
       <div className="detail-layout">
         <div className="detail-media">
           <img
             className="detail-image"
-            src={'/assets/' + p.image}
+            src={sitePath('/assets/' + p.image)}
             alt={p.name}
           />
 
@@ -256,7 +258,7 @@ function Detail({ id, routeLabel }: { id: number; routeLabel?: string }) {
 }
 function MembershipSummary({progress=false}:{progress?:boolean}) {
   return <section className="member-status">
-    <a className="member-summary" href="/others/help-oripa-rank"><Trophy size={40}/><div><small>現在の会員ランク</small><strong>ブロンズ</strong><span>会員ランクの特典を見る</span></div><ChevronRight size={20}/></a>
+    <a className="member-summary" href={sitePath("/others/help-oripa-rank")}><Trophy size={40}/><div><small>現在の会員ランク</small><strong>ブロンズ</strong><span>会員ランクの特典を見る</span></div><ChevronRight size={20}/></a>
     {progress&&<div className="member-progress"><div><span>次のランク：シルバー</span><strong>100,000 / 500,000</strong></div><Progress value={20} aria-label="次の会員ランクへの進捗"/><p>あと <strong>400,000</strong> コイン購入</p></div>}
   </section>;
 }
@@ -268,16 +270,16 @@ function MyPage() {
     <PageHeading title="マイページ"/>
     <div className="member-profile"><span><UserRound size={26}/></span><div><strong>ゲスト 様</strong><small>デザインプレビュー</small></div></div>
     <MembershipSummary/>
-    <section className="member-wallet"><div><span>コイン残高</span><Coin value={wallet.balance}/></div><a className="button primary-button" href="/point">チャージ <Plus size={16}/></a><a className="small-link" href="/me/point_expire">コインの有効期限を確認<ChevronRight size={14}/></a></section>
-    <a href="/me/megaboost" className="member-boost"><Zap size={27}/><div><strong>PARADEブースト</strong><span>毎月のコイン消費で、翌月に特典を。</span></div><ChevronRight size={20}/></a>
+    <section className="member-wallet"><div><span>コイン残高</span><Coin value={wallet.balance}/></div><a className="button primary-button" href={sitePath("/point")}>チャージ <Plus size={16}/></a><a className="small-link" href={sitePath("/me/point_expire")}>コインの有効期限を確認<ChevronRight size={14}/></a></section>
+    <a href={sitePath("/me/megaboost")} className="member-boost"><Zap size={27}/><div><strong>PARADEブースト</strong><span>毎月のコイン消費で、翌月に特典を。</span></div><ChevronRight size={20}/></a>
     <div className="account-shortcuts account-page-shortcuts">
-      {([["/notification","お知らせ",Bell],["/me/cards","獲得商品",Gift],["/me/tickets","チケット",Ticket],["/coupon","クーポン",Sparkles]] as const).map(([href,label,Icon])=><a key={href} href={href}><Icon size={25}/><span>{label}</span></a>)}
+      {([["/notification","お知らせ",Bell],["/me/cards","獲得商品",Gift],["/me/tickets","チケット",Ticket],["/coupon","クーポン",Sparkles]] as const).map(([href,label,Icon])=><a key={href} href={sitePath(href)}><Icon size={25}/><span>{label}</span></a>)}
     </div>
-    <div className="member-ticket-line"><Ticket size={20}/><span>所持チケット</span><strong>3枚</strong><a href="/me/tickets">確認する<ChevronRight size={16}/></a></div>
-    <section className="member-settings"><h2>アカウント</h2><div className="account-menu">{menuItems.map(([href,label,Icon])=><a href={href} key={href}><Icon size={20}/><span>{label}</span><ChevronRight size={16}/></a>)}</div></section>
+    <div className="member-ticket-line"><Ticket size={20}/><span>所持チケット</span><strong>3枚</strong><a href={sitePath("/me/tickets")}>確認する<ChevronRight size={16}/></a></div>
+    <section className="member-settings"><h2>アカウント</h2><div className="account-menu">{menuItems.map(([href,label,Icon])=><a href={sitePath(href)} key={href}><Icon size={20}/><span>{label}</span><ChevronRight size={16}/></a>)}</div></section>
     <section className="member-invite"><h2>友だちを招待</h2><div className="invite-code"><strong>PARADE</strong><button onClick={async()=>{try{await navigator.clipboard.writeText('PARADE');setCopied(true);}catch{setCopied(false);}}} aria-label="招待コードをコピー"><Copy size={17}/>{copied?'コピーしました':'コピー'}</button></div><small>確認用のサンプルコードです</small></section>
     <button className="logout-button" onClick={()=>setLogout(true)}><LogOut size={18}/>ログアウト</button>
-    <PreviewDialog open={logout} onClose={()=>setLogout(false)} title="ログアウトしますか？"><a className="button primary-button" href="/login">ログイン画面を見る</a><Action secondary onClick={()=>setLogout(false)}>キャンセル</Action></PreviewDialog>
+    <PreviewDialog open={logout} onClose={()=>setLogout(false)} title="ログアウトしますか？"><a className="button primary-button" href={sitePath("/login")}>ログイン画面を見る</a><Action secondary onClick={()=>setLogout(false)}>キャンセル</Action></PreviewDialog>
   </div>;
 }
 function Collection() {
@@ -341,7 +343,7 @@ function Collection() {
                         : '発送済みの商品はありません'
                   }
                   description="商品がある場合はここに表示されます。"
-                  href="/oripa/All"
+                  href={sitePath("/oripa/All")}
                   label="オリパを探す"
                 />
               ) : (
@@ -384,7 +386,7 @@ function Collection() {
                           />
                         )}
                         <div className="item-image">
-                          <img src={'/assets/' + item.image} alt={item.name} />
+                          <img src={sitePath('/assets/' + item.image)} alt={item.name} />
                         </div>
                         <span className="small-badge">{item.tag}</span>
                         <h3>{item.name}</h3>
@@ -402,7 +404,7 @@ function Collection() {
             </div>
             {tab === 'unselected' && (
               <aside className="selection-panel collection-dock" aria-label="選択商品の操作">
-                <div className="collection-dock-summary"><strong>選択 {selected.length}点</strong><span>合計 <Coin value={sum}/></span><a href="/mypage/address">お届け先を確認<ChevronRight size={14}/></a></div>
+                <div className="collection-dock-summary"><strong>選択 {selected.length}点</strong><span>合計 <Coin value={sum}/></span><a href={sitePath("/mypage/address")}>お届け先を確認<ChevronRight size={14}/></a></div>
                 <div className="collection-dock-actions"><Action disabled={!canShip} onClick={()=>{setDialog('ship');setDone(false);}}><Truck size={18}/>発送手続きへ</Action><Action disabled={!canExchange} secondary onClick={()=>{setDialog('exchange');setDone(false);}}>コインに交換<ArrowRight size={18}/></Action></div>
                 <p>発送は合計1,500コイン以上から。発送限定の商品はコイン交換できません。</p>
               </aside>
@@ -489,13 +491,13 @@ function Lab() {
                 <div className="recipe-materials">
                   <h3>必要な素材</h3>
                   <div>
-                    <img src="/assets/flag.png" alt="パレードフラッグC" />
+                    <img src={sitePath("/assets/flag.png")} alt="パレードフラッグC" />
                     <span>パレードフラッグC</span>
                     <b>{n ? '0' : '2'} / 1</b>
                   </div>
                   {!n && (
                     <div>
-                      <img src="/assets/flag.png" alt="パレードフラッグB" />
+                      <img src={sitePath("/assets/flag.png")} alt="パレードフラッグB" />
                       <span>パレードフラッグB</span>
                       <b>1 / 1</b>
                     </div>
@@ -531,7 +533,7 @@ function Lab() {
         title="虹色チケットを調合"
       >
         <div className="craft-preview">
-          <img src="/assets/flag.png" alt="フラッグ素材" />
+          <img src={sitePath("/assets/flag.png")} alt="フラッグ素材" />
           <Plus />
           <Ticket size={56} />
           <ArrowRight />
@@ -572,7 +574,7 @@ function HistoryPage() {
             <div className="history-main">
               <img
                 src={
-                  '/assets/' + (n === 0 ? 'monster.jpeg' : 'gacha-pink.jpeg')
+                  sitePath('/assets/' + (n === 0 ? 'monster.jpeg' : 'gacha-pink.jpeg'))
                 }
                 alt="ガチャ画像"
               />
@@ -583,11 +585,11 @@ function HistoryPage() {
                 <p>{n === 0 ? '10連' : '1回'}ガチャ</p>
                 <div className="history-items">
                   {demoItems.slice(2, n === 0 ? 6 : 3).map((i) => (
-                    <img src={'/assets/' + i.image} alt={i.name} key={i.id} />
+                    <img src={sitePath('/assets/' + i.image)} alt={i.name} key={i.id} />
                   ))}
                 </div>
               </div>
-              <a className="button outline-button" href="/me/cards">
+              <a className="button outline-button" href={sitePath("/me/cards")}>
                 獲得商品を見る <ArrowRight size={17} />
               </a>
             </div>
@@ -620,14 +622,14 @@ function Purchases({ id }: { id?: number }) {
         <div className="checkout-layout">
           <Panel title="購入するコイン">
             <div className="checkout-coins">
-              <img src="/assets/parade-coin.svg" alt="コイン" />
+              <img src={sitePath("/assets/parade-coin.svg")} alt="コイン" />
               <Coin value={packs[id - 1] || 5000} />
             </div>
             <div className="total-row">
               <span>お支払い金額</span>
               <strong>¥{(packs[id - 1] || 5000).toLocaleString()}</strong>
             </div>
-            <a className="text-link" href="/point">
+            <a className="text-link" href={sitePath("/point")}>
               金額を選び直す <ArrowRight size={16} />
             </a>
           </Panel>
@@ -666,7 +668,7 @@ function Purchases({ id }: { id?: number }) {
           <div className="coin-pack-grid">
             {packs.map((amount, n) => (
               <a
-                href={'/purchases/' + (n + 1)}
+                href={sitePath('/purchases/' + (n + 1))}
                 className={
                   'coin-pack ' + (amount === 5000 ? 'recommended' : '')
                 }
@@ -675,7 +677,7 @@ function Purchases({ id }: { id?: number }) {
                 {amount === 5000 && (
                   <span className="pack-label">5,000 コイン</span>
                 )}
-                <img src="/assets/parade-coin.svg" alt="" />
+                <img src={sitePath("/assets/parade-coin.svg")} alt="" />
                 <strong>{amount.toLocaleString()}</strong>
                 <span>コイン</span>
                 <div>
@@ -703,7 +705,7 @@ function Purchases({ id }: { id?: number }) {
         <Info>
           実際の請求はありません。チャージ後に保有コインを使ってガチャを引く流れを体験できます。
         </Info>
-        {charged ? <div className="charge-success"><CheckCircle2/><h2>チャージが完了しました</h2><p>保有コイン：{wallet.balance.toLocaleString()}</p><a className="button primary-button" href="/oripa/Pokemon">ガチャを選ぶ</a></div> : <Action disabled={!wallet.ready} onClick={()=>{wallet.charge(packs[(id||1)-1]);setCharged(true);}}>サンプルコインをチャージ</Action>}
+        {charged ? <div className="charge-success"><CheckCircle2/><h2>チャージが完了しました</h2><p>保有コイン：{wallet.balance.toLocaleString()}</p><a className="button primary-button" href={sitePath("/oripa/Pokemon")}>ガチャを選ぶ</a></div> : <Action disabled={!wallet.ready} onClick={()=>{wallet.charge(packs[(id||1)-1]);setCharged(true);}}>サンプルコインをチャージ</Action>}
       </PreviewDialog>
     </>
   );
@@ -716,14 +718,14 @@ function Special({ choice = false, step = 1 }: { choice?: boolean; step?: number
    {!choice&&step===1&&<div className="step-next-layer" aria-hidden="true"><span>STEP 2</span></div>}
    <article className="special-front-card">
     {!choice&&<div className="step-current-label"><strong>STEP {step}</strong><span>{step===1?'ここからスタート':'次のステップ'}</span></div>}
-    <img className="special-cover" src={'/assets/'+p.image} alt={choice?'運命の2択ガチャ':'STEP '+step+' のガチャ'}/>
+    <img className="special-cover" src={sitePath('/assets/'+p.image)} alt={choice?'運命の2択ガチャ':'STEP '+step+' のガチャ'}/>
     <div className="special-card-info">
      {choice?<><h2>どちらのガチャへ進む？</h2><p>ルートを選んで、専用ガチャの景品を確認できます。</p></>:<><h2>STEP {step}</h2><GachaSummary cost={p.cost} left={p.left} total={p.total}/><Progress value={p.left/p.total*100} aria-label="残り口数の割合"/><p>{step===1?'ガチャ結果を確認したあと、次のSTEPへ進みます。':'STEP 2のガチャです。'}</p></>}
     </div>
    </article>
   </div>
   <aside className="detail-draw-dock special-draw-dock" aria-label={choice?'ルート選択':'ガチャ操作'}>
-   {choice?<div className="branch-buttons"><a className="button primary-button" href="/choice-gacha/1">天国ルートへ<ArrowRight size={18}/></a><a className="button primary-button" href="/choice-gacha/2">地獄ルートへ<ArrowRight size={18}/></a></div>:<><GachaSummary cost={p.cost} left={p.left} total={p.total}/><Progress value={p.left/p.total*100} aria-label="残り口数の割合"/><GachaPlay boxId={p.id} cost={p.cost} name={'ステップアップ STEP '+step} resultHref={step===1?'/gacha/result?step=2':'/gacha/result'}/></>}
+   {choice?<div className="branch-buttons"><a className="button primary-button" href={sitePath("/choice-gacha/1")}>天国ルートへ<ArrowRight size={18}/></a><a className="button primary-button" href={sitePath("/choice-gacha/2")}>地獄ルートへ<ArrowRight size={18}/></a></div>:<><GachaSummary cost={p.cost} left={p.left} total={p.total}/><Progress value={p.left/p.total*100} aria-label="残り口数の割合"/><GachaPlay boxId={p.id} cost={p.cost} name={'ステップアップ STEP '+step} resultHref={step===1?'/gacha/result?step=2':'/gacha/result'}/></>}
   </aside>
   {choice?<p className="special-preview-note">各ルートの内容はデザイン確認用のサンプルです。</p>:<><section className="gacha-conditions"><h2>ご利用条件</h2><p>ステップ進行・掲載景品はデザイン確認用のサンプルです。</p></section><PrizeLineup boxId={p.id}/><GachaNotes/></>}
  </>;
@@ -745,7 +747,7 @@ function Tickets() {
           <span className="small-badge">チケット</span>
           <h2>虹色フラッグチケット</h2>
           <p>有効期限なし · 所持上限3枚</p>
-          <a className="text-link" href="/lab">
+          <a className="text-link" href={sitePath("/lab")}>
             合成ラボで入手方法を見る <ArrowUpRight size={17} />
           </a>
         </div>
@@ -753,7 +755,7 @@ function Tickets() {
           <b>
             3<span>枚</span>
           </b>
-          <a className="button primary-button" href="/oripa/All">
+          <a className="button primary-button" href={sitePath("/oripa/All")}>
             オリパ一覧へ <ArrowRight size={16} />
           </a>
         </div>
@@ -781,7 +783,7 @@ function Bonus() {
                 claimed ? (
                   <CheckCircle2 />
                 ) : (
-                  <img src="/assets/parade-coin.svg" alt="コイン" />
+                  <img src={sitePath("/assets/parade-coin.svg")} alt="コイン" />
                 )
               ) : (
                 <Gift size={25} />
@@ -1001,7 +1003,7 @@ function Addresses() {
             <br />
             住所のサンプル表示
           </p>
-          <a href="/mypage/address/demo" className="text-link">
+          <a href={sitePath("/mypage/address/demo")} className="text-link">
             登録内容を編集 <ArrowRight size={17} />
           </a>
         </Panel>
@@ -1009,7 +1011,7 @@ function Addresses() {
         <Empty
           title="お届け先を登録しましょう"
           description="発送手続きをスムーズに進めるため、お届け先をご登録ください。"
-          href="/mypage/address/new"
+          href={sitePath("/mypage/address/new")}
           label="お届け先を追加"
         />
       )}
@@ -1221,7 +1223,7 @@ function Forms({ route }: { route: string }) {
             )}
           </span>
           {isSignup && <p>新規登録で500コインプレゼント</p>}
-          <img src="/assets/gacha-pink.jpeg" alt="オリパレードのガチャアート" />
+          <img src={sitePath("/assets/gacha-pink.jpeg")} alt="オリパレードのガチャアート" />
         </section>
         <section className="form-panel">
           {done ? (
@@ -1247,11 +1249,11 @@ function Forms({ route }: { route: string }) {
               <a
                 className="button primary-button"
                 href={
-                  isSignup
+                  sitePath(isSignup
                     ? '/phone-verification'
                     : address
                       ? '/me/addresses'
-                      : '/me'
+                      : '/me')
                 }
               >
                 {isSignup ? '電話番号認証画面へ' : 'マイページへ'}
@@ -1335,7 +1337,7 @@ function Forms({ route }: { route: string }) {
                       onCheckedChange={(v) => setAgreed(v === true)}
                     />
                     <span>
-                      <a href="/terms" target="_blank" rel="noreferrer">
+                      <a href={sitePath("/terms")} target="_blank" rel="noreferrer">
                         利用規約
                       </a>
                       を確認しました。
@@ -1369,7 +1371,7 @@ function Forms({ route }: { route: string }) {
                 デザイン確認用です。実際の個人情報は入力しないでください。入力内容は送信・保存されません。
               </p>
               {isLogin && (
-                <a className="small-link" href="/password_reset">
+                <a className="small-link" href={sitePath("/password_reset")}>
                   パスワードを忘れた方はこちら
                 </a>
               )}
@@ -1378,7 +1380,7 @@ function Forms({ route }: { route: string }) {
                   {isLogin
                     ? 'アカウントをお持ちでない方'
                     : 'アカウントをお持ちの方'}
-                  <a href={isLogin ? '/signup' : '/login'}>
+                  <a href={sitePath(isLogin ? '/signup' : '/login')}>
                     {isLogin ? '新規登録' : 'ログイン'}
                     <ChevronRight size={15} />
                   </a>
@@ -1407,7 +1409,7 @@ function Help({ terms = false }: { terms?: boolean }) {
             既存サイトの利用規約本文は取得できていません。正式な規約本文をこの共通レイアウトに配置してください。
           </Info>
           <p>このプレビューでは規約への同意やアカウント作成は行われません。</p>
-          <a className="text-link" href="/signup">
+          <a className="text-link" href={sitePath("/signup")}>
             新規登録へ戻る <ArrowRight size={16} />
           </a>
         </Panel>
@@ -1441,7 +1443,7 @@ function Help({ terms = false }: { terms?: boolean }) {
                 <span className="guide-number">{n}</span>
                 <h2>{t}</h2>
                 <p>{d}</p>
-                <a className="text-link" href={href}>
+                <a className="text-link" href={sitePath(href)}>
                   {label}
                   <ArrowRight size={16} />
                 </a>
@@ -1500,7 +1502,7 @@ function Result() {
         {Array.from({length:draw?.count||0},(_,index)=>({...demoItems[2+index%3],resultId:index})).map((i) => (
           <article className="item-card" key={i.resultId}>
             <div className="item-image">
-              <img src={'/assets/' + i.image} alt={i.name} />
+              <img src={sitePath('/assets/' + i.image)} alt={i.name} />
             </div>
             <h3>{i.name}</h3>
             <Coin value={i.value} />
@@ -1509,11 +1511,11 @@ function Result() {
       </div>
       <div className="result-balance">保有コイン：{wallet.balance.toLocaleString()}</div>
       <div className="result-actions">
-        {nextStep&&draw&&<a className="button primary-button" href="/step-up/2">STEP 2へ進む<ArrowRight size={18}/></a>}
-        <a className="button primary-button" href="/me/cards">
+        {nextStep&&draw&&<a className="button primary-button" href={sitePath("/step-up/2")}>STEP 2へ進む<ArrowRight size={18}/></a>}
+        <a className="button primary-button" href={sitePath("/me/cards")}>
           獲得商品で確認 <Gift size={18} />
         </a>
-        <a className="button outline-button" href="/oripa/All">
+        <a className="button outline-button" href={sitePath("/oripa/All")}>
           オリパ一覧へ
         </a>
       </div>
@@ -1548,10 +1550,10 @@ function DesignSystem() {
       </Panel>
       <Panel title="ボタンと状態">
         <div className="component-row">
-          <a className="button primary-button" href="/oripa/All">
+          <a className="button primary-button" href={sitePath("/oripa/All")}>
             メインアクション <ArrowRight size={17} />
           </a>
-          <a className="button outline-button" href="/oripa/All">
+          <a className="button outline-button" href={sitePath("/oripa/All")}>
             サブアクション
           </a>
           <Action disabled>利用条件未達成</Action>
@@ -1563,7 +1565,7 @@ function DesignSystem() {
           {supportedRoutes
             .filter((x) => !x.startsWith('/purchases/') || x === '/purchases/3')
             .map((route) => (
-              <a href={route} key={route}>
+              <a href={sitePath(route)} key={route}>
                 {route}
                 <ArrowUpRight size={15} />
               </a>

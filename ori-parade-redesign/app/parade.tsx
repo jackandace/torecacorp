@@ -1,4 +1,6 @@
 'use client';
+import {sitePath} from "../lib/site-path";
+
 import { useState, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import { SiteHeader, SiteFooter, CatalogNavigation, CatalogSidebar } from './shared';
@@ -151,13 +153,13 @@ export default function Parade({ initialCategory = 'すべて' }: { initialCateg
               <article className="gacha-card" key={n}>
                 <CatalogBadges category="ポケモン" hashtags={[]} dailyLimit={n===2?undefined:n===1?200000:100000}/>
                 <a
-                  href={'/oripa/Pokemon/' + (n === 2 ? 13 : n === 1 ? 21 : 22)}
+                  href={sitePath('/oripa/Pokemon/' + (n === 2 ? 13 : n === 1 ? 21 : 22))}
                   className="gacha-cover"
                 >
                   <img
                     src={
-                      '/assets/' +
-                      (n === 2 ? 'gacha-pink.jpeg' : 'monster.jpeg')
+                      sitePath('/assets/' +
+                      (n === 2 ? 'gacha-pink.jpeg' : 'monster.jpeg'))
                     }
                     alt={n === 2 ? 'ポケモン オリパ' : 'モンスターパレード'}
                   />
@@ -176,7 +178,7 @@ export default function Parade({ initialCategory = 'すべて' }: { initialCateg
                     aria-label="残り口数の割合"
                   />
                   <GachaPlay boxId={n===2?13:n===1?21:22} cost={n===2?100:555} name={n===2?'ポケモン お楽しみオリパ':'モンスターパレード'}/>
-                  <a className="lineup-link" href={'/oripa/Pokemon/'+(n===2?13:n===1?21:22)}>景品ラインナップを見る</a>
+                  <a className="lineup-link" href={sitePath('/oripa/Pokemon/'+(n===2?13:n===1?21:22))}>景品ラインナップを見る</a>
                 </div>
               </article>
             ))}

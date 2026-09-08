@@ -1,3 +1,5 @@
+
+import {sitePath} from "../lib/site-path";
 import data from './lineup-data.json';
 export type PrizeCard={image:string;name:string;quantity:number|null;psa:boolean};
 export type PrizeRank={label:string;columns?:number;cards:PrizeCard[]};
@@ -7,7 +9,7 @@ export function PrizeLineup({boxId}:{boxId:number}) {
  return <section className="rank-lineup" aria-label="賞ランク別ラインナップ"><h2 className="lineup-title">景品ラインナップ</h2>{ranks.map((rank,index)=><section className={'prize-rank rank-tone-'+Math.min(index,4)} key={rank.label} data-rank={rank.label}>
  <header><h3>{rank.label}</h3><span>{rank.cards.length}種類</span></header>
  <div className={'rank-card-grid cols-'+rankColumns(rank)}>{rank.cards.map((card,n)=><article key={card.image+n}>
- <div className="rank-card-image"><img src={card.image} alt={card.name} loading="lazy"/>{card.psa&&<span className="rank-psa">PSA</span>}</div>
+ <div className="rank-card-image"><img src={sitePath(card.image)} alt={card.name} loading="lazy"/>{card.psa&&<span className="rank-psa">PSA</span>}</div>
  {card.quantity!==null&&<span className="rank-quantity">× {card.quantity.toLocaleString()}<small>口</small></span>}
  </article>)}</div>
  </section>)}<p className="small-note">実サイトの掲載内容を元にしたデザインプレビューです。</p></section>;

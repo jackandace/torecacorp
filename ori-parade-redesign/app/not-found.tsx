@@ -1,3 +1,5 @@
+
+import {sitePath} from "../lib/site-path";
 import { SiteHeader, SiteFooter, Empty } from './shared';
 export default function NotFound() {
   return (
@@ -8,7 +10,7 @@ export default function NotFound() {
         <Empty
           title="ページが見つかりません"
           description="URLをご確認いただくか、トップページへお戻りください。"
-          href="/"
+          href={sitePath("/")}
           label="オリパ一覧へ"
         />
       </main>

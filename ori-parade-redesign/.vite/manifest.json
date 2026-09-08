@@ -1,0 +1,128 @@
+{
+  "../../ori-parade-redesign/node_modules/vinext/dist/shims/internal/app-route-prefetch-policy.js": {
+    "file": "_next/static/chunks/app-route-prefetch-policy-CkBEFZXs.js",
+    "name": "app-route-prefetch-policy",
+    "src": "../../ori-parade-redesign/node_modules/vinext/dist/shims/internal/app-route-prefetch-policy.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "virtual:vinext-app-browser-entry"
+    ]
+  },
+  "../../ori-parade-redesign/node_modules/vinext/dist/shims/layout-segment-context.js": {
+    "file": "_next/static/chunks/layout-segment-context-DKHmQx7P.js",
+    "name": "layout-segment-context",
+    "src": "../../ori-parade-redesign/node_modules/vinext/dist/shims/layout-segment-context.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "virtual:vinext-app-browser-entry",
+      "_framework-D_rUT4EX.js",
+      "_navigation-errors-By4dF-Cc.js"
+    ]
+  },
+  "../../ori-parade-redesign/node_modules/vinext/dist/shims/streamed-icons.js": {
+    "file": "_next/static/chunks/streamed-icons-Bumrcy-j.js",
+    "name": "streamed-icons",
+    "src": "../../ori-parade-redesign/node_modules/vinext/dist/shims/streamed-icons.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "_demo-wallet-v5HmKhCe.js": {
+    "file": "_next/static/chunks/demo-wallet-v5HmKhCe.js",
+    "name": "demo-wallet",
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "_framework-D_rUT4EX.js": {
+    "file": "_next/static/chunks/framework-D_rUT4EX.js",
+    "name": "framework",
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js"
+    ]
+  },
+  "_navigation-errors-By4dF-Cc.js": {
+    "file": "_next/static/chunks/navigation-errors-By4dF-Cc.js",
+    "name": "navigation-errors",
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "_progress-CCaIgird.js": {
+    "file": "_next/static/chunks/progress-CCaIgird.js",
+    "name": "progress",
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "app/shared.tsx",
+      "_framework-D_rUT4EX.js",
+      "_demo-wallet-v5HmKhCe.js"
+    ]
+  },
+  "_rolldown-runtime-C60lm6uB.js": {
+    "file": "_next/static/chunks/rolldown-runtime-C60lm6uB.js",
+    "name": "rolldown-runtime"
+  },
+  "app/parade.tsx": {
+    "file": "_next/static/chunks/parade-C3d5FVpw.js",
+    "name": "parade",
+    "src": "app/parade.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "app/shared.tsx",
+      "_progress-CCaIgird.js",
+      "_framework-D_rUT4EX.js"
+    ]
+  },
+  "app/screens.tsx": {
+    "file": "_next/static/chunks/screens-DjiISruM.js",
+    "name": "screens",
+    "src": "app/screens.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "app/shared.tsx",
+      "_progress-CCaIgird.js",
+      "_framework-D_rUT4EX.js",
+      "_demo-wallet-v5HmKhCe.js"
+    ]
+  },
+  "app/shared.tsx": {
+    "file": "_next/static/chunks/shared-aKhSUfn7.js",
+    "name": "shared",
+    "src": "app/shared.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "virtual:vinext-app-browser-entry",
+      "_framework-D_rUT4EX.js",
+      "_demo-wallet-v5HmKhCe.js"
+    ]
+  },
+  "virtual:vinext-app-browser-entry": {
+    "file": "_next/static/chunks/index-fxnQp2yN.js",
+    "name": "index",
+    "src": "virtual:vinext-app-browser-entry",
+    "isEntry": true,
+    "imports": [
+      "_rolldown-runtime-C60lm6uB.js",
+      "_framework-D_rUT4EX.js",
+      "_navigation-errors-By4dF-Cc.js"
+    ],
+    "dynamicImports": [
+      "../../ori-parade-redesign/node_modules/vinext/dist/shims/internal/app-route-prefetch-policy.js",
+      "../../ori-parade-redesign/node_modules/vinext/dist/shims/layout-segment-context.js",
+      "virtual:vinext-app-browser-entry",
+      "../../ori-parade-redesign/node_modules/vinext/dist/shims/streamed-icons.js",
+      "_demo-wallet-v5HmKhCe.js",
+      "app/shared.tsx",
+      "app/parade.tsx",
+      "app/screens.tsx"
+    ]
+  }
+}

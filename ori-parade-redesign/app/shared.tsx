@@ -1,4 +1,6 @@
 'use client';
+import {sitePath} from "../lib/site-path";
+
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import {useDemoWallet} from './demo-wallet';
@@ -34,7 +36,7 @@ export const nav = [
 ] as const;
 
 function useActive() {
-  const path = usePathname() || '/';
+  const path = usePathname()?.replace(process.env.NEXT_PUBLIC_BASE_PATH || '__no_base__', '') || '/';
   return (href: string) =>
     href === '/'
       ? path === '/' ||
@@ -47,29 +49,29 @@ function useActive() {
 }
 export function SiteHeader() {
   const wallet=useDemoWallet();
-  const pathname = usePathname();
+  const pathname = usePathname()?.replace(process.env.NEXT_PUBLIC_BASE_PATH || '__no_base__', '');
   const guest = ['/login', '/signup', '/password_reset'].includes(
     pathname || '',
   );
   return (
     <>
       <header className="site-header">
-        <a href="/oripa/All" className="logo">
-          <img src="/assets/logo.svg" alt="オリパレード" />
+        <a href={sitePath("/oripa/All")} className="logo">
+          <img src={sitePath("/assets/logo.svg")} alt="オリパレード" />
         </a>
         {guest ? (
           <div className="guest-actions">
-            <a href="/login" className="button outline-button">
+            <a href={sitePath("/login")} className="button outline-button">
               ログイン
             </a>
-            <a href="/signup" className="button primary-button">
+            <a href={sitePath("/signup")} className="button primary-button">
               新規登録
             </a>
           </div>
         ) : (
           <>
-            <a href="/point" className="wallet">
-              <img src="/assets/parade-coin.svg" alt="" />
+            <a href={sitePath("/point")} className="wallet">
+              <img src={sitePath("/assets/parade-coin.svg")} alt="" />
               <b>{wallet.balance.toLocaleString()}</b>
               <span className="wallet-plus">
                 <Plus size={16} />
@@ -77,40 +79,40 @@ export function SiteHeader() {
             </a>
           </>
         )}
-        <a className="header-utility" href="/notification" aria-label="お知らせ"><Bell size={23}/></a>
-        <a className="account-menu-trigger" href="/mypage" aria-label="マイページ"><UserRound size={25}/></a>
+        <a className="header-utility" href={sitePath("/notification")} aria-label="お知らせ"><Bell size={23}/></a>
+        <a className="account-menu-trigger" href={sitePath("/mypage")} aria-label="マイページ"><UserRound size={25}/></a>
       </header>
     </>
   );
 }
 export function CatalogNavigation({category}:{category:string}) {
-  return <nav className="reference-category-nav" aria-label="オリパカテゴリ">{([['すべて','すべて','All'],['ポケモン','ポケモン','Pokemon'],['ワンピース','ワンピース','OnePiece']] as const).map(([c,label,slug])=><a key={c} href={'/oripa/'+slug} aria-current={category===c?'page':undefined}>{label}</a>)}<a href="/step-up?chainId=1">ステップアップ</a><a href="/choice-gacha?groupId=1">2択ガチャ</a></nav>;
+  return <nav className="reference-category-nav" aria-label="オリパカテゴリ">{([['すべて','すべて','All'],['ポケモン','ポケモン','Pokemon'],['ワンピース','ワンピース','OnePiece']] as const).map(([c,label,slug])=><a key={c} href={sitePath('/oripa/'+slug)} aria-current={category===c?'page':undefined}>{label}</a>)}<a href={sitePath("/step-up?chainId=1")}>ステップアップ</a><a href={sitePath("/choice-gacha?groupId=1")}>2択ガチャ</a></nav>;
 }
 export function CatalogSidebar() {
-  const path=usePathname();
+  const path=usePathname()?.replace(process.env.NEXT_PUBLIC_BASE_PATH || '__no_base__', '');
   const groups=[['オリパ',[['/oripa/All','すべて'],['/oripa/Pokemon','ポケモン'],['/oripa/OnePiece','ワンピース'],['/step-up?chainId=1','ステップアップ'],['/choice-gacha?groupId=1','2択ガチャ']]],['獲得商品',[['/me/cards','獲得一覧'],['/me/gacha_logs','ガチャ履歴']]],['アカウント',[['/mypage','マイページ'],['/notification','お知らせ'],['/point','コイン購入'],['/purchases','コイン購入履歴'],['/mypage/address','お届け先の登録・変更']]],['特典・ヘルプ',[['/me/tickets','チケット'],['/coupon','クーポン'],['/login-bonus','ログインボーナス'],['/lab','合成ラボ'],['/others/help-oripa-rank','会員ランク'],['/help','ヘルプ']]]] as const;
-  return <aside className="reference-sidebar" aria-label="サイドメニュー">{groups.map(([title,links])=><section key={title}><h2>{title}</h2>{links.map(([href,label])=><a key={href} href={href} aria-current={path===href?'page':undefined}>{label}</a>)}</section>)}</aside>;
+  return <aside className="reference-sidebar" aria-label="サイドメニュー">{groups.map(([title,links])=><section key={title}><h2>{title}</h2>{links.map(([href,label])=><a key={href} href={sitePath(href)} aria-current={path===href?'page':undefined}>{label}</a>)}</section>)}</aside>;
 }
 export function SiteFooter() {
   const active = useActive();
   return (
     <>
       <footer>
-        <a href="/oripa/All" className="logo">
-          <img src="/assets/logo.svg" alt="オリパレード" />
+        <a href={sitePath("/oripa/All")} className="logo">
+          <img src={sitePath("/assets/logo.svg")} alt="オリパレード" />
         </a>
         <p>毎日が、お宝パレード。</p>
         <div>
-          <a href="/help">はじめての方へ</a>
-          <a href="/others/help-oripa-rank">会員ランク</a>
-          <a href="/help">よくある質問</a>
-          <a href="/design-system">画面・部品一覧</a>
+          <a href={sitePath("/help")}>はじめての方へ</a>
+          <a href={sitePath("/others/help-oripa-rank")}>会員ランク</a>
+          <a href={sitePath("/help")}>よくある質問</a>
+          <a href={sitePath("/design-system")}>画面・部品一覧</a>
         </div>
         <small>© ORI PARADE</small><p className="footer-preview-note">デザインプレビュー · 決済・抽選は実行されません</p>
       </footer>
       <nav className="mobile-nav">
         {nav.map(([href, label, Icon]) => (
-          <a href={href} key={href} className={active(href) ? 'active' : ''}>
+          <a href={sitePath(href)} key={href} className={active(href) ? 'active' : ''}>
             <Icon size={22} />
             <span>{label}</span>
           </a>
@@ -130,7 +132,7 @@ export function PageHeading({
 }) {
   return (
     <div className="page-heading">
-      <a href="/oripa/All" className="page-back" aria-label="オリパ一覧へ戻る"><ArrowLeft size={20}/></a>
+      <a href={sitePath("/oripa/All")} className="page-back" aria-label="オリパ一覧へ戻る"><ArrowLeft size={20}/></a>
       <h1>{title}</h1>
     </div>
   );
@@ -152,7 +154,7 @@ export function Empty({
       <h3>{title}</h3>
       <p>{description}</p>
       {href && (
-        <a className="button draw-button compact-button" href={href}>
+        <a className="button draw-button compact-button" href={sitePath(href)}>
           {label}
           <ArrowRight size={17} />
         </a>
@@ -163,7 +165,7 @@ export function Empty({
 export function Coin({ value }: { value: number }) {
   return (
     <span className="coin-value">
-      <img src="/assets/parade-coin.svg" alt="" />
+      <img src={sitePath("/assets/parade-coin.svg")} alt="" />
       <b>{value.toLocaleString('ja-JP')}</b>
       <small>コイン</small>
     </span>

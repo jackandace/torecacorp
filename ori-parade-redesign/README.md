@@ -28,5 +28,9 @@ Node.js 22.13以降。`npm ci` 後に `npm run dev`。
 共通レイアウトは `app/reference-layout.css`、最終配色・フォントは `app/candy-theme.css` です。
 白背景・コーラルのアクセント・白地の枠線ボタンを使用しています。
 
-このフォルダは開発ソースです。GitHub Pagesのサブディレクトリへの直接配置には、ルート相対URLなどの調整が必要です。現在の動作確認先は上記プレビューです。
-`.openai/hosting.json` は既存Sitesプレビューの設定です。別環境への公開時は公開先に合わせて設定してください。
+## GitHub Pages
+
+https://jackandace.github.io/torecacorp/ori-parade-redesign/
+
+`npm run build:pages` でサブディレクトリ対応の静的ページをこのフォルダへ生成します。生成物もGitに含めて公開します。
+元のSites公開は独立して維持されています。
