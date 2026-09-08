@@ -16,7 +16,7 @@ export default async function SupplierIntakePage() {
   const admin = createAdminClient();
   const { data: products } = await admin
     .from("products")
-    .select("id, series, title, model_number, price, ct_to_box, planned_qty, image_url, is_approved, is_visible, created_at")
+    .select("id, series, title, model_number, jan_code, price, ct_to_box, min_order_box, planned_qty, order_deadline, release_info, flow_type, intake_note, image_url, is_approved, is_visible, created_at")
     .eq("supplier_id", ctx.supplier.id)
     .is("deleted_at", null)
     .order("created_at", { ascending: false })
@@ -30,9 +30,15 @@ export default async function SupplierIntakePage() {
         series: p.series,
         title: p.title,
         modelNumber: p.model_number,
+        janCode: p.jan_code,
         price: p.price,
         ctToBox: p.ct_to_box,
+        minOrderBox: p.min_order_box,
         plannedQty: p.planned_qty,
+        deadline: p.order_deadline,
+        releaseInfo: p.release_info,
+        flowType: p.flow_type,
+        note: p.intake_note,
         imageUrl: p.image_url,
         approved: p.is_approved,
         visible: p.is_visible,

@@ -9,12 +9,35 @@ interface Row {
   series: string | null;
   title: string;
   modelNumber: string | null;
+  janCode: string | null;
   price: number | null;
   ctToBox: number;
+  minOrderBox: number;
   plannedQty: number | null;
+  deadline: string | null;
+  releaseInfo: string | null;
+  flowType: string;
+  note: string | null;
   imageUrl: string | null;
   approved: boolean;
   visible: boolean;
+}
+
+interface PreviewRow {
+  row: number;
+  series: string | null;
+  title: string;
+  modelNumber: string | null;
+  janCode: string | null;
+  price: number | null;
+  ctToBox: number;
+  minOrderBox: number;
+  plannedQty: number | null;
+  releaseDate: string | null;
+  deadline: string | null;
+  flowType: "haibun" | "cut";
+  note: string | null;
+  warnings: string[];
 }
 
 const EMPTY_FORM = {
@@ -41,7 +64,9 @@ export function IntakeClient({ isTest, products }: { isTest: boolean; products: 
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [excelFile, setExcelFile] = useState<File | null>(null);
-  const [excelResult, setExcelResult] = useState<{ inserted: number; titles: string[]; skipped: { row: number; reason: string }[] } | null>(null);
+  const excelRef = useRef<HTMLInputElement>(null);
+  // Excel は「プレビュー → 内容確認 → 登録」の2段階
+  const [preview, setPreview] = useState<{ rows: PreviewRow[]; skipped: { row: number; reason: string }[] } | null>(null);
 
   const set = (k: keyof typeof EMPTY_FORM) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setF((prev) => ({ ...prev, [k]: e.target.value }));
@@ -103,21 +128,27 @@ export function IntakeClient({ isTest, products }: { isTest: boolean; products: 
     }
   }
 
-  async function submitExcel() {
+  async function runExcel(mode: "preview" | "commit") {
     if (!excelFile) return;
     setBusy(true);
     setMsg(null);
-    setExcelResult(null);
     try {
       const fd = new FormData();
       fd.append("file", excelFile);
+      fd.append("mode", mode);
       const res = await fetch("/api/supplier/intake/import", { method: "POST", body: fd });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error ?? "取込に失敗しました");
-      setExcelResult(json);
-      setMsg({ kind: "ok", text: `${json.inserted} 件登録しました。トレカ商事の承認後に公開されます` });
-      setExcelFile(null);
-      router.refresh();
+      if (mode === "preview") {
+        setPreview({ rows: json.rows, skipped: json.skipped ?? [] });
+        setMsg(null);
+      } else {
+        setPreview(null);
+        setExcelFile(null);
+        if (excelRef.current) excelRef.current.value = "";
+        setMsg({ kind: "ok", text: `${json.inserted} 件登録しました。トレカ商事の承認後に公開されます` });
+        router.refresh();
+      }
     } catch (e) {
       setMsg({ kind: "err", text: e instanceof Error ? e.message : "取込に失敗しました" });
     } finally {
@@ -221,23 +252,85 @@ export function IntakeClient({ isTest, products }: { isTest: boolean; products: 
             <p className="font-semibold mb-1">Excelの列構成 (1行目は見出し行として読み飛ばします)</p>
             <p className="font-mono">
               A: シリーズ / B: 商品名(必須) / C: 型番 / D: JANコード / E: 定価(税抜) /<br />
-              F: カートンBOX数 / G: 最低発注数 / H: 発注可能数(BOX) / I: 発売日 / J: 配分 or カット / K: 備考
+              F: カートンBOX数 / G: 最低発注数 / H: 発注可能数(BOX) / I: 発売日 /<br />
+              J: 配分 or カット / K: 備考 / L: 締め日(発注締切)
             </p>
-            <p className="mt-1 text-slate-500">1回の取込は200行まで。空欄の数値はカートン12等の既定値になります。</p>
+            <p className="mt-1 text-slate-500">
+              1回の取込は200行まで。空欄の数値はカートン12等の既定値になります。{" "}
+              <a href="/supplier-intake-template.xlsx" download className="text-blue-700 underline">テンプレートをダウンロード</a>
+            </p>
           </div>
-          <input type="file" accept=".xlsx,.xls" className="text-xs"
-            onChange={(e) => setExcelFile(e.target.files?.[0] ?? null)} />
-          <button type="button" className="btn-primary" disabled={busy || !excelFile} onClick={submitExcel}>
-            {busy ? "取込中…" : "Excelを取込む"}
-          </button>
-          {excelResult && (
-            <div className="text-xs space-y-1">
-              <p className="text-emerald-700 font-semibold">✔ {excelResult.inserted} 件登録</p>
-              {excelResult.skipped.length > 0 && (
-                <ul className="text-amber-700">
-                  {excelResult.skipped.map((s, i) => <li key={i}>行{s.row}: {s.reason}</li>)}
+          <input ref={excelRef} type="file" accept=".xlsx,.xls" className="text-xs"
+            onChange={(e) => { setExcelFile(e.target.files?.[0] ?? null); setPreview(null); }} />
+
+          {!preview ? (
+            <button type="button" className="btn-primary" disabled={busy || !excelFile} onClick={() => runExcel("preview")}>
+              {busy ? "読込中…" : "読み込んで内容を確認する"}
+            </button>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-xs font-semibold">
+                以下のように読み取りました ({preview.rows.length} 件)。内容を確認してから登録してください。
+                {preview.rows.some((r) => r.warnings.length > 0) && (
+                  <span className="text-amber-700">⚠ の行は注意事項があります。</span>
+                )}
+              </p>
+              <div className="overflow-x-auto border border-slate-200 rounded-md">
+                <table className="w-full text-xs min-w-[860px]">
+                  <thead className="bg-slate-50 text-slate-600">
+                    <tr>
+                      <th className="px-2 py-1.5 text-left">行</th>
+                      <th className="px-2 py-1.5 text-left">商品名</th>
+                      <th className="px-2 py-1.5 text-left">型番</th>
+                      <th className="px-2 py-1.5 text-right">定価</th>
+                      <th className="px-2 py-1.5 text-right">CT</th>
+                      <th className="px-2 py-1.5 text-right">最低</th>
+                      <th className="px-2 py-1.5 text-right">数量</th>
+                      <th className="px-2 py-1.5 text-left">発売日</th>
+                      <th className="px-2 py-1.5 text-left">締め日</th>
+                      <th className="px-2 py-1.5 text-left">区分</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {preview.rows.map((r) => (
+                      <>
+                        <tr key={r.row} className={`border-t border-slate-100 ${r.warnings.length ? "bg-amber-50" : ""}`}>
+                          <td className="px-2 py-1.5">{r.warnings.length > 0 && "⚠ "}{r.row}</td>
+                          <td className="px-2 py-1.5">{r.series ? `[${r.series}] ` : ""}{r.title}</td>
+                          <td className="px-2 py-1.5">{r.modelNumber ?? "—"}</td>
+                          <td className="px-2 py-1.5 text-right">{r.price != null ? `¥${r.price.toLocaleString()}` : "—"}</td>
+                          <td className="px-2 py-1.5 text-right">{r.ctToBox}</td>
+                          <td className="px-2 py-1.5 text-right">{r.minOrderBox}</td>
+                          <td className="px-2 py-1.5 text-right">{r.plannedQty ?? "—"}</td>
+                          <td className="px-2 py-1.5">{r.releaseDate ?? "—"}</td>
+                          <td className="px-2 py-1.5">{r.deadline ?? "—"}</td>
+                          <td className="px-2 py-1.5">{r.flowType === "cut" ? "カット" : "配分"}</td>
+                        </tr>
+                        {r.warnings.length > 0 && (
+                          <tr key={`w-${r.row}`} className="bg-amber-50">
+                            <td></td>
+                            <td colSpan={9} className="px-2 pb-1.5 text-amber-700">{r.warnings.join(" / ")}</td>
+                          </tr>
+                        )}
+                      </>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {preview.skipped.length > 0 && (
+                <ul className="text-xs text-slate-500">
+                  {preview.skipped.map((s, i) => <li key={i}>行{s.row}: {s.reason}</li>)}
                 </ul>
               )}
+              <div className="flex gap-2">
+                <button type="button" className="btn-primary" disabled={busy} onClick={() => runExcel("commit")}>
+                  {busy ? "登録中…" : `この内容で ${preview.rows.length} 件登録する`}
+                </button>
+                <button type="button" className="btn-secondary" disabled={busy}
+                  onClick={() => { setPreview(null); setExcelFile(null); if (excelRef.current) excelRef.current.value = ""; }}>
+                  キャンセル (ファイルを直す)
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -247,28 +340,38 @@ export function IntakeClient({ isTest, products }: { isTest: boolean; products: 
       <section className="card p-5">
         <h2 className="font-semibold mb-3">登録済みの商品 ({products.length} 件)</h2>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[560px]">
+          <table className="w-full text-sm min-w-[900px]">
             <thead className="text-slate-600 bg-slate-50">
               <tr>
                 <th className="text-left px-2 py-2">商品</th>
                 <th className="text-right px-2 py-2">定価</th>
                 <th className="text-right px-2 py-2">CT/BOX</th>
+                <th className="text-right px-2 py-2">最低</th>
                 <th className="text-right px-2 py-2">数量</th>
+                <th className="text-left px-2 py-2">発売日</th>
+                <th className="text-left px-2 py-2">締め日</th>
+                <th className="text-left px-2 py-2">区分</th>
                 <th className="text-center px-2 py-2">画像</th>
                 <th className="text-left px-2 py-2">状態</th>
               </tr>
             </thead>
             <tbody>
               {products.map((p) => (
-                <tr key={p.id} className="border-t border-slate-100">
+                <tr key={p.id} className="border-t border-slate-100 align-top">
                   <td className="px-2 py-2">
                     <span className="text-xs text-slate-500">{p.series ? `[${p.series}] ` : ""}</span>
                     {p.title}
                     {p.modelNumber && <span className="text-xs text-slate-400 ml-1">({p.modelNumber})</span>}
+                    {p.janCode && <div className="text-[11px] text-slate-400">JAN: {p.janCode}</div>}
+                    {p.note && <div className="text-[11px] text-amber-700">📝 {p.note}</div>}
                   </td>
                   <td className="px-2 py-2 text-right whitespace-nowrap">{p.price != null ? `¥${p.price.toLocaleString()}` : "—"}</td>
                   <td className="px-2 py-2 text-right">{p.ctToBox}</td>
+                  <td className="px-2 py-2 text-right">{p.minOrderBox}</td>
                   <td className="px-2 py-2 text-right">{p.plannedQty ?? "—"}</td>
+                  <td className="px-2 py-2 whitespace-nowrap text-xs">{p.releaseInfo ? p.releaseInfo.replace("発売日: ", "") : "—"}</td>
+                  <td className="px-2 py-2 whitespace-nowrap text-xs">{p.deadline ?? "—"}</td>
+                  <td className="px-2 py-2 text-xs whitespace-nowrap">{p.flowType === "cut" ? "カット" : "配分"}</td>
                   <td className="px-2 py-2 text-center">{p.imageUrl ? "🖼" : "—"}</td>
                   <td className="px-2 py-2 whitespace-nowrap">
                     {p.approved ? (
@@ -282,7 +385,7 @@ export function IntakeClient({ isTest, products }: { isTest: boolean; products: 
                 </tr>
               ))}
               {products.length === 0 && (
-                <tr><td colSpan={6} className="px-2 py-6 text-center text-slate-400">まだ登録がありません</td></tr>
+                <tr><td colSpan={10} className="px-2 py-6 text-center text-slate-400">まだ登録がありません</td></tr>
               )}
             </tbody>
           </table>
