@@ -122,10 +122,10 @@ export async function POST(request: NextRequest) {
     action: "issue_invoice",
     targetTable: "invoices",
     targetId: inserted.id,
-    after: { invoice_number: invoiceNumber, total: totals.totalAmount },
+    after: { invoice_number: invoiceNumber, total: withFee.totalAmount },
   });
 
-  // 発行通知
+  // 発行通知 (金額は請求書本体と同じ手数料込みの確定額を使う)
   await notifyShop({
     supabase,
     shopId: shop.id,
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
     vars: {
       company_name: shop.company_name,
       invoice_number: invoiceNumber,
-      total_amount: totals.totalAmount.toLocaleString(),
+      total_amount: withFee.totalAmount.toLocaleString(),
       due_date: body.dueDate ?? "(別途ご案内)",
     },
   });

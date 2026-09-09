@@ -96,7 +96,7 @@ export async function POST(_request: NextRequest, { params }: { params: { id: st
         action: "settle_deposit_even",
         targetTable: "invoices",
         targetId: deposit.id,
-        after: { final_total: totals.totalAmount, deposit_paid: depositPaid },
+        after: { final_total: withFee.totalAmount, deposit_paid: depositPaid },
       });
       return NextResponse.json({ ok: true, kind, amount: 0, message: "保証金と一致したため追加請求はありません" });
     }

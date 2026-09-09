@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { RANK_LABEL } from "@/constants/ranks";
-import { formatRate, formatYen, calcRebate, aggregateRebate } from "@/lib/rebate";
+import { formatRate, formatYen, calcRebate, aggregateRebate, applyHandlingFee } from "@/lib/rebate";
 import type { RankCode } from "@/types/database";
 
 interface ShopOption {
@@ -64,7 +64,8 @@ export function BillingWizard({ shops }: { shops: ShopOption[] }) {
           rebateRate: o.rebate_rate,
         }),
       );
-    return aggregateRebate(lines);
+    // 発行APIと同じ計算 (決済手数料2%込み) — プレビューと実発行額を必ず一致させる
+    return applyHandlingFee(aggregateRebate(lines));
   }, [orders, selected]);
 
   const toggle = (id: string) => {
@@ -195,6 +196,8 @@ export function BillingWizard({ shops }: { shops: ShopOption[] }) {
             <div className="text-right">{formatYen(totals.subtotal)}</div>
             <div className="text-slate-500">リベート割引</div>
             <div className="text-right text-emerald-600">-{formatYen(totals.rebateAmount)}</div>
+            <div className="text-slate-500">決済手数料 (2%)</div>
+            <div className="text-right">{formatYen(totals.feeAmount)}</div>
             <div className="text-slate-500">課税対象額</div>
             <div className="text-right">{formatYen(totals.taxableAmount)}</div>
             <div className="text-slate-500">消費税</div>
