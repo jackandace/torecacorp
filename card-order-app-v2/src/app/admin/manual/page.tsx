@@ -14,6 +14,23 @@ export default function AdminManualPage() {
         管理者向けは admin 権限を持つスタッフのみ閲覧できます。ショップ向けの内容も参考として確認できます。
       </p>
 
+      {/* 問屋登録の承認フロー手順書への導線 */}
+      <Link
+        href="/admin/manual/approval-flow"
+        className="block rounded-xl border border-amber-200 bg-amber-50 p-4 sm:p-5 hover:bg-amber-100 transition"
+      >
+        <div className="flex items-start gap-3">
+          <span className="text-2xl" aria-hidden>📦</span>
+          <div>
+            <p className="font-semibold text-amber-800">問屋登録の承認フロー — 画面つき手順書</p>
+            <p className="text-sm text-slate-600 mt-0.5">
+              橋本さん（問屋）が登録した商品を確認・承認してショップに公開するまでの手順。
+              実際の画面キャプチャ付きで、掛け率・締切の設定ポイントとよくある質問をまとめています。
+            </p>
+          </div>
+        </div>
+      </Link>
+
       {/* 新人向け研修マニュアルへの導線 */}
       <Link
         href="/admin/manual/onboarding"
