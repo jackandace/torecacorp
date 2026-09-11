@@ -8,6 +8,7 @@ import type { Product, Shop, OrderUnit, ProductCategory } from "@/types/database
 import { getListedRate, formatRate, formatYen } from "@/lib/rebate";
 import { validateOrderQty, calcCartSubtotal } from "@/lib/orders";
 import { orderCutoffDate } from "@/lib/dates";
+import { DEPOSIT_RATE } from "@/lib/deposit";
 
 interface CartItem {
   product: Product;
@@ -607,7 +608,7 @@ function ProductCard({
           </div>
           {isCut ? (
             <p className="text-xs mt-1 text-amber-700">
-              希望BOX数で受付（カット後に配分確定）。発注時に保証金30%(前受金)、配分確定後に差額精算します。(1CT = {product.ct_to_box} BOX)
+              希望BOX数で受付（カット後に配分確定）。発注時に保証金{Math.round((product.deposit_rate ?? DEPOSIT_RATE) * 100)}%(前受金)、配分確定後に差額精算します。(1CT = {product.ct_to_box} BOX)
             </p>
           ) : (
             <p className={`text-xs mt-1 ${soldOut ? "text-rose-600 font-semibold" : "text-slate-500"}`}>
