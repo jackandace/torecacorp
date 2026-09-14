@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRIM 退会申請 モック v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e8442e;--gold:#d4af37;--ink:#222;--sub:#666;--line:#e5e5e5;--bg:#f4f4f4;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Noto Sans JP",system-ui,sans-serif;background:var(--bg);color:var(--ink);padding:32px 16px;}
+  h1.page{font-size:18px;font-weight:700;margin-bottom:4px}
+  p.lead{font-size:13px;color:var(--sub);margin-bottom:16px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:24px}
+  .toolbar button{font-family:inherit;font-size:12px;padding:7px 12px;border-radius:999px;border:1px solid #ccc;background:#fff;cursor:pointer}
+  .toolbar button.on{background:var(--red);color:#fff;border-color:var(--red);font-weight:700}
+  .stage{display:flex;gap:36px;flex-wrap:wrap;align-items:flex-start;justify-content:center}
+  .col{display:flex;flex-direction:column;gap:10px;align-items:center}
+  .col .label{font-size:12px;font-weight:700;color:var(--sub);letter-spacing:.05em}
+  .col .label b{color:#fff;background:var(--red);border-radius:4px;padding:2px 6px;margin-right:6px;font-size:11px}
+  .col .label code{font-weight:400;background:#e9e9e9;padding:1px 5px;border-radius:3px}
+
+  .phone{width:390px;height:800px;background:#fff;border:10px solid #111;border-radius:40px;overflow:hidden;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+  .screen{height:100%;overflow-y:auto;display:flex;flex-direction:column}
+  .header{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:2;flex-shrink:0}
+  .logo{width:36px;height:36px;border-radius:4px;background:linear-gradient(135deg,#8b0000,#e8442e);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700;font-size:14px}
+  .chips{display:flex;gap:6px;align-items:center}
+  .chip{font-size:11px;background:#f1f1f1;border-radius:999px;padding:3px 8px;color:#444;display:flex;gap:4px;align-items:center}
+  .chip .coin{width:12px;height:12px;border-radius:50%;background:var(--gold);display:inline-block}
+  .chip .plus{width:14px;height:14px;border-radius:50%;background:var(--red);color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+  .content{padding:16px;flex:1}
+  .ttl{font-size:16px;font-weight:700;text-align:center;margin:8px 0 16px}
+
+  /* mypage */
+  .uid{background:#f5f5f5;border-radius:6px;padding:10px 12px;font-size:12px;font-weight:700;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .uid span{color:#999;font-weight:400}
+  .menu a{display:block;padding:15px 4px;border-bottom:1px solid var(--line);font-size:14px;color:var(--ink);text-decoration:none}
+  .menu .gap{height:40px}
+
+  /* withdraw */
+  .intro{font-size:13px;line-height:1.75;color:#333;margin-bottom:14px}
+  .intro .ng{color:var(--red);font-weight:700}
+  .status{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .status div{background:#f7f7f7;border-radius:8px;padding:10px 12px}
+  .status small{display:block;font-size:11px;color:var(--sub)}
+  .status strong{font-size:18px;font-weight:700}
+  .status strong em{font-style:normal;font-size:12px;margin-left:2px}
+  .block{display:none;background:#fdece9;border:1px solid var(--red);border-radius:8px;padding:12px 14px;font-size:12.5px;line-height:1.7;color:#8a1d10;margin-bottom:14px}
+  .block b{display:block;color:var(--red);margin-bottom:2px}
+  .block.show{display:block}
+  details{border:1px solid var(--line);border-radius:8px;margin-bottom:8px;background:#fff}
+  details summary{list-style:none;cursor:pointer;padding:12px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+  details summary::-webkit-details-marker{display:none}
+  details summary .n{width:20px;height:20px;border-radius:4px;background:var(--red);color:#fff;font-size:11px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  details summary::after{content:"＋";margin-left:auto;color:#999;font-weight:400}
+  details[open] summary::after{content:"－"}
+  details .body{padding:0 14px 12px 42px;font-size:12px;line-height:1.75;color:#444}
+  details .body ul{padding-left:16px}
+  details .body li{margin-bottom:3px}
+  details .body .em{color:var(--red);font-weight:700}
+  .terms-h{font-size:14px;font-weight:700;margin:18px 0 8px}
+  .agree{margin-top:16px;border-top:2px solid #111;padding-top:12px}
+  .agree h3{font-size:14px;font-weight:700;margin-bottom:4px}
+  .agree p{font-size:11.5px;color:var(--sub);margin-bottom:10px}
+  .ck{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);font-size:12.5px;line-height:1.6;cursor:pointer}
+  .ck input{width:20px;height:20px;flex-shrink:0;accent-color:var(--red);margin-top:1px}
+  .ck.last{font-weight:700;border-bottom:0}
+  .ck.dis{opacity:.45;cursor:not-allowed}
+  .btn{display:block;width:100%;height:50px;border:0;border-radius:999px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:14px}
+  .btn.danger{background:var(--red);color:#fff}
+  .btn.danger:disabled{background:#d9dce0;color:#fff;cursor:not-allowed}
+  .btn.ghost{background:#fff;color:var(--ink);border:1px solid #ccc}
+  .hint{font-size:11px;color:var(--sub);text-align:center;margin-top:8px}
+  .back{display:block;text-align:center;font-size:12px;color:var(--sub);margin-top:16px;text-decoration:underline;cursor:pointer}
+
+  /* modal */
+  .modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:10;padding:24px}
+  .modal-bg.show{display:flex}
+  .modal{background:#fff;border-radius:14px;padding:22px 18px;width:100%}
+  .modal h3{font-size:16px;font-weight:700;text-align:center;margin-bottom:12px}
+  .modal .loss{background:#fdece9;border-radius:8px;padding:12px;margin-bottom:10px}
+  .modal .loss div{display:flex;justify-content:space-between;font-size:13px;padding:4px 0}
+  .modal .loss strong{color:var(--red);font-size:15px}
+  .modal p{font-size:12px;line-height:1.7;color:#444;text-align:center}
+  .modal p.ng{color:var(--red);font-weight:700}
+  .modal .row{display:flex;gap:8px;margin-top:14px}
+  .modal .row .btn{margin-top:0;height:44px;font-size:14px}
+
+  /* grace banner */
+  .grace{background:#111;color:#fff;font-size:11.5px;line-height:1.6;padding:10px 14px;display:none;flex-shrink:0}
+  .grace.show{display:block}
+  .grace b{color:var(--gold)}
+  .grace a{color:#fff;text-decoration:underline;display:inline-block;margin-top:4px}
+  .top-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+  .top-cards div{aspect-ratio:3/4;background:repeating-linear-gradient(45deg,#f0f0f0 0 10px,#e6e6e6 10px 20px);border-radius:8px;display:flex;align-items:flex-end;justify-content:center;padding:8px;font-size:10px;color:#999}
+  .stopped{position:absolute;inset:56px 0 0;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;z-index:5}
+  .stopped div{background:#111;color:#fff;font-size:12px;padding:10px 16px;border-radius:8px;text-align:center;line-height:1.6}
+
+  /* done */
+  .done{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:24px}
+  .done .ico{width:64px;height:64px;border-radius:50%;background:#fdece9;color:var(--red);font-size:30px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+  .done h2{font-size:17px;font-weight:700;margin-bottom:10px}
+  .done p{font-size:13px;line-height:1.75;color:#444}
+  .done .box{background:#f7f7f7;border-radius:8px;padding:12px;font-size:12px;line-height:1.7;margin-top:14px;text-align:left;width:100%}
+
+  /* notes */
+  .notes{width:390px;background:#fff;border-radius:12px;padding:18px 20px;font-size:12.5px;line-height:1.8;border-top:4px solid var(--red)}
+  .notes h2{font-size:14px;font-weight:700;margin-bottom:8px}
+  .notes h2 span{color:var(--gold);font-size:11px;margin-left:8px;font-weight:500}
+  .notes h4{font-size:12.5px;margin:10px 0 2px;color:var(--red)}
+  .notes ul{padding-left:18px}
+  .notes li{margin-bottom:2px}
+  .notes code{background:#f3f3f3;border-radius:3px;padding:1px 5px;font-size:11.5px}
+</style>
+</head>
+<body>
+
+<h1 class="page">GRIM｜退会申請フォーム モック v2</h1>
+<p class="lead">v1からの変更：注意事項7項目（クライアント提供文言）／同意チェック6分割／退会ブロック条件／最終確認ダイアログの動的表示／猶予期間バナー。下のボタンでユーザー状態を切り替えて確認できます。</p>
+
+<div class="toolbar">
+  <span style="font-size:12px;align-self:center;color:var(--sub)">ユーザー状態：</span>
+  <button class="on" onclick="setState('normal',this)">通常（退会可）</button>
+  <button onclick="setState('shipping',this)">発送手続き中あり</button>
+  <button onclick="setState('payment',this)">決済対応中あり（CB／銀振差額）</button>
+  <button onclick="setState('zero',this)">ポイント0・景品0</button>
+</div>
+
+<div class="stage">
+
+  <!-- 1 マイページ -->
+  <div class="col">
+    <div class="label"><b>1</b>マイページ</div>
+    <div class="phone">
+      <div class="screen">
+        <div class="header">
+          <div class="logo">G</div>
+          <div class="chips"><span class="chip">🔑 2</span><span class="chip"><i class="coin"></i>1,250 <i class="plus">+</i></span><span>🔔</span></div>
+        </div>
+        <div class="content">
+          <div class="uid">4a9a4130-16e7-4904-b50f-fb2628313810 <span>⧉</span></div>
+          <div class="menu">
+            <a>カード獲得履歴</a><a>コイン購入履歴</a><a>ガチャ履歴</a><a>お届け先登録・変更</a><a>クレジットカード管理</a><a>会員ランク詳細</a><a>メールアドレスの変更</a><a>パスワードの変更</a>
+            <a href="#" onclick="goto('s2');return false;">退会申請</a>
+            <a>お問い合わせ</a><a>ボーナスオリパについて</a>
+            <div class="gap"></div><a>ログアウト</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 退会申請 -->
+  <div class="col">
+    <div class="label"><b>2</b>退会申請ページ <code>/me/delete</code></div>
+    <div class="phone" id="s2">
+      <div class="screen" id="s2scroll">
+        <div class="header">
+          <div class="logo">G</div>
+          <div class="chips"><span class="chip">🔑 2</span><span class="chip"><i class="coin"></i><span id="hdPt">1,250</span> <i class="plus">+</i></span><span>🔔</span></div>
+        </div>
+        <div class="content">
+          <div class="ttl">退会申請</div>
+          <p class="intro">退会手続きを行うと、お客様のアカウントおよびアカウントに紐づくすべてのデータが削除され、<span class="ng">元に戻すことはできません。</span>以下の内容を必ずご確認のうえ、お手続きにお進みください。</p>
+
+          <div class="status">
+            <div><small>保有ポイント</small><strong id="stPt">1,250<em>pt</em></strong></div>
+            <div><small>未発送の景品</small><strong id="stItems">3<em>件</em></strong></div>
+          </div>
+
+          <div class="block" id="blkShip"><b>現在退会できません</b>発送手続き中の商品が <span id="shipN">2</span>件あります。お受け取り後に改めてお手続きください。</div>
+          <div class="block" id="blkPay"><b>現在退会できません</b>対応中のお取引が <span id="payN">1</span>件あります（チャージバック／銀行振込の過剰・過小入金）。対応完了後に改めてお手続きください。</div>
+
+          <div class="terms-h">退会に関する注意事項</div>
+
+          <details open><summary><span class="n">1</span>保有ポイントについて</summary><div class="body"><ul>
+            <li>退会と同時に、保有中のすべてのポイントが失効します。</li>
+            <li>購入ポイント・無料付与ポイント・キャンペーン付与ポイントのいずれも対象です。</li>
+            <li>退会申請後の猶予期間（7日間）中にご購入いただいたポイントも、同様に失効します。</li>
+            <li><span class="em">失効したポイントの払い戻し・返金・他アカウントへの移行はできません。ポイント購入代金の返金も行いません。</span></li>
+            <li>再登録された場合も、失効したポイントは復元されません。</li>
+          </ul></div></details>
+
+          <details><summary><span class="n">2</span>獲得済み・未発送の景品について</summary><div class="body"><ul>
+            <li>抽選で獲得済みで、まだ発送申請をしていない景品は、退会と同時にすべて権利が消滅します。</li>
+            <li>退会申請後の猶予期間（7日間）中に獲得された景品も、同様に権利が消滅します。</li>
+            <li>退会後に「発送してほしい」というご依頼にはお応えできません。</li>
+            <li><span class="em">発送をご希望の景品がある場合は、必ず発送申請を完了し、お手元に到着してから退会手続きを行ってください。</span></li>
+          </ul></div></details>
+
+          <details><summary><span class="n">3</span>発送手続き中の商品がある場合</summary><div class="body"><ul>
+            <li>発送申請済み・発送準備中・配送中の商品がある場合、お手続きが完了するまで退会いただけません。</li>
+            <li>商品到着後、改めて退会手続きをお願いいたします。</li>
+            <li>退会後に配送トラブル（未着・破損等）が発生した場合、アカウント情報が削除されているため、対応いたしかねる場合がございます。</li>
+          </ul></div></details>
+
+          <details><summary><span class="n">4</span>ランク・各種特典について</summary><div class="body">
+            <p>退会すると、以下のデータはマイページからご確認いただけなくなり、再登録後も引き継ぐことはできません。</p>
+            <ul style="margin-top:4px"><li>ランクおよび累計課金額の記録</li><li>レインボーキー</li><li>抽選履歴、購入履歴、発送履歴</li></ul>
+          </div></details>
+
+          <details><summary><span class="n">5</span>再登録について</summary><div class="body"><ul>
+            <li>退会後、同じ電話番号で再度ご登録いただくことはできません。</li>
+            <li>同じ電話番号で再度ご登録頂く場合には新しいアカウントのユーザーID、使用したい電話番号を記載の上お問い合わせにご連絡ください。</li>
+            <li>同じ電話番号で再登録の場合、初回登録特典はお受け取りいただけません。</li>
+            <li>ランク・特典をリセットする目的での退会・再登録の繰り返しなど、不正な利用が確認された場合は、ご登録をお断りする、またはアカウントを停止することがあります。</li>
+          </ul></div></details>
+
+          <details><summary><span class="n">6</span>お客様情報の取り扱いについて</summary><div class="body"><ul>
+            <li>退会後、お客様のアカウント情報および会員登録情報は、当社プライバシーポリシーに従って削除いたします。</li>
+            <li>ただし、法令により保存が義務付けられている取引記録（購入・決済・配送に関する記録等）については、所定の期間、当社内で保管いたします。これらの記録はお客様がご確認いただくことはできません。</li>
+            <li>保管する情報は、法令に基づく対応および不正利用防止の目的以外には使用いたしません。</li>
+          </ul></div></details>
+
+          <details><summary><span class="n">7</span>各種配信について</summary><div class="body"><ul>
+            <li>退会手続き完了後、はがきの配信は停止されます。</li>
+            <li>LINE公式アカウントは自動では解除されません。配信の停止をご希望の場合は、LINEアプリ上でブロックまたは友だち解除のお手続きをお願いいたします。</li>
+          </ul></div></details>
+
+          <div class="agree" id="agree">
+            <h3>同意事項</h3>
+            <p id="agreeNote">注意事項1〜7をすべて開いて確認すると、チェックできるようになります。（<span id="openCount">1</span>/7 確認済み）</p>
+            <label class="ck"><input type="checkbox" onchange="chk()">猶予期間中に購入したものを含め、保有ポイントがすべて失効し、返金されないことを理解しました</label>
+            <label class="ck"><input type="checkbox" onchange="chk()">未発送の景品がすべて消滅し、退会後は発送を依頼できないことを理解しました</label>
+            <label class="ck"><input type="checkbox" onchange="chk()">ランク・レインボーキー等の特典がすべて失われ、再登録しても復元されないことを理解しました</label>
+            <label class="ck"><input type="checkbox" onchange="chk()">同じ電話番号では再登録できず、再登録の場合も初回登録特典を受け取れないことを理解しました</label>
+            <label class="ck"><input type="checkbox" onchange="chk()">退会後はお取引に関するお問い合わせへの対応ができない場合があることを理解しました</label>
+            <label class="ck last"><input type="checkbox" onchange="chk()">上記すべてに同意のうえ、退会手続きを行います</label>
+          </div>
+
+          <button class="btn danger" id="delBtn" disabled onclick="openModal()">退会する</button>
+          <div class="hint" id="hint">同意事項 <span id="ckCount">0</span>/6 チェック済み</div>
+          <span class="back">マイページに戻る</span>
+        </div>
+      </div>
+
+      <!-- 最終確認ダイアログ -->
+      <div class="modal-bg" id="modal">
+        <div class="modal">
+          <h3>本当に退会しますか？</h3>
+          <div class="loss">
+            <div><span>保有ポイント</span><strong id="mdPt">1,250pt</strong></div>
+            <div><span>未発送景品</span><strong id="mdItems">3件</strong></div>
+          </div>
+          <p>上記が消滅します。</p>
+          <p class="ng">この操作は取り消せません。</p>
+          <div class="row">
+            <button class="btn ghost" onclick="closeModal()">キャンセル</button>
+            <button class="btn danger" onclick="doDelete()">退会する</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 猶予期間中 -->
+  <div class="col">
+    <div class="label"><b>3</b>猶予期間中（申請後7日間）</div>
+    <div class="phone" id="s3">
+      <div class="screen">
+        <div class="header">
+          <div class="logo">G</div>
+          <div class="chips"><span class="chip">🔑 2</span><span class="chip"><i class="coin"></i>1,250 <i class="plus">+</i></span><span>🔔</span></div>
+        </div>
+        <div class="grace show">
+          <b>退会申請中：9月21日に削除されます。</b><br>この期間に購入されたポイント・獲得された景品も失効します。<br>
+          <a onclick="alert('モック：猶予期間内の再ログイン／ボタン押下で退会申請を取り消し')">退会申請を取り消す</a>
+        </div>
+        <div class="content">
+          <div class="ttl">オリパ一覧</div>
+          <div class="top-cards"><div>仮画像</div><div>仮画像</div><div>仮画像</div><div>仮画像</div></div>
+        </div>
+        <div class="stopped"><div>退会申請中のため<br>ポイント購入・ガチャは<br>ご利用いただけません<br><small style="color:#aaa">（推奨案：猶予期間中は購入・抽選を停止）</small></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 完了 -->
+  <div class="col">
+    <div class="label"><b>4</b>申請完了</div>
+    <div class="phone" id="s4">
+      <div class="screen">
+        <div class="header"><div class="logo">G</div><div class="chips"><span class="chip">ログイン</span></div></div>
+        <div class="done">
+          <div class="ico">✓</div>
+          <h2>退会申請を受け付けました</h2>
+          <p>7日間の猶予期間の後、アカウントが完全に削除されます。<br>猶予期間内に再度ログインすると、退会申請は取り消されます。</p>
+          <div class="box">
+            申請日時：2026/09/14 15:02<br>
+            削除予定日：2026/09/21<br>
+            失効予定ポイント：<span id="dnPt">1,250</span>pt<br>
+            消滅予定景品：<span id="dnItems">3</span>件
+          </div>
+          <button class="btn ghost" style="max-width:240px" onclick="resetAll()">トップページへ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 仕様メモ -->
+  <div class="col">
+    <div class="notes">
+      <h2>実装メモ<span>v2 / 2026-09-14</span></h2>
+      <h4>退会ボタン活性条件（AND）</h4>
+      <ul>
+        <li>注意事項1〜7をすべて展開済み（未展開の間はチェックボックス非活性）</li>
+        <li>同意チェック6個すべてON（一括チェック不可）</li>
+        <li>発送申請済み・発送準備中・配送中の商品が0件</li>
+        <li>決済対応中の取引が0件（チャージバック中／銀行振込の過剰・過小入金で対応未完了）</li>
+      </ul>
+      <h4>動的表示</h4>
+      <ul>
+        <li>保有ポイント数・未発送景品件数をページ上部と最終確認ダイアログに実数表示</li>
+        <li>ブロック時は理由と件数を画面上に表示、チェックボックスは非活性</li>
+      </ul>
+      <h4>猶予期間（7日）</h4>
+      <ul>
+        <li>申請中は全画面上部に黒バナー常時表示（削除予定日を明記）</li>
+        <li>猶予期間中の再ログイン or 取消ボタンで申請キャンセル</li>
+        <li><b>推奨：</b>猶予期間中はポイント購入・抽選を停止</li>
+      </ul>
+      <h4>削除実行時（猶予期間満了）</h4>
+      <ul>
+        <li>退会ログ保存：退会日時／保有pt／未発送景品件数／同意取得日時</li>
+        <li>消滅景品の在庫戻し処理</li>
+        <li>Supabase auth ユーザー削除・セッション破棄</li>
+        <li>電話番号ハッシュを再登録判定用に保持（初回登録特典を付与しない）</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const DATA = {
+    normal:  {pt:1250, items:3, ship:0, pay:0},
+    shipping:{pt:1250, items:3, ship:2, pay:0},
+    payment: {pt:1250, items:3, ship:0, pay:1},
+    zero:    {pt:0,    items:0, ship:0, pay:0},
+  };
+  let cur = 'normal';
+  const fmt = n => n.toLocaleString('ja-JP');
+
+  function setState(k, btn){
+    cur = k;
+    document.querySelectorAll('.toolbar button').forEach(b=>b.classList.remove('on'));
+    if(btn) btn.classList.add('on');
+    const d = DATA[k];
+    document.getElementById('hdPt').textContent = fmt(d.pt);
+    document.getElementById('stPt').innerHTML = fmt(d.pt)+'<em>pt</em>';
+    document.getElementById('stItems').innerHTML = d.items+'<em>件</em>';
+    document.getElementById('mdPt').textContent = fmt(d.pt)+'pt';
+    document.getElementById('mdItems').textContent = d.items+'件';
+    document.getElementById('dnPt').textContent = fmt(d.pt);
+    document.getElementById('dnItems').textContent = d.items;
+    document.getElementById('shipN').textContent = d.ship;
+    document.getElementById('payN').textContent = d.pay;
+    document.getElementById('blkShip').classList.toggle('show', d.ship>0);
+    document.getElementById('blkPay').classList.toggle('show', d.pay>0);
+    refreshGate();
+    document.getElementById('s2scroll').scrollTop = 0;
+  }
+  const opened = new Set();
+  document.querySelectorAll('details').forEach((d,i)=>{
+    if(d.open) opened.add(i);
+    d.addEventListener('toggle',()=>{ if(d.open) opened.add(i); refreshGate(); });
+  });
+  function allRead(){ return opened.size>=7; }
+  function refreshGate(){
+    const d=DATA[cur];
+    const blocked = d.ship>0 || d.pay>0;
+    const locked = blocked || !allRead();
+    document.getElementById('agreeNote').textContent = blocked ? '上記の理由により現在は退会できません'
+      : allRead() ? '6項目すべてにチェックを入れると「退会する」ボタンが押せるようになります。'
+      : `注意事項1〜7をすべて開いて確認すると、チェックできるようになります。（${opened.size}/7 確認済み）`;
+    document.querySelectorAll('#agree .ck').forEach(l=>{
+      l.classList.toggle('dis', locked);
+      const i=l.querySelector('input'); i.disabled=locked; if(locked) i.checked=false;
+    });
+    chk();
+  }
+  function chk(){
+    const boxes=[...document.querySelectorAll('#agree input')];
+    const n=boxes.filter(b=>b.checked).length;
+    const d=DATA[cur];
+    const blocked = d.ship>0 || d.pay>0;
+    document.getElementById('delBtn').disabled = blocked || !allRead() || n<6;
+    document.getElementById('hint').textContent = blocked ? '上記の理由により現在は退会できません' : `同意事項 ${n}/6 チェック済み`;
+  }
+  function openModal(){ document.getElementById('modal').classList.add('show'); }
+  function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+  function doDelete(){ closeModal(); goto('s4'); }
+  function goto(id){ document.getElementById(id).scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
+  function resetAll(){ document.querySelectorAll('#agree input').forEach(i=>i.checked=false); chk(); window.scrollTo({top:0,behavior:'smooth'}); }
+  setState('normal', document.querySelector('.toolbar button.on'));
+  refreshGate();
+</script>
+</body>
+</html>
