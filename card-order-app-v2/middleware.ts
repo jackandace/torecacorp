@@ -16,6 +16,8 @@ const PUBLIC_PATHS = [
   "/api/health",
   "/receipt",         // 受領確認 (ログイン不要・トークン制)
   "/api/receipt",     // 受領確認 API (トークン制)
+  "/apply",           // ショップ登録の審査申込みフォーム (公開)
+  "/api/apply",       // 審査申込み API (公開)
 ];
 
 function isAdminRole(role: unknown): boolean {

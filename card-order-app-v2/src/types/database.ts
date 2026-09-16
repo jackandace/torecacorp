@@ -88,6 +88,33 @@ export type ShopChangeRequest = {
   updated_at: string;
 };
 
+// ショップ登録の審査申込み (033・公開フォーム /apply 経由)
+export type ShopApplicationStatus = "pending" | "approved" | "rejected";
+export type ShopApplication = {
+  id: string;
+  company_name: string;
+  contact_name: string;
+  email: string;
+  phone: string;
+  billing_name: string | null;
+  address: string;
+  delivery_address: string;
+  receiver_name: string | null;
+  business_type: "physical_only" | "physical_and_ec" | "ec_only";
+  opened_at: string | null;
+  store_url: string | null;
+  interested_titles: string | null;
+  note: string | null;
+  terms_agreed_at: string;
+  status: ShopApplicationStatus;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  review_note: string | null;
+  invite_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type RegistrationInvite = {
   id: string;
   token: string;
@@ -501,6 +528,9 @@ export type Database = {
       ]>;
       faqs:                   TableDef<Faq>;
       registration_invites:   TableDef<RegistrationInvite>;
+      shop_applications:      TableDef<ShopApplication, [
+        FK<"shop_applications_invite_id_fkey", ["invite_id"], "registration_invites", ["id"]>,
+      ]>;
       shop_change_requests:   TableDef<ShopChangeRequest, [
         FK<"shop_change_requests_shop_id_fkey", ["shop_id"], "shops", ["id"]>,
       ]>;
