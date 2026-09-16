@@ -14,6 +14,23 @@ export default function AdminManualPage() {
         管理者向けは admin 権限を持つスタッフのみ閲覧できます。ショップ向けの内容も参考として確認できます。
       </p>
 
+      {/* ショップ登録申請の審査フロー手順書への導線 */}
+      <Link
+        href="/admin/manual/shop-review"
+        className="block rounded-xl border border-emerald-200 bg-emerald-50 p-4 sm:p-5 hover:bg-emerald-100 transition"
+      >
+        <div className="flex items-start gap-3">
+          <span className="text-2xl" aria-hidden>🏪</span>
+          <div>
+            <p className="font-semibold text-emerald-800">ショップ登録申請の審査フロー — 申請から承認 / 否決まで</p>
+            <p className="text-sm text-slate-600 mt-0.5">
+              新規ショップ様の申込みフォーム → 管理画面「ショップ審査」での確認 → 承認（登録リンク自動送付）/ 否決の手順。
+              登録リンクが期限切れになったときの再発行、各メールの一覧、よくある質問つき。
+            </p>
+          </div>
+        </div>
+      </Link>
+
       {/* 問屋登録の承認フロー手順書への導線 */}
       <Link
         href="/admin/manual/approval-flow"
