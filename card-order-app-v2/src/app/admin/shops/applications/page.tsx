@@ -7,6 +7,22 @@ import { formatJST } from "@/lib/dates";
 import { BUSINESS_TYPE_LABEL } from "@/constants/business";
 import type { ShopApplication, BusinessType } from "@/types/database";
 import { ApplicationActions } from "./ApplicationActions";
+import { ReissueInviteButton } from "./ReissueInviteButton";
+
+type InviteState = "valid" | "expired" | "used";
+
+/** 承認済み申請の招待リンク状態 (有効 / 期限切れ / 登録完了) */
+function inviteStateOf(inv: { expires_at: string; used_at: string | null } | null | undefined): InviteState | null {
+  if (!inv) return null;
+  if (inv.used_at) return "used";
+  return new Date(inv.expires_at) < new Date() ? "expired" : "valid";
+}
+
+const INVITE_STATE_LABEL: Record<InviteState, { label: string; tone: string }> = {
+  valid:   { label: "登録リンク有効",   tone: "bg-blue-100 text-blue-800" },
+  expired: { label: "登録リンク期限切れ", tone: "bg-rose-100 text-rose-700" },
+  used:    { label: "ショップ登録完了",  tone: "bg-emerald-100 text-emerald-800" },
+};
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "ショップ審査 | 管理" };
@@ -46,6 +62,19 @@ export default async function ShopApplicationsPage({
       .eq("status", "pending"),
   ]);
 
+  // 承認済みタブでは招待リンクの状態 (期限切れ → 再発行が必要) を併せて表示する
+  const inviteById = new Map<string, { expires_at: string; used_at: string | null }>();
+  if (status === "approved") {
+    const inviteIds = ((apps ?? []) as ShopApplication[]).map((a) => a.invite_id).filter((v): v is string => !!v);
+    if (inviteIds.length > 0) {
+      const { data: invites } = await supabase
+        .from("registration_invites")
+        .select("id, expires_at, used_at")
+        .in("id", inviteIds);
+      for (const inv of invites ?? []) inviteById.set(inv.id, { expires_at: inv.expires_at, used_at: inv.used_at });
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -76,7 +105,9 @@ export default async function ShopApplicationsPage({
       </div>
 
       <div className="space-y-3">
-        {((apps ?? []) as ShopApplication[]).map((a) => (
+        {((apps ?? []) as ShopApplication[]).map((a) => {
+          const inviteState = a.status === "approved" ? inviteStateOf(a.invite_id ? inviteById.get(a.invite_id) : null) : null;
+          return (
           <div key={a.id} className="card p-4 sm:p-5">
             <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
               <div className="min-w-0 text-sm space-y-1.5">
@@ -88,6 +119,11 @@ export default async function ShopApplicationsPage({
                   <span className="text-[10px] bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded">
                     {BUSINESS_TYPE_LABEL[a.business_type as BusinessType] ?? a.business_type}
                   </span>
+                  {inviteState && (
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${INVITE_STATE_LABEL[inviteState].tone}`}>
+                      {INVITE_STATE_LABEL[inviteState].label}
+                    </span>
+                  )}
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-0.5 text-xs text-slate-600">
                   <span>担当: {a.contact_name}</span>
@@ -118,9 +154,13 @@ export default async function ShopApplicationsPage({
                 </p>
               </div>
               {a.status === "pending" && <ApplicationActions applicationId={a.id} companyName={a.company_name} email={a.email} />}
+              {a.status === "approved" && inviteState !== "used" && (
+                <ReissueInviteButton applicationId={a.id} companyName={a.company_name} email={a.email} expired={inviteState === "expired"} />
+              )}
             </div>
           </div>
-        ))}
+          );
+        })}
         {(!apps || apps.length === 0) && (
           <div className="card p-8 text-center text-slate-500 text-sm">
             {status === "pending" ? "審査待ちの申請はありません" : "該当する申請はありません"}
