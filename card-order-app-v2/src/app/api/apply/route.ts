@@ -108,6 +108,7 @@ export async function POST(request: NextRequest) {
     try {
       await sendEmail({
         to: email,
+        replyTo: "m.kawazu@torecacorp.jp", // 送信元は noreply のため返信は担当 (河津) へ
         subject: "【トレカ商事カンパニー】卸取引のお申込みを受け付けました",
         html: `
 <div style="max-width:560px;margin:0 auto;font-family:-apple-system,'Hiragino Sans','Noto Sans JP',Meiryo,sans-serif;color:#1f2937;line-height:1.8;">
@@ -122,7 +123,8 @@ export async function POST(request: NextRequest) {
     ※ お心当たりがない場合は本メールを破棄してください。</p>
   </div>
   <div style="padding:12px 0;border-top:1px solid #e2e8f0;font-size:12px;color:#64748b;">
-    株式会社パレットグループ トレカ商事カンパニー (自動送信)
+    株式会社パレットグループ トレカ商事カンパニー (自動送信)<br>
+    お問い合わせ: 河津 (m.kawazu@torecacorp.jp) ※本メールへの返信でも届きます
   </div>
 </div>`,
       });

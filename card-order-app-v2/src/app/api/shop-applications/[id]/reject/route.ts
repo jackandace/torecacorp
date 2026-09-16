@@ -68,6 +68,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     try {
       await sendEmail({
         to: app.email,
+        replyTo: "m.kawazu@torecacorp.jp", // 送信元は noreply のため返信は担当 (河津) へ
         subject: "【トレカ商事カンパニー】審査結果のご連絡",
         html: `
 <div style="max-width:560px;margin:0 auto;font-family:-apple-system,'Hiragino Sans','Noto Sans JP',Meiryo,sans-serif;color:#1f2937;line-height:1.8;">
