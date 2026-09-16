@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { BusinessType } from "@/types/database";
 import { BUSINESS_TYPE_LABEL } from "@/constants/business";
 
 // 申込みフォームの選択肢は Google フォーム時代と同じ 3 択 ("other" は出さない)
 const BUSINESS_TYPE_CHOICES: BusinessType[] = ["physical_only", "physical_and_ec", "ec_only"];
+
+// 利用注意事項の確認などでページを離れても入力が消えないよう下書きを保持
+const DRAFT_KEY = "applyFormDraft";
 
 export function ApplyForm() {
   const [companyName, setCompanyName] = useState("");
@@ -32,6 +35,50 @@ export function ApplyForm() {
   const [message, setMessage] = useState<string | null>(null);
 
   const ecOnly = businessType === "ec_only";
+
+  // 下書きの復元 (初回マウント時)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw) as Record<string, unknown>;
+      const s = (v: unknown) => (typeof v === "string" ? v : "");
+      setCompanyName(s(d.companyName));
+      setContactName(s(d.contactName));
+      setEmail(s(d.email));
+      setPhone(s(d.phone));
+      setBillingName(s(d.billingName));
+      setPostal(s(d.postal));
+      setAddress(s(d.address));
+      setDeliveryPostal(s(d.deliveryPostal));
+      setDeliveryAddress(s(d.deliveryAddress));
+      if (typeof d.sameAsAddress === "boolean") setSameAsAddress(d.sameAsAddress);
+      setReceiverName(s(d.receiverName));
+      setBusinessType(s(d.businessType) as BusinessType | "");
+      setOpenedAt(s(d.openedAt));
+      setStoreUrl(s(d.storeUrl));
+      setInterestedTitles(s(d.interestedTitles));
+      setNote(s(d.note));
+      if (typeof d.agreed === "boolean") setAgreed(d.agreed);
+    } catch {
+      // 復元失敗は無視 (空のフォームから開始)
+    }
+  }, []);
+
+  // 入力のたびに下書きを保存
+  useEffect(() => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        companyName, contactName, email, phone, billingName,
+        postal, address, deliveryPostal, deliveryAddress, sameAsAddress,
+        receiverName, businessType, openedAt, storeUrl, interestedTitles, note, agreed,
+      }));
+    } catch {
+      // 保存できない環境 (プライベートモード等) では諦める
+    }
+  }, [companyName, contactName, email, phone, billingName, postal, address,
+    deliveryPostal, deliveryAddress, sameAsAddress, receiverName, businessType,
+    openedAt, storeUrl, interestedTitles, note, agreed]);
 
   const handleSubmit = async () => {
     setMessage(null);
@@ -85,6 +132,7 @@ export function ApplyForm() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "申請の送信に失敗しました");
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* noop */ }
       setDone(true);
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "申請の送信に失敗しました");
@@ -218,7 +266,7 @@ export function ApplyForm() {
         <h2 className="font-bold text-lg">利用注意事項・免責事項</h2>
         <p className="text-sm text-slate-600">
           お申込みの前に
-          <Link href="/terms" target="_blank" className="text-brand-600 hover:underline mx-1">利用注意事項・免責事項</Link>
+          <Link href="/terms?from=apply" className="text-brand-600 hover:underline mx-1">利用注意事項・免責事項</Link>
           をご確認ください。
         </p>
         <label className="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer">

@@ -3,7 +3,9 @@ import { TERMS_SECTIONS, TERMS_VERSION } from "@/constants/terms";
 
 export const metadata = { title: "利用注意事項・免責事項 | トレカ商事" };
 
-export default function TermsPage() {
+export default function TermsPage({ searchParams }: { searchParams: { from?: string } }) {
+  // 審査申込みフォームから開いた場合は、フォームへ戻す (入力内容はフォーム側で保持)
+  const fromApply = searchParams.from === "apply";
   return (
     <main className="min-h-screen bg-slate-50 py-12 px-4">
       <div className="max-w-3xl mx-auto">
@@ -27,8 +29,11 @@ export default function TermsPage() {
           </div>
 
           <div className="mt-10 pt-6 border-t border-slate-200 text-center">
-            <Link href="/login" className="text-sm text-brand-600 hover:underline">
-              ← ログインページへ戻る
+            <Link
+              href={fromApply ? "/apply" : "/login"}
+              className="text-sm text-brand-600 hover:underline"
+            >
+              {fromApply ? "← 申込みフォームへ戻る" : "← ログインページへ戻る"}
             </Link>
           </div>
         </div>

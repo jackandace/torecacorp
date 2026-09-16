@@ -88,6 +88,8 @@ export async function POST(request: NextRequest) {
     .select("id, company_name")
     .single();
   if (error || !application) {
+    // 033_shop_applications.sql 未実行 (テーブル無し) 等の原因切り分け用
+    console.error("[apply] insert failed:", error?.message ?? "no row returned");
     return NextResponse.json({ error: "申請の送信に失敗しました。時間をおいて再度お試しください" }, { status: 500 });
   }
 
