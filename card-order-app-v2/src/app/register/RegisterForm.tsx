@@ -9,18 +9,37 @@ interface Props {
   token: string;
   prefillEmail: string;
   prefillCompany: string;
+  // 審査申込み (/apply) 経由の招待では申請内容をプレフィル (二重入力の防止)
+  prefillContact?: string;
+  prefillPhone?: string;
+  prefillAddress?: string;
+  prefillDelivery?: string;
+  prefillBusinessType?: string;
+  prefillOpenedAt?: string;
 }
 
-export function RegisterForm({ token, prefillEmail, prefillCompany }: Props) {
+export function RegisterForm({
+  token,
+  prefillEmail,
+  prefillCompany,
+  prefillContact = "",
+  prefillPhone = "",
+  prefillAddress = "",
+  prefillDelivery = "",
+  prefillBusinessType = "",
+  prefillOpenedAt = "",
+}: Props) {
   const [companyName, setCompanyName] = useState(prefillCompany);
-  const [contactName, setContactName] = useState("");
+  const [contactName, setContactName] = useState(prefillContact);
   const [email, setEmail] = useState(prefillEmail);
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(prefillPhone);
   const [postal, setPostal] = useState("");
-  const [address, setAddress] = useState("");
-  const [deliveryAddress, setDeliveryAddress] = useState("");
-  const [businessType, setBusinessType] = useState<BusinessType | "">("");
-  const [openedAt, setOpenedAt] = useState("");
+  const [address, setAddress] = useState(prefillAddress);
+  const [deliveryAddress, setDeliveryAddress] = useState(prefillDelivery);
+  const [businessType, setBusinessType] = useState<BusinessType | "">(
+    (prefillBusinessType as BusinessType) || "",
+  );
+  const [openedAt, setOpenedAt] = useState(prefillOpenedAt);
   const [agreed, setAgreed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);

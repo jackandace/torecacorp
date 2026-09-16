@@ -100,7 +100,7 @@ export function ApplyForm() {
         <h2 className="text-xl font-bold">お申込みを受け付けました</h2>
         <p className="text-sm text-slate-600 leading-relaxed">
           <strong>{email}</strong> 宛に受付確認メールをお送りしました。<br />
-          審査結果は通常 2〜3営業日以内にメールでご連絡いたします。
+          審査結果は、内容の確認ができ次第メールでご連絡いたします。
         </p>
         <p className="text-xs text-slate-500">
           確認メールが届かない場合は、迷惑メールフォルダをご確認ください。
@@ -247,7 +247,7 @@ export function ApplyForm() {
         {busy ? "送信中…" : "審査を申し込む"}
       </button>
       <p className="text-xs text-slate-500 text-center">
-        送信後、受付確認メールが自動で届きます。審査結果は通常 2〜3営業日以内にご連絡します。
+        送信後、受付確認メールが自動で届きます。審査結果は確認でき次第ご連絡します。
       </p>
     </div>
   );

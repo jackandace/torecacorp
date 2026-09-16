@@ -16,6 +16,14 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
 
   // トークン検証 (service role で照合。anon には invites テーブルを公開しない)
   let invite: { email: string | null; company_name: string | null } | null = null;
+  let application: {
+    contact_name: string;
+    phone: string;
+    address: string;
+    delivery_address: string;
+    business_type: string;
+    opened_at: string | null;
+  } | null = null;
   let error: string | null = null;
 
   if (!token) {
@@ -24,7 +32,7 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
     const adminSb = createAdminClient();
     const { data } = await adminSb
       .from("registration_invites")
-      .select("email, company_name, expires_at, used_at")
+      .select("id, email, company_name, expires_at, used_at")
       .eq("token", token)
       .maybeSingle();
 
@@ -36,6 +44,13 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
       error = "招待リンクの有効期限が切れています。担当者まで再発行をご依頼ください。";
     } else {
       invite = { email: data.email, company_name: data.company_name };
+      // 審査申込み (/apply) 経由の招待なら、申請内容を登録フォームにプレフィルして二重入力を防ぐ
+      const { data: app } = await adminSb
+        .from("shop_applications")
+        .select("contact_name, phone, address, delivery_address, business_type, opened_at")
+        .eq("invite_id", data.id)
+        .maybeSingle();
+      application = app ?? null;
     }
   }
 
@@ -59,6 +74,16 @@ export default async function RegisterPage({ searchParams }: { searchParams: Sea
             token={token!}
             prefillEmail={invite?.email ?? ""}
             prefillCompany={invite?.company_name ?? ""}
+            prefillContact={application?.contact_name ?? ""}
+            prefillPhone={application?.phone ?? ""}
+            prefillAddress={application?.address ?? ""}
+            prefillDelivery={
+              application && application.delivery_address !== application.address
+                ? application.delivery_address
+                : ""
+            }
+            prefillBusinessType={application?.business_type ?? ""}
+            prefillOpenedAt={application?.opened_at ?? ""}
           />
         )}
       </div>

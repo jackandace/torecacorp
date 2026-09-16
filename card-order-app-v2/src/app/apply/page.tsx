@@ -22,7 +22,7 @@ export default function ApplyPage() {
             以下のフォームに必要事項をご入力のうえ、お申込みください。
           </p>
           <ul className="list-disc list-outside ml-5 space-y-1 text-slate-600">
-            <li>審査結果は通常 <strong>2〜3営業日以内</strong> にメールでご連絡します。</li>
+            <li>審査結果は、内容の確認ができ次第メールでご連絡します。</li>
             <li>実店舗を運営されている事業者様が対象です（<strong>EC のみの店舗様とはお取引できません</strong>）。</li>
             <li>審査通過後、ショップアカウントの登録リンクをお送りします。</li>
           </ul>

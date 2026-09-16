@@ -95,7 +95,9 @@ export async function POST(_request: NextRequest, { params }: { params: { id: st
     <p style="margin:20px 0;text-align:center;">
       <a href="${registerUrl}" style="display:inline-block;background:#1d4ed8;color:#ffffff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;">ショップアカウントを登録する</a>
     </p>
-    <p style="font-size:12px;color:#64748b;">※ リンクの有効期限は <b>${INVITE_EXPIRES_DAYS}日間</b> です。期限が切れた場合は担当者までご連絡ください。<br>
+    <p style="font-size:12px;color:#64748b;">※ 登録フォームには申込み時の内容があらかじめ反映されています。変更がある場合は修正のうえご登録ください。<br>
+    ※ ご登録完了後、マイページより返金先口座のご登録をお願いいたします。<br>
+    ※ リンクの有効期限は <b>${INVITE_EXPIRES_DAYS}日間</b> です。期限が切れた場合は担当者までご連絡ください。<br>
     ※ ボタンが開けない場合は次の URL をブラウザに貼り付けてください。<br>
     <span style="word-break:break-all;">${registerUrl}</span></p>
   </div>
