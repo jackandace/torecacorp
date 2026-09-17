@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NOVA GACHA 実装トラッキングシート（7/24 MTG反映）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p:#570DF8; --pink:#C4157F; --cyan:#0E7490; --teal:#0D9488;
+  --su:#15803D; --wa:#B45309; --err:#DC2626;
+  --bg:#F6F5FB; --panel:#FFFFFF; --panel2:#FAF9FE;
+  --line:#E3E0F0; --line2:#EDEAF6;
+  --ink:#1A1830; --muted:#6B6590; --soft:#8A84AC;
+}
+*{box-sizing:border-box;font-family:"M PLUS 1p",-apple-system,Meiryo,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.65}
+a{color:var(--cyan)}
+code{background:#F0EDFA;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11.5px;color:#4527A0}
+
+.hero{padding:26px 22px 18px;background:linear-gradient(135deg,#FFFFFF,#F1EDFC 70%);border-bottom:1px solid var(--line)}
+.hero h1{margin:0;font-size:21px;font-weight:800;color:#241455}
+.hero h1 .cat{margin-right:8px}
+.hero .sub{font-size:12.5px;color:var(--muted);margin-top:6px}
+.hero .sub b{color:var(--p)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip{font-size:11.5px;padding:4px 11px;border-radius:999px;border:1px solid var(--line);background:#FFFFFF;color:var(--muted)}
+.chip.hot{border-color:var(--pink);color:var(--pink);background:#FDF2F8}
+.chip.go{border-color:var(--su);color:var(--su);background:#F0FDF4}
+
+.tabs{display:flex;gap:8px;padding:12px 20px;background:#FFFFFF;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:30;flex-wrap:wrap;box-shadow:0 1px 4px rgba(60,40,120,.06)}
+.tab{padding:7px 14px;border:1px solid var(--line);border-radius:999px;cursor:pointer;font-size:12.5px;background:#F6F5FB;color:var(--muted);user-select:none}
+.tab.active{background:var(--p);color:#fff;border-color:var(--p)}
+.sec{display:none;padding:22px 20px 60px;max-width:980px;margin:0 auto}
+.sec.show{display:block}
+h2{font-size:16px;margin:0 0 4px;color:#241455}
+.lead{font-size:12.5px;color:var(--muted);margin:0 0 18px}
+h3{font-size:14px;margin:26px 0 10px;color:#3B2A78}
+
+/* status board */
+.board{display:flex;flex-direction:column;gap:10px}
+.row{display:grid;grid-template-columns:150px 1fr 140px;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 16px;box-shadow:0 1px 3px rgba(60,40,120,.05)}
+.row .fid{font-size:11px;color:var(--soft)}
+.row .fname{font-weight:700;font-size:13.5px}
+.row .note{font-size:12px;color:#4A4370}
+.st{font-size:11.5px;font-weight:800;text-align:center;padding:6px 8px;border-radius:8px;border:1px solid}
+.st.done{color:var(--su);border-color:#86EFAC;background:#F0FDF4}
+.st.almost{color:var(--cyan);border-color:#A5D8E6;background:#F0F9FF}
+.st.wait{color:var(--wa);border-color:#FCD34D;background:#FFFBEB}
+.st.open{color:var(--pink);border-color:#F9A8D4;background:#FDF2F8}
+.st.go{color:#fff;border-color:var(--su);background:linear-gradient(90deg,#16A34A,#15803D)}
+
+/* cards */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(60,40,120,.05)}
+.card.hotline{border-color:#F9A8D4;box-shadow:0 2px 10px rgba(196,21,127,.10)}
+.card.decided{border-color:#86EFAC;box-shadow:0 2px 10px rgba(21,128,61,.10)}
+.card h4{margin:0 0 8px;font-size:14px;color:#241455}
+.card h4 .tag{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:6px;margin-left:8px;vertical-align:2px}
+.tag.new{background:#F0F9FF;color:var(--cyan);border:1px solid #A5D8E6}
+.tag.hold{background:#FFFBEB;color:var(--wa);border:1px solid #FCD34D}
+.tag.go{background:#F0FDF4;color:var(--su);border:1px solid #86EFAC}
+.tag.upd{background:#F3EEFF;color:#6D28D9;border:1px solid #C4B5FD}
+.kv{display:grid;grid-template-columns:96px 1fr;gap:6px 12px;font-size:12.5px;margin-top:8px}
+.kv dt{color:var(--muted);font-weight:700}
+.kv dd{margin:0;color:#332C58}
+ul.q{margin:8px 0 0;padding-left:0;list-style:none}
+ul.q li{font-size:12.5px;padding:7px 0 7px 22px;position:relative;border-bottom:1px dashed var(--line2)}
+ul.q li:last-child{border-bottom:none}
+ul.q li:before{content:"？";position:absolute;left:0;top:7px;color:var(--pink);font-weight:800;font-size:12px}
+ul.pt{margin:8px 0 0;padding-left:0;list-style:none}
+ul.pt li{font-size:12.5px;padding:5px 0 5px 18px;position:relative}
+ul.pt li:before{content:"▸";position:absolute;left:2px;color:var(--teal)}
+.scale{font-size:11.5px;color:var(--muted)}
+.scale b{color:var(--wa)}
+
+/* timeline */
+.tl{border-left:2px solid #D6CCF5;margin:14px 0 0 8px;padding-left:20px}
+.tl .ev{position:relative;padding-bottom:20px}
+.tl .ev:before{content:"";position:absolute;left:-26px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 3px #E0F2F9}
+.tl .ev.milestone:before{background:var(--pink);box-shadow:0 0 0 3px #FBE3F1}
+.tl .ev.past:before{background:#C3BCDD;box-shadow:none}
+.tl .when{font-size:11.5px;font-weight:800;color:var(--cyan)}
+.tl .ev.milestone .when{color:var(--pink)}
+.tl .ev.past .when{color:var(--soft)}
+.tl .what{font-size:13px;font-weight:700;margin:2px 0}
+.tl .memo{font-size:12px;color:var(--muted)}
+
+/* checklist */
+.ckwrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:0 1px 3px rgba(60,40,120,.05)}
+.ckgroup{margin-bottom:18px}
+.ckgroup .gt{font-size:12px;font-weight:800;color:#6D28D9;margin-bottom:6px;letter-spacing:.04em}
+label.ck{display:flex;gap:10px;align-items:flex-start;font-size:13px;padding:8px 6px;border-radius:8px;cursor:pointer}
+label.ck:hover{background:#F6F5FB}
+label.ck input{margin-top:3px;accent-color:var(--p)}
+label.ck.on{color:var(--su)}
+label.ck .who{font-size:10.5px;font-weight:800;color:var(--cyan);border:1px solid #A5D8E6;background:#F0F9FF;border-radius:6px;padding:0 6px;margin-right:2px;white-space:nowrap;align-self:center}
+label.ck .who.cl{color:var(--wa);border-color:#FCD34D;background:#FFFBEB}
+.prog{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.prog .bar{flex:1;height:8px;border-radius:4px;background:#EDEAF6;overflow:hidden}
+.prog .f{height:100%;width:0%;background:linear-gradient(90deg,var(--p),var(--pink));transition:width .3s}
+.prog .n{font-size:12px;font-weight:800;color:var(--p);min-width:52px;text-align:right}
+
+.notice{border:1px solid #FCD34D;border-radius:10px;padding:10px 14px;font-size:12px;color:var(--wa);background:#FFFBEB;margin-top:16px}
+
+/* 原文メモ */
+details.raw{background:#FBFAFF;border:1px solid #D6CCF5;border-radius:12px;margin-bottom:14px;overflow:hidden}
+details.raw summary{cursor:pointer;padding:11px 16px;font-size:12.5px;font-weight:800;color:#6D28D9;user-select:none;list-style:none}
+details.raw summary:before{content:"▸ ";color:var(--pink)}
+details.raw[open] summary:before{content:"▾ "}
+.rawbody{padding:4px 16px 16px;border-top:1px dashed #D6CCF5}
+.rawline{display:grid;grid-template-columns:1fr 170px;gap:10px;align-items:baseline;padding:5px 0;border-bottom:1px dashed var(--line2);font-size:12.5px}
+.rawline:last-child{border-bottom:none}
+.rawline .org{color:#332C58;white-space:pre-wrap}
+.rawline .map{font-size:10.5px;font-weight:800;color:var(--cyan);text-align:right}
+.rawline .map.guess{color:var(--wa)}
+.rawline .map.fix{color:var(--su)}
+.rawline.head .org{color:var(--muted);font-weight:700}
+.orgq{font-size:11.5px;color:var(--muted);background:#FBFAFF;border-left:3px solid #C4B5FD;padding:6px 10px;border-radius:0 8px 8px 0;margin:0 0 10px}
+.orgq b{color:#6D28D9;font-weight:800}
+.mtgnote{font-size:12px;background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:8px 12px;margin-top:10px;color:#166534}
+.mtgnote b{color:var(--su)}
+@media(max-width:640px){.row{grid-template-columns:1fr;gap:6px}.st{width:fit-content}.rawline{grid-template-columns:1fr}.rawline .map{text-align:left}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1><span class="cat">🐈‍⬛</span>NOVA GACHA｜実装トラッキングシート</h1>
+  <div class="sub">最終更新 2026-09-11（<b>9/9 MTG＋9/10フレーム受領 反映</b>）／ 履歴: 7/20報告 → 7/24 → 8/12 → 8/24-25 → 9/9 MTG ／ 参照mock: <a href="https://torecacorp.vercel.app/NOVA-mock1-5.html" target="_blank">NOVA-mock1-5.html</a></div>
+  <div class="chips">
+    <span class="chip go">N-13 アプリ: 審査通過 ✅ 修正版リリース予定</span>
+    <span class="chip hot">9/9 MTG: N-17/N-18/N-19 新規確定（モック済・起票待ち）</span>
+    <span class="chip go">N-18 専用フレーム「NOVA SYSTEM」受領済（9/10）</span>
+    <span class="chip">エンジニア定例: 確認5件 回答待ち</span>
+    <span class="chip hot">弁護士法人響の件: 対応枠 新設（内容整理中）</span>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="show(0,this)">1. 進捗サマリ</div>
+  <div class="tab" onclick="show(1,this)">2. 既存機能 残タスク</div>
+  <div class="tab" onclick="show(2,this)">3. 機能リスト N-1〜N-8</div>
+  <div class="tab" onclick="show(3,this)">4. スケジュール</div>
+  <div class="tab" onclick="show(4,this)">5. アクション管理</div>
+</div>
+
+<!-- 1. summary -->
+<div class="sec show">
+  <h2>進捗サマリ（9/11 更新反映）</h2>
+  <p class="lead">元ネタは下の原文メモ6本（7/20〜8/25＋9/9 MTG決定サマリ）に保持。ナンバリング照合は常にここで。<br><b style="color:#15803D">①②③の対応はJira既存チケット（KAN-353/354/355）で確定: ①=01-c福袋 ／ ②=01-dレイド ／ ③=01-f裏ボタン</b>（③「タイミング検討中」＝裏ボタン保留とも整合）。</p>
+
+  <details class="raw">
+    <summary>原文メモ①｜7/20 追加実装作業状況更新（クライアント報告 全文・改変なし）</summary>
+    <div class="rawbody">
+      <div class="rawline head"><div class="org">https://torecacorp.vercel.app/NOVA-mock1-5.html</div><div class="map">参照mock</div></div>
+      <div class="rawline"><div class="org">課金限定ガチャ BT消費タイプ→完了本番反映済み</div><div class="map">= 01-a</div></div>
+      <div class="rawline"><div class="org">BT消費解放ガチャ→詳細画面のサムネロックデザイン修正のみ残す</div><div class="map">= 01-b</div></div>
+      <div class="rawline"><div class="org">① 仕様定義 工数確定→請求へ移行</div><div class="map fix">= 01-c 福袋争奪戦（KAN-353で確定）</div></div>
+      <div class="rawline"><div class="org">② 仕様定義中→仕様確定後に工数確認へ</div><div class="map fix">= 01-d レイド（KAN-354で確定）</div></div>
+      <div class="rawline"><div class="org">③ 仕様確定→工数確認へ（タイミング検討中）</div><div class="map fix">= 01-f 裏ボタン（KAN-355で確定）</div></div>
+      <div class="rawline head"><div class="org">追加相談機能（未確定分）</div><div class="map">新規4件 ↓</div></div>
+      <div class="rawline"><div class="org">・期間課金イベント機能（toraさん仕様）</div><div class="map">→ N-1</div></div>
+      <div class="rawline"><div class="org">・特定条件を満たしたユーザー様への招待ガチャ機能</div><div class="map">→ N-2</div></div>
+      <div class="rawline"><div class="org">・新規登録限定ガチャ機能の実装</div><div class="map">→ N-3</div></div>
+      <div class="rawline"><div class="org">・ドメイン強化プロジェクト（ブログ機能追加？）</div><div class="map">→ N-4</div></div>
+    </div>
+  </details>
+
+  <details class="raw">
+    <summary>原文メモ②｜7/24 MTG議事録「次のステップ」（Gemini自動生成・原文ママ＋対応ID）</summary>
+    <div class="rawbody">
+      <div class="rawline"><div class="org">[カードノヴァ] レド詳細の送付: レドに関する細かい要件を決定し文面で送付する。</div><div class="map fix">「レド」=レイド（01-d）確認済</div></div>
+      <div class="rawline"><div class="org">[j suzuki] 限定ガチャ構成案の作成: 新規会員登録向けの限定ガチャについて構成案を提出する。</div><div class="map">= N-3</div></div>
+      <div class="rawline"><div class="org">[j suzuki] ステップアップガチャの設計: 段階的に解放されるステップアップガチャの仕組みを整理する。</div><div class="map">= N-5（新規）</div></div>
+      <div class="rawline"><div class="org">[j suzuki] 招待ガチャ条件の構成案作成: 特定条件を満たしたユーザーに対する招待ガチャの条件設定について構成案を提示する。</div><div class="map">= N-2</div></div>
+      <div class="rawline"><div class="org">[j suzuki] インターバル機能の実装: ガチャ利用後に一定時間経過するまで再度利用できない制限機能の実装を進める。</div><div class="map">= N-6（新規）</div></div>
+      <div class="rawline"><div class="org">[j suzuki] マスコット動作の確認: サイト内でマスコットが動き回るアニメーションの実装可否を確認する。</div><div class="map">= N-7（新規）</div></div>
+      <div class="rawline"><div class="org">[j suzuki] 演出数の拡張確認: スロット演出の数を5個から10個へ増やすことが可能かを確認する。</div><div class="map">= N-8（新規）</div></div>
+      <div class="rawline head"><div class="org">※ ガチャ背景デザインのルール（グラデはコード実装可／柄はPC・SP別画像）の議論あり → 新規限定ガチャ（N-3）のデザイン要件として整理</div><div class="map fix">= N-3 に統合（確認済）</div></div>
+    </div>
+  </details>
+
+  <details class="raw">
+    <summary>原文メモ③｜8/12 MTG議事録「次のステップ」（Gemini自動生成・原文ママ＋対応ID）</summary>
+    <div class="rawbody">
+      <div class="rawline"><div class="org">[j suzuki] 新規ガチャ実装: 新規会員登録限定ガチャにおいて、ユーザー条件設定の時間を任意で選択できるように実装し、タイマー表示を追加する。</div><div class="map">= N-3（実装着手）</div></div>
+      <div class="rawline"><div class="org">[カードノヴァ] 優先順位の決定: アプリの決済周りの修正とロジック改善のどちらを先に行うか社内で検討し、結果を連絡する。</div><div class="map">= N-13 vs N-14(KAN-358)</div></div>
+      <div class="rawline"><div class="org">[j suzuki] SMS認証要件確認: 抽選販売機能の申し込み時にSMS認証が必須となるよう仕様の是非を確認する。</div><div class="map">= N-11（新規）</div></div>
+      <div class="rawline"><div class="org">[j suzuki] 背景演出の確認: 背景にキャラクターを登場させるアニメーションの実装が可能か確認する。</div><div class="map">= N-7（継続）</div></div>
+      <div class="rawline"><div class="org">[j suzuki] 仕様情報の送付: 新規会員登録限定の期間限定ガチャについて、修正内容を反映した最新のイメージおよび仕様を確認用として送付する。</div><div class="map">= N-3（仕様送付）</div></div>
+      <div class="rawline"><div class="org">[j suzuki] 福袋争奪戦の反映: 福袋争奪戦の結果をシステムへ反映させる。</div><div class="map">= 01-c（結果反映）</div></div>
+      <div class="rawline"><div class="org">[j suzuki] 管理画面の表記変更: 管理画面上の終了時間の設定を、公開期間としての日時指定形式へ変更することを検討する。</div><div class="map">= N-12（新規）</div></div>
+      <div class="rawline head"><div class="org">※ 詳細より: 既存ユーザー向け「新規登録ガチャ実装記念ガチャ」を別枠で設ける方針で合意 ／ 新ロジック負荷テスト200〜300万規模・初動15分で約30万口処理OK ／ N-3デザインは紫基調の夜空・宇宙イメージ＋タイマー表示（SMS認証完了後から計測）</div><div class="map">= N-10（新規）ほか</div></div>
+    </div>
+  </details>
+
+  <details class="raw">
+    <summary>原文メモ④｜8/24 状況更新＋当選一覧に関するやり取り（原文ママ）</summary>
+    <div class="rawbody">
+      <div class="rawline head"><div class="org">福袋争奪戦と新規会員限定ガチャ機能類は本番まで反映したので一旦クローズ（追加修正の可能性はあり）</div><div class="map">= 01-c / N-3 クローズ</div></div>
+      <div class="rawline head"><div class="org">現在口数改善＋アプリ再審査の対応を優先度最大で進行中です。</div><div class="map">= N-14 ＋ N-13</div></div>
+      <div class="rawline head"><div class="org">加えて当選結果が見える機能のロジック修正を依頼受けていますがここがどう進めるかまだ未確定で詰める必要があり</div><div class="map">= N-15（新規）</div></div>
+      <div class="rawline"><div class="org">00:34 クライアント: 最新の当選一覧についてのご質問です！現在はリアルタイムで当選内容が表示されるような設計になっているかと思いますが、これをガチャ完売後という条件に変更することは可能でしょうか？公開ロジックを変えるだけなので、大して難しい内容ではないと考えています。↑これもお手隙の時にご確認いただけますと幸いです。</div><div class="map">N-15 発端</div></div>
+      <div class="rawline"><div class="org">06:32 じぇい: 結論可能かと思います。どれくらいでできるかは確認します</div><div class="map">可否回答済</div></div>
+      <div class="rawline"><div class="org">13:53 クライアント: こちらに関して特段作業が必要ない事案かと思いますが、追加実装になるということですか？</div><div class="map guess">認識ギャップ</div></div>
+      <div class="rawline"><div class="org">23:54 じぇい: いや多分ですが完売後に当選結果を見るボタンを設置するとか、これまで通りの途中から公開するというルールも維持したいとか、設定方法の拡張性って少なからず出てきませんかね？ルール変えるだけで済まないか結局改善することになる可能性もあるならそれらも考慮しておかねばいけないかなと、</div><div class="map">拡張性の論点提示</div></div>
+    </div>
+  </details>
+
+  <details class="raw">
+    <summary>原文メモ⑤｜8/24-25 続報: N-15方式確定・本番直反映の合意・直近スケジュール（原文ママ）</summary>
+    <div class="rawbody">
+      <div class="rawline"><div class="org">8/24 13:48 クライアント: 現状、まずはユーザーの反応を見たいと考えているため、どちらの公開方法も並行して運用していく想定です。そのため、管理画面から「リアルタイム公開」「完売後に公開」のどちらも選択できる設計にしたいと考えております。あわせて、こちらを実装する場合にどの程度の期間がかかりそうか、また実装する上での考慮点や懸念点などがございましたら、ご教示いただけますと幸いです。</div><div class="map fix">= B案 確定</div></div>
+      <div class="rawline"><div class="org">14:52 じぇい: 並行運用も考慮してどうすべきか費用がかからないような方法も検討して一回エンジニアと相談してきます。軽微な修正であれば工数なしで吸収できるよう社内調整はうまくやります。</div><div class="map">対応方針</div></div>
+      <div class="rawline"><div class="org">20:41 / 20:49 クライアント: いつ頃わかりますでしょうか？ こちら早急に対応していただきたいです。</div><div class="map guess">緊急度: 高</div></div>
+      <div class="rawline"><div class="org">20:54 じぇい: 口数改善入っているので直接本番あげるしか方法ないですがそれは許容できますか？</div><div class="map">制約提示</div></div>
+      <div class="rawline"><div class="org">21:02 じぇい: （テスト環境経由は）口数改善を一回取り外しする作業だけで1日はロスしますのとアプリもずれ再度上げ直しの作業も発生する（中略）今の状態で当選履歴の作業やるならリスク承知で本番直で作業するしかないですが、リスク考えたら表示上の改善レベルでないと流石に怖いです…</div><div class="map guess">リスク＆スコープ制約</div></div>
+      <div class="rawline"><div class="org">21:08-21:13 クライアント: アプリより前に組み込むことはできますか？ ／ じぇい: タイミング的に間に合います。今日〜明日でアプリ行く予定なので先に当選結果走らせれば可能です。</div><div class="map">順序確定</div></div>
+      <div class="rawline"><div class="org">21:16-21:18 じぇい: 口数は正直裏側のロジックの話なので審査には影響及ぼしません。（stg検証は一定必要なので本番反映までに一定時間がかかる見込み。ただ見た目上の変化が起きないので、当選結果修正した時点でアプリ審査は進められる判断）</div><div class="map">審査影響なし判断</div></div>
+      <div class="rawline"><div class="org">21:38 クライアント: 承知しました、それでお願いいたします！</div><div class="map fix">本番直反映 了承</div></div>
+      <div class="rawline"><div class="org">23:10 じぇい: 今晩まで口数改善対応で手一杯なのようで当選履歴の件明日対応予定とのことです。</div><div class="map">8/25 対応予定</div></div>
+      <div class="rawline head"><div class="org">【8/25 追加依頼・スクショ】当選履歴の表示を下ではなくこの位置（詳細ページのメインバナー直下）に設定したい → 可能か？</div><div class="map">= N-15 表示位置変更</div></div>
+      <div class="rawline head"><div class="org">【確定スケジュール】8/25（今晩）当選結果履歴 → 8/26 アプリ修正 → 8/27 審査開始（Apple Developerの更新が必要）</div><div class="map fix">直近3日 確定</div></div>
+    </div>
+  </details>
+
+  <details class="raw" open>
+    <summary>原文メモ⑥｜9/9 MTG決定サマリ＋9/10-11 続報（要点・対応ID付き）</summary>
+    <div class="rawbody">
+      <div class="rawline"><div class="org">アプリ審査通過。画面修正部分は直したverでリリース予定（スコープ外扱いでOK）</div><div class="map fix">N-13 ✅</div></div>
+      <div class="rawline"><div class="org">課金消費型の明示変更: トップはサムネフレームのみ／説明・ボタンは詳細のみ。説明はリッチカード化（あと○円・残り挑戦枠・引ける最大回数）</div><div class="map">= N-17</div></div>
+      <div class="rawline"><div class="org">ガチャボタンは既存デザインのまま33%×3横並び。当選結果画面にも展開</div><div class="map">= N-17</div></div>
+      <div class="rawline"><div class="org">フッターメニュー確定: ガチャ/獲得景品/イベント/アイテム交換所/マイページ（5タブ）＋ヘッダーのマイページアイコン削除。旧タブ位置に「当選結果 見える/見えない」切替。FVはガチャ2個並ぶまで圧縮</div><div class="map fix">= N-17 確定</div></div>
+      <div class="rawline"><div class="org">当選結果非表示: 既存トグル流用。ON時は専用フレーム適用、完売で自動OFF→履歴閲覧可（推奨実装: hideFlag && 残&gt;0 の判定式）</div><div class="map">= N-18</div></div>
+      <div class="rawline"><div class="org">9/10 専用フレーム受領（Drive）: PC_ラインナップ枠_NOVA SYSTEM（バーあり/なし）＋下部バー単体の3点 → モックに実データ埋込済。SP用素材の有無 要確認</div><div class="map fix">= N-18 素材確定</div></div>
+      <div class="rawline"><div class="org">レベル制御のLv表記を削除→最低保証コイン表示へ。値は景品の最小交換ポイント数を自動適用（項目追加なし・二重入力/入れ間違い防止）</div><div class="map">= N-19</div></div>
+      <div class="rawline"><div class="org">エンジニア定例 確認5件: ①プッシュ通知＋バイブ ②起動時スプラッシュ ③当選結果ボタンのサムネ直下移動（復活分） ④演出スロット5→10（KAN-377） ⑤当選履歴の並び順ルール（全体＋10/100連の束内）</div><div class="map">回答待ち</div></div>
+      <div class="rawline head"><div class="org">弁護士法人響の件: 対応が増加中 → タスク枠を新設（詳細は本シート未収載・じぇいさんから内容受領後に反映）</div><div class="map guess">内容 整理中</div></div>
+    </div>
+  </details>
+
+  <h3>既存機能ステータスボード</h3>
+  <div class="board">
+    <div class="row">
+      <div><div class="fid">01-a</div><div class="fname">課金限定ガチャ BT消費タイプ</div></div>
+      <div class="note">本番反映済み。追加対応なし。</div>
+      <div class="st done">完了・本番反映</div>
+    </div>
+    <div class="row">
+      <div><div class="fid">01-b</div><div class="fname">BT消費解放ガチャ</div></div>
+      <div class="note">詳細画面のサムネロックデザイン修正 <b>反映済み</b>（7/24）。全実装完了。</div>
+      <div class="st done">完了・反映済</div>
+    </div>
+    <div class="row">
+      <div><div class="fid">N-3</div><div class="fname">新規会員登録限定ガチャ 機能類</div></div>
+      <div class="note">タイマー・任意時間設定・宇宙デザイン含め<b>本番反映・クローズ</b>(8/24)。追加修正の可能性はあり。※記念ガチャ(N-10)の公開状況は要確認。</div>
+      <div class="st done">クローズ（本番反映）</div>
+    </div>
+    <div class="row">
+      <div><div class="fid">01-c</div><div class="fname">福袋争奪戦</div></div>
+      <div class="note">結果反映まで完了し<b>本番反映・クローズ</b>（8/24）。追加修正の可能性はあり（要望受領時に再オープン）。</div>
+      <div class="st done">クローズ（本番反映）</div>
+    </div>
+    <div class="row">
+      <div><div class="fid">01-d</div><div class="fname">レイドイベント</div></div>
+      <div class="note">カードノヴァ様が細かい要件を<b>文面で送付予定</b>（レイド詳細）。受領後、未決8項目をブリーフに反映して仕様確定へ。性能改善（7月末）とあわせて着工判断。</div>
+      <div class="st wait">要件文面 受領待ち</div>
+    </div>
+    <div class="row">
+      <div><div class="fid">01-f</div><div class="fname">裏ボタン（確定音・GOGOランプ）</div></div>
+      <div class="note"><b>仕様確定・保留中</b>（=報告の③、KAN-355）。実装再開タイミングは別途判断（01-c/01-d優先のため後回し）。</div>
+      <div class="st wait">仕様確定・保留</div>
+    </div>
+    <div class="row">
+      <div><div class="fid">01-E</div><div class="fname">イベントスペース</div></div>
+      <div class="note"><b>反映済み</b>（7/24）。以降のイベント（01-c 福袋 → 01-d レイド）はこの基盤の上に載せる。</div>
+      <div class="st done">反映済</div>
+    </div>
+    <div class="row">
+      <div><div class="fid">N-14</div><div class="fname">新ガチャロジック改善（口数改善・KAN-358）</div></div>
+      <div class="note">負荷テストクリア済（30万口/15分）。本適用対応中（8/25時点でstg検証→本番反映の段取り）。<b>現況は定例で確認</b>。</div>
+      <div class="st go">本適用 対応中</div>
+    </div>
+    <div class="row">
+      <div><div class="fid">N-13</div><div class="fname">アプリ 決済修正・再審査</div></div>
+      <div class="note"><b>審査通過 ✅</b>（9/9報告）。画面修正部分は修正版でリリース予定。リリース確認をもってクローズ。</div>
+      <div class="st done">審査通過</div>
+    </div>
+    <div class="row">
+      <div><div class="fid">N-16</div><div class="fname">配送限定機能（交換タイプ＋バッジ）</div></div>
+      <div class="note">KAN-483起票済（9/3・原さん）。既存景品テーブルに交換タイプ列追加＋カードにバッジ（状態マーク直下・コード実装）。tora実装流用方針。</div>
+      <div class="st wait">実装中（原さん）</div>
+    </div>
+    <div class="row">
+      <div><div class="fid">N-17</div><div class="fname">課金消費型 表示変更＋フッターメニュー＋FV圧縮</div></div>
+      <div class="note">9/9 MTG確定。トップ=サムネフレームのみ／ボタン33%×3横並び／フッター5タブ（マイページ移動・ヘッダーアイコン削除）／当選結果 見える・見えない切替／リッチ説明カード。<b>モック確定済→起票待ち</b>。</div>
+      <div class="st open">確定・起票待ち</div>
+    </div>
+    <div class="row">
+      <div><div class="fid">N-18</div><div class="fname">当選結果非表示ガチャ（専用フレーム＋完売時自動OFF）</div></div>
+      <div class="note">既存トグル流用。<b>専用フレーム「NOVA SYSTEM」受領済（9/10）</b>・モックに実データ埋込済。SP用素材の有無 要確認。<b>起票待ち</b>。</div>
+      <div class="st open">確定・起票待ち</div>
+    </div>
+    <div class="row">
+      <div><div class="fid">N-19</div><div class="fname">最低保証コイン表示（Lv表記置換・自動適用）</div></div>
+      <div class="note">値は景品の最小交換pt数を自動適用（管理画面の項目追加なし）。境界条件3点（0/未設定除外・配送限定の扱い・景品0件）を確定後に実装。<b>起票待ち</b>。</div>
+      <div class="st open">確定・起票待ち</div>
+    </div>
+    <div class="row">
+      <div><div class="fid">響</div><div class="fname">弁護士法人響の件（新規対応枠）</div></div>
+      <div class="note"><b>内容整理中</b>——本シート未収載の案件。経緯・対応事項・期限をじぇいさんから受領後に反映（機能開発と別トラックで管理想定）。</div>
+      <div class="st open">内容確認中</div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. remaining -->
+<div class="sec">
+  <h2>既存機能 残タスク</h2>
+  <p class="lead">新規N系と切り分けて、既存01系でクローズすべき項目。</p>
+
+  <div class="card hotline">
+    <h4>N-15｜当選結果機能改善（B案確定・8/25 本番直反映で対応）</h4>
+    <p class="orgq"><b>確定（8/24 13:48 クライアント回答）:</b> ユーザー反応を見たいため<b>両公開方式の並行運用</b>を想定 → <b>管理画面から「リアルタイム公開」「完売後に公開」を選択できる設計</b>（=B案）で確定。あわせて期間・考慮点・懸念点の提示依頼あり。</p>
+    <ul class="pt">
+      <li><b>スコープ2点</b>: ① 公開方式の選択機能（リアルタイム/完売後・管理画面設定）② <b>表示位置の変更</b>（8/25追加依頼: 当選履歴をページ下部→詳細ページのメインバナー直下へ・スクショ指定あり）</li>
+      <li><b>反映方法: 本番直反映</b>——N-14 口数改善が本番作業中のため、stg経由だと口数改善の取り外しで1日ロス＋アプリ日程もずれるため。<b>21:38 クライアント了承済み</b>（リスク受容の記録は原文メモ⑤）</li>
+      <li><b>スコープ制約（じぇい 21:02）</b>: 本番直で行う作業はリスク上「<b>表示上の改善レベル</b>」に留める方針を表明済み。表示位置変更は該当。公開方式の設定機能がロジック側に踏み込む場合は範囲の線引きをエンジニアと確認</li>
+      <li><b>順序</b>: アプリ提出より先に当選結果対応を走らせる（8/25今晩対応予定・エンジニアは今晩まで口数改善で手一杯）</li>
+      <li>費用方針: 軽微な修正は工数なしで吸収できるよう社内調整（じぇい 14:52）</li>
+    </ul>
+  </div>
+
+  <div class="card decided">
+    <h4>N-3｜新規会員登録限定ガチャ 実装スプリント<span class="tag go">本番反映・クローズ</span></h4>
+    <ul class="pt">
+      <li><b>8/24 本番反映まで完了しクローズ</b>（追加修正の可能性あり・要望受領時に再オープン）</li>
+      <li>実装済み仕様（記録）: 任意時間設定／タイマー表示／SMS認証完了起点／紫基調の夜空・宇宙デザイン</li>
+    </ul>
+  </div>
+
+  <div class="card decided">
+    <h4>01-c｜福袋争奪戦<span class="tag go">結果反映済み・クローズ</span></h4>
+    <ul class="pt">
+      <li><b>8/24 結果反映まで完了しクローズ</b>（追加修正の可能性あり）</li>
+      <li>次回開催時に棚卸しする運用課題（メモ）: アクセス集中対策・ランキング集計負荷 ※N-14本適用後は前提が改善される見込み</li>
+    </ul>
+  </div>
+
+  <div class="card decided">
+    <h4>01-b｜詳細画面 サムネロックデザイン修正<span class="tag go">反映済み・クローズ</span></h4>
+    <ul class="pt">
+      <li><b>7/24 反映完了</b>。これで01-bは全実装完了（記録として残置）</li>
+      <li>採用方式: A案（ボタンエリアロック）＋サムネロックオーバーレイ、詳細画面はチェーン <code>opacity:0</code>（CSS変数制御）</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h4>01-d｜レイド 要件文面の受領 → ブリーフ反映（8/12 言及なし・受領待ち継続）</h4>
+    <ul class="pt">
+      <li>7/24 MTG: カードノヴァ様がレイドの細かい要件を決定し<b>文面で送付</b>いただくことに（「レド」表記はレイドで確認済み）</li>
+      <li>受領後: raid-mtg-brief.html の未決8項目に回答を突合 → 未回答分のみ再質問 → 仕様確定 → 工数確認（②の完了）</li>
+      <li>前提: バックエンド性能改善（BGギフト生成・DBアーカイブ、7月末目標）の完了確認</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 3. features -->
+<div class="sec">
+  <h2>機能リスト N-1〜N-8</h2>
+  <p class="lead">N-1〜N-4は7/20報告分、N-5〜N-8は7/24 MTG、N-10〜N-13は8/12 MTGで追加（N-9はN-3統合により欠番）。N-14=ロジック改善（KAN-358）。N-15=8/24追加。N-16=9/3（KAN-483）。N-17〜N-19=9/9 MTG確定（各モック確定済）。仮番号（正式ID採番は着手決定時）。各カードに原文/議事録の該当箇所を併記。<br><b>Jira工数確認チケット起票済み（7/24）:</b> N-1=KAN-370 / N-2=KAN-371 / N-3=KAN-372 / N-4=KAN-373 / N-5=KAN-374 / N-6=KAN-375 / N-7=KAN-376 / N-8=KAN-377（既存: 01-c=KAN-353, 01-d=KAN-354, 01-f=KAN-355）。起票状況: N-15=KAN-455済 / N-16=KAN-483済 / <b>N-17・N-18・N-19は未起票（次アクション）</b> / N-10〜N-12未起票 / N-14=KAN-358。</p>
+
+  <div class="card decided">
+    <h4>N-5｜ステップアップガチャ<span class="tag go">導入決定</span><span class="tag new">7/24 新規</span></h4>
+    <p class="orgq"><b>議事録:</b>「ステップ1を引いたユーザーがステップ2へと進む流れを作る仕組みであり、奥へ進むほど当選確率が高まるような仕様」（継続率向上目的・j suzuki提案）</p>
+    <dl class="kv">
+      <dt>決定事項</dt><dd>導入を正式決定。カードノヴァ様も高評価。</dd>
+      <dt>次アクション</dt><dd><b>[j suzuki]</b> 段階的に解放される仕組みの設計整理</dd>
+      <dt>流用資産</dt><dd>01-bの「ユーザー×ガチャ単位の解放記録」を段階化（ステップNクリア→ステップN+1解放）すれば土台になる。将来拡張メモの「段階制」がまさにこれ。</dd>
+      <dt>規模感</dt><dd class="scale"><b>中</b>。解放記録の段階管理＋ステップ別確率設定（管理画面）＋ステップ進行UI。</dd>
+    </dl>
+    <ul class="q">
+      <li>ステップ数は固定（例3段）か管理画面で可変か</li>
+      <li>ステップ進行の条件: 前ステップを「1回引く」or「完売させる」or「N回引く」</li>
+      <li>進行状態のリセット: なし（永続）/ 期間毎 / N-6インターバルと連動</li>
+      <li>「奥ほど当選確率が高い」の実装: ステップ別に別ガチャ（在庫別）とするのが既存構成と整合的か</li>
+    </ul>
+  </div>
+
+  <div class="card decided">
+    <h4>N-6｜インターバル機能（ユーザー起点リセット）<span class="tag go">実装へ</span><span class="tag new">7/24 新規</span></h4>
+    <p class="orgq"><b>議事録:</b>「現在24時間でリセットされるガチャの仕組みを、ユーザーが最後に回した時間を起点として、例えば6時間や8時間後に再度引けるようになる仕組みへ変更したい」→ ラストガチャのログデータ確認済み・理論上実装可能</p>
+    <dl class="kv">
+      <dt>決定事項</dt><dd>技術的実現可能性を確認済み。実装に向けた整理を進める。</dd>
+      <dt>次アクション</dt><dd><b>[j suzuki]</b> 実装整理（既存「ガチャ条件: 1日1回」の判定起点を固定時刻→最終利用時刻に変更）</dd>
+      <dt>規模感</dt><dd class="scale"><b>小〜中</b>。ラストガチャログは既存。判定ロジック変更＋管理画面にインターバル時間設定（時間数）を追加。</dd>
+    </dl>
+    <ul class="q">
+      <li>既存の「1日1回」ガチャは全て新方式に移行か、ガチャ毎に方式選択（日次リセット/インターバル）か</li>
+      <li>インターバル時間はプリセット（6h/8h/24h等）か自由入力か</li>
+      <li>残り時間のユーザー表示（カウントダウン）の要否 ※タイマーUIは01-cの実装を流用可</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h4>N-7｜マスコット動作（ノヴァ君アニメーション）<span class="tag upd">8/12 継続</span></h4>
+    <p class="orgq"><b>議事録(7/24):</b>「キャラクター『ノヴァ君』をサイト内で動かし、時折ガチャ画面に登場させる演出」／ <b>8/12:</b>「背景にキャラクターを登場させるアニメーションの実装が可能か確認する」（=背景演出として継続、確認アクション再掲）</p>
+    <dl class="kv">
+      <dt>次アクション</dt><dd><b>[j suzuki]</b> 実装可否の確認（アニメーション方式: スプライト/Lottie/動画、表示タイミング制御、パフォーマンス影響）</dd>
+      <dt>規模感</dt><dd class="scale">素材次第。既存アセットの有無で<b>小〜中</b>。素材制作が必要なら別途デザイン工数。</dd>
+    </dl>
+    <ul class="q">
+      <li>ノヴァ君のアニメーション素材は先方支給か、こちらで制作か</li>
+      <li>登場箇所・頻度（常時徘徊 or ランダム出現 or 特定操作トリガー）</li>
+      <li>演出OFF設定（01-fの演出モード設定）との統合要否</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h4>N-8｜演出スロット数の拡張（5個→10個）<span class="tag new">7/24 新規</span></h4>
+    <p class="orgq"><b>議事録:</b>「現在各所5個となっている演出スロットを10個に増やす」</p>
+    <dl class="kv">
+      <dt>次アクション</dt><dd><b>[j suzuki]</b> 可否確認。管理コンソールの演出マスタ（動画・Supabase storage）＋ランク別割当の上限が5に固定されている箇所の特定</dd>
+      <dt>規模感</dt><dd class="scale">上限が設定値なら<b>極小</b>、UIやDBスキーマに固定されていれば<b>小</b>。動画ストレージ容量・読み込みへの影響も確認。</dd>
+    </dl>
+    <ul class="q">
+      <li>「各所5個」の正確な対象（当たり演出の割当枠か、演出マスタ登録数か）をエンジニアに確認</li>
+    </ul>
+  </div>
+
+  <div class="card decided">
+    <h4>N-10｜新規登録ガチャ実装記念ガチャ（既存ユーザー向け・別枠）<span class="tag go">実装決定</span><span class="tag new">8/12 新規</span></h4>
+    <p class="orgq"><b>議事録:</b> 既存ユーザーが新規登録ガチャを引けない問題に対し、当初の「24時間限定で引けるようにする案」はボタン設置の工数を考慮して見送り、代わりに<b>新規登録ガチャ実装記念ガチャを別枠で設ける方針で合意</b>。</p>
+    <dl class="kv">
+      <dt>位置づけ</dt><dd>N-3リリースに合わせた既存ユーザー向け救済/プロモ施策。通常ガチャの枠組みで作成できる可能性が高い。</dd>
+      <dt>規模感</dt><dd class="scale"><b>極小〜小</b>。既存のガチャ作成＋期間限定条件で構成できれば開発ゼロ、専用導線を作るなら小。</dd>
+    </dl>
+    <ul class="q">
+      <li>開催期間・対象（全ユーザー or 既存ユーザーのみ。既存限定なら逆条件の制御が必要=N-2条件基盤の先行ケース）</li>
+      <li>N-3本番リリースと同時公開か、後追いか</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h4>N-11｜抽選販売 SMS認証必須化（是非確認 → 仕様整理）<span class="tag new">8/12 新規</span></h4>
+    <p class="orgq"><b>議事録:</b> SMS認証未完了のユーザーが抽選販売に申し込み、当選後に認証が通らず他ユーザーが不満を感じる課題（カードノヴァ様指摘）。申込時にSMS認証必須とする仕様の是非を確認。</p>
+    <dl class="kv">
+      <dt>課題の構造</dt><dd>未認証でも申込可 → 当選 → 認証NGで受取不成立 → その当選枠が死に（or 繰上げ処理が煩雑になり）、落選した認証済みユーザーに不公平感が出る。</dd>
+      <dt>方式オプション</dt><dd><b>A案（推奨）: 申込時ブロック</b>——未認証ユーザーは申込ボタン押下時に認証誘導モーダルを表示し、認証完了まで申込を受け付けない。当選後の不成立が構造的に発生しなくなる。<br><b>B案: 申込許可＋当選条件化</b>——申込は通すが「当選確定にはSMS認証必須」とし、期限内未認証は自動繰上げ。繰上げロジックと通知が必要で、A案より工数増。<br><b>C案: 抽選母集団から除外</b>——未認証は申込ボタン自体を非活性化。UXは最もシンプルだが、認証への導線を強く出さないと機会損失。</dd>
+      <dt>影響範囲</dt><dd>抽選申込API（サーバサイドで認証状態チェック必須＝フロント制御のみは不可）／ 申込ボタンまわりのフロント表示 ／ A・C案なら当選処理は現行のまま。</dd>
+      <dt>要決定事項</dt><dd>① 採用案（A/B/C）② 既申込・未認証ユーザーへの遡及適用の有無と告知 ③ 認証誘導の文言・遷移先 ④ 適用開始日（開催中の抽選への途中適用は避けるのが安全）。</dd>
+      <dt>流用資産</dt><dd>SMS認証フローは既存（KAN-316 メール認証後SMS認証フローの知見）。認証状態フラグの参照のみで実装可能な見込み。</dd>
+      <dt>規模感</dt><dd class="scale">A案・C案なら<b>小</b>（判定＋誘導UI）。B案は繰上げ・通知込みで<b>中</b>。</dd>
+      <dt>次アクション</dt><dd><b>[j suzuki]</b> 現状申込フローの認証チェック有無をエンジニア確認 → A案ベースの仕様是非をクライアント回答</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h4>N-12｜管理画面「公開期間」表記変更（検討 → 方式整理）<span class="tag new">8/12 新規</span></h4>
+    <p class="orgq"><b>議事録:</b> 現在の「終了時間」表記がユーザーへの見え方と乖離している可能性（カードノヴァ様指摘）。スタッフが管理しやすく誤解のない表示として、<b>「公開期間」として開始〜終了を一括で設定・表示する仕組み</b>への変更を検討。</p>
+    <dl class="kv">
+      <dt>課題の構造</dt><dd>管理画面は「終了時間」単体の設定・表示のため、スタッフが「ユーザーにいつからいつまで見えているのか」を直感的に把握しづらく、設定ミス（公開前提の時間と実際の表示期間の乖離）の温床になっている。</dd>
+      <dt>方式オプション</dt><dd><b>A案: ラベル/表示のみ変更</b>——設定項目は現行のまま、表記を「公開期間（開始〜終了）」に変え、一覧・編集画面に期間として並べて表示。データ構造変更なし・最速。<br><b>B案: 期間一括設定UI</b>——編集フォームを開始/終了の日時レンジ入力（datetime range）に改修し、バリデーション（開始&lt;終了、過去日時警告）を追加。<br><b>C案: B案＋ユーザー側表示連動</b>——公開期間をユーザー側の「公開予定」表示やカウントダウンにも連動（N-3タイマー実装の流用可）。</dd>
+      <dt>影響範囲</dt><dd>管理コンソール（Chakra UI）のガチャ編集フォーム・ガチャ一覧の列表示。B案以降はバリデーションとAPI受け渡し。既存の課金限定ガチャ「公開予定日+課金集計時間表示」（KAN-269）と表記の整合を取る。</dd>
+      <dt>要決定事項</dt><dd>① 採用案（A/B/C）② 既存ガチャデータの扱い（開始日時を持たないガチャのデフォルト値）③ 「終了時間」を参照している他画面・帳票の洗い出し ④ 適用対象（全ガチャ種別か、期間限定系のみか）。</dd>
+      <dt>規模感</dt><dd class="scale">A案<b>極小</b> ／ B案<b>小</b> ／ C案<b>小〜中</b>（ユーザー側連動の範囲次第）。</dd>
+      <dt>次アクション</dt><dd><b>[j suzuki]</b> A案即時＋B案を次スプリントの二段構えを推奨案としてクライアント提示 → 合意後に工数確認</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h4>N-13｜アプリ内課金 決済周りの修正（アプリ再審査対応）<span class="tag go">進行中・優先度最大</span><span class="tag upd">8/24 更新</span></h4>
+    <p class="orgq"><b>議事録:</b> アプリの審査通過に向け、<b>アプリ内課金を直接触れない形での実装変更</b>を検討中。他社事例を参考に決済周りを修正する方針。一定の工数が想定されるため、ロジック改善（N-14/KAN-358）との並行が困難な場合は優先順位で調整。</p>
+    <dl class="kv">
+      <dt>目的</dt><dd>ストア審査の通過。アプリ内から課金（コイン購入）に直接触れる導線が審査リスクになっているため、IAP（アプリ内課金）を経由しない構成へ変更する。</dd>
+      <dt>方針</dt><dd>他社オリパ/ガチャ系アプリの事例を参考に決済周りを修正。想定される型: アプリ内では購入導線を出さない/弱める、購入は外部ブラウザ（Web版）で完結させる、アプリは残高表示と消費のみ、など。※ 具体方式は事例調査の上で確定。</dd>
+      <dt>論点</dt><dd>① 対象OSと審査基準（iOS/Androidでガイドラインが異なる。外部リンク許容の最新状況確認）② アプリ内の見せ方（購入ボタン非表示か、外部誘導の文言・遷移方法か）③ Web決済側の受け皿（ログイン連携・購入後のアプリ残高反映のタイミング）④ 既存アプリユーザーへの影響（KAN-297 アプリ修正・KAN-144 キャッシュ問題の知見を参照）。</dd>
+      <dt>状況(8/25)</dt><dd><b>優先度最大で進行中</b>。確定スケジュール: <b>8/26 アプリ修正 → 8/27 審査開始</b>。⚠ 審査開始前に<b>Apple Developer の更新が必要</b>（期限つき要対応）。N-15当選結果対応（8/25）を先に走らせてからアプリ提出の順序で合意済み。</dd>
+      <dt>規模感</dt><dd class="scale"><b>中</b>。事例調査＋アプリ側UI変更＋Web決済導線整備＋審査再提出まで含む。調査フェーズと実装フェーズで工数を分けて見積るのが安全。</dd>
+      <dt>次アクション</dt><dd>事例調査 → 方式確定 → 実装 → 再審査提出</dd>
+    </dl>
+  </div>
+
+  <div class="card decided">
+    <h4>N-14｜新ガチャロジック改善（口数改善・本適用）<span class="tag go">進行中・優先度最大</span><span class="tag upd">採番: KAN-358</span></h4>
+    <p class="orgq"><b>位置づけ:</b> 既存進行中のKAN-358「NOVAさん新ロジック適応（口数改善）」をN系に採番（N-14）。決済修正（N-13）との優先順位議論で並べて扱うため。</p>
+    <dl class="kv">
+      <dt>内容</dt><dd>ガチャ抽選ロジックの刷新による口数上限・同時実行処理能力の改善。大口数ガチャ（背景: KAN-302「20万口上限を100万口に」要望）や高負荷イベントを支える基盤。</dd>
+      <dt>検証結果（8/12報告）</dt><dd><b>負荷テストを200〜300万の規模で実施し、初動15分で約30万口の処理が問題なく完了</b>。同時に実行可能なガチャの処理能力が大幅に向上することを確認済み。</dd>
+      <dt>状況(8/25)</dt><dd><b>本番適用作業中</b>（エンジニアは8/24晩まで本件で手一杯）。stg検証は一定必要で本番反映まで時間を要する見込み。<b>見た目上の変化がないためアプリ審査には影響しない判断</b>——当選結果修正が済んだ時点でアプリ審査を進められる（8/24 じぇい説明・原文メモ⑤）。</dd>
+      <dt>波及効果</dt><dd>01-d レイド・チームバトル等の高負荷イベント着工の前提条件がほぼ整う。福袋次回開催のアクセス集中懸念も軽減見込み。</dd>
+      <dt>次アクション</dt><dd>本番適用スケジュールの確定（大型イベントと重ねない日程調整）</dd>
+    </dl>
+  </div>
+
+  <div class="card hotline">
+    <h4>N-15｜当選結果機能改善（公開方式選択＋表示位置変更）<span class="tag go">B案確定・8/25対応</span><span class="tag upd">8/25 更新</span></h4>
+    <p class="orgq"><b>要望（8/24 やり取り）:</b> 当選一覧は現在リアルタイム表示の設計 → <b>ガチャ完売後に表示</b>の条件へ変更したい。クライアント認識は「公開ロジックを変えるだけ・特段作業不要では」。可否は「結論可能」と回答済み・工数確認中。</p>
+    <dl class="kv">
+      <dt>決着(8/24)</dt><dd>拡張性の指摘（じぇい 23:54）に対し、クライアントが<b>並行運用の意向を明確化</b>（ユーザー反応を見たい）→ <b>B案で確定</b>。認識ギャップは解消。</dd>
+      <dt>確定スコープ</dt><dd><b>① 公開方式の選択（B案）</b>——管理画面から「リアルタイム公開」「完売後に公開」をガチャ毎に選択。完売後方式は「当選結果を見る」ボタン＋完売判定との連動。<br><b>② 表示位置の変更（8/25追加）</b>——ガチャ詳細ページの当選履歴を、ページ下部から<b>メインバナー直下</b>（賞ライン表示の上のエリア・スクショ赤丸位置）へ移動。</dd>
+      <dt>反映方法</dt><dd><b>本番直反映</b>（N-14口数改善が本番作業中のため。stg経由は取り外しで1日ロス＋アプリ日程ずれ）。<b>クライアント了承済み（8/24 21:38）</b>。ただし本番直の作業は「表示上の改善レベル」に留めるスコープ制約を表明済み——①のうちロジックに踏み込む部分の扱いはエンジニアと線引き確認。</dd>
+      <dt>技術論点</dt><dd>完売判定のタイミングと表示切替の整合（キャッシュ）／ 完売に至らず期間終了するガチャの当選結果の扱い ／ 公開済みガチャへの遡及 ／ 表示位置変更に伴うレイアウト影響（賞ライン・コイン表示との間隔、モバイル幅）／ 当選情報を参照する他機能への影響。</dd>
+      <dt>残決定事項</dt><dd>① 完売に至らないガチャの表示ルール ② 既存公開済みガチャへの遡及有無 ③ 8/25本番直反映に含める範囲（表示位置のみ先行か、公開方式選択まで含むか）——エンジニア回答待ち。</dd>
+      <dt>規模感</dt><dd class="scale">表示位置変更は<b>極小〜小</b>（表示上の改善）。公開方式選択（B案本体）は<b>中</b>（設定UI＋判定分岐＋ボタンUI）——工数なし吸収の社内調整方針あり。</dd>
+      <dt>次アクション</dt><dd><b>[エンジニア]</b> 8/25 当選結果対応（今晩まで口数改善で手一杯→明日=8/25対応予定）／ <b>[じぇい]</b> 本番直反映に含める範囲の線引き確認・作業完了の見届け・クライアント報告</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h4>N-16｜配送限定機能<span class="tag go">実装中</span><span class="tag upd">KAN-483</span></h4>
+    <p class="orgq"><b>9/3依頼:</b> 既存景品テーブルに「交換タイプ」列（通常/pt交換限定/配送限定）を追加し、配送限定景品のカードにバッジ表示（状態マーク直下・横幅同幅・全コード実装）。tora console実装の流用方針。担当: 原さん。詳細: mock-n16-shiponly-badge.html。</p>
+  </div>
+
+  <div class="card decided">
+    <h4>N-17｜課金消費型 表示変更＋全体UI再編<span class="tag go">9/9確定</span><span class="tag hot" style="background:#FDF2F8;color:#BE185D;border:1px solid #F9A8D4">起票待ち</span></h4>
+    <p class="orgq"><b>確定内容:</b> ①トップ=サムネフレームエリアのみ（説明・ボタンは詳細のみ）②説明はリッチカード（あと○円チャージ・残り挑戦枠・引ける最大回数=課金総額÷必要課金額）③ガチャボタン既存デザインのまま33%×3横並び（当選結果画面にも展開）④<b>フッターメニュー5タブ確定</b>（ガチャ/獲得景品/イベント/アイテム交換所/マイページ・ヘッダーのマイページアイコン削除）⑤旧タブ位置に「当選結果 見える/見えない」切替 ⑥FVはガチャ2個並ぶまで圧縮。</p>
+    <dl class="kv">
+      <dt>成果物</dt><dd>mock-n17-paytype-display.html（実機キャプチャ仮当て・実装はstg実パーツ使用）</dd>
+      <dt>次アクション</dt><dd>Jira起票（KAN-8・原さん）→ 実装順をN-16との並びで確定</dd>
+    </dl>
+  </div>
+
+  <div class="card decided">
+    <h4>N-18｜当選結果非表示ガチャ<span class="tag go">9/9確定・フレーム受領済</span><span class="tag hot" style="background:#FDF2F8;color:#BE185D;border:1px solid #F9A8D4">起票待ち</span></h4>
+    <p class="orgq"><b>確定内容:</b> stg既存の「当選結果を非表示」トグルを流用（項目追加なし）。追加実装は ①非表示ON時に<b>専用フレーム「NOVA SYSTEM」適用</b>（9/10 Drive受領・PC用3点、モックに実データ埋込済）②<b>完売時の自動OFF</b>→N-15ルールに合流し履歴閲覧可（推奨: <code>hideFlag && 残口数&gt;0</code> の判定式方式）③非表示中の注意書き表示。</p>
+    <dl class="kv">
+      <dt>成果物</dt><dd>mock-n18-hidden-results.html（状態フロー＋3画面＋実フレーム合成）</dd>
+      <dt>要確認</dt><dd><b>SP（スマホ）用フレーム素材の有無</b>（受領分はPC_プレフィックスのみ）／ 注意書き文言の固定or編集可 ／ 一覧サムネ側の残数表示の扱い</dd>
+      <dt>次アクション</dt><dd>Jira起票（KAN-8・原さん）＋SP素材の確認をクライアントへ</dd>
+    </dl>
+  </div>
+
+  <div class="card decided">
+    <h4>N-19｜最低保証コイン表示（Lv表記の置き換え）<span class="tag go">9/9確定</span><span class="tag hot" style="background:#FDF2F8;color:#BE185D;border:1px solid #F9A8D4">起票待ち</span></h4>
+    <p class="orgq"><b>確定内容:</b> フレーム部のLv制限表記を削除（レベル制限機能自体は維持）し、「最低保証 ＋ novaコインアイコン ＋ 数値 coin」を表示。<b>値は景品テーブルの最小交換ポイント数を自動適用</b>——管理画面の項目追加なし・二重入力/入れ間違いを構造的に防止。</p>
+    <dl class="kv">
+      <dt>成果物</dt><dd>mock-n19-min-guarantee.html（Before/After＋自動算出ルール図解）</dd>
+      <dt>要確定（境界条件）</dt><dd>① 交換pt 0/未設定の景品を集計から除外するか ② 配送限定（N-16）景品を含めるか ③ 景品0件時は非表示でよいか</dd>
+      <dt>次アクション</dt><dd>Jira起票（KAN-8・原さん）※境界条件は起票時に確認事項として明記</dd>
+    </dl>
+  </div>
+
+  <div class="card hotline">
+    <h4>響｜弁護士法人響の件（新規対応枠・別トラック）<span class="tag hot" style="background:#FDF2F8;color:#BE185D;border:1px solid #F9A8D4">内容整理中</span></h4>
+    <p class="orgq">対応が増加中とのことで枠を新設。<b>本シートには経緯未収載</b>のため、以下を受領後に整理して反映: ①経緯（受任通知/請求内容 等）②相手方と当方の立場 ③対応済み事項 ④期限のあるアクション ⑤機能開発側への影響（表記・仕様の是正要否など）。取り扱いに注意が必要な内容のため、詳細は別ドキュメント管理とし本シートにはタスクと期限のみ載せる運用を推奨。</p>
+  </div>
+
+  <h3>7/20分（N-1〜N-4）の更新状況</h3>
+
+  <div class="card">
+    <h4>N-2｜招待ガチャ機能<span class="tag upd">7/24 更新</span></h4>
+    <p class="orgq"><b>原文(7/20):</b>「・特定条件を満たしたユーザー様への招待ガチャ機能」</p>
+    <div class="mtgnote"><b>7/24決定:</b> 条件の具体例が確定（<b>期間内の利用金額・特定ガチャの利用状況など</b>）。ガチャ作成画面が煩雑にならないよう、<b>カスタムユーザー条件を設定するメニューを別途用意し各ガチャに適用</b>する構成を提案 → 見積作成へ。</div>
+    <dl class="kv">
+      <dt>次アクション</dt><dd><b>[j suzuki]</b> 条件設定の構成案作成＋見積</dd>
+      <dt>流用資産</dt><dd>01-bの解放記録（アクセス制御）。条件判定→自動解放の形。</dd>
+      <dt>規模感</dt><dd class="scale">条件メニュー新設のため<b>中</b>。ただしN-3と基盤共通化で圧縮可。</dd>
+    </dl>
+    <ul class="q">
+      <li>条件の判定タイミング（リアルタイム/日次バッチ）</li>
+      <li>対象外ユーザーへの見え方（完全非表示が7/24の言いぶり「表示される」から濃厚だが要確定）</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h4>N-3｜新規会員登録限定ガチャ<span class="tag go">本番反映・クローズ</span><span class="tag upd">8/24 更新</span></h4>
+    <p class="orgq"><b>原文(7/20):</b>「・新規登録限定ガチャ機能の実装」</p>
+    <div class="mtgnote"><b>8/12 決着（両論点とも確定）:</b> ① 計測起点=<b>SMS認証完了後</b>。② 期間設定=<b>任意の時間を選択可能</b>な方式（24h/72h/1週間などに縛らない）。<b>実装最優先・8/12着手・8/14(金)テスト環境反映</b>で合意 → 詳細はタブ2のスプリントカード参照。</div>
+    <div class="mtgnote"><b>7/24整理（経緯）:</b> 論点2つ——① 新規会員登録とみなすタイミング（認証時など）の定義確定。② 限定期間の設定方式: プリセートか自由設定かで工数変動 → 上記の通り8/12に両方決着。</div>
+    <div class="mtgnote"><b>デザイン確定（8/12）:</b> <b>紫基調の夜空・宇宙イメージ</b>の背景グラデーション＋タイマー表示で合意（コード実装で対応）。※ 7/24ルール（柄はPC/SP別画像・刷新意向に留意）は引き続き有効。</div>
+    <dl class="kv">
+      <dt>状態</dt><dd><b>本番反映まで完了・クローズ</b>（8/24）。追加修正の可能性はあり。</dd>
+      <dt>規模感</dt><dd class="scale"><b>小</b>（プリセット方式なら）。自由設定は+α。</dd>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h4>N-1｜期間課金イベント機能（toraさん仕様）<span class="tag hold">動きなし</span></h4>
+    <p class="orgq"><b>原文(7/20):</b>「・期間課金イベント機能（toraさん仕様）」／ 7/24 MTGでの言及なし。toraさん仕様の共有待ちのまま。</p>
+  </div>
+
+  <div class="card">
+    <h4>N-4｜ドメイン強化プロジェクト（ブログ機能追加？）<span class="tag hold">動きなし</span></h4>
+    <p class="orgq"><b>原文(7/20):</b>「・ドメイン強化プロジェクト（ブログ機能追加？）」（「？」原文ママ）／ 7/24 MTGでの言及なし。別トラック提案は維持。</p>
+  </div>
+</div>
+
+<!-- 4. schedule -->
+<div class="sec">
+  <h2>スケジュール（9/11 タスク整理版）</h2>
+  <p class="lead">済みレーンを畳み、「起票3本」「定例回答5件」「響の件の整理」を今週の軸に再編。</p>
+
+  <div class="tl">
+    <div class="ev past">
+      <div class="when">〜8月末 済</div>
+      <div class="what">01系クローズ（a/b/c/E）／ N-3・N-15 本番反映 ／ N-13 アプリ修正→審査提出</div>
+    </div>
+    <div class="ev past">
+      <div class="when">9/3 済</div>
+      <div class="what">N-16 配送限定 起票（KAN-483・原さん）→ 実装中</div>
+    </div>
+    <div class="ev past">
+      <div class="when">9/9-9/10 済</div>
+      <div class="what">MTG: N-17/N-18/N-19 確定・モック3本作成 ／ N-13 審査通過 ／ N-18フレーム「NOVA SYSTEM」受領</div>
+    </div>
+    <div class="ev milestone">
+      <div class="when">今週（最優先）</div>
+      <div class="what">N-17/N-18/N-19 の Jira起票（KAN-8・原さん）＋ N-16との実装順確定</div>
+      <div class="memo">N-18はSP用フレーム素材の有無をクライアント確認、N-19は境界条件3点を起票時に明記。</div>
+    </div>
+    <div class="ev milestone">
+      <div class="when">エンジニア定例</div>
+      <div class="what">確認5件の回答回収: ①プッシュ通知＋バイブ ②起動時スプラッシュ ③当選ボタン復活分 ④演出10個化（→KAN-377記録）⑤当選履歴の並び順</div>
+      <div class="memo">engineer-teirei-0909.html 参照。①②はアプリ修正版リリースへの同梱可否も確認。</div>
+    </div>
+    <div class="ev milestone">
+      <div class="when">要整理（別トラック）</div>
+      <div class="what">弁護士法人響の件: 経緯・対応事項・期限の整理 → タスク化</div>
+      <div class="memo">詳細受領後に反映。機能開発と分けて管理。</div>
+    </div>
+    <div class="ev">
+      <div class="when">継続確認</div>
+      <div class="what">N-13 修正版リリース確認（→クローズ）／ N-14 本適用の現況 ／ 01-d レイド要件文面（未受領のまま）／ N-10 記念ガチャ公開状況</div>
+    </div>
+    <div class="ev">
+      <div class="when">待ち</div>
+      <div class="what">N-1（toraさん仕様）／ N-2・N-5・N-6 構成案再開 ／ N-4 ドメイン強化 ／ N-11・N-12 回答</div>
+    </div>
+  </div>
+  <div class="notice">⚠ N-17〜N-19は3本ともフロント/管理画面系で原さんに集中するため、起票時にN-16含めた実装順（直列/並行）を原さんと合意してから期日を置く。響の件は内容次第で最優先に繰り上がる可能性あり——整理を先行。</div>
+</div>
+
+<!-- 5. actions -->
+<div class="sec">
+  <h2>アクション管理（7/24〜9/11 累積）</h2>
+  <p class="lead">議事録の宛先そのまま。完了したらチェック。</p>
+
+  <div class="ckwrap">
+    <div class="prog"><div class="bar"><div class="f" id="pf"></div></div><div class="n" id="pn">2 / 12</div></div>
+
+    <div class="ckgroup">
+      <div class="gt">クライアント側（受領待ち）</div>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who cl">カードノヴァ</span>レイド（01-d）詳細要件の文面送付を受領した</label>
+      <label class="ck on"><input type="checkbox" checked onchange="ck(this)"><span class="who cl">カードノヴァ</span>優先順位の件 ✅ 決着（N-13・N-14とも優先度最大で並行進行）</label>
+    </div>
+
+    <div class="ckgroup">
+      <div class="gt">当方アクション（8/12 議事録分）</div>
+      <label class="ck on"><input type="checkbox" checked onchange="ck(this)"><span class="who">j suzuki</span>N-3: 実装〜本番反映 ✅ クローズ（8/24）</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>N-3: 最新イメージ＋仕様を確認用として送付した</label>
+      <label class="ck on"><input type="checkbox" checked onchange="ck(this)"><span class="who">j suzuki</span>01-c: 福袋争奪戦の結果反映 ✅ クローズ（8/24）</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>N-11: 抽選販売のSMS認証必須化の仕様是非を確認・回答した</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>N-7: 背景キャラアニメーションの実装可否を確認・回答した</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>N-12: 管理画面「公開期間」表記変更の方針を検討・提示した</label>
+    </div>
+
+    <div class="ckgroup">
+      <div class="gt">当方アクション（8/24 更新分）</div>
+      <label class="ck on"><input type="checkbox" checked onchange="ck(this)"><span class="who">じぇい</span>N-15: 採用案の確定 ✅ B案（並行運用・管理画面で選択式）で確定（8/24）</label>
+      <label class="ck on"><input type="checkbox" checked onchange="ck(this)"><span class="who">じぇい</span>N-15: 反映方法の合意 ✅ 本番直反映をクライアント了承（8/24 21:38・記録はメモ⑤）</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>N-14: 口数改善の本番適用を完了した</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>N-13: アプリ決済修正を実装し再審査へ提出した</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">じぇい</span>N-10: 記念ガチャの公開状況をクライアントに確認した</label>
+    </div>
+
+    <div class="ckgroup">
+      <div class="gt">9/9 MTG〜（最新）</div>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">じぇい</span>N-17/N-18/N-19 をJira起票した（KAN-8・原さん）</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">じぇい</span>N-18: SP用フレーム素材の有無をクライアントに確認した</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">じぇい</span>エンジニア定例: 確認5件の回答を回収した（④はKAN-377へ記録）</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">じぇい</span>響の件: 経緯・対応事項・期限を整理しタスク化した</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>N-13: 修正版リリースを確認しクローズした</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">エンジニア</span>N-16: 配送限定の実装を完了した（KAN-483）</label>
+    </div>
+
+    <div class="ckgroup">
+      <div class="gt">直近3日スプリント（8/25-27・確定）</div>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">エンジニア</span>8/25: N-15 当選結果履歴 対応（表示位置=バナー直下＋公開方式・本番直反映）</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">じぇい</span>8/25: 本番直反映の範囲線引き確認 → 完了後クライアントへ報告</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>8/26: N-13 アプリ修正</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>8/27: Apple Developer 更新 → N-13 審査開始</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>N-14: stg検証 → 本番反映（審査と並行・別レーン）</label>
+    </div>
+
+    <div class="ckgroup">
+      <div class="gt">当方アクション（7/24 議事録分）</div>
+      <label class="ck on"><input type="checkbox" checked onchange="ck(this)"><span class="who">j suzuki</span>N-3: 構成案の提出 ✅ 8/12 MTGで仕様確定に到達（実装フェーズへ移行）</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>N-5: ステップアップガチャの仕組みを整理した（設計案）</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>N-2: 招待ガチャ条件設定の構成案＋見積を提示した</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>N-6: インターバル機能の実装整理を進めた</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>N-7: マスコット動作の実装可否を確認・回答した（8/12「背景演出の確認」に引き継ぎ・重複チェック不要）</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>N-8: 演出スロット5→10個の可否を確認・回答した</label>
+    </div>
+
+    <div class="ckgroup">
+      <div class="gt">既存分（継続）</div>
+      <label class="ck on"><input type="checkbox" checked onchange="ck(this)"><span class="who">j suzuki</span>01-c: 7/28-29 レビュー版を提示した ✅</label>
+      <label class="ck on"><input type="checkbox" checked onchange="ck(this)"><span class="who">j suzuki</span>01-c: 販売開始・開催 ✅（結果反映は8/12分の項目へ）</label>
+      <label class="ck on"><input type="checkbox" checked onchange="ck(this)"><span class="who">j suzuki</span>01-b: サムネロックデザイン修正を反映した ✅ 7/24 完了</label>
+      <label class="ck on"><input type="checkbox" checked onchange="ck(this)"><span class="who">j suzuki</span>01-E: イベントスペースを反映した ✅ 7/24 完了</label>
+      <label class="ck"><input type="checkbox" onchange="ck(this)"><span class="who">j suzuki</span>01-d: 受領文面をブリーフ8項目に突合し仕様確定した</label>
+    </div>
+  </div>
+</div>
+
+<script>
+function show(i,el){
+  document.querySelectorAll('.sec').forEach((s,n)=>s.classList.toggle('show',n===i));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  window.scrollTo(0,0);
+}
+function ck(inp){
+  inp.closest('label').classList.toggle('on',inp.checked);
+  sync();
+}
+function sync(){
+  const all=document.querySelectorAll('.ckwrap input[type=checkbox]');
+  const done=[...all].filter(c=>c.checked).length;
+  document.getElementById('pf').style.width=(done/all.length*100)+'%';
+  document.getElementById('pn').textContent=done+' / '+all.length;
+}
+sync();
+</script>
+</body>
+</html>
