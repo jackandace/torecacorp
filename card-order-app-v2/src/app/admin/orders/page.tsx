@@ -1,29 +1,77 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatJST, orderCutoffDate, todayISOInJST } from "@/lib/dates";
 import { formatYen } from "@/lib/rebate";
+import type { OrderStatus } from "@/types/database";
 
 export const metadata = { title: "発注管理 | 管理" };
 export const dynamic = "force-dynamic";
 
-const PENDING_STATUSES = ["リクエスト", "発注調整中", "仮確定"];
+const PENDING_STATUSES: OrderStatus[] = ["リクエスト", "発注調整中", "仮確定"];
+const PAGE_SIZE = 100;
 
-export default async function OrdersAdminPage() {
+function Pagination({ page, totalPages, total, from, to }: {
+  page: number; totalPages: number; total: number; from: number; to: number;
+}) {
+  if (total === 0) return null;
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1)
+    .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2);
+  const link = (p: number) => `/admin/orders?page=${p}`;
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+      <span className="text-slate-500">全 {total} 件中 {from}〜{to} 件を表示</span>
+      {totalPages > 1 && (
+        <nav className="flex items-center gap-1" aria-label="ページ送り">
+          {page > 1
+            ? <a href={link(page - 1)} className="px-2.5 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50">← 前へ</a>
+            : <span className="px-2.5 py-1 rounded border border-slate-200 text-slate-300">← 前へ</span>}
+          {pages.map((p, i) => (
+            <span key={p} className="flex items-center gap-1">
+              {i > 0 && p - pages[i - 1] > 1 && <span className="px-1 text-slate-400">…</span>}
+              {p === page
+                ? <span className="px-2.5 py-1 rounded bg-brand-600 text-white font-semibold">{p}</span>
+                : <a href={link(p)} className="px-2.5 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50">{p}</a>}
+            </span>
+          ))}
+          {page < totalPages
+            ? <a href={link(page + 1)} className="px-2.5 py-1 rounded border border-slate-300 bg-white hover:bg-slate-50">次へ →</a>
+            : <span className="px-2.5 py-1 rounded border border-slate-200 text-slate-300">次へ →</span>}
+        </nav>
+      )}
+    </div>
+  );
+}
+
+export default async function OrdersAdminPage({ searchParams }: { searchParams: { page?: string } }) {
   const supabase = createClient();
-  const { data: orders } = await supabase
-    .from("orders")
-    .select("*, shops(company_name), products(title, flow_type, order_deadline)")
-    .is("deleted_at", null)
-    .order("created_at", { ascending: false })
-    .limit(100);
+  const page = Math.max(1, parseInt(searchParams.page ?? "1", 10) || 1);
+  const offset = (page - 1) * PAGE_SIZE;
+  const [{ data: orders, count }, { data: pendingOrders }] = await Promise.all([
+    supabase
+      .from("orders")
+      .select("*, shops(company_name), products(title, flow_type, order_deadline)", { count: "exact" })
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false })
+      .range(offset, offset + PAGE_SIZE - 1),
+    // 「要確定」バナーの件数は表示中のページに限らず全件から数える
+    supabase
+      .from("orders")
+      .select("status, products(order_deadline)")
+      .is("deleted_at", null)
+      .in("status", PENDING_STATUSES),
+  ]);
+  const total = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const shownFrom = total === 0 ? 0 : offset + 1;
+  const shownTo = offset + (orders?.length ?? 0);
 
   const today = todayISOInJST();
   // 締切(発注期限の3日前)を過ぎたのに未確定 = 要確定
   const needsConfirm = (o: { status: string; products?: { order_deadline?: string | null } | null }) => {
-    if (!PENDING_STATUSES.includes(o.status)) return false;
+    if (!(PENDING_STATUSES as string[]).includes(o.status)) return false;
     const cutoff = orderCutoffDate(o.products?.order_deadline ?? null);
     return !!cutoff && cutoff < today;
   };
-  const needCount = (orders ?? []).filter((o) => needsConfirm(o as never)).length;
+  const needCount = (pendingOrders ?? []).filter((o) => needsConfirm(o as never)).length;
 
   return (
     <div className="space-y-6">
@@ -40,6 +88,8 @@ export default async function OrdersAdminPage() {
           ⚠ 締切を過ぎたのに未確定の発注が <strong>{needCount} 件</strong> あります。個数を確定するとショップへ自動で確定通知が送られます。
         </div>
       )}
+
+      <Pagination page={page} totalPages={totalPages} total={total} from={shownFrom} to={shownTo} />
 
       {/* モバイル: カード表示 */}
       <div className="md:hidden space-y-2">
@@ -126,6 +176,7 @@ export default async function OrdersAdminPage() {
           </tbody>
         </table>
       </div>
+      <Pagination page={page} totalPages={totalPages} total={total} from={shownFrom} to={shownTo} />
       <p className="text-xs text-slate-500">
         TODO: 絞り込み (ステータス/ショップ/期間)、一括承認、配分数量入力モーダル、楽観的ロックの実装
       </p>
