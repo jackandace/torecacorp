@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRIM 使いすぎ防止設定・年齢確認 モック v0.3（既存サイトUI準拠）</title>
+<style>
+  /* ---- 既存サイト(grim-tcg.net-oripa.com)から採取したトークン ---- */
+  :root{--txt:#333;--red:#c5313b;--line:#e5e7eb;--inbg:#e6e6e6;--gray:#f2f2f2;--dark:#333;--yellow:#facc15;--blue:#3b82f6;--pink:#fdf2f2;--g1:#eab308;--g2:#f97316;--sub:#6b7280}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;background:#2a2a2e;color:var(--txt);min-height:100vh;display:flex;gap:28px;justify-content:center;align-items:flex-start;padding:28px 16px;flex-wrap:wrap}
+  /* ---- control panel ---- */
+  .panel{width:300px;background:#fff;border-radius:12px;padding:16px;font-size:13px;position:sticky;top:28px}
+  .panel h1{font-size:15px;font-weight:900;border-left:4px solid var(--red);padding-left:8px;margin-bottom:4px}
+  .panel .sub{color:var(--sub);font-weight:700;font-size:11px;margin-bottom:12px;line-height:1.5}
+  .panel h2{font-size:12px;font-weight:700;color:var(--sub);margin:14px 0 6px}
+  .panel label{display:flex;align-items:center;gap:6px;margin:4px 0;cursor:pointer}
+  .panel input[type=number]{width:100%;padding:6px;border:1px solid var(--line);border-radius:6px;font-family:inherit}
+  .panel .btns{display:flex;flex-wrap:wrap;gap:6px}
+  .panel .btns button{flex:1 1 45%;padding:8px 6px;border:1px solid var(--line);background:var(--gray);border-radius:8px;font-family:inherit;font-size:12px;cursor:pointer;font-weight:700}
+  .panel .btns button.on{background:var(--dark);color:#fff;border-color:var(--dark)}
+  .state{background:var(--gray);border-radius:8px;padding:8px;font-size:11px;line-height:1.6;margin-top:10px;font-family:ui-monospace,Menlo,monospace}
+  /* ---- phone ---- */
+  .phone{width:390px;height:844px;background:#fff;border-radius:40px;border:10px solid #1a1a1a;position:relative;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.5);flex-shrink:0}
+  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:28px;background:#1a1a1a;border-radius:0 0 18px 18px;z-index:20}
+  .screen{position:absolute;inset:0;overflow-y:auto;display:none;padding-bottom:80px}
+  .screen.active{display:block}
+  /* header: 既存 = 白・border-b・ロゴ左・右にpill */
+  .hdr{position:sticky;top:0;background:#fff;z-index:10;padding:34px 8px 6px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+  .logo{width:36px;height:36px;border-radius:4px;background:linear-gradient(135deg,#7a1010,#c5313b 60%,#d4af37);display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:900}
+  .pills{display:flex;align-items:center;gap:6px}
+  .pill{background:var(--gray);border-radius:999px;height:26px;padding:0 8px;display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700}
+  .pill .ic{width:14px;height:14px;border-radius:50%;background:var(--yellow);display:inline-block}
+  .pill .plus{width:14px;height:14px;border-radius:50%;background:var(--red);color:#fff;font-size:11px;line-height:14px;text-align:center}
+  .bell{font-size:18px;margin-left:4px}
+  .wrap{padding:16px}
+  h1.t{font-size:24px;font-weight:700;margin-bottom:20px}
+  h2.t{font-size:16px;font-weight:700;margin-bottom:8px}
+  .lead{font-size:13px;color:var(--sub);line-height:1.7}
+  /* mypage */
+  .coinhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .coinhead b{font-size:16px}.coinhead a{font-size:12px;font-weight:700;color:var(--txt)}
+  .coinbox{background:#e8e8e8;border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .coinbox b{font-size:18px}.coinbox b small{font-size:12px;font-weight:400;margin-left:2px}
+  .btn-red-sm{background:var(--red);color:#fff;border:none;border-radius:6px;height:32px;padding:0 12px;font-weight:700;font-size:13px;font-family:inherit;cursor:pointer}
+  .uid{background:#e8e8e8;border-radius:8px;padding:12px;font-size:12px;font-weight:700;color:#555;display:flex;justify-content:space-between;margin-bottom:8px;word-break:break-all}
+  .menu a{display:flex;justify-content:space-between;align-items:center;width:100%;padding:16px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--txt);text-decoration:none;cursor:pointer}
+  .menu a .st{font-size:12px;font-weight:700;color:var(--sub)}
+  .menu a .st.ok{color:#15803d}.menu a .st.ng{color:var(--red)}.menu a .st.wa{color:#b45309}
+  .tagnew{background:var(--red);color:#fff;font-size:9px;font-weight:900;padding:1px 4px;border-radius:3px;margin-left:6px;vertical-align:middle}
+  /* common comps */
+  .card{border:1px solid var(--line);border-radius:8px;padding:14px;background:#fff}
+  .notice{background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.7}
+  .notice b{color:#b45309}
+  .alert{background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.7;color:#991b1b}
+  .alert a{color:var(--red);font-weight:700;text-decoration:underline;cursor:pointer}
+  .btn{display:block;width:100%;height:44px;border:none;border-radius:12px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
+  .btn.red{background:var(--red);color:#fff}.btn.gray{background:var(--gray);color:var(--txt)}.btn.dark{background:var(--dark);color:#fff}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .input{background:var(--inbg);border:1px solid var(--gray);border-radius:8px;height:44px;padding:0 12px;font-size:16px;width:100%;font-family:inherit;color:var(--txt)}
+  .lbl{font-size:14px;margin-bottom:6px;display:block}
+  /* usage */
+  .usage .nums{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:6px}
+  .usage .big{font-size:22px;font-weight:700}.usage .big small{font-size:11px;font-weight:400;color:var(--sub);margin-left:2px}
+  .usage .lim{font-size:11px;color:var(--sub);text-align:right;line-height:1.5}
+  .bar{height:8px;background:var(--gray);border-radius:4px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--dark);border-radius:4px;transition:width .3s}
+  .bar.warn i{background:var(--g2)}.bar.full i{background:var(--red)}
+  .usage .rem{font-size:12px;color:var(--sub);margin-top:6px;display:flex;justify-content:space-between;gap:8px}
+  .usage .rem b.warn{color:#b45309}.usage .rem b.full{color:var(--red)}
+  /* radio cards (既存の支払い方法選択スタイル) */
+  .rc{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:8px;background:var(--gray);cursor:pointer;font-size:14px}
+  .rc.sel{border:2px solid var(--blue);background:var(--pink)}
+  .rc .radio{width:16px;height:16px;border-radius:50%;border:2px solid #9ca3af;flex-shrink:0;position:relative}
+  .rc.sel .radio{border-color:var(--blue)}.rc.sel .radio::after{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--blue)}
+  .rc .lt{flex:1}.rc .lt b{display:block;font-size:14px}.rc .lt small{font-size:12px;color:var(--sub)}
+  .rc .cur{font-size:10px;font-weight:700;color:var(--sub);background:#fff;border:1px solid var(--line);padding:1px 6px;border-radius:4px}
+  .customrow{display:flex;align-items:center;gap:8px;margin:-2px 0 8px;font-size:13px;display:none}
+  .customrow.show{display:flex}
+  .customrow .input{text-align:right;flex:1}
+  .pending{border:1px dashed #f59e0b;background:#fffbeb;border-radius:8px;padding:10px 12px;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;line-height:1.6}
+  .pending b{color:#b45309}
+  .pending button{border:1px solid var(--line);background:#fff;border-radius:6px;padding:6px 8px;font-family:inherit;font-size:11px;cursor:pointer;white-space:nowrap;font-weight:700}
+  .pending button.go{background:var(--red);color:#fff;border-color:var(--red)}
+  .hist{font-size:12px;width:100%;border-collapse:collapse}
+  .hist th{background:var(--gray);font-weight:700;padding:8px 6px;text-align:left;border-bottom:1px solid var(--line)}
+  .hist td{padding:8px 6px;border-bottom:1px solid var(--line)}
+  /* purchases list (既存: 左白/右ダーク #333, rounded-lg, border gray-500) */
+  .campaign{background:linear-gradient(to right,var(--g1),var(--g2));color:#fff;padding:12px;border-radius:8px;margin-bottom:16px}
+  .campaign b{font-size:14px}.campaign small{display:block;font-size:11px;margin-top:2px}
+  .pk{display:flex;width:100%;border:1px solid #808080;border-radius:8px;overflow:hidden;margin-bottom:8px;cursor:pointer;background:#fff}
+  .pk .l{width:65%;display:flex;align-items:center;gap:8px;padding:8px 10px}
+  .pk .l .c{width:20px;height:20px;border-radius:50%;background:var(--yellow);border:2px solid #ca8a04;flex-shrink:0}
+  .pk .l b{font-size:16px}.pk .l b small{font-size:12px;font-weight:400;margin-left:4px}
+  .pk .r{flex:1;background:var(--dark);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px}
+  .pk .r .old{font-size:10px;color:#bbb;text-decoration:line-through}.pk .r .off{font-size:10px;font-weight:700;color:var(--yellow);margin-left:4px}
+  .pk .r .p{font-size:15px;font-weight:700}
+  .pk.dis{opacity:.45;cursor:not-allowed}
+  .pk .why{font-size:10px;color:var(--red);font-weight:700;display:block}
+  /* purchase detail */
+  .pbox{background:#e8e8e8;border-radius:8px;padding:18px;text-align:center;margin-bottom:16px}
+  .pbox .cn{font-size:16px;font-weight:700;margin-bottom:8px}
+  .pbox .pr{font-size:22px;font-weight:700}.pbox .pr s{font-size:14px;color:#888;font-weight:400;margin-right:8px}.pbox .pr .off{font-size:11px;color:#d97706;font-weight:700;margin-left:6px}
+  .cpn{display:flex;gap:8px;align-items:center;margin-bottom:4px}.cpn .input{width:60%}.cpn button{font-size:13px;color:#999;background:none;border:none;font-family:inherit}
+  .cpnok{font-size:12px;color:#d97706;margin-bottom:16px}
+  .formbox{background:#fafafa;border:1px solid var(--line);border-radius:8px;padding:14px;margin-bottom:10px}
+  .formbox h3{font-size:14px;font-weight:700;margin-bottom:12px}
+  .formbox .lbl{font-size:13px}
+  .chkrow{display:flex;align-items:center;gap:8px;font-size:12px;margin:10px 0 12px}
+  .cb{width:18px;height:18px;border:2px solid #a78bfa;border-radius:4px;display:inline-block}
+  /* modal / sheet */
+  .ov{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:30;display:none;align-items:flex-end}
+  .ov.show{display:flex}
+  .sheet{background:#fff;width:100%;border-radius:16px 16px 0 0;padding:14px 18px 24px;max-height:92%;overflow-y:auto}
+  .grab{width:40px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 14px}
+  .sheet h3{font-size:17px;font-weight:700;line-height:1.5;margin-bottom:6px}
+  .dob{display:flex;gap:6px;margin:12px 0 6px}
+  .dob select{flex:1;height:44px;padding:0 8px;border:1px solid var(--gray);border-radius:8px;font-family:inherit;font-size:16px;background:var(--inbg);color:var(--txt)}
+  .chk{display:flex;align-items:flex-start;gap:10px;font-size:13px;line-height:1.6;padding:8px 0;cursor:pointer}
+  .chk input{width:20px;height:20px;margin-top:1px;accent-color:var(--red);flex-shrink:0}
+  .age-res{font-size:12px;color:var(--sub);text-align:center;margin:2px 0 6px;min-height:18px}
+  .age-res b{color:var(--txt)}
+  .err{color:var(--red);font-size:12px;font-weight:700}
+  .modal-c{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:31;display:none;align-items:center;justify-content:center;padding:24px}
+  .modal-c.show{display:flex}
+  .modal-c .box{background:#fff;border-radius:12px;padding:20px;width:100%;font-size:13px;line-height:1.7}
+  .modal-c .box h3{font-size:15px;font-weight:700;margin-bottom:8px}
+  .modal-c .row2{display:flex;gap:8px;margin-top:14px}
+  .toast{position:absolute;top:80px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;font-size:12px;padding:10px 16px;border-radius:20px;z-index:40;display:none;white-space:nowrap;max-width:92%;text-overflow:ellipsis;overflow:hidden}
+  .toast.show{display:block}
+  /* footer nav (既存: 4項目) */
+  .foot{position:absolute;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;padding:8px 0 20px;z-index:10}
+  .foot span{flex:1;font-size:10px;color:var(--txt);display:flex;flex-direction:column;align-items:center;gap:3px;opacity:.5}
+  .foot span i{font-style:normal;font-size:18px}
+  .foot span.on{opacity:1}
+  .wm{position:absolute;bottom:64px;right:10px;font-size:9px;color:#bbb;z-index:11}
+  .back{font-size:13px;color:var(--sub);margin-bottom:10px;cursor:pointer;display:inline-block}
+</style>
+</head>
+<body>
+
+<!-- ============ CONTROL PANEL ============ -->
+<div class="panel">
+  <h1>使いすぎ防止設定・年齢確認</h1>
+  <div class="sub">GRIM モック v0.3 ／ 2026-09-23<br>既存サイト（grim-tcg.net-oripa.com）UI準拠</div>
+  <h2>画面</h2>
+  <div class="btns">
+    <button data-go="mypage" class="on">マイページ /me</button>
+    <button data-go="limit">使いすぎ防止設定</button>
+    <button data-go="charge">コインを購入</button>
+    <button data-go="detail">商品情報（決済）</button>
+  </div>
+  <h2>ユーザー状態（シミュレーション）</h2>
+  <label><input type="checkbox" id="simAge"> 生年月日 登録済み</label>
+  <label><input type="checkbox" id="simMinor"> 18歳未満（購入不可）</label>
+  <label><input type="checkbox" id="simFirst" checked> 初回課金割引15%OFF 適用中</label>
+  <h2>今月の購入額（決済額・円）</h2>
+  <input type="number" id="simTotal" value="12000" step="500" min="0">
+  <div class="btns" style="margin-top:6px">
+    <button data-total="0">0%</button><button data-total="24000">80%</button><button data-total="30000">上限到達</button><button data-total="12000">40%</button>
+  </div>
+  <h2>時間の経過（クールダウン確認用）</h2>
+  <div class="btns"><button id="skip24">24時間経過させる</button></div>
+  <div class="state" id="stateBox"></div>
+  <div style="font-size:10px;color:#888;margin-top:10px;line-height:1.6">※初期上限 30,000円／月。引き下げ即時、引き上げ・解除は24時間後に本人が再確認して反映（月2回まで）。集計は割引後の決済額。18歳未満は購入不可（保護者同意なし）。判定はサーバー側想定。</div>
+</div>
+
+<!-- ============ PHONE ============ -->
+<div class="phone">
+  <div class="notch"></div>
+  <div class="toast" id="toast"></div>
+  <div class="wm">モック v0.3</div>
+
+  <!-- ---- MYPAGE ---- -->
+  <div class="screen active" id="s-mypage">
+    <div class="hdr"><div class="logo">GRIM</div><div class="pills"><span class="pill">🔑 0</span><span class="pill"><span class="ic"></span>1,240 <span class="plus">+</span></span><span class="bell">🔔</span></div></div>
+    <div class="wrap">
+      <h1 class="t">マイページ</h1>
+      <div class="coinhead"><b>コイン残高</b><a>コイン失効期限の確認</a></div>
+      <div class="coinbox"><b>1,240<small>コイン</small></b><button class="btn-red-sm" data-go="charge">チャージ</button></div>
+      <div class="lbl" style="font-size:12px;color:var(--sub)">ユーザーID</div>
+      <div class="uid"><span>4a9a4130-16e7-4904-b50f-fb2628313810</span><span>⧉</span></div>
+      <div class="menu">
+        <a>カード獲得履歴</a>
+        <a>コイン購入履歴</a>
+        <a>ガチャ履歴</a>
+        <a>お届け先登録・変更</a>
+        <a>クレジットカード管理</a>
+        <a id="rowAge"><span>年齢確認<span class="tagnew">NEW</span></span><span class="st" id="stAge">未登録</span></a>
+        <a data-go="limit"><span>使いすぎ防止設定<span class="tagnew">NEW</span></span><span class="st" id="stLimit">未設定</span></a>
+        <a>会員ランク詳細</a>
+        <a>メールアドレスの変更</a>
+        <a>パスワードの変更</a>
+        <a>お問い合わせ</a>
+        <a style="padding:24px 0">ボーナスオリパについて</a>
+        <a style="margin-top:24px">ログアウト</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---- LIMIT SETTING ---- -->
+  <div class="screen" id="s-limit">
+    <div class="hdr"><div class="logo">GRIM</div><div class="pills"><span class="pill">🔑 0</span><span class="pill"><span class="ic"></span>1,240 <span class="plus">+</span></span><span class="bell">🔔</span></div></div>
+    <div class="wrap">
+      <span class="back" data-go="mypage">‹ マイページ</span>
+      <h1 class="t" style="margin-bottom:8px">使いすぎ防止設定</h1>
+      <p class="lead" style="margin-bottom:20px">1か月あたりのコイン購入上限額を設定できます。上限に達すると翌月1日までコインを購入できなくなります。金額はクーポン適用後の実際のお支払い額で計算します。</p>
+
+      <h2 class="t">今月の利用状況</h2>
+      <div class="card usage" id="usageLimit" style="margin-bottom:20px"></div>
+
+      <div id="minorBlock" style="display:none;margin-bottom:20px">
+        <div class="alert"><b>18歳未満のお客様はコインを購入できません。</b><br>18歳になると購入と上限の設定ができるようになります。</div>
+      </div>
+
+      <div id="chooseBlock">
+        <h2 class="t">上限額を選ぶ</h2>
+        <div id="opts"></div>
+        <div class="customrow" id="custom">カスタム <input class="input" type="number" id="customVal" step="1000" min="1000" max="999000" placeholder="1,000円単位"> 円/月</div>
+        <div class="notice" style="margin-bottom:10px">引き下げは<b>すぐに反映</b>されます。引き上げ・解除は申請から<b>24時間後</b>に、この画面で「反映する」を押すと反映されます（引き上げは<b>月2回</b>まで）。</div>
+        <div id="pendingBox" style="margin-bottom:10px"></div>
+        <button class="btn red" id="saveBtn" disabled>設定を保存する</button>
+        <p class="lead" style="margin-top:10px;font-size:12px">上限はコインの購入に対するものです。保有コインでのガチャや、ミッション報酬の受け取りは制限されません。</p>
+      </div>
+
+      <h2 class="t" style="margin-top:24px">変更履歴</h2>
+      <table class="hist"><thead><tr><th>日時</th><th>変更</th><th>反映</th></tr></thead><tbody id="histBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- ---- CHARGE LIST (/purchases) ---- -->
+  <div class="screen" id="s-charge">
+    <div class="hdr"><div class="logo">GRIM</div><div class="pills"><span class="pill">🔑 0</span><span class="pill"><span class="ic"></span>1,240 <span class="plus">+</span></span><span class="bell">🔔</span></div></div>
+    <div class="wrap">
+      <h1 class="t">コインを購入</h1>
+      <div id="chargeAlert"></div>
+      <div class="card usage" id="usageCharge" style="margin-bottom:16px"></div>
+      <div class="campaign" id="campBanner"><b>🎉初回課金限定割引キャンペーン中！</b><small>最大割引でお得にポイントを購入できます</small></div>
+      <div id="packs"></div>
+    </div>
+  </div>
+
+  <!-- ---- PURCHASE DETAIL (/purchases/{id}) ---- -->
+  <div class="screen" id="s-detail">
+    <div class="hdr"><div class="logo">GRIM</div><div class="pills"><span class="pill">🔑 0</span><span class="pill"><span class="ic"></span>1,240 <span class="plus">+</span></span><span class="bell">🔔</span></div></div>
+    <div class="wrap">
+      <span class="back" data-go="charge">‹ コインを購入</span>
+      <h2 class="t">商品情報</h2>
+      <div class="campaign" id="campBanner2"><b>🎉初回課金限定 15%OFF!</b><small>※他のクーポンとの併用はできません</small></div>
+      <div class="pbox" id="pbox"></div>
+      <span class="lbl">クーポンコード</span>
+      <div class="cpn"><input class="input" placeholder=""><button>確認する</button></div>
+      <div class="cpnok" id="cpnok">初回課金割引が適用されています</div>
+      <div id="detailAlert"></div>
+      <h2 class="t">支払い方法を選択</h2>
+      <div class="rc sel"><span class="radio"></span><span class="lt"><b>クレジットカード</b><small>すぐに決済が完了します</small></span></div>
+      <div class="formbox">
+        <h3>クレジットカード情報入力</h3>
+        <span class="lbl">カード番号</span><input class="input" style="margin-bottom:10px">
+        <span class="lbl">有効期限</span><div style="display:flex;gap:8px;margin-bottom:10px"><input class="input" placeholder="月"><input class="input" placeholder="年"></div>
+        <span class="lbl">セキュリティコード</span><input class="input" placeholder="123" style="margin-bottom:10px">
+        <div class="chkrow"><span class="cb"></span>このカードを保存して次回以降も使用する</div>
+        <button class="btn red" id="payBtn">カードで支払う</button>
+      </div>
+      <div class="rc"><span class="radio"></span><span class="lt"><b>銀行振込</b><small>振込先口座を表示します</small></span></div>
+    </div>
+  </div>
+
+  <!-- ---- AGE MODAL (初回のみ) ---- -->
+  <div class="ov" id="ageOv">
+    <div class="sheet">
+      <div class="grab"></div>
+      <h3>はじめてのコイン購入の前に、年齢の確認をお願いします</h3>
+      <p class="lead">18歳未満のお客様はコインを購入できません。ご入力いただいた生年月日はあとから変更できません。</p>
+      <div class="dob"><select id="dobY"></select><select id="dobM"></select><select id="dobD"></select></div>
+      <div class="age-res" id="ageRes">生年月日を選択してください</div>
+      <label class="chk"><input type="checkbox" id="chkDob"> 入力した生年月日に間違いはありません</label>
+      <div id="minorConsent" style="display:none">
+        <div class="alert"><b>18歳未満のお客様はコインを購入できません。</b><br>18歳になるとご購入いただけます。入力された生年月日は保存されます。</div>
+      </div>
+      <button class="btn red" id="ageOk" disabled style="margin-top:6px">確認して購入に進む</button>
+      <button class="btn dark" id="ageMinorClose" style="margin-top:6px;display:none">確認して閉じる</button>
+      <button class="btn gray" id="ageCancel" style="margin-top:8px">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- ---- CONFIRM DIALOG ---- -->
+  <div class="modal-c" id="confirm">
+    <div class="box"><h3 id="cTitle"></h3><div id="cBody"></div>
+      <div class="row2"><button class="btn gray" id="cNo">キャンセル</button><button class="btn red" id="cYes">OK</button></div></div>
+  </div>
+
+  <div class="foot">
+    <span><i>🎰</i>オリパガチャ</span><span><i>🏆</i>獲得景品</span><span><i>📜</i>ガチャ履歴</span><span class="on" id="footMy"><i>👤</i>マイページ</span>
+  </div>
+</div>
+
+<script>
+const PRESETS=[10000,30000,50000,100000,300000], RAISE_PER_MONTH=2;
+const state={limit:30000,pending:undefined,pendingReady:false,selected:30000,ageDone:false,minor:false,first:true,total:12000,raiseCount:0,selPack:null,
+  hist:[{at:'9/01 10:12',chg:'未設定 → 30,000円',eff:'即時'}]};
+const yen=n=>n==null?'未設定':n.toLocaleString()+'円';
+const $=id=>document.getElementById(id);
+function effLimit(){return state.minor?0:state.limit;}
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$('s-'+id).classList.add('active');document.querySelectorAll('.panel [data-go]').forEach(b=>b.classList.toggle('on',b.dataset.go===id));render();}
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();go(b.dataset.go);}));
+document.querySelectorAll('[data-total]').forEach(b=>b.addEventListener('click',()=>{$('simTotal').value=b.dataset.total;state.total=+b.dataset.total;render();}));
+$('simTotal').addEventListener('input',e=>{state.total=+e.target.value||0;render();});
+$('simAge').addEventListener('change',e=>{state.ageDone=e.target.checked;if(!state.ageDone){state.minor=false;$('simMinor').checked=false;}render();});
+$('simMinor').addEventListener('change',e=>{state.minor=e.target.checked;if(state.minor){state.ageDone=true;$('simAge').checked=true;}render();});
+$('simFirst').addEventListener('change',e=>{state.first=e.target.checked;render();});
+$('skip24').addEventListener('click',()=>{if(state.pending!==undefined){state.pendingReady=true;toast('24時間が経過しました。設定画面で反映できます');}else toast('予約中の変更はありません');render();});
+$('rowAge').addEventListener('click',()=>{if(state.ageDone){toast('生年月日は登録済みです。訂正はお問い合わせから');}else openAge();});
+
+function usageHTML(){
+  const lim=effLimit();
+  if(lim==null)return `<div class="nums"><div class="big">${state.total.toLocaleString()}<small>円</small></div><div class="lim">今月の購入額<br>上限：未設定</div></div><div class="bar"><i style="width:0"></i></div><div class="rem"><span>上限を設定すると残り購入可能額が表示されます</span></div>`;
+  const pct=Math.min(100,Math.round(state.total/lim*100)),rem=Math.max(0,lim-state.total),cls=pct>=100?'full':pct>=80?'warn':'';
+  const msg=pct>=100?`<b class="full">今月の上限に達しました</b>`:pct>=80?`<b class="warn">上限まで残り ${rem.toLocaleString()}円</b>`:`<span>残り購入可能額 <b>${rem.toLocaleString()}円</b></span>`;
+  return `<div class="nums"><div class="big">${state.total.toLocaleString()}<small>円</small></div><div class="lim">今月の購入額（決済額）<br>上限：${yen(lim)}${state.minor?'（固定）':''}</div></div><div class="bar ${cls}"><i style="width:${pct}%"></i></div><div class="rem">${msg}<span>${pct}%・10月1日にリセット</span></div>`;
+}
+function price(p){return state.first?Math.round(p*0.85):p;}
+function render(){
+  const lim=effLimit(), hasPending=state.pending!==undefined;
+  const sa=$('stAge');sa.textContent=state.ageDone?(state.minor?'18歳未満（購入不可）':'登録済み'):'未登録';sa.className='st '+(state.ageDone?(state.minor?'ng':'ok'):'ng');
+  const sl=$('stLimit');sl.textContent=state.minor?'購入不可':hasPending?(state.pendingReady?'反映待ち（要確認）':'変更予約あり'):lim==null?'未設定':'月 '+yen(lim);sl.className='st '+(state.minor?'ng':hasPending&&state.pendingReady?'wa':lim==null?'':'ok');
+  $('usageLimit').innerHTML=usageHTML();$('usageCharge').innerHTML=usageHTML();$('usageLimit').style.display=state.minor?'none':'block';$('usageCharge').style.display=state.minor?'none':'block';
+  $('minorBlock').style.display=state.minor?'block':'none';$('chooseBlock').style.display=state.minor?'none':'block';
+  const opts=$('opts');opts.innerHTML='';
+  [...PRESETS.map(v=>({v,l:yen(v)+' / 月'})),{v:'custom',l:'カスタム'},{v:null,l:'設定しない'}].forEach(o=>{
+    const d=document.createElement('div');d.className='rc'+(state.selected===o.v?' sel':'');
+    const isCur=(o.v===state.limit&&o.v!=='custom')||(o.v==='custom'&&state.limit!=null&&!PRESETS.includes(state.limit));
+    d.innerHTML=`<span class="radio"></span><span class="lt"><b>${o.l}</b></span>${isCur?'<span class="cur">現在</span>':''}`;
+    d.addEventListener('click',()=>{state.selected=o.v;render();});opts.appendChild(d);});
+  $('custom').classList.toggle('show',state.selected==='custom');
+  const pb=$('pendingBox');
+  pb.innerHTML=hasPending?`<div class="pending"><span>上限 <b>${state.pending==null?'なし（解除）':yen(state.pending)}</b> への変更を予約中<br><span style="color:var(--sub)">${state.pendingReady?'24時間が経過しました。反映するには「反映する」を押してください':'9/22 '+nowStr()+' 以降に反映できます'}</span></span><span style="display:flex;flex-direction:column;gap:4px">${state.pendingReady?'<button class="go" id="applyPending">反映する</button>':''}<button id="cancelPending">取り消す</button></span></div>`:'';
+  const cp=$('cancelPending');if(cp)cp.onclick=()=>{state.pending=undefined;state.pendingReady=false;toast('変更予約を取り消しました');render();};
+  const ap=$('applyPending');if(ap)ap.onclick=()=>{state.hist.unshift({at:'9/22 '+nowStr(),chg:`${yen(state.limit)} → ${yen(state.pending)}`,eff:'本人確認後に反映'});state.limit=state.pending;state.selected=state.pending;state.pending=undefined;state.pendingReady=false;toast('上限を反映しました');render();};
+  const sel=selValue();$('saveBtn').disabled=(sel===undefined)||(sel===state.limit);
+  $('histBody').innerHTML=state.hist.slice(0,5).map(h=>`<tr><td>${h.at}</td><td>${h.chg}</td><td>${h.eff}</td></tr>`).join('');
+  // charge list
+  const rem=lim==null?Infinity:Math.max(0,lim-state.total);
+  const ca=$('chargeAlert');
+  if(state.minor){ca.innerHTML=`<div class="alert" style="margin-bottom:12px"><b>18歳未満のお客様はコインを購入できません。</b><br>18歳になるとご購入いただけます。保有コインでのガチャはご利用いただけます。</div>`;}
+  else if(lim!=null&&rem<=0){ca.innerHTML=`<div class="alert" style="margin-bottom:12px">今月の購入上限（${yen(lim)}）に達しました。<b>10月1日 0:00</b> から再度購入できます。<br><a data-go="limit">使いすぎ防止設定を確認する ›</a></div>`;ca.querySelector('a').onclick=()=>go('limit');}
+  else if(lim!=null&&state.total/lim>=0.8)ca.innerHTML=`<div class="notice" style="margin-bottom:12px">今月の上限まで残り <b>${rem.toLocaleString()}円</b>です。</div>`;
+  else ca.innerHTML='';
+  $('campBanner').style.display=state.first?'block':'none';$('campBanner2').style.display=state.first?'block':'none';$('cpnok').style.display=state.first?'block':'none';
+  const packs=[500,1000,3000,5000,10000,30000,50000,100000,200000,500000];
+  $('packs').innerHTML=packs.map(p=>{const pr=price(p),dis=state.minor||pr>rem;return `<div class="pk${dis?' dis':''}" data-p="${p}"><div class="l"><span class="c"></span><span><b>${p.toLocaleString()}<small>コイン</small></b>${dis?`<span class="why">${state.minor?'18歳未満は購入できません':rem<=0?'今月の上限に達しています':'残り購入可能額を超えています'}</span>`:''}</span></div><div class="r">${state.first?`<div><span class="old">¥${p.toLocaleString()}</span><span class="off">15%OFF</span></div>`:''}<div class="p">¥${pr.toLocaleString()}</div></div></div>`;}).join('');
+  document.querySelectorAll('.pk:not(.dis)').forEach(el=>el.addEventListener('click',()=>{state.selPack=+el.dataset.p;go('detail');}));
+  // detail
+  const p=state.selPack||500,pr=price(p);
+  $('pbox').innerHTML=`<div class="cn">🪙 ${p.toLocaleString()}コイン</div><div class="pr">${state.first?`<s>¥${p.toLocaleString()}</s>→ `:''}¥${pr.toLocaleString()}${state.first?'<span class="off">(15%OFF)</span>':''}</div>`;
+  const da=$('detailAlert');
+  if(state.minor){da.innerHTML=`<div class="alert" style="margin-bottom:12px"><b>18歳未満のお客様はコインを購入できません。</b></div>`;$('payBtn').disabled=true;}
+  else if(lim!=null&&pr>rem){da.innerHTML=`<div class="alert" style="margin-bottom:12px">この金額（¥${pr.toLocaleString()}）は今月の残り購入可能額（${rem.toLocaleString()}円）を超えています。</div>`;$('payBtn').disabled=true;}
+  else{da.innerHTML=lim!=null?`<div class="lead" style="font-size:12px;margin-bottom:12px">今月の購入額 ${state.total.toLocaleString()}円 → 購入後 <b>${(state.total+pr).toLocaleString()}円</b>（上限 ${yen(lim)}）</div>`:'';$('payBtn').disabled=false;}
+  $('stateBox').innerHTML=`limit: ${state.minor?'-(購入不可)':state.limit}<br>pending: ${hasPending?(state.pending===null?'null(解除)':state.pending)+(state.pendingReady?' [ready]':' [cooldown]'):'-'}<br>raise_count(月): ${state.raiseCount}/${RAISE_PER_MONTH}<br>month_total: ${state.total}<br>birth_date: ${state.ageDone?'registered':'null'} / minor: ${state.minor}<br>first_discount: ${state.first}`;
+}
+function selValue(){if(state.selected==='custom'){const v=+$('customVal').value;return (v>=1000&&v<=999000&&v%1000===0)?v:undefined;}return state.selected;}
+$('customVal').addEventListener('input',render);
+$('saveBtn').addEventListener('click',()=>{
+  const v=selValue(),cur=state.limit,isRaise=cur!=null&&(v==null||v>cur);
+  if(isRaise){
+    if(state.raiseCount>=RAISE_PER_MONTH){toast('引き上げは月2回までです。翌月に再度お試しください');return;}
+    confirmDlg(v==null?'上限を解除しますか？':'上限を引き上げますか？',`${v==null?'解除':'引き上げ'}は申請から <b>24時間後</b> に、この画面で「反映する」を押すと反映されます。それまでは月 <b>${yen(cur)}</b> が適用されます。<br><span style="color:var(--sub)">今月の引き上げ回数：${state.raiseCount+1}/${RAISE_PER_MONTH}</span>`,()=>{state.pending=v;state.pendingReady=false;state.raiseCount++;state.hist.unshift({at:'9/21 '+nowStr(),chg:`${yen(cur)} → ${yen(v)}`,eff:'24時間後（予約）'});toast('変更を予約しました（24時間後に反映できます）');render();});
+  }else{state.hist.unshift({at:'9/21 '+nowStr(),chg:`${yen(cur)} → ${yen(v)}`,eff:'即時'});state.limit=v;state.selected=v;state.pending=undefined;state.pendingReady=false;toast('上限を保存しました');render();}
+});
+function nowStr(){const d=new Date();return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0');}
+function confirmDlg(t,b,ok){$('cTitle').textContent=t;$('cBody').innerHTML=b;const m=$('confirm');m.classList.add('show');$('cYes').onclick=()=>{m.classList.remove('show');ok();};$('cNo').onclick=()=>m.classList.remove('show');}
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2400);}
+// ---- pay flow ----
+$('payBtn').addEventListener('click',()=>pay());
+function pay(){
+  if(!state.ageDone){openAge();return;}
+  if(state.minor){toast('18歳未満は購入できません（サーバー側で拒否）');return;}
+  const lim=effLimit(),pr=price(state.selPack||500);
+  if(lim!=null&&state.total+pr>lim){toast('今月の残り購入可能額を超えています（サーバー側で拒否）');return;}
+  toast(`サーバー判定OK → fincode決済へ（¥${price(state.selPack||500).toLocaleString()}）`);
+}
+// ---- age modal ----
+const Y=$('dobY'),M=$('dobM'),D=$('dobD'),TODAY=new Date(2026,8,21);
+Y.innerHTML='<option value="">年</option>'+Array.from({length:101},(_,i)=>`<option>${TODAY.getFullYear()-i}</option>`).join('');
+M.innerHTML='<option value="">月</option>'+Array.from({length:12},(_,i)=>`<option>${i+1}</option>`).join('');
+D.innerHTML='<option value="">日</option>'+Array.from({length:31},(_,i)=>`<option>${i+1}</option>`).join('');
+function openAge(){$('ageOv').classList.add('show');}
+$('ageCancel').onclick=()=>$('ageOv').classList.remove('show');
+function calcAge(){const y=+Y.value,m=+M.value,d=+D.value;if(!y||!m||!d)return{msg:'生年月日を選択してください'};const dt=new Date(y,m-1,d);if(dt.getFullYear()!==y||dt.getMonth()!==m-1||dt.getDate()!==d)return{err:'存在しない日付です'};if(dt>TODAY)return{err:'未来の日付は入力できません'};let age=TODAY.getFullYear()-y;if(TODAY.getMonth()+1<m||(TODAY.getMonth()+1===m&&TODAY.getDate()<d))age--;return{age};}
+function ageRender(){const r=calcAge(),res=$('ageRes');if(r.err)res.innerHTML=`<span class="err">${r.err}</span>`;else if(r.msg)res.textContent=r.msg;else res.innerHTML=`満 <b>${r.age}歳</b>${r.age<18?'（18歳未満）':''}`;
+  const minor=r.age!=null&&r.age<18;$('minorConsent').style.display=minor?'block':'none';
+  $('ageOk').style.display=minor?'none':'block';$('ageMinorClose').style.display=minor?'block':'none';
+  $('ageOk').disabled=!(r.age!=null&&$('chkDob').checked&&!minor);$('ageMinorClose').disabled=!$('chkDob').checked;}
+[Y,M,D].forEach(s=>s.addEventListener('change',ageRender));['chkDob'].forEach(id=>$(id).addEventListener('change',ageRender));
+$('ageOk').onclick=()=>{state.ageDone=true;state.minor=false;$('simAge').checked=true;$('simMinor').checked=false;$('ageOv').classList.remove('show');toast('年齢確認が完了しました');render();if($('s-detail').classList.contains('active'))setTimeout(pay,700);};
+$('ageMinorClose').onclick=()=>{state.ageDone=true;state.minor=true;$('simAge').checked=true;$('simMinor').checked=true;$('ageOv').classList.remove('show');toast('生年月日を保存しました（18歳未満・購入不可）');go('charge');};
+render();
+</script>
+</body>
+</html>
