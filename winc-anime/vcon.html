@@ -108,6 +108,24 @@ tr.grp td{background:var(--panel2);font-weight:700;font-size:12px;color:var(--mu
 .agree li::before{counter-increment:q;content:counter(q);font-family:var(--mono);font-weight:700;color:var(--accent);grid-row:span 2}
 .agree span{color:var(--muted);font-size:13px}
 .note{font-size:12px;color:var(--muted);margin-top:14px}
+#base4 .head .tag{font-size:11px;font-weight:900;background:var(--accent);color:#1a1004;padding:1px 9px;border-radius:999px;align-self:center}
+.b4{display:grid;gap:14px}
+.b4row{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--c,var(--accent));border-radius:12px;padding:14px 16px;display:grid;gap:10px}
+.b4row.C{--c:var(--C)} .b4row.B{--c:var(--B)} .b4row.A{--c:var(--A)} .b4row.S{--c:#E9B949}
+.b4top{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.b4top .ttl{font-size:16px;font-weight:900}
+.b4top .sec{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.b4top .btn{margin-left:auto;padding:5px 12px;font-size:12.5px}
+.strip{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+.fr{flex:0 0 84px;display:grid;gap:4px;align-content:start}
+.fr canvas{width:84px;aspect-ratio:9/16;border-radius:6px;background:#000;display:block}
+.fr span{font-size:10.5px;line-height:1.35;color:var(--muted)}
+.fr span b{display:block;font-family:var(--mono);font-weight:500;color:var(--faint);font-size:10px}
+.b4txt{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:12.5px}
+.b4txt dt{color:var(--muted)} .b4txt dd{margin:0}
+.add{display:inline-block;font-size:11px;font-weight:700;padding:0 7px;border-radius:4px;background:#4a2a14;color:#ffb27a;margin:1px 2px}
+.bgroup.base h4{color:var(--accent)}
+tr.grp.base td{background:rgba(227,176,75,.14);color:var(--accent)}
 footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-size:12px;color:var(--faint);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
 </style>
 
@@ -154,6 +172,15 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-si
       </div>
     </div>
   </div>
+
+  <section id="base4">
+    <div class="head">
+      <h2>先に作る基本4分岐</h2><span class="tag">10/5 納品</span>
+      <p>先方資料の確定ストーリー（C・B・A・S 各1本）を最優先で仕上げます。チャンスアップ11分岐は、この4本の結末カットを流用して後から作ります。</p>
+    </div>
+    <div class="b4" id="b4"></div>
+    <p class="note"><span class="add">追加</span> は先方資料にない、からくり系に寄せるための当社提案です。外して先方資料どおりにすることもできます。</p>
+  </section>
 
   <section id="konte">
     <div class="head">
@@ -228,7 +255,7 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-si
 
   <footer>
     <span>パレットグループ トレカ商事カンパニー</span>
-    <span>仮Vコン v2（からくり系）／ 2026-09-28 ／ タイミング確認用の仮映像です</span>
+    <span>仮Vコン v2.1（からくり系）／ 2026-09-28 ／ タイミング確認用の仮映像です</span>
   </footer>
 </div>
 
@@ -237,7 +264,7 @@ footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-si
 const W=540,H=960;
 const PZ={C:{c:'#E3E6EC',n:'C賞',cn:'白'},B:{c:'#3D8BFF',n:'B賞',cn:'青'},A:{c:'#EF4B4B',n:'A賞',cn:'赤'},G:{c:'#E9B949',n:'',cn:'金'},S:{c:'rainbow',n:'S賞',cn:'虹'}};
 const MOD={
-  null:{g:'基本（違和感なし）',floor:'C〜S',memo:'先方資料どおり'},
+  null:{g:'基本4分岐（先に作る・10/5納品）',floor:'C〜S',memo:'先方資料どおり'},
   red:{g:'赤文字',floor:'B以上',memo:'数字の色違い'},
   gold:{g:'金文字',floor:'A以上',memo:'数字の色違い'},
   mism:{g:'カウント矛盾',floor:'A以上',memo:'編集のみ'},
@@ -557,7 +584,7 @@ function selectBranch(b){cur=b;bd=build(b);
   buildTimeline();drawFrame();buildCuts();}
 
 const groups={};B.forEach(b=>{const g=MOD[b.mod].g;(groups[g]=groups[g]||{floor:MOD[b.mod].floor,items:[]}).items.push(b);});
-Object.entries(groups).forEach(([g,v])=>{const d=document.createElement('div');d.className='bgroup';
+Object.entries(groups).forEach(([g,v])=>{const d=document.createElement('div');d.className='bgroup'+(v.floor==='C〜S'?' base':'');
   d.innerHTML=`<h4>${g}<span class="chip">${v.floor}</span></h4><div class="items"></div>`;
   v.items.forEach(b=>{const bt=document.createElement('button');bt.type='button';bt.className='bbtn';bt.dataset.no=b.no;
     bt.innerHTML=`<span class="pz ${b.end}">${b.end}</span><span class="no">${String(b.no).padStart(2,'0')}</span>${b.name.replace(/ → [CBAS]$/,'').replace(/ 通常$/,'')}`;
@@ -565,10 +592,10 @@ Object.entries(groups).forEach(([g,v])=>{const d=document.createElement('div');d
   $('#blist').appendChild(d);});
 (()=>{const tb=$('#btable');let lastG='';
   const ab={null:'なし',red:'カウント「2」だけが赤文字',gold:'3・2・1・LASTの数字がすべて金文字',mism:'「3→2→2→LAST」と「1」が来ない',lag:'「2」のあと約1秒、画面も音も止まる',p3150:'「3→1→5→0」と進み、数字が並んで「3150」',illumi:'「1」で一瞬だけ顔の線画が光る',revive:'C賞と同じ暗転のあと、顔の線画が虹色に灯る'};
-  B.forEach(b=>{const m=MOD[b.mod];if(m.g!==lastG){lastG=m.g;const r=document.createElement('tr');r.className='grp';r.innerHTML=`<td colspan="7">${m.g} ／ ${m.floor}</td>`;tb.appendChild(r);}
+  B.forEach(b=>{const m=MOD[b.mod];if(m.g!==lastG){lastG=m.g;const r=document.createElement('tr');r.className='grp'+(b.mod?'':' base');r.innerHTML=`<td colspan="7">${m.g} ／ ${m.floor}</td>`;tb.appendChild(r);}
     const x=build(b);
     const endTxt=b.end==='C'?'暗転 → 白カード':(b.mod==='revive'?'暗転 → 復活 → 虹イルミ → 筆文字 → 虹カード':({B:'プチュン → 青イルミ → 青カード',A:'無音 → プチュン → 2段テロップ → 赤イルミ → 赤カード',S:'無音 → プチュン → 2段テロップ → 金イルミ → 反転・両断 → 虹イルミ → 筆文字 → 虹カード'})[b.end]);
-    const r=document.createElement('tr');r.innerHTML=`<td class="num">${String(b.no).padStart(2,'0')}</td><td><b>${b.name}</b></td><td>${ab[b.mod]}</td><td>${endTxt}</td><td><span class="pz ${b.end}">${b.end}</span></td><td class="num">${Math.round(x.dur)}秒</td><td class="muted">${b.mod?m.memo:'基本4本（10/5納品）'}</td>`;
+    const r=document.createElement('tr');r.innerHTML=`<td class="num">${String(b.no).padStart(2,'0')}</td><td><b>${b.name}</b></td><td>${ab[b.mod]}</td><td>${endTxt}</td><td><span class="pz ${b.end}">${b.end}</span></td><td class="num">${Math.round(x.dur)}秒</td><td class="muted">${b.mod?m.memo:'<b style="color:var(--accent)">10/5納品</b>'}</td>`;
     tb.appendChild(r);});})();
 
 const LOOK=[
@@ -579,15 +606,36 @@ const LOOK=[
 ];
 function drawLook(){const x=build(B[3]);const box=$('#look');
   if(!box.children.length){LOOK.forEach(l=>{const el=document.createElement('div');el.className='lk';el.innerHTML=`<canvas width="540" height="960"></canvas><b>${l.b}</b><p>${l.p}</p>`;box.appendChild(el);});}
-  box.querySelectorAll('canvas').forEach((c,i)=>{const l=LOOK[i];const s=x.segs.find(s=>s.k===l.k&&(l.z==null||s.zoom===l.z));render(c.getContext('2d',{willReadFrequently:true}),x,s.t0+(s.t1-s.t0)*0.6);});}
+  box.querySelectorAll('canvas').forEach((c,i)=>{const l=LOOK[i];const s=x.segs.find(s=>s.k===l.k&&(l.z==null||s.zoom===l.z));render(c.getContext('2d',{willReadFrequently:true}),x,onBeat(s,s.t0+(s.t1-s.t0)*0.6));});}
+
+const B4TXT={
+ 1:{src:'LASTのあと、徐々にブラックアウト（ハズレ）',add:['カウント中に目元アップへ寄る','白カード']},
+ 2:{src:'プチュン＋電子音 → 1枚絵が青で激しく点滅 → キュイン → 喜ぶ立ち絵＋エフェクト',add:['点滅を顔の線画（イルミ）で表現','電子音 → 和太鼓','青カード']},
+ 3:{src:'Bと同じ流れで、赤で点滅',add:['LAST後の無音1.5秒','金の2段テロップ','点滅を顔の線画（イルミ）で表現','赤カード']},
+ 4:{src:'金で点滅 → ネガポジ反転＋横一文字の両断＋重低音 → 虹で点滅 → 喜ぶ立ち絵',add:['LAST後の無音','金の2段テロップ','白熱の筆文字','点滅を顔の線画（イルミ）で表現','虹カード']},
+};
+const FLOWTXT={C:'OP → 祈り → 3・2・1・LAST → 暗転 → 白カード',B:'OP → 祈り → 3・2・1・LAST → プチュン → 青イルミ → キュイン → 喜び → 青カード',
+ A:'OP → 祈り → 3・2・1・LAST → 無音 → プチュン → 2段テロップ → 赤イルミ → キュイン → 喜び → 赤カード',
+ S:'OP → 祈り → 3・2・1・LAST → 無音 → プチュン → 2段テロップ → 金イルミ → 反転・両断 → 虹イルミ → 筆文字 → キュイン → 喜び → 虹カード'};
+function onBeat(s,t){if(s.k!=='illumi')return t;let m=Math.floor(t*12);if(m%2)m++;const r=m/12+0.01;return r<s.t1?r:t;}
+function keyCuts(x){return x.segs.filter(s=>s.k==='op'||s.k==='enter'||(s.k==='count'&&(s.n==='3'||s.n==='LAST'))||!['count','silence','kyuin','op','enter'].includes(s.k));}
+function buildB4(){const box=$('#b4');const fresh=!box.children.length;
+  B.slice(0,4).forEach((b,bi)=>{const x=build(b);const cuts=keyCuts(x);let row;
+    if(fresh){row=document.createElement('article');row.className='b4row '+b.end;const t=B4TXT[b.no];
+      row.innerHTML=`<div class="b4top"><span class="pz ${b.end}">${b.end}</span><span class="ttl">${PZ[b.end].n}</span><span class="sec">約${Math.round(x.dur)}秒 ／ No.${String(b.no).padStart(2,'0')}</span><button class="btn" type="button">▶ この分岐を再生</button></div>
+      <div class="strip">${cuts.map(s=>`<div class="fr"><canvas width="540" height="960"></canvas><span><b>${fmt(s.t0)}</b>${s.label}</span></div>`).join('')}</div>
+      <dl class="b4txt"><dt>流れ</dt><dd>${FLOWTXT[b.end]}</dd><dt>先方資料</dt><dd>${t.src}</dd><dt>当社で足した所</dt><dd>${t.add.map(a=>`<span class="add">${a}</span>`).join('')}</dd></dl>`;
+      row.querySelector('button').addEventListener('click',()=>{pause();selectBranch(b);window.scrollTo({top:0,behavior:'smooth'});});
+      box.appendChild(row);} else row=box.children[bi];
+    row.querySelectorAll('canvas').forEach((c,i)=>{const s=cuts[i];const mid=s.k==='card'?s.t0+Math.min(1.2,(s.t1-s.t0)*0.8):(s.k==='puchun'?s.t0+0.1:s.t0+(s.t1-s.t0)*0.6);render(c.getContext('2d',{willReadFrequently:true}),x,onBeat(s,mid));});});}
 function buildCuts(){const box=$('#cuts');box.innerHTML='';$('#konteTitle').textContent=`No.${String(cur.no).padStart(2,'0')}「${cur.name}」／全${bd.segs.length}カット・約${Math.round(bd.dur)}秒`;
   bd.segs.forEach((s,i)=>{const el=document.createElement('div');el.className='cut';
     el.innerHTML=`<canvas width="540" height="960"></canvas><div class="h"><span>C${String(i+1).padStart(2,'0')}</span><span>${fmt(s.t0)}–${fmt(s.t1)}</span></div><div class="v">${s.vis}</div><div class="a">${s.snd}</div>`;
     box.appendChild(el);const c=el.querySelector('canvas').getContext('2d',{willReadFrequently:true});
-    const mid=s.k==='card'?s.t0+Math.min(1.2,(s.t1-s.t0)*0.8):(s.k==='puchun'?s.t0+0.1:(s.k==='count'&&s.hint?s.t0+(s.t1-s.t0)*0.45:s.t0+(s.t1-s.t0)*0.6));render(c,bd,mid);});}
+    const mid=s.k==='card'?s.t0+Math.min(1.2,(s.t1-s.t0)*0.8):(s.k==='puchun'?s.t0+0.1:(s.k==='count'&&s.hint?s.t0+(s.t1-s.t0)*0.45:s.t0+(s.t1-s.t0)*0.6));render(c,bd,onBeat(s,mid));});}
 
-selectBranch(B[3]);drawLook();
-const reDraw=()=>{drawFrame();drawLook();buildCuts();};
+selectBranch(B[3]);drawLook();buildB4();
+const reDraw=()=>{drawFrame();drawLook();buildCuts();buildB4();};
 if(document.fonts){Promise.all([document.fonts.load('900 40px "Noto Serif JP"','3210LAST演出成功でアド確定⁉祈りは届くか'),document.fonts.load('900 40px "Zen Kaku Gothic New"','賞支給キャラ')]).then(reDraw).catch(()=>{});document.fonts.ready.then(reDraw);}
 })();
 </script>
