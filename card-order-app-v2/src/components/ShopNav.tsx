@@ -90,7 +90,7 @@ export function ShopNav({ shopId = null, noticesEnabled = false }: {
       href={href}
       aria-label={n > 0 ? `${label} (${n}件)` : label}
       title={label}
-      className={`relative p-2 rounded-full hover:bg-slate-100 ${isActive(pathname, href.split("#")[0]!) && href !== "/order#cart" ? "text-brand-600" : "text-slate-600"}`}
+      className={`relative p-2 rounded-full hover:bg-slate-100 ${isActive(pathname, href) ? "text-brand-600" : "text-slate-600"}`}
     >
       {icon}
       <Badge n={n} />
@@ -100,7 +100,7 @@ export function ShopNav({ shopId = null, noticesEnabled = false }: {
   const tabs = [
     { href: "/order", label: "発注", icon: I.order, n: 0 },
     { href: "/notifications", label: noticeLabel, icon: I.bell, n: unread },
-    { href: "/order#cart", label: "カート", icon: I.cart, n: cartCount },
+    { href: "/cart", label: "カート", icon: I.cart, n: cartCount },
     { href: "/mypage", label: "マイページ", icon: I.user, n: 0 },
   ];
 
@@ -117,7 +117,7 @@ export function ShopNav({ shopId = null, noticesEnabled = false }: {
               発注
             </Link>
             {iconLink("/notifications", noticeLabel, I.bell, unread)}
-            {iconLink("/order#cart", "カート", I.cart, cartCount)}
+            {iconLink("/cart", "カート", I.cart, cartCount)}
             {iconLink("/mypage", "マイページ", I.user, 0)}
           </nav>
         </div>
@@ -127,7 +127,7 @@ export function ShopNav({ shopId = null, noticesEnabled = false }: {
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200 pb-[env(safe-area-inset-bottom)]">
         <div className="grid grid-cols-4">
           {tabs.map((t) => {
-            const active = t.href === "/order#cart" ? false : isActive(pathname, t.href);
+            const active = isActive(pathname, t.href);
             return (
               <Link key={t.href} href={t.href} className={`flex flex-col items-center gap-0.5 py-2 text-[10px] ${active ? "text-brand-600" : "text-slate-500"}`}>
                 <span className="relative">{t.icon}<Badge n={t.n} /></span>

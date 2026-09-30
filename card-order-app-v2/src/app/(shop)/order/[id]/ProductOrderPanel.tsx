@@ -95,10 +95,10 @@ export function ProductOrderPanel({
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 space-y-2">
           <p className="font-semibold">カートに追加しました（カート {added} 件）</p>
           <div className="flex flex-wrap gap-2">
-            <Link href="/order#cart" className="btn-primary text-xs">カートを見て発注する</Link>
+            <Link href="/cart" className="btn-primary text-xs">カートを見て発注する</Link>
             <Link href="/order" className="btn-secondary text-xs">ほかの商品を見る</Link>
           </div>
-          <p className="text-xs text-emerald-700">発注の確定（同意・送信）は発注ページのカートから行います。</p>
+          <p className="text-xs text-emerald-700">発注の確定（同意・送信）はカートから行います。</p>
         </div>
       )}
     </div>

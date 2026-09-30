@@ -24,6 +24,8 @@ interface Props {
   shop: Shop | null;
   /** 商品ID → このショップが発注中(未確定)のBOX数。配分品のショップ別上限判定に使う */
   pendingByProduct?: Record<string, number>;
+  /** "cart" = カートページ (商品一覧を出さずカートだけを大きく表示) */
+  mode?: "order" | "cart";
 }
 
 type CategoryFilter = "all" | ProductCategory;
@@ -35,7 +37,7 @@ const CATEGORY_LABEL: Record<ProductCategory, string> = {
   other:    "その他",
 };
 
-export function OrderForm({ products: initialProducts, shop, pendingByProduct = {} }: Props) {
+export function OrderForm({ products: initialProducts, shop, pendingByProduct = {}, mode = "order" }: Props) {
   const [cart, setCart] = useState<CartItem[]>([]);
   // 受付終了・在庫なし等で復元できなかったカート行 (理由を見せて削除してもらう)
   const [unavailable, setUnavailable] = useState<{ line: StoredCartLine; reason: string }[]>([]);
@@ -311,8 +313,9 @@ export function OrderForm({ products: initialProducts, shop, pendingByProduct = 
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* 商品リスト */}
+    <div className={mode === "cart" ? "max-w-2xl space-y-6" : "grid grid-cols-1 lg:grid-cols-3 gap-6"}>
+      {/* 商品リスト (カートページでは出さない) */}
+      {mode === "order" && (
       <div className="lg:col-span-2 space-y-4">
         {/* 検索 + カテゴリタブ + ソート */}
         <div className="card p-4 space-y-3">
@@ -412,10 +415,14 @@ export function OrderForm({ products: initialProducts, shop, pendingByProduct = 
           ))}
         </div>
       </div>
+      )}
 
       {/* カート */}
-      <aside id="cart" className="card p-5 h-fit lg:sticky lg:top-4 space-y-4 scroll-mt-20">
-        <h2 className="font-semibold">カート ({cart.length})</h2>
+      <aside id="cart" className={`card p-5 h-fit space-y-4 scroll-mt-20 ${mode === "order" ? "lg:sticky lg:top-4" : ""}`}>
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="font-semibold">カート ({cart.length})</h2>
+          {mode === "order" && cart.length > 0 && <Link href="/cart" className="text-xs text-brand-600 hover:underline">カートを開く →</Link>}
+        </div>
         {unavailable.length > 0 && (
           <ul className="space-y-2">
             {unavailable.map((u) => (
@@ -430,14 +437,22 @@ export function OrderForm({ products: initialProducts, shop, pendingByProduct = 
           </ul>
         )}
         {cart.length === 0 ? (
-          <p className="text-sm text-slate-500">カートは空です</p>
+          mode === "cart" ? (
+            <div className="text-center py-8 space-y-3">
+              <p className="text-3xl" aria-hidden>🛒</p>
+              <p className="text-sm text-slate-600">カートは空です</p>
+              <Link href="/order" className="btn-primary inline-flex">発注ページで商品を選ぶ</Link>
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500">カートは空です</p>
+          )
         ) : (
           <ul className="space-y-3">
             {cart.map((c) => {
               const conflict = stockConflicts.get(c.product.id);
               return (
                 <li key={c.product.id} className="text-sm border-b border-slate-100 pb-2">
-                  <div className="font-medium">{c.product.title}</div>
+                  <Link href={`/order/${c.product.id}`} className="font-medium hover:text-brand-700 hover:underline">{c.product.title}</Link>
                   <div className="text-slate-500">
                     {c.qty}{c.unit} = {c.qtyInBox} BOX
                   </div>
@@ -505,13 +520,17 @@ export function OrderForm({ products: initialProducts, shop, pendingByProduct = 
               <a href="/mypage" className="btn-primary w-full block text-center">
                 発注履歴を確認する
               </a>
-              <button
-                type="button"
-                className="btn-secondary w-full"
-                onClick={() => setCompleteOpen(false)}
-              >
-                続けて発注する
-              </button>
+              {mode === "cart" ? (
+                <a href="/order" className="btn-secondary w-full block text-center">続けて発注する</a>
+              ) : (
+                <button
+                  type="button"
+                  className="btn-secondary w-full"
+                  onClick={() => setCompleteOpen(false)}
+                >
+                  続けて発注する
+                </button>
+              )}
             </div>
           </div>
         </div>
