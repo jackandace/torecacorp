@@ -323,14 +323,14 @@ export function LegacyPurchasesManager({ shopId, purchases, batches, invoices, i
       <section className="card p-5 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-semibold text-sm">過去請求書（PDF）</h2>
-          <span className="text-xs text-slate-500">請求書1枚に複数の購入履歴を紐付けられます。紐付けた請求書はお客様の購入履歴からも開けます</span>
+          <span className="text-xs text-slate-500">請求書1枚に複数の購入履歴を紐付けられます。紐付けた請求書はお客様の購入履歴からも開けます（請求書は税込・購入履歴は税抜）</span>
         </div>
         {invoices.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-xs min-w-[620px]">
               <thead className="bg-slate-50 text-slate-600"><tr>
                 <th className="text-left px-3 py-2">請求書番号</th><th className="text-left px-3 py-2">発行日</th>
-                <th className="text-right px-3 py-2">請求書の金額</th><th className="text-right px-3 py-2">紐付け中の購入履歴</th>
+                <th className="text-right px-3 py-2">請求書の金額(税込)</th><th className="text-right px-3 py-2">紐付け中の購入履歴</th>
                 <th className="text-left px-3 py-2">PDF</th>
               </tr></thead>
               <tbody>
@@ -350,7 +350,7 @@ export function LegacyPurchasesManager({ shopId, purchases, batches, invoices, i
             </table>
           </div>
         ) : (
-          <p className="text-xs text-slate-500">まだ過去請求書はありません。下の「過去請求書を取込」からPDFをアップロードしてください。</p>
+          <p className="text-xs text-slate-500">まだ過去請求書はありません。下の「+ 過去の請求書を追加」からPDFをアップロードしてください。</p>
         )}
         {invoiceUpload}
       </section>
