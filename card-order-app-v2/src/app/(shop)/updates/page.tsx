@@ -12,6 +12,8 @@ interface Item {
   id: string;
   icon: string;
   title: string;
+  /** 目次用の短い見出し */
+  short: string;
   changes: string[];
   howTo: string[];
   links: { href: string; label: string }[];
@@ -23,6 +25,7 @@ const RELEASE_2026_10: Item[] = [
     id: "notices",
     icon: "🔔",
     title: "新商品のお知らせが届くようになりました",
+    short: "新商品のお知らせ",
     noticesOnly: true,
     changes: [
       "新しく公開された商品を、アプリの「お知らせ」でお知らせします（ご覧いただける商品のみ）",
@@ -44,6 +47,7 @@ const RELEASE_2026_10: Item[] = [
     id: "cart",
     icon: "🛒",
     title: "カートが使いやすくなりました",
+    short: "カート",
     changes: [
       "カートに入れた商品は、ページを移動しても・画面を閉じても残るようになりました（同じ端末・同じブラウザ内）",
       "商品ページからも「カートに追加」できるようになり、発注ページと同じカートにまとまります",
@@ -64,6 +68,7 @@ const RELEASE_2026_10: Item[] = [
     id: "release",
     icon: "📅",
     title: "発売日・メーカー希望小売価格を表示するようになりました",
+    short: "発売日・希望小売価格",
     changes: [
       "発注ページと商品ページに「発売日」と「メーカー希望小売価格（税込）」を表示します",
       "発注ページの並び替えに「発売日が早い順」を追加しました",
@@ -75,6 +80,7 @@ const RELEASE_2026_10: Item[] = [
     id: "history",
     icon: "📋",
     title: "発注履歴に商品名が表示されない問題を修正しました",
+    short: "発注履歴の商品名",
     changes: [
       "受付が終了した商品などで、マイページの発注履歴の商品名が「—」になることがありました。発注時点の商品名を必ず表示するよう修正しました",
       "発注履歴のCSVダウンロードは、マイページの「発注履歴」の見出しの横に移動しました",
@@ -86,6 +92,7 @@ const RELEASE_2026_10: Item[] = [
     id: "mypage",
     icon: "👤",
     title: "メニューをマイページにまとめました",
+    short: "マイページ",
     changes: [
       "お問い合わせ・よくある質問・操作マニュアル・プロフィール・ログアウトは、マイページから開けるようになりました",
       "画面上部は「発注」と🔔お知らせ・🛒カート・👤マイページのアイコンに整理しました。スマホは画面下のメニューから移動できます",
@@ -98,6 +105,7 @@ const RELEASE_2026_10: Item[] = [
     id: "legacy",
     icon: "🗂",
     title: "アプリ導入前の購入履歴を確認できるようになりました",
+    short: "過去の購入履歴",
     changes: [
       "卸アプリを使い始める前からお取引いただいているお客様は、それ以前の購入履歴をマイページから確認できるようになりました（順次登録しています）",
     ],
@@ -128,7 +136,7 @@ export default async function UpdatesPage() {
         <nav className="card p-4 flex flex-wrap gap-2 text-sm" aria-label="目次">
           {items.map((i) => (
             <a key={i.id} href={`#${i.id}`} className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-brand-50 hover:text-brand-700">
-              {i.icon} {i.title.replace(/ました$/, "")}
+              {i.icon} {i.short}
             </a>
           ))}
         </nav>
