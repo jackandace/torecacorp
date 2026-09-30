@@ -9,6 +9,7 @@ export const DEFAULT_PREFS: Omit<ShopNoticePrefs, "shop_id" | "updated_at"> = {
   title_mode: "all",
   title_ids: [],
   last_digest_at: null,
+  confirmed_at: null,
 };
 
 export async function getNoticePrefs(admin: Sb, shopId: string): Promise<ShopNoticePrefs> {

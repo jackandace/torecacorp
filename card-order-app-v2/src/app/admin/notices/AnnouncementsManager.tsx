@@ -5,6 +5,25 @@ import { useRouter } from "next/navigation";
 
 interface Item { id: string; title: string; body: string | null; linkUrl: string | null; createdAt: string }
 
+/** よく使う文面 (全体反映時のアップデート告知など) */
+const PRESETS: { label: string; title: string; body: string; linkUrl: string }[] = [
+  {
+    label: "2026年10月アップデートの告知",
+    title: "【アップデート】カート・新商品のお知らせなどが新しくなりました",
+    body: [
+      "いつもご利用ありがとうございます。アプリを以下のとおり更新しました。",
+      "",
+      "・新商品のお知らせ（アプリ内＋1日1回のまとめメール）を開始しました。受け取るタイトル・メールの有無はマイページ「お知らせの受け取り設定」から選べます",
+      "・カートがページを移動しても残るようになり、画面上部の🛒から中身を確認できます",
+      "・発売日とメーカー希望小売価格（税込）を表示するようになりました",
+      "・お問い合わせ・よくある質問・マニュアル・プロフィールはマイページにまとめました",
+      "",
+      "変わったことと使い方は、下の「詳しく見る」からご確認ください。",
+    ].join("\n"),
+    linkUrl: "/updates",
+  },
+];
+
 export function AnnouncementsManager({ items }: { items: Item[] }) {
   const router = useRouter();
   const [title, setTitle] = useState("");
@@ -40,6 +59,15 @@ export function AnnouncementsManager({ items }: { items: Item[] }) {
       <div>
         <h2 className="font-semibold">全体へのお知らせ</h2>
         <p className="text-xs text-slate-500 mt-0.5">お客様全員のお知らせ「全体へのお知らせ」タブに表示されます（メールは送りません）。新商品は公開時に自動で載るので、ここでの投稿は不要です。</p>
+      </div>
+      <div className="flex flex-wrap gap-2 text-xs">
+        <span className="text-slate-500 self-center">文面テンプレート:</span>
+        {PRESETS.map((p) => (
+          <button key={p.label} type="button" className="btn-secondary text-xs"
+            onClick={() => { setTitle(p.title); setBody(p.body); setLinkUrl(p.linkUrl); setMsg(null); }}>
+            {p.label}
+          </button>
+        ))}
       </div>
       <div className="space-y-2">
         <input className="input text-sm" placeholder="タイトル（例: 年末年始の営業について）" value={title} onChange={(e) => setTitle(e.target.value)} />

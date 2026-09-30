@@ -41,6 +41,7 @@ export async function PUT(request: NextRequest) {
     email_enabled: body.emailEnabled,
     title_mode: body.titleMode,
     title_ids: body.titleMode === "selected" ? validIds : [],
+    confirmed_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   }, { onConflict: "shop_id" });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

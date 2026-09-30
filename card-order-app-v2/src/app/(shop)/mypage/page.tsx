@@ -203,6 +203,7 @@ export default async function MyPage({ searchParams }: { searchParams: SearchPar
       {/* メニュー */}
       <section className="card divide-y divide-slate-100" aria-label="メニュー">
         {[
+          { href: "/updates", label: "アップデート情報", sub: "2026年10月: カート・発売日表示・お知らせ など" },
           ...(noticeAccess.enabled ? [{ href: "/notifications/settings", label: "お知らせの受け取り設定", sub: "受け取るタイトル・新商品メール" }] : []),
           ...((legacyCount ?? 0) > 0 ? [{ href: "/mypage/purchase-history", label: "購入履歴（アプリ運用以前）", sub: `${legacyCount} 件` }] : []),
           { href: "/profile", label: "プロフィール・登録情報", sub: "連絡先・配送先・返金先口座" },

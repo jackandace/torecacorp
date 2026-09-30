@@ -121,6 +121,7 @@ export type ShopNoticePrefs = {
   title_mode: "all" | "selected";
   title_ids: string[];
   last_digest_at: string | null;
+  confirmed_at: string | null;      // 037: お客様が受け取り設定を確認した日時 (未確認はメール送信しない)
   updated_at: string;
 };
 

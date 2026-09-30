@@ -3,6 +3,7 @@
 // 前回の対象時刻 (shop_notice_prefs.last_digest_at、初回は24時間前) 以降に公開された
 // 受付中の商品を、ショップごとに「見られる商品 (ランク・個別指名)」かつ「希望タイトル」で絞り、
 // 1通にまとめて送る。新商品が無いショップには送らない。
+// 送るのは受け取り設定を確認して「受け取る」を選んだショップだけ (確認前はアプリ内のお知らせのみ)。
 // お知らせ機能の先行公開中は、テストユーザー (手動指定 + スタッフ別名) にだけ送る。
 // 【過去分は送らない】お知らせ開始時刻 (feature-flags) より前に公開された商品は、どのショップにも送らない。
 //
@@ -107,7 +108,9 @@ async function run(request: NextRequest) {
         }));
 
       let ok = true;
-      if (list.length > 0 && prefs.email_enabled) {
+      // 受け取り設定を確認して「受け取る」を選んだお客様だけに送る (未確認のお客様には送らない)
+      const wantsEmail = !!prefs.confirmed_at && prefs.email_enabled;
+      if (list.length > 0 && wantsEmail) {
         if (dryRun) {
           preview.push({ shop: shop.company_name, products: list.map((p) => p.title) });
         } else if (canSend && shop.email) {
@@ -125,7 +128,7 @@ async function run(request: NextRequest) {
       // 送れた (または送る物が無い・受け取らない設定) ショップは起点を進める。失敗時は翌日に再送
       if (ok && !dryRun) {
         await admin.from("shop_notice_prefs").upsert(
-          { shop_id: shop.id, email_enabled: prefs.email_enabled, title_mode: prefs.title_mode, title_ids: prefs.title_ids, last_digest_at: now, updated_at: now },
+          { shop_id: shop.id, email_enabled: prefs.email_enabled, title_mode: prefs.title_mode, title_ids: prefs.title_ids, confirmed_at: prefs.confirmed_at ?? null, last_digest_at: now, updated_at: now },
           { onConflict: "shop_id" },
         );
       }

@@ -4,6 +4,9 @@ import { isAdmin, isSupplier } from "@/lib/auth";
 import { ShopNav } from "@/components/ShopNav";
 import { ReceiptEnforcer } from "@/components/ReceiptEnforcer";
 import { getNoticeAccess } from "@/lib/feature-flags";
+import { NoticeOnboarding } from "@/components/NoticeOnboarding";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getNoticePrefs } from "@/lib/notice-prefs";
 
 export default async function ShopLayout({
   children,
@@ -32,6 +35,12 @@ export default async function ShopLayout({
   // お知らせ機能の表示可否だけをここで決める。未読件数はナビがページ移動のたびに API から取り直す
   // (レイアウトはページ移動で再描画されないため、ここで数えると既読後も古い件数が残る)
   const noticesOn = shop ? (await getNoticeAccess(shop.id)).enabled : false;
+  // 受け取り設定をまだ確認していなければ、確認ポップアップを出す (037 未実行なら confirmed_at が無く出さない)
+  let needsNoticeConfirm = false;
+  if (shop && noticesOn) {
+    const prefs = await getNoticePrefs(createAdminClient(), shop.id);
+    needsNoticeConfirm = "confirmed_at" in prefs && !prefs.confirmed_at;
+  }
   let pending: { token: string; title: string }[] = [];
   if (shop) {
     const { data } = await supabase
@@ -52,6 +61,7 @@ export default async function ShopLayout({
       {/* 下部固定タブ(モバイル)に隠れないよう余白 */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24 md:pb-8">{children}</main>
       <ReceiptEnforcer pending={pending} />
+      {pending.length === 0 && <NoticeOnboarding show={needsNoticeConfirm} />}
     </div>
   );
 }
