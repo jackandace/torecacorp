@@ -13,6 +13,8 @@ import {
   getGeneralFeed, getSeenAt, getUnreadCounts, markSeen, NEW_PRODUCT_WINDOW_DAYS, type NoticeTab,
 } from "@/lib/shop-notifications";
 import { NotificationHistory } from "./NotificationHistory";
+import { MarkAllRead } from "./MarkAllRead";
+import { SeenPing } from "./SeenPing";
 
 export const metadata = { title: "お知らせ | トレカ商事" };
 export const dynamic = "force-dynamic";
@@ -88,10 +90,14 @@ export default async function NotificationsPage({ searchParams }: { searchParams
         <Link href="/mypage" className="text-sm text-brand-600 hover:underline">← マイページ</Link>
         <div className="flex items-end justify-between gap-2 mt-1">
           <h1 className="text-2xl font-bold">お知らせ</h1>
-          <Link href="/notifications/settings" className="text-sm text-brand-600 hover:underline">⚙ 受け取り設定</Link>
+          <div className="flex items-center gap-4">
+            <MarkAllRead disabled={counts.general + counts.personal === 0} />
+            <Link href="/notifications/settings" className="text-sm text-brand-600 hover:underline">⚙ 受け取り設定</Link>
+          </div>
         </div>
       </div>
 
+      <SeenPing tab={tab} />
       <div className="card p-1 flex gap-1">
         {tabLink("general", "全体へのお知らせ", counts.general)}
         {tabLink("personal", "あなたへのお知らせ", counts.personal)}

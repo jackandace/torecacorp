@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LogoutButton } from "@/components/LogoutButton";
 import { CART_EVENT, loadCart } from "@/lib/cart-storage";
+import { NOTICES_EVENT } from "@/lib/notices-client";
 
 /** アイコン (24px, currentColor) */
 const I = {
@@ -57,6 +58,24 @@ function Badge({ n }: { n: number }) {
   );
 }
 
+/** お知らせの未読件数: ページ移動・既読操作のたびに取り直す */
+function useUnreadNotices(enabled: boolean, pathname: string): number {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!enabled) return;
+    let alive = true;
+    const load = () =>
+      fetch("/api/profile/notices/unread", { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => { if (alive && j) setCount((j.general ?? 0) + (j.personal ?? 0)); })
+        .catch(() => { /* 取得失敗時は前の表示のまま */ });
+    load();
+    window.addEventListener(NOTICES_EVENT, load);
+    return () => { alive = false; window.removeEventListener(NOTICES_EVENT, load); };
+  }, [enabled, pathname]);
+  return count;
+}
+
 /** ブラウザに保存されたカートの件数 (発注ページ・商品詳細・別タブの変更に追従) */
 function useCartCount(shopId: string | null): number {
   const [count, setCount] = useState(0);
@@ -78,18 +97,16 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function ShopNav({ shopId = null, noticesEnabled = false, unreadNotices = 0 }: {
+export function ShopNav({ shopId = null, noticesEnabled = false }: {
   shopId?: string | null;
   noticesEnabled?: boolean;
-  unreadNotices?: number;
 }) {
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
   const cartCount = useCartCount(shopId);
   const LINKS = linksFor(noticesEnabled);
   const TABS = tabsFor(noticesEnabled);
-  // お知らせを開いている間は既読になるためバッジを出さない
-  const unread = noticesEnabled && !pathname.startsWith("/notifications") ? unreadNotices : 0;
+  const unread = useUnreadNotices(noticesEnabled, pathname);
   const badgeFor = (href: string) => (href === "/notifications" ? unread : 0);
 
   // ページ遷移でドロワーを閉じる
