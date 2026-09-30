@@ -91,6 +91,7 @@ export async function getGeneralFeed(admin: Sb, shop: ShopLite, startAt: string)
       .select("id, title, body, link_url, created_at")
       .is("deleted_at", null)
       .gte("created_at", startAt)
+      .lte("created_at", new Date().toISOString()) // 予約投稿は公開日時まで出さない
       .order("created_at", { ascending: false })
       .limit(50),
   ]);
@@ -125,7 +126,7 @@ export async function getUnreadCounts(admin: Sb, shop: ShopLite, startAt: string
   const [products, { count: annCount }, { count: personalCount }] = await Promise.all([
     visibleNewProducts(admin, shop, generalSince),
     admin.from("announcements").select("id", { count: "exact", head: true })
-      .is("deleted_at", null).gt("created_at", seen.general),
+      .is("deleted_at", null).gt("created_at", seen.general).lte("created_at", new Date().toISOString()),
     admin.from("notifications").select("id", { count: "exact", head: true })
       .eq("shop_id", shop.id).gt("created_at", seen.personal),
   ]);

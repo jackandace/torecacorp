@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatJST } from "@/lib/dates";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { listTesterShops, NOTICES_ROLLOUT_AT, NOTICES_TESTER_START } from "@/lib/feature-flags";
+import { isRolledOut, listTesterShops, NOTICES_ROLLOUT_AT, NOTICES_TESTER_START } from "@/lib/feature-flags";
 import { AnnouncementsManager } from "./AnnouncementsManager";
 import { DigestTester } from "./DigestTester";
 
@@ -21,7 +21,8 @@ export default async function NoticesAdminPage() {
     supabase.from("batch_logs").select("status, processed_count, error_count, error_detail, started_at").eq("batch_name", "new-product-digest").order("started_at", { ascending: false }).limit(5),
   ]);
   const testers = (testerRows ?? []).map((t) => ({ ...t, reason: testerMap.get(t.id) }));
-  const rolledOut = !!NOTICES_ROLLOUT_AT;
+  const rolledOut = isRolledOut();
+  const rolloutLabel = NOTICES_ROLLOUT_AT ? new Date(NOTICES_ROLLOUT_AT).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" }) : null;
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -34,10 +35,11 @@ export default async function NoticesAdminPage() {
 
       <section className={`rounded-xl border p-4 text-sm ${rolledOut ? "border-emerald-200 bg-emerald-50" : "border-amber-300 bg-amber-50"}`}>
         {rolledOut ? (
-          <p className="font-semibold text-emerald-800">お知らせ機能は全てのお客様に公開中です。</p>
+          <p className="font-semibold text-emerald-800">お知らせ機能は全てのお客様に公開中です（{rolloutLabel} 公開）。</p>
         ) : (
           <>
-            <p className="font-semibold text-amber-900">🧪 お知らせ機能は現在「テストユーザー」のお客様にだけ表示されています（新商品メールもテストユーザーにだけ送信）。</p>
+            <p className="font-semibold text-amber-900">お知らせ機能は現在「テストユーザー」のお客様にだけ表示されています（新商品メールもテストユーザーにだけ送信）。</p>
+            {rolloutLabel && <p className="font-semibold text-amber-900 mt-1">全てのお客様への公開予定: {rolloutLabel}（この時刻に自動で公開されます）</p>}
             <p className="text-amber-900 mt-1">テストユーザー: {testers.length === 0 ? "なし" : testers.map((t) => (
               <Link key={t.id} href={`/admin/shops/${t.id}`} className="underline mr-2">
                 {t.company_name}{t.reason === "staff" ? "（スタッフ）" : ""}
@@ -48,7 +50,7 @@ export default async function NoticesAdminPage() {
               それ以外は 顧客管理 → お客様の詳細 →「テストユーザー」で個別に追加できます。全体への公開は開発担当に依頼してください。
             </p>
             <p className="text-xs text-amber-800 mt-1">
-              ※ お知らせの対象は、テストユーザーは {new Date(NOTICES_TESTER_START).toLocaleString("ja-JP")} 以降、全体は全体反映した時刻以降に公開された商品・お知らせだけです（それより前の分は通知しません）。
+              ※ お知らせの対象は、テストユーザーは {new Date(NOTICES_TESTER_START).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })} 以降、全体は全体反映した時刻以降に公開された商品・お知らせだけです（それより前の分は通知しません）。
             </p>
           </>
         )}
@@ -63,7 +65,7 @@ export default async function NoticesAdminPage() {
       </section>
 
       <AnnouncementsManager
-        items={(anns ?? []).map((a) => ({ id: a.id, title: a.title, body: a.body, linkUrl: a.link_url, createdAt: formatJST(a.created_at) }))}
+        items={(anns ?? []).map((a) => ({ id: a.id, title: a.title, body: a.body, linkUrl: a.link_url, createdAt: formatJST(a.created_at), scheduled: Date.parse(a.created_at) > Date.now() }))}
       />
 
       <DigestTester testers={testers.map((t) => ({ id: t.id, name: t.company_name }))} />

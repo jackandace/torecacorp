@@ -9,15 +9,20 @@
 //   テストユーザー: NOTICES_TESTER_START (機能リリース時) 以降
 //   それ以外     : NOTICES_ROLLOUT_AT (全体反映した時刻) 以降
 // 全体反映の手順: NOTICES_ROLLOUT_AT に反映する時刻 (ISO) を入れてデプロイする。
-//   未設定 (null) の間は全体には一切表示・送信しない。
+//   未設定 (null) または その時刻より前 は全体には一切表示・送信しない (予約公開できる)。
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /** テストユーザー向けにお知らせを開始した時刻 (2026-09-30 16:40 JST・機能リリース時) */
 export const NOTICES_TESTER_START = "2026-09-30T07:40:00Z";
-/** 全体反映した時刻。null の間は全体未公開 */
-export const NOTICES_ROLLOUT_AT: string | null = null;
+/** 全体反映する時刻 (2026-10-01 12:00 JST)。null またはこの時刻より前は全体未公開 */
+export const NOTICES_ROLLOUT_AT: string | null = "2026-10-01T03:00:00Z";
+
+/** 全体反映の時刻を過ぎているか */
+export function isRolledOut(now: number = Date.now()): boolean {
+  return !!NOTICES_ROLLOUT_AT && now >= Date.parse(NOTICES_ROLLOUT_AT);
+}
 
 export interface NoticeAccess {
   enabled: boolean;       // お知らせ機能を見せるか
@@ -37,9 +42,9 @@ export async function getNoticeAccess(shopId: string): Promise<NoticeAccess> {
   return accessFor(isTester);
 }
 
-export function accessFor(isTester: boolean): NoticeAccess {
+export function accessFor(isTester: boolean, now: number = Date.now()): NoticeAccess {
   if (isTester) return { enabled: true, isTester, startAt: NOTICES_TESTER_START };
-  if (NOTICES_ROLLOUT_AT) return { enabled: true, isTester, startAt: NOTICES_ROLLOUT_AT };
+  if (NOTICES_ROLLOUT_AT && isRolledOut(now)) return { enabled: true, isTester, startAt: NOTICES_ROLLOUT_AT };
   return { enabled: false, isTester, startAt: null };
 }
 
