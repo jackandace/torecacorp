@@ -478,6 +478,9 @@ export function OrderForm({ products: initialProducts, shop, pendingByProduct = 
             })}
           </ul>
         )}
+        {/* カートページで空のときは、小計・同意・送信は出さない (発注ページへの導線だけ) */}
+        {!(mode === "cart" && cart.length === 0) && (
+        <>
         <div className="flex justify-between text-sm">
           <span>小計 (税抜・リベート前)</span>
           <span className="font-bold">{formatYen(subtotal)}</span>
@@ -499,6 +502,8 @@ export function OrderForm({ products: initialProducts, shop, pendingByProduct = 
         >
           {stockConflicts.size > 0 ? "在庫変動あり (数量を調整してください)" : "リクエスト送信"}
         </button>
+        </>
+        )}
         {message && <p className="text-xs text-slate-600">{message}</p>}
       </aside>
 
