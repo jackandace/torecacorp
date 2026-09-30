@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getNoticeAccess } from "@/lib/feature-flags";
+import { LogoutButton } from "@/components/LogoutButton";
 import { buildRankSettingsMap, amountToNextRank } from "@/lib/ranks";
 import { firstDayOfMonth, lastDayOfMonth } from "@/lib/dates";
 import { formatRate, formatYen } from "@/lib/rebate";
@@ -115,7 +116,15 @@ export default async function MyPage({ searchParams }: { searchParams: SearchPar
     <div className="space-y-8">
       {/* ヘッダ + KPI */}
       <section>
-        <h1 className="text-2xl font-bold mb-4">マイページ</h1>
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-12 h-12 rounded-full bg-brand-600 text-white flex items-center justify-center text-lg font-bold shrink-0" aria-hidden>
+            {(shop.company_name ?? "?").slice(0, 1)}
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold truncate">{shop.company_name} 様</h1>
+            <Link href="/profile" className="text-sm text-slate-500 hover:text-brand-600">プロフィール・登録情報を見る →</Link>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="card p-5">
             <p className="text-xs text-slate-500">現在のランク</p>
@@ -163,31 +172,20 @@ export default async function MyPage({ searchParams }: { searchParams: SearchPar
         )}
       </section>
 
-      {noticeAccess.enabled && (
-        <Link
-          href="/notifications/settings"
-          className="flex items-center justify-between gap-3 card p-4 hover:bg-slate-50 transition"
-        >
-          <div>
-            <p className="font-semibold">🔔 お知らせの受け取り設定</p>
-            <p className="text-xs text-slate-500 mt-0.5">新商品のお知らせを受け取るタイトル（ポケモン・ワンピース・ヴァイス など）と、新商品メールの受け取りを設定できます</p>
-          </div>
-          <span className="text-sm text-brand-600 whitespace-nowrap">設定する →</span>
-        </Link>
-      )}
-
-      {(legacyCount ?? 0) > 0 && (
-        <Link
-          href="/mypage/purchase-history"
-          className="flex items-center justify-between gap-3 card p-4 hover:bg-slate-50 transition"
-        >
-          <div>
-            <p className="font-semibold">購入履歴（アプリ運用以前）</p>
-            <p className="text-xs text-slate-500 mt-0.5">卸アプリ運用以前にご購入いただいた商品の履歴（{legacyCount} 件）</p>
-          </div>
-          <span className="text-sm text-brand-600 whitespace-nowrap">見る →</span>
-        </Link>
-      )}
+      {/* よく使う機能 */}
+      <nav className="grid grid-cols-2 sm:grid-cols-4 gap-3" aria-label="よく使う機能">
+        {[
+          { href: "/notifications", label: noticeAccess.enabled ? "お知らせ" : "通知履歴", icon: "🔔" },
+          { href: "/inquiries", label: "お問い合わせ", icon: "💬" },
+          { href: "/faq", label: "よくある質問", icon: "❓" },
+          { href: "/manual", label: "操作マニュアル", icon: "📘" },
+        ].map((t) => (
+          <Link key={t.href} href={t.href} className="card py-4 flex flex-col items-center gap-1.5 hover:bg-slate-50 hover:border-brand-300 transition">
+            <span className="text-2xl" aria-hidden>{t.icon}</span>
+            <span className="text-sm font-medium">{t.label}</span>
+          </Link>
+        ))}
+      </nav>
 
       <MyPageDataView
         orders={orders ?? []}
@@ -202,12 +200,31 @@ export default async function MyPage({ searchParams }: { searchParams: SearchPar
         shopRank={shop.current_rank}
       />
 
-      <div className="flex items-center justify-center gap-3 flex-wrap">
-        <Link href="/order" className="btn-primary">発注ページへ</Link>
-        <Link href="/inquiries" className="btn-secondary">お問い合わせ / チャット</Link>
-        <Link href="/notifications" className="btn-secondary">通知履歴</Link>
-        <a href="/api/profile/orders/export" className="btn-secondary text-xs">発注履歴 CSV</a>
-      </div>
+      {/* メニュー */}
+      <section className="card divide-y divide-slate-100" aria-label="メニュー">
+        {[
+          ...(noticeAccess.enabled ? [{ href: "/notifications/settings", label: "お知らせの受け取り設定", sub: "受け取るタイトル・新商品メール" }] : []),
+          ...((legacyCount ?? 0) > 0 ? [{ href: "/mypage/purchase-history", label: "購入履歴（アプリ運用以前）", sub: `${legacyCount} 件` }] : []),
+          { href: "/profile", label: "プロフィール・登録情報", sub: "連絡先・配送先・返金先口座" },
+          { href: "/inquiries", label: "お問い合わせ / チャット", sub: null },
+          { href: "/faq", label: "よくある質問", sub: null },
+          { href: "/manual", label: "操作マニュアル", sub: null },
+          { href: "/terms", label: "利用注意事項・免責事項", sub: null },
+        ].map((m) => (
+          <Link key={m.href} href={m.href} className="flex items-center justify-between gap-3 px-5 py-4 hover:bg-slate-50 transition">
+            <span>
+              <span className="text-sm">{m.label}</span>
+              {m.sub && <span className="block text-xs text-slate-400 mt-0.5">{m.sub}</span>}
+            </span>
+            <span className="text-slate-400" aria-hidden>›</span>
+          </Link>
+        ))}
+        <a href="/api/profile/orders/export" className="flex items-center justify-between gap-3 px-5 py-4 hover:bg-slate-50 transition">
+          <span className="text-sm">発注履歴をCSVでダウンロード</span>
+          <span className="text-slate-400" aria-hidden>↓</span>
+        </a>
+        <LogoutButton className="w-full text-left px-5 py-4 text-sm text-rose-600 hover:bg-rose-50 transition" />
+      </section>
     </div>
   );
 }
