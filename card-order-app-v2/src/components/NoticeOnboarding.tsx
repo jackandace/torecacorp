@@ -11,8 +11,9 @@ const LATER_KEY = "trecacorp_notice_onboarding_later";
  * お知らせの受け取り設定の確認ポップアップ。
  * 受け取り設定をまだ確認していないお客様に、ログイン後の最初の画面で1回出す。
  * 「あとで」はこのログイン中 (ブラウザのタブを閉じるまで) は出さず、次回ログイン時に再表示する。
+ * テストユーザーは URL に ?notice_preview=1 を付けると、設定済みでも表示を確認できる (選ぶと実際に保存される)。
  */
-export function NoticeOnboarding({ show }: { show: boolean }) {
+export function NoticeOnboarding({ show, canPreview = false }: { show: boolean; canPreview?: boolean }) {
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
@@ -20,12 +21,14 @@ export function NoticeOnboarding({ show }: { show: boolean }) {
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
+    const preview = canPreview && new URLSearchParams(window.location.search).get("notice_preview") === "1";
+    if (preview) { setOpen(true); return; }
     if (!show) { setOpen(false); return; }
     let later = false;
     try { later = window.sessionStorage.getItem(LATER_KEY) === "1"; } catch { /* noop */ }
     // 受け取り設定・アップデート情報を見ている間は出さない
     setOpen(!later && !pathname.startsWith("/notifications/settings") && !pathname.startsWith("/updates"));
-  }, [show, pathname]);
+  }, [show, canPreview, pathname]);
 
   if (!open) return null;
 
