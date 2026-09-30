@@ -50,7 +50,7 @@ export function NoticeOnboarding({ show }: { show: boolean }) {
     <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50" role="dialog" aria-modal="true" aria-labelledby="notice-onboarding-title">
       <div className="bg-white w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
         <div className="text-center space-y-1">
-          <p className="text-3xl" aria-hidden>🔔</p>
+          <p className="text-xs font-semibold tracking-wider text-brand-600">お知らせ設定のご案内</p>
           <h2 id="notice-onboarding-title" className="text-lg font-bold">新商品のお知らせが届くようになりました</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             新しく公開された商品を、アプリの「お知らせ」と<b>1日1回のまとめメール</b>でお知らせします。
