@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdmin } from "@/lib/auth";
 import { generateInvoicePdf, invoicePdfPath } from "@/lib/pdf/generate-invoice";
+import { LEGACY_INVOICE_BUCKET, resolveLegacyInvoicePdfPath } from "@/lib/legacy-invoice-pdf";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     // 請求書の存在 + 所有ショップを確認 (RLS 下の読込)
     const { data: invoice } = await supabase
       .from("invoices")
-      .select("id, shop_id")
+      .select("id, shop_id, invoice_number, is_legacy, pdf_url")
       .eq("id", params.id)
       .is("deleted_at", null)
       .maybeSingle();
@@ -43,6 +44,19 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     const adminSb = createAdminClient();
+
+    // 過去請求書 (システム外で発行・PDF アップロード) はアップ済み PDF をそのまま返す。
+    // ここで生成し直すと当時の請求書と別物になり、pdf_url も上書きされて元 PDF を見失うため生成しない。
+    if (invoice.is_legacy) {
+      const legacyPath = await resolveLegacyInvoicePdfPath(adminSb, invoice);
+      if (!legacyPath) {
+        return NextResponse.json({ error: "この過去請求書の PDF が見つかりません。担当者にお問い合わせください" }, { status: 404 });
+      }
+      const legacySigned = await adminSb.storage.from(LEGACY_INVOICE_BUCKET).createSignedUrl(legacyPath, 120);
+      if (legacySigned.error || !legacySigned.data) throw legacySigned.error ?? new Error("failed to sign");
+      return NextResponse.redirect(legacySigned.data.signedUrl, 302);
+    }
+
     let path = invoicePdfPath(params.id);
 
     // 署名 (短命: 即リダイレクトで開くため 120 秒で十分)

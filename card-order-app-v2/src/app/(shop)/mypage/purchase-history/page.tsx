@@ -34,7 +34,7 @@ export default async function PurchaseHistoryPage({ searchParams }: { searchPara
   const admin = createAdminClient();
   let query = admin
     .from("legacy_purchases")
-    .select("id, purchased_on, product_name, quantity, unit, unit_price, amount, shipment_status, note", { count: "exact" })
+    .select("id, purchased_on, product_name, quantity, unit, unit_price, amount, shipment_status, note, legacy_invoice_id", { count: "exact" })
     .eq("shop_id", shop.id)
     .is("deleted_at", null);
   if (from) query = query.gte("purchased_on", from);
@@ -44,6 +44,21 @@ export default async function PurchaseHistoryPage({ searchParams }: { searchPara
     .order("purchased_on", { ascending: false })
     .order("created_at", { ascending: false })
     .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+
+  // 紐付けた過去請求書: 「このショップの」「過去請求書」「未削除」のものだけリンクする
+  // (ダウンロード API 側でも本人確認するが、表示の段階でも他社の請求書を出さない)
+  const invoiceIds = [...new Set((rows ?? []).map((r) => r.legacy_invoice_id).filter((v): v is string => !!v))];
+  const invoiceNo = new Map<string, string>();
+  if (invoiceIds.length > 0) {
+    const { data: invs } = await admin
+      .from("invoices")
+      .select("id, invoice_number")
+      .in("id", invoiceIds)
+      .eq("shop_id", shop.id)
+      .eq("is_legacy", true)
+      .is("deleted_at", null);
+    for (const i of invs ?? []) invoiceNo.set(i.id, i.invoice_number);
+  }
 
   const total = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -87,13 +102,14 @@ export default async function PurchaseHistoryPage({ searchParams }: { searchPara
             <div className="font-medium mt-1">{r.product_name}</div>
             <div className="text-xs text-slate-600 mt-1">数量: {r.quantity}{r.unit} ・ 単価 {yen(r.unit_price)} ・ 金額 <b>{yen(r.amount)}</b></div>
             {r.note && <div className="text-xs text-slate-500 mt-1">備考: {r.note}</div>}
+            <InvoiceLink id={r.legacy_invoice_id} number={r.legacy_invoice_id ? invoiceNo.get(r.legacy_invoice_id) : undefined} />
           </div>
         ))}
       </div>
 
       {/* PC: テーブル */}
       <div className="card overflow-x-auto hidden md:block">
-        <table className="w-full text-sm min-w-[720px]">
+        <table className="w-full text-sm min-w-[820px]">
           <thead className="bg-slate-50 text-slate-600">
             <tr>
               <th className="text-left px-3 py-2">購入日</th>
@@ -102,6 +118,7 @@ export default async function PurchaseHistoryPage({ searchParams }: { searchPara
               <th className="text-right px-3 py-2">単価(税抜)</th>
               <th className="text-right px-3 py-2">金額(税抜)</th>
               <th className="text-left px-3 py-2">出荷</th>
+              <th className="text-left px-3 py-2">請求書</th>
             </tr>
           </thead>
           <tbody>
@@ -113,6 +130,7 @@ export default async function PurchaseHistoryPage({ searchParams }: { searchPara
                 <td className="px-3 py-2 text-right">{yen(r.unit_price)}</td>
                 <td className="px-3 py-2 text-right">{yen(r.amount)}</td>
                 <td className="px-3 py-2"><ShipBadge status={r.shipment_status} /></td>
+                <td className="px-3 py-2"><InvoiceLink id={r.legacy_invoice_id} number={r.legacy_invoice_id ? invoiceNo.get(r.legacy_invoice_id) : undefined} /></td>
               </tr>
             ))}
           </tbody>
@@ -138,6 +156,15 @@ export default async function PurchaseHistoryPage({ searchParams }: { searchPara
         </div>
       )}
     </div>
+  );
+}
+
+function InvoiceLink({ id, number }: { id: string | null; number: string | undefined }) {
+  if (!id || !number) return null;
+  return (
+    <a href={`/api/invoices/${id}/pdf/download`} target="_blank" rel="noreferrer" className="inline-block text-xs text-brand-600 hover:underline mt-1 whitespace-nowrap">
+      📄 請求書 {number}
+    </a>
   );
 }
 

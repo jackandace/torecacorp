@@ -31,6 +31,12 @@ async function handlePost(request: NextRequest, params: { id: string }) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
+  // 過去請求書はアップロードされた PDF が正本。再生成すると別物になり pdf_url も上書きされるため拒否
+  const { data: target } = await supabase.from("invoices").select("is_legacy").eq("id", params.id).maybeSingle();
+  if (target?.is_legacy) {
+    return NextResponse.json({ error: "過去請求書 (アップロードしたPDF) は再生成できません" }, { status: 400 });
+  }
+
   // 生成 + Storage 保存 (Service Role)
   const adminSb = createAdminClient();
   const { path, shopId } = await generateInvoicePdf(adminSb, params.id);

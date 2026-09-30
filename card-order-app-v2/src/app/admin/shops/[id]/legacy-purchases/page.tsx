@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { LegacyPurchase } from "@/types/database";
-import { LegacyPurchasesManager, type ImportBatch } from "./LegacyPurchasesManager";
+import { LegacyPurchasesManager, type ImportBatch, type LegacyInvoiceOption } from "./LegacyPurchasesManager";
+import { LegacyInvoiceUpload } from "../LegacyInvoiceUpload";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "購入履歴 (アプリ運用以前) | 管理" };
@@ -29,6 +30,17 @@ export default async function LegacyPurchasesPage({ params }: { params: { id: st
     .limit(5000);
 
   const purchases = (rows ?? []) as LegacyPurchase[];
+
+  const { data: invRows } = await supabase
+    .from("invoices")
+    .select("id, invoice_number, issued_at, total_amount")
+    .eq("shop_id", shop.id)
+    .eq("is_legacy", true)
+    .is("deleted_at", null)
+    .order("issued_at", { ascending: false });
+  const invoices: LegacyInvoiceOption[] = (invRows ?? []).map((i) => ({
+    id: i.id, number: i.invoice_number, issuedAt: i.issued_at, total: i.total_amount,
+  }));
   const batchMap = new Map<string, ImportBatch>();
   for (const p of purchases) {
     if (!p.import_batch_id) continue;
@@ -50,7 +62,13 @@ export default async function LegacyPurchasesPage({ params }: { params: { id: st
           金額はすべて<b>税抜</b>。ランク・リベート・請求・累計取引額の計算には使われない参照用の記録です。
         </p>
       </div>
-      <LegacyPurchasesManager shopId={shop.id} purchases={purchases} batches={batches} />
+      <LegacyPurchasesManager
+        shopId={shop.id}
+        purchases={purchases}
+        batches={batches}
+        invoices={invoices}
+        invoiceUpload={<LegacyInvoiceUpload shopId={shop.id} />}
+      />
     </div>
   );
 }

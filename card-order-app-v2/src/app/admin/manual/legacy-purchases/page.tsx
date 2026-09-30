@@ -44,7 +44,7 @@ export default function LegacyPurchasesManualPage() {
         <b className="text-sky-300">金額</b>: すべて<b>税抜</b>で入力<br />
         <b className="text-sky-300">お客様への表示</b>: 登録するとマイページに表示されます（「社内メモ」欄だけは表示されません）<br />
         <b className="text-sky-300">集計との関係</b>: ランク・リベート・請求・累計取引額の計算には<b>一切入りません</b>（参照用の記録）<br />
-        <b className="text-sky-300">通知</b>: 登録・出荷済への切り替えで、お客様にメールは<b>届きません</b>
+        <b className="text-sky-300">通知</b>: 登録・出荷済への切り替え・請求書の紐付けで、お客様にメールは<b>届きません</b>
       </div>
 
       <Step no="操作 1" title="1件ずつ登録する">
@@ -104,6 +104,20 @@ export default function LegacyPurchasesManualPage() {
         </ul>
       </Step>
 
+      <Step no="操作 5" title="当時の請求書（PDF）をアップロードして購入履歴に紐付ける">
+        <ol className="list-decimal pl-5 space-y-1">
+          <li>購入履歴ページの<b>「過去請求書（PDF）」</b>欄の「過去請求書を取込」から、請求書番号・発行日・金額・PDFを入れてアップロード</li>
+          <li>下の一覧で、その請求書に含まれる購入履歴の行に<b>チェック</b>（複数可）</li>
+          <li>画面上部に出るバーで請求書を選び<b>「請求書に紐付け」</b>→ 行に「📄 請求書 〇〇」と表示されます</li>
+          <li>「過去請求書（PDF）」欄で、請求書ごとの<b>紐付け件数・合計（税抜）と請求書の金額</b>を見比べて、漏れや紐付け違いがないか確認</li>
+        </ol>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>請求書1枚に何行でも紐付けできます。紐付けを外すときは行を選んで「紐付けを解除」</li>
+          <li>紐付けた請求書は、お客様のマイページの購入履歴の行と「請求書」一覧の両方から開けます</li>
+          <li>請求書の「開く」で表示されるのは<b>アップロードしたPDFそのもの</b>です</li>
+        </ul>
+      </Step>
+
       <section className="card p-5 sm:p-6 space-y-3">
         <h2 className="font-bold text-lg">お客様側の見え方（マイページ）</h2>
         <p>登録が1件以上あるお客様には、マイページに「購入履歴（アプリ運用以前）」のリンクが表示されます。閲覧のみで、期間・商品名で検索できます。</p>
@@ -141,8 +155,10 @@ export default function LegacyPurchasesManualPage() {
             <dd className="text-slate-600 ml-0">この機能は税抜で統一しています。税込額を 1.1 で割って（端数は切り捨て）入力し、必要なら社内メモに「税込〇〇円から換算」と残してください。</dd></div>
           <div><dt className="font-semibold">Q. 間違って登録した / 取り込んだ</dt>
             <dd className="text-slate-600 ml-0">1件なら「編集」または「削除」。取込まるごとなら「取込履歴」→「この取込を取り消す」。どちらもお客様のマイページからもすぐ消えます。</dd></div>
-          <div><dt className="font-semibold">Q. 当時の請求書（PDF）も見せたい</dt>
-            <dd className="text-slate-600 ml-0">現在検討中です。決まるまでは、顧客詳細の既存「過去請求書」アップロードは使わずにお待ちください（お客様側のダウンロードに不具合が見つかっているため）。</dd></div>
+          <div><dt className="font-semibold">Q. 請求書を間違えて紐付けた</dt>
+            <dd className="text-slate-600 ml-0">対象の行を選んで「紐付けを解除」、または正しい請求書を選んで紐付け直してください（上書きされます）。別のお客様の請求書はシステム側で紐付けできないようになっています。</dd></div>
+          <div><dt className="font-semibold">Q. アップロードした請求書PDFを差し替えたい</dt>
+            <dd className="text-slate-600 ml-0">現状は差し替え機能はありません。正しいPDFを新しい請求書としてアップロードし、購入履歴の紐付けを付け替えてください。</dd></div>
         </dl>
       </section>
     </div>

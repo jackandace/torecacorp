@@ -6,6 +6,7 @@ import type { LegacyPurchase, LegacyPurchaseShipmentStatus } from "@/types/datab
 import { LEGACY_UNITS, SHIPMENT_LABEL, type ParsedLegacyRow } from "@/lib/legacy-purchases";
 
 export interface ImportBatch { id: string; count: number; amount: number; importedAt: string }
+export interface LegacyInvoiceOption { id: string; number: string; issuedAt: string | null; total: number }
 
 const PAGE_SIZE = 20;
 const yen = (n: number) => `¥${n.toLocaleString()}`;
@@ -42,8 +43,9 @@ interface Preview {
   summary: { total: number; errorCount: number; warningCount: number; totalAmount: number };
 }
 
-export function LegacyPurchasesManager({ shopId, purchases, batches }: {
+export function LegacyPurchasesManager({ shopId, purchases, batches, invoices, invoiceUpload }: {
   shopId: string; purchases: LegacyPurchase[]; batches: ImportBatch[];
+  invoices: LegacyInvoiceOption[]; invoiceUpload: React.ReactNode;
 }) {
   const router = useRouter();
   const [from, setFrom] = useState("");
@@ -56,6 +58,10 @@ export function LegacyPurchasesManager({ shopId, purchases, batches }: {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [linkTo, setLinkTo] = useState("");
+  const invoiceById = useMemo(() => new Map(invoices.map((i) => [i.id, i])), [invoices]);
 
   const [importOpen, setImportOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -154,6 +160,36 @@ export function LegacyPurchasesManager({ shopId, purchases, batches }: {
     } catch (e) {
       setMsg({ kind: "err", text: e instanceof Error ? e.message : "取込に失敗しました" });
     } finally { setBusy(false); }
+  }
+
+  function toggle(id: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  async function link(invoiceId: string | null) {
+    const ids = [...selected];
+    if (ids.length === 0) return;
+    const inv = invoiceId ? invoiceById.get(invoiceId) : null;
+    const text = inv
+      ? `選択した ${ids.length} 件を 請求書 ${inv.number} に紐付けます。お客様のマイページの購入履歴からもこの請求書を開けるようになります。よろしいですか？`
+      : `選択した ${ids.length} 件の請求書の紐付けを解除します。よろしいですか？`;
+    if (!confirm(text)) return;
+    setBusy(true); setMsg(null);
+    const res = await fetch(`/api/shops/${shopId}/legacy-purchases/link`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ purchaseIds: ids, invoiceId }),
+    });
+    const json = await res.json().catch(() => ({}));
+    setBusy(false);
+    if (!res.ok) { setMsg({ kind: "err", text: json.error ?? "紐付けに失敗しました" }); return; }
+    setMsg({ kind: "ok", text: invoiceId ? `${json.updated} 件を請求書に紐付けました` : `${json.updated} 件の紐付けを解除しました` });
+    setSelected(new Set()); setLinkTo("");
+    router.refresh();
   }
 
   async function undoBatch(b: ImportBatch) {
@@ -283,6 +319,56 @@ export function LegacyPurchasesManager({ shopId, purchases, batches }: {
         </section>
       )}
 
+      {/* 過去請求書 (PDF) と紐付け状況 */}
+      <section className="card p-5 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-semibold text-sm">過去請求書（PDF）</h2>
+          <span className="text-xs text-slate-500">請求書1枚に複数の購入履歴を紐付けられます。紐付けた請求書はお客様の購入履歴からも開けます</span>
+        </div>
+        {invoices.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs min-w-[620px]">
+              <thead className="bg-slate-50 text-slate-600"><tr>
+                <th className="text-left px-3 py-2">請求書番号</th><th className="text-left px-3 py-2">発行日</th>
+                <th className="text-right px-3 py-2">請求書の金額</th><th className="text-right px-3 py-2">紐付け中の購入履歴</th>
+                <th className="text-left px-3 py-2">PDF</th>
+              </tr></thead>
+              <tbody>
+                {invoices.map((inv) => {
+                  const linked = purchases.filter((p) => p.legacy_invoice_id === inv.id);
+                  return (
+                    <tr key={inv.id} className="border-t border-slate-100">
+                      <td className="px-3 py-2 font-mono">{inv.number}</td>
+                      <td className="px-3 py-2">{inv.issuedAt ? new Date(inv.issuedAt).toLocaleDateString("ja-JP") : "—"}</td>
+                      <td className="px-3 py-2 text-right">{yen(inv.total)}</td>
+                      <td className="px-3 py-2 text-right">{linked.length} 件 / {yen(linked.reduce((sum, p) => sum + p.amount, 0))}（税抜）</td>
+                      <td className="px-3 py-2"><a href={`/api/invoices/${inv.id}/pdf/download`} target="_blank" rel="noreferrer" className="text-brand-600 hover:underline">開く</a></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p className="text-xs text-slate-500">まだ過去請求書はありません。下の「過去請求書を取込」からPDFをアップロードしてください。</p>
+        )}
+        {invoiceUpload}
+      </section>
+
+      {selected.size > 0 && (
+        <div className="sticky top-2 z-10 card p-3 flex flex-wrap items-center gap-2 text-sm border-brand-300 bg-brand-50">
+          <span className="font-semibold">{selected.size} 件を選択中</span>
+          <select className="input text-sm w-auto" value={linkTo} onChange={(e) => setLinkTo(e.target.value)}>
+            <option value="">紐付ける請求書を選択…</option>
+            {invoices.map((i) => <option key={i.id} value={i.id}>{i.number}（{yen(i.total)}）</option>)}
+          </select>
+          <button type="button" className="btn-primary text-xs" disabled={busy || !linkTo} onClick={() => link(linkTo)}>請求書に紐付け</button>
+          <button type="button" className="btn-secondary text-xs" disabled={busy} onClick={() => link(null)}>紐付けを解除</button>
+          <button type="button" className="text-xs text-slate-500 underline" onClick={() => setSelected(new Set())}>選択をクリア</button>
+          {invoices.length === 0 && <span className="text-xs text-slate-500">先に過去請求書をアップロードしてください</span>}
+        </div>
+      )}
+
       {/* 絞り込み */}
       <div className="card p-4 flex flex-wrap items-end gap-3 text-sm">
         <label className="block"><span className="block text-xs text-slate-600 mb-1">購入日</span>
@@ -304,6 +390,18 @@ export function LegacyPurchasesManager({ shopId, purchases, batches }: {
         <table className="w-full text-sm min-w-[860px]">
           <thead className="bg-slate-50 text-slate-600">
             <tr>
+              <th className="px-3 py-2 w-8">
+                <input
+                  type="checkbox"
+                  aria-label="このページの行をすべて選択"
+                  checked={pageRows.length > 0 && pageRows.every((p) => selected.has(p.id))}
+                  onChange={(e) => setSelected((prev) => {
+                    const next = new Set(prev);
+                    pageRows.forEach((p) => (e.target.checked ? next.add(p.id) : next.delete(p.id)));
+                    return next;
+                  })}
+                />
+              </th>
               <th className="text-left px-3 py-2">購入日</th>
               <th className="text-left px-3 py-2">商品名</th>
               <th className="text-right px-3 py-2">数量</th>
@@ -317,9 +415,13 @@ export function LegacyPurchasesManager({ shopId, purchases, batches }: {
           <tbody>
             {pageRows.map((p) => (
               <tr key={p.id} className={`border-t border-slate-100 align-top ${p.shipment_status === "unshipped" ? "bg-amber-50" : ""}`}>
+                <td className="px-3 py-2"><input type="checkbox" aria-label="選択" checked={selected.has(p.id)} onChange={() => toggle(p.id)} /></td>
                 <td className="px-3 py-2 whitespace-nowrap">{fmtDate(p.purchased_on)}</td>
                 <td className="px-3 py-2">
                   {p.product_name}
+                  {p.legacy_invoice_id && invoiceById.get(p.legacy_invoice_id) && (
+                    <div className="text-xs"><span className="px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800">📄 請求書 {invoiceById.get(p.legacy_invoice_id)!.number}</span></div>
+                  )}
                   {p.note && <div className="text-xs text-slate-500">備考: {p.note}</div>}
                   {p.internal_note && <div className="text-xs text-violet-700">社内: {p.internal_note}</div>}
                 </td>
@@ -339,7 +441,7 @@ export function LegacyPurchasesManager({ shopId, purchases, batches }: {
               </tr>
             ))}
             {pageRows.length === 0 && (
-              <tr><td colSpan={8} className="px-3 py-8 text-center text-slate-500">
+              <tr><td colSpan={9} className="px-3 py-8 text-center text-slate-500">
                 {purchases.length === 0 ? "まだ登録がありません。「+ 購入履歴を追加」または「一括取込」から登録してください" : "条件に一致する履歴はありません"}
               </td></tr>
             )}

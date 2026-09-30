@@ -57,10 +57,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     .upload(path, buf, { contentType: "application/pdf", upsert: false });
   if (upErr) return NextResponse.json({ error: upErr.message }, { status: 500 });
 
-  // 署名付き URL (長期 1 年) を pdf_url として保存
-  const { data: signed } = await adminSb.storage
-    .from("legacy-invoices")
-    .createSignedUrl(path, 60 * 60 * 24 * 365);
+  // pdf_url には保存パスを記録 (開くときに /api/invoices/[id]/pdf/download が都度短命の署名 URL を発行する)
 
   const paidAmount = status === "入金済み" ? totalAmount : status === "一部入金" ? 0 : 0;
 
@@ -79,7 +76,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       paid_amount: paidAmount,
       status,
       issued_at: new Date(issuedAt).toISOString(),
-      pdf_url: signed?.signedUrl ?? path,
+      pdf_url: path,
       is_legacy: true,
     })
     .select("*")
