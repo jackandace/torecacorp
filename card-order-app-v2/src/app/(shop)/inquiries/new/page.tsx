@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { BackLink } from "@/components/BackLink";
 import { createClient } from "@/lib/supabase/server";
 import { NewInquiryForm } from "./NewInquiryForm";
 
@@ -21,7 +22,10 @@ export default async function NewInquiryPage() {
 
   return (
     <div className="space-y-4 max-w-2xl">
-      <h1 className="text-2xl font-bold">新規問い合わせ</h1>
+      <div>
+        <BackLink href="/inquiries" label="お問い合わせ一覧" />
+        <h1 className="text-2xl font-bold mt-1">新規問い合わせ</h1>
+      </div>
       <p className="text-sm text-slate-500">
         担当者が確認次第ご返信いたします。発送・請求の急ぎの内容は電話もご利用ください。
       </p>

@@ -70,6 +70,11 @@ export function MyPageDataView(props: Props) {
       <section>
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <h2 className="text-lg font-semibold">発注履歴 ({props.ordCount} 件)</h2>
+          {props.ordCount > 0 && (
+            <a href="/api/profile/orders/export" className="inline-flex items-center gap-1 text-sm text-brand-600 hover:underline">
+              <span aria-hidden>↓</span>CSVダウンロード
+            </a>
+          )}
         </div>
         <div className="card p-3 mb-3 flex flex-wrap gap-1 text-xs">
           {ORDER_STATUSES.map((s) => (

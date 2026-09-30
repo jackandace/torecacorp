@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { BackLink } from "@/components/BackLink";
 import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
@@ -49,7 +50,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
 
   return (
     <div className="max-w-4xl space-y-6">
-      <Link href="/order" className="text-sm text-brand-600 hover:underline">← 発注ページに戻る</Link>
+      <BackLink href="/order" label="発注ページ" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 画像 */}

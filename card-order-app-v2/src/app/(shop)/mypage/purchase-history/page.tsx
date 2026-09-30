@@ -2,6 +2,7 @@
 // legacy_purchases の RLS は admin のみ (社内メモを守るため) なので、
 // ログイン中ショップを確定したうえで Service Role で「表示してよい列だけ」を取得する。
 import { redirect } from "next/navigation";
+import { BackLink } from "@/components/BackLink";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -74,7 +75,7 @@ export default async function PurchaseHistoryPage({ searchParams }: { searchPara
   return (
     <div className="space-y-5">
       <div>
-        <Link href="/mypage" className="text-sm text-brand-600 hover:underline">← マイページ</Link>
+        <BackLink href="/mypage" label="マイページ" />
         <h1 className="text-xl sm:text-2xl font-bold mt-1">購入履歴 <span className="text-base font-normal text-slate-500">（アプリ運用以前の履歴）</span></h1>
         <p className="text-sm text-slate-500 mt-1">卸アプリ運用以前にご購入いただいた商品の履歴です。金額はすべて税抜です。</p>
       </div>

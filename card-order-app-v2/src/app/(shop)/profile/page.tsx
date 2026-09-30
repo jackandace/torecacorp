@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { BackLink } from "@/components/BackLink";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { RANK_LABEL } from "@/constants/ranks";
@@ -56,7 +57,7 @@ export default async function ProfilePage() {
   return (
     <div className="space-y-8 max-w-3xl">
       <div>
-        <Link href="/mypage" className="text-sm text-brand-600 hover:underline">← マイページ</Link>
+        <BackLink href="/mypage" label="マイページ" />
         <h1 className="text-2xl font-bold mt-1">プロフィール</h1>
         <p className="text-sm text-slate-500 mt-1">
           担当者・連絡先は直接変更できます。会社名・登録住所の変更は管理者まで、配送先の変更は申請制です。

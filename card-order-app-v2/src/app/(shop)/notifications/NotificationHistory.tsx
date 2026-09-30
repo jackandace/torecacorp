@@ -1,5 +1,6 @@
 // 従来の「通知履歴」(お知らせ機能を全体反映するまで、テストユーザー以外に表示)
 import Link from "next/link";
+import { BackLink } from "@/components/BackLink";
 import { createClient } from "@/lib/supabase/server";
 import { formatJST } from "@/lib/dates";
 import { sanitizeHtml } from "@/lib/sanitize";
@@ -23,7 +24,7 @@ export async function NotificationHistory({ shopId, searchParams }: { shopId: st
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
-        <Link href="/mypage" className="text-sm text-brand-600 hover:underline">← マイページ</Link>
+        <BackLink href="/mypage" label="マイページ" />
         <h1 className="text-2xl font-bold mt-1">通知履歴 ({count ?? 0} 件)</h1>
         <p className="text-sm text-slate-500 mt-1">
           発注確認・請求書発行・ランク変動などのお知らせ履歴です。

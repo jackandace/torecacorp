@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/BackLink";
 import { createClient } from "@/lib/supabase/server";
 import { FAQ_CATEGORY_LABEL } from "@/constants/inquiry";
 import type { FaqCategory } from "@/types/database";
@@ -27,7 +28,8 @@ export default async function FaqPage() {
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-bold">よくある質問 (FAQ)</h1>
+        <BackLink href="/mypage" label="マイページ" />
+        <h1 className="text-2xl font-bold mt-1">よくある質問 (FAQ)</h1>
         <p className="text-sm text-slate-500 mt-1">
           解決しない場合は <Link href="/inquiries/new" className="text-brand-600 hover:underline">お問い合わせフォーム</Link> へ。
         </p>

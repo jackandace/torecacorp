@@ -2,6 +2,7 @@
 //   テストユーザー (または全体反映後): 「全体へのお知らせ」「あなたへのお知らせ」のタブ表示
 //   それ以外: 従来の通知履歴
 import { redirect } from "next/navigation";
+import { BackLink } from "@/components/BackLink";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -87,7 +88,7 @@ export default async function NotificationsPage({ searchParams }: { searchParams
   return (
     <div className="space-y-5 max-w-3xl">
       <div>
-        <Link href="/mypage" className="text-sm text-brand-600 hover:underline">← マイページ</Link>
+        <BackLink href="/mypage" label="マイページ" />
         <div className="flex items-end justify-between gap-2 mt-1">
           <h1 className="text-2xl font-bold">お知らせ</h1>
           <div className="flex items-center gap-4">

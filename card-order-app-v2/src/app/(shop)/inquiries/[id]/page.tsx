@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/components/BackLink";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatJST } from "@/lib/dates";
@@ -30,7 +31,7 @@ export default async function InquiryDetailPage({ params }: { params: { id: stri
 
   return (
     <div className="space-y-4 max-w-3xl">
-      <Link href="/inquiries" className="text-sm text-brand-600 hover:underline">← 一覧</Link>
+      <BackLink href="/inquiries" label="お問い合わせ一覧" />
       <div className="card p-5 space-y-2">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>

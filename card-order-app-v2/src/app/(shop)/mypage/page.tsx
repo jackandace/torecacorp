@@ -209,7 +209,7 @@ export default async function MyPage({ searchParams }: { searchParams: SearchPar
           { href: "/inquiries", label: "お問い合わせ / チャット", sub: null },
           { href: "/faq", label: "よくある質問", sub: null },
           { href: "/manual", label: "操作マニュアル", sub: null },
-          { href: "/terms", label: "利用注意事項・免責事項", sub: null },
+          { href: "/terms?from=mypage", label: "利用注意事項・免責事項", sub: null },
         ].map((m) => (
           <Link key={m.href} href={m.href} className="flex items-center justify-between gap-3 px-5 py-4 hover:bg-slate-50 transition">
             <span>
@@ -219,10 +219,6 @@ export default async function MyPage({ searchParams }: { searchParams: SearchPar
             <span className="text-slate-400" aria-hidden>›</span>
           </Link>
         ))}
-        <a href="/api/profile/orders/export" className="flex items-center justify-between gap-3 px-5 py-4 hover:bg-slate-50 transition">
-          <span className="text-sm">発注履歴をCSVでダウンロード</span>
-          <span className="text-slate-400" aria-hidden>↓</span>
-        </a>
         <LogoutButton className="w-full text-left px-5 py-4 text-sm text-rose-600 hover:bg-rose-50 transition" />
       </section>
     </div>

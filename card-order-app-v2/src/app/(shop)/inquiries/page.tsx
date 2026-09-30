@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BackLink } from "@/components/BackLink";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatJST } from "@/lib/dates";
@@ -48,7 +49,8 @@ export default async function InquiriesPage() {
     <div className="space-y-6 max-w-4xl">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-2xl font-bold">お問い合わせ / チャット ({inquiries?.length ?? 0})</h1>
+          <BackLink href="/mypage" label="マイページ" />
+          <h1 className="text-2xl font-bold mt-1">お問い合わせ / チャット ({inquiries?.length ?? 0})</h1>
           <p className="text-sm text-slate-500 mt-1">
             ご質問・ご相談はこちらから。担当者とそのままチャットでやり取りできます。
             <Link href="/faq" className="text-brand-600 hover:underline ml-1">FAQ</Link> もご覧ください

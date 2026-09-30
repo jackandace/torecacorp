@@ -1,5 +1,6 @@
 // お知らせの受け取り設定 (新商品メール・希望タイトル)
 import { redirect } from "next/navigation";
+import { BackLink } from "@/components/BackLink";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -27,7 +28,7 @@ export default async function NoticeSettingsPage() {
   return (
     <div className="space-y-5 max-w-2xl">
       <div>
-        <Link href="/notifications" className="text-sm text-brand-600 hover:underline">← お知らせ</Link>
+        <BackLink href="/notifications" label="お知らせ" />
         <h1 className="text-2xl font-bold mt-1">お知らせの受け取り設定</h1>
         <p className="text-sm text-slate-500 mt-1">
           新商品のお知らせを受け取るタイトルと、メールの受け取りを設定できます。
