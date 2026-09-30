@@ -172,16 +172,16 @@ export default async function MyPage({ searchParams }: { searchParams: SearchPar
         )}
       </section>
 
-      {/* よく使う機能 */}
+      {/* よく使う機能 (アイコンはヘッダーと同じ線画) */}
       <nav className="grid grid-cols-2 sm:grid-cols-4 gap-3" aria-label="よく使う機能">
         {[
-          { href: "/notifications", label: noticeAccess.enabled ? "お知らせ" : "通知履歴", icon: "🔔" },
-          { href: "/inquiries", label: "お問い合わせ", icon: "💬" },
-          { href: "/faq", label: "よくある質問", icon: "❓" },
-          { href: "/manual", label: "操作マニュアル", icon: "📘" },
+          { href: "/notifications", label: noticeAccess.enabled ? "お知らせ" : "通知履歴", icon: <><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></> },
+          { href: "/inquiries", label: "お問い合わせ", icon: <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /> },
+          { href: "/faq", label: "よくある質問", icon: <><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><path d="M12 17h.01" /></> },
+          { href: "/manual", label: "操作マニュアル", icon: <><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></> },
         ].map((t) => (
-          <Link key={t.href} href={t.href} className="card py-4 flex flex-col items-center gap-1.5 hover:bg-slate-50 hover:border-brand-300 transition">
-            <span className="text-2xl" aria-hidden>{t.icon}</span>
+          <Link key={t.href} href={t.href} className="card py-4 flex flex-col items-center gap-2 hover:bg-slate-50 hover:border-brand-300 transition">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600" aria-hidden>{t.icon}</svg>
             <span className="text-sm font-medium">{t.label}</span>
           </Link>
         ))}
