@@ -14,6 +14,23 @@ export default function AdminManualPage() {
         管理者向けは admin 権限を持つスタッフのみ閲覧できます。ショップ向けの内容も参考として確認できます。
       </p>
 
+      {/* 購入履歴 (アプリ運用以前) の操作マニュアルへの導線 */}
+      <Link
+        href="/admin/manual/legacy-purchases"
+        className="block rounded-xl border border-violet-200 bg-violet-50 p-4 sm:p-5 hover:bg-violet-100 transition"
+      >
+        <div className="flex items-start gap-3">
+          <span className="text-2xl" aria-hidden>🎬</span>
+          <div>
+            <p className="font-semibold text-violet-800">購入履歴（卸アプリ運用以前）の登録 — 操作録画つきマニュアル</p>
+            <p className="text-sm text-slate-600 mt-0.5">
+              アプリ導入前の購入実績を登録してお客様のマイページに表示する手順。1件登録・テンプレートでの一括取込・
+              出荷済への切り替え・取込の取り消しを、実際の操作録画で確認できます。
+            </p>
+          </div>
+        </div>
+      </Link>
+
       {/* ショップ登録申請の審査フロー手順書への導線 */}
       <Link
         href="/admin/manual/shop-review"
