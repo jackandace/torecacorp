@@ -93,7 +93,7 @@ export default async function NotificationsPage({ searchParams }: { searchParams
           <h1 className="text-2xl font-bold">お知らせ</h1>
           <div className="flex items-center gap-4">
             <MarkAllRead disabled={counts.general + counts.personal === 0} />
-            <Link href="/notifications/settings" className="text-sm text-brand-600 hover:underline">⚙ 受け取り設定</Link>
+            <Link href="/notifications/settings" className="text-sm text-brand-600 hover:underline">受け取り設定</Link>
           </div>
         </div>
       </div>

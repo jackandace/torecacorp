@@ -439,7 +439,7 @@ export function OrderForm({ products: initialProducts, shop, pendingByProduct = 
         {cart.length === 0 ? (
           mode === "cart" ? (
             <div className="text-center py-8 space-y-3">
-              <p className="text-3xl" aria-hidden>🛒</p>
+              <svg className="mx-auto text-slate-300" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg>
               <p className="text-sm text-slate-600">カートは空です</p>
               <Link href="/order" className="btn-primary inline-flex">発注ページで商品を選ぶ</Link>
             </div>
@@ -742,7 +742,7 @@ function ProductCard({
           )}
           {!compact && (
             <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-[11px] text-slate-400">
-              {product.carton_delivery && <span className="text-slate-500">📦 カートン単位でお届け</span>}
+              {product.carton_delivery && <span className="text-slate-500">カートン単位でお届け</span>}
               {product.jan_code && <span>JAN: {product.jan_code}</span>}
             </div>
           )}

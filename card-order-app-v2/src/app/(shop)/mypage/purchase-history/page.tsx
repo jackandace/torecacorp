@@ -164,7 +164,7 @@ function InvoiceLink({ id, number }: { id: string | null; number: string | undef
   if (!id || !number) return null;
   return (
     <a href={`/api/invoices/${id}/pdf/download`} target="_blank" rel="noreferrer" className="inline-block text-xs text-brand-600 hover:underline mt-1 whitespace-nowrap">
-      📄 請求書 {number}
+      請求書 {number}
     </a>
   );
 }

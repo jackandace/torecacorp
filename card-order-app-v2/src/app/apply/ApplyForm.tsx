@@ -144,7 +144,7 @@ export function ApplyForm() {
   if (done) {
     return (
       <div className="card p-8 sm:p-12 text-center space-y-4">
-        <div className="text-4xl">✅</div>
+        <svg className="mx-auto text-emerald-600" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="12" cy="12" r="10" /><path d="m8 12 3 3 5-6" /></svg>
         <h2 className="text-xl font-bold">お申込みを受け付けました</h2>
         <p className="text-sm text-slate-600 leading-relaxed">
           <strong>{email}</strong> 宛に受付確認メールをお送りしました。<br />

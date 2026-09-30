@@ -17,7 +17,7 @@ export function MarkAllRead({ disabled }: { disabled: boolean }) {
   }
   return (
     <button type="button" className="text-sm text-brand-600 hover:underline disabled:text-slate-400 disabled:no-underline" disabled={busy || disabled} onClick={run}>
-      {busy ? "処理中…" : "✓ すべて既読にする"}
+      {busy ? "処理中…" : "すべて既読にする"}
     </button>
   );
 }

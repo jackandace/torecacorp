@@ -46,7 +46,7 @@ export function ReceiptEnforcer({ pending }: { pending: Pending[] }) {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-200 max-h-[85vh] flex flex-col">
         <div className="p-5 border-b border-slate-100">
-          <h2 className="text-lg font-bold">📦 商品受領のご確認をお願いします</h2>
+          <h2 className="text-lg font-bold">商品受領のご確認をお願いします</h2>
           <p className="text-sm text-slate-500 mt-1">
             納品済みの商品があります。お手数ですが、受け取った商品の<strong>「受領する」</strong>を押してください。
             （すべて確認するまでこの画面は表示されます）
