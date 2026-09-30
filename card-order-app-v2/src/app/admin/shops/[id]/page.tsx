@@ -23,7 +23,7 @@ export default async function ShopDetailPage({ params }: { params: { id: string 
     .maybeSingle();
   if (!shop) notFound();
 
-  const [{ data: rankHistory }, { data: invoices }, { data: surveys }, { count: orderCount }] = await Promise.all([
+  const [{ data: rankHistory }, { data: invoices }, { data: surveys }, { count: orderCount }, { data: legacyRows }] = await Promise.all([
     supabase
       .from("shop_rank_history")
       .select("*")
@@ -48,7 +48,15 @@ export default async function ShopDetailPage({ params }: { params: { id: string 
       .select("*", { count: "exact", head: true })
       .eq("shop_id", shop.id)
       .is("deleted_at", null),
+    supabase
+      .from("legacy_purchases")
+      .select("amount, shipment_status")
+      .eq("shop_id", shop.id)
+      .is("deleted_at", null),
   ]);
+  const legacyCount = legacyRows?.length ?? 0;
+  const legacyAmount = (legacyRows ?? []).reduce((s, r) => s + r.amount, 0);
+  const legacyUnshipped = (legacyRows ?? []).filter((r) => r.shipment_status === "unshipped").length;
 
   return (
     <div className="space-y-6">
@@ -62,6 +70,21 @@ export default async function ShopDetailPage({ params }: { params: { id: string 
           <div>累計発注: {orderCount ?? 0} 件</div>
         </div>
       </div>
+
+      <Link
+        href={`/admin/shops/${shop.id}/legacy-purchases`}
+        className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 transition"
+      >
+        <div>
+          <p className="font-semibold text-sm">購入履歴（卸アプリ運用以前）</p>
+          <p className="text-xs text-slate-500 mt-0.5">アプリ導入前の購入実績の登録・一括取込。お客様のマイページにも表示されます（参照用・集計には含めない）</p>
+        </div>
+        <div className="text-sm text-right">
+          <span className="font-medium">{legacyCount} 件 / {formatYen(legacyAmount)}（税抜）</span>
+          {legacyUnshipped > 0 && <span className="ml-2 text-[11px] px-1.5 py-0.5 rounded bg-amber-500 text-white font-bold">未出荷 {legacyUnshipped}</span>}
+          <span className="ml-2 text-brand-600">開く →</span>
+        </div>
+      </Link>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">

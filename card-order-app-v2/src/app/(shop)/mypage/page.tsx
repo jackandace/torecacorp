@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { buildRankSettingsMap, amountToNextRank } from "@/lib/ranks";
 import { firstDayOfMonth, lastDayOfMonth } from "@/lib/dates";
 import { formatRate, formatYen } from "@/lib/rebate";
@@ -54,6 +55,13 @@ export default async function MyPage({ searchParams }: { searchParams: SearchPar
     .gte("created_at", monthStart)
     .lte("created_at", monthEnd)
     .in("status", ["仮確定", "確定"])
+    .is("deleted_at", null);
+
+  // アプリ運用以前の購入履歴 (登録があるショップにだけ導線を出す)
+  const { count: legacyCount } = await createAdminClient()
+    .from("legacy_purchases")
+    .select("id", { count: "exact", head: true })
+    .eq("shop_id", shop.id)
     .is("deleted_at", null);
 
   const monthlyAmount = monthlyOrders?.reduce((s, o) => s + (o.total_price ?? 0), 0) ?? 0;
@@ -151,6 +159,19 @@ export default async function MyPage({ searchParams }: { searchParams: SearchPar
           </div>
         )}
       </section>
+
+      {(legacyCount ?? 0) > 0 && (
+        <Link
+          href="/mypage/purchase-history"
+          className="flex items-center justify-between gap-3 card p-4 hover:bg-slate-50 transition"
+        >
+          <div>
+            <p className="font-semibold">購入履歴（アプリ運用以前）</p>
+            <p className="text-xs text-slate-500 mt-0.5">卸アプリ運用以前にご購入いただいた商品の履歴（{legacyCount} 件）</p>
+          </div>
+          <span className="text-sm text-brand-600 whitespace-nowrap">見る →</span>
+        </Link>
+      )}
 
       <MyPageDataView
         orders={orders ?? []}

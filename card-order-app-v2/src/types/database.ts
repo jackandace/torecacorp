@@ -89,6 +89,29 @@ export type ShopChangeRequest = {
 };
 
 // ショップ登録の審査申込み (033・公開フォーム /apply 経由)
+export type LegacyPurchaseShipmentStatus = "shipped" | "unshipped";
+/** 卸アプリ運用以前の購入履歴 (参照専用。ランク・請求・累計額の計算には使わない) */
+export type LegacyPurchase = {
+  id: string;
+  shop_id: string;
+  purchased_on: string;
+  product_name: string;
+  quantity: number;
+  unit: string;
+  unit_price: number;
+  amount: number;
+  shipment_status: LegacyPurchaseShipmentStatus;
+  note: string | null;
+  internal_note: string | null;
+  legacy_invoice_id: string | null;
+  import_batch_id: string | null;
+  created_by: string | null;
+  updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+};
+
 export type ShopApplicationStatus = "pending" | "approved" | "rejected";
 export type ShopApplication = {
   id: string;
@@ -528,6 +551,10 @@ export type Database = {
       ]>;
       faqs:                   TableDef<Faq>;
       registration_invites:   TableDef<RegistrationInvite>;
+      legacy_purchases:       TableDef<LegacyPurchase, [
+        FK<"legacy_purchases_shop_id_fkey", ["shop_id"], "shops", ["id"]>,
+        FK<"legacy_purchases_legacy_invoice_id_fkey", ["legacy_invoice_id"], "invoices", ["id"]>,
+      ]>;
       shop_applications:      TableDef<ShopApplication, [
         FK<"shop_applications_invite_id_fkey", ["invite_id"], "registration_invites", ["id"]>,
       ]>;
