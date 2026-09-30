@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 /** 先行公開機能 (お知らせ) を見せるテストユーザーの切り替え */
-export function BetaToggle({ shopId, initial }: { shopId: string; initial: boolean }) {
+export function BetaToggle({ shopId, initial, autoStaff = false }: { shopId: string; initial: boolean; autoStaff?: boolean }) {
   const router = useRouter();
   const [on, setOn] = useState(initial);
   const [busy, setBusy] = useState(false);
@@ -24,7 +24,11 @@ export function BetaToggle({ shopId, initial }: { shopId: string; initial: boole
         <input type="checkbox" checked={on} disabled={busy} onChange={(e) => change(e.target.checked)} />
         🧪 テストユーザー
       </label>
-      <p className="text-xs text-slate-500">オンにすると、全体公開前の機能（アプリ内お知らせ・新商品メール）がこのお客様に表示されます。</p>
+      {autoStaff ? (
+        <p className="text-xs text-emerald-700">スタッフのメールアドレスで作られたショップのため、<b>自動でテストユーザー</b>です（チェック不要）。</p>
+      ) : (
+        <p className="text-xs text-slate-500">オンにすると、全体公開前の機能（アプリ内お知らせ・新商品メール）がこのお客様に表示されます。スタッフのメールアドレス（+別名可）で作ったショップは自動でテストユーザーになります。</p>
+      )}
     </section>
   );
 }

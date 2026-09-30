@@ -4,7 +4,7 @@ import { isAdmin, isSupplier } from "@/lib/auth";
 import { ShopNav } from "@/components/ShopNav";
 import { ReceiptEnforcer } from "@/components/ReceiptEnforcer";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { fetchBetaFlag, shopNoticesEnabled } from "@/lib/feature-flags";
+import { getNoticeAccess } from "@/lib/feature-flags";
 import { getUnreadCounts } from "@/lib/shop-notifications";
 
 export default async function ShopLayout({
@@ -31,11 +31,12 @@ export default async function ShopLayout({
     .maybeSingle();
 
   // お知らせ (テストユーザーのみ先行公開): 未読件数。失敗しても画面は出す
-  const noticesOn = !!shop && shopNoticesEnabled({ is_beta_tester: await fetchBetaFlag(supabase, shop.id) });
+  const access = shop ? await getNoticeAccess(shop.id) : null;
+  const noticesOn = !!access?.enabled;
   let unreadNotices = 0;
-  if (shop && noticesOn) {
+  if (shop && access?.enabled && access.startAt) {
     try {
-      const c = await getUnreadCounts(createAdminClient(), shop);
+      const c = await getUnreadCounts(createAdminClient(), shop, access.startAt);
       unreadNotices = c.general + c.personal;
     } catch (e) {
       console.error("[shop-layout] unread count failed:", e instanceof Error ? e.message : e);

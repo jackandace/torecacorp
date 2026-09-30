@@ -638,6 +638,14 @@ export type Database = {
         Args: Record<string, never>;
         Returns: number;
       };
+      shop_is_tester: {
+        Args: { p_shop_id: string };
+        Returns: boolean;
+      };
+      tester_shop_ids: {
+        Args: Record<string, never>;
+        Returns: { shop_id: string; reason: string }[];
+      };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

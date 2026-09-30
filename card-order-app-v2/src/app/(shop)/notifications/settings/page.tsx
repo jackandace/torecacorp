@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { fetchBetaFlag, shopNoticesEnabled } from "@/lib/feature-flags";
+import { getNoticeAccess } from "@/lib/feature-flags";
 import { getNoticePrefs } from "@/lib/notice-prefs";
 import { NoticePrefsForm } from "./NoticePrefsForm";
 
@@ -16,7 +16,7 @@ export default async function NoticeSettingsPage() {
   if (!user) redirect("/login");
   const { data: shop } = await supabase
     .from("shops").select("id, email").eq("user_id", user.id).is("deleted_at", null).maybeSingle();
-  if (!shop || !shopNoticesEnabled({ is_beta_tester: await fetchBetaFlag(supabase, shop.id) })) redirect("/notifications");
+  if (!shop || !(await getNoticeAccess(shop.id)).enabled) redirect("/notifications");
 
   const admin = createAdminClient();
   const [prefs, { data: titles }] = await Promise.all([

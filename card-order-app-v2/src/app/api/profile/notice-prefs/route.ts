@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { fetchBetaFlag, shopNoticesEnabled } from "@/lib/feature-flags";
+import { getNoticeAccess } from "@/lib/feature-flags";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +19,7 @@ export async function PUT(request: NextRequest) {
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   const { data: shop } = await supabase
     .from("shops").select("id").eq("user_id", user.id).is("deleted_at", null).maybeSingle();
-  if (!shop || !shopNoticesEnabled({ is_beta_tester: await fetchBetaFlag(supabase, shop.id) })) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  if (!shop || !(await getNoticeAccess(shop.id)).enabled) return NextResponse.json({ error: "forbidden" }, { status: 403 });
 
   let body: z.infer<typeof Schema>;
   try {

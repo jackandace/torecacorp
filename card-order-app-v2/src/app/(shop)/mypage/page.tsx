@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getNoticeAccess } from "@/lib/feature-flags";
 import { buildRankSettingsMap, amountToNextRank } from "@/lib/ranks";
 import { firstDayOfMonth, lastDayOfMonth } from "@/lib/dates";
 import { formatRate, formatYen } from "@/lib/rebate";
@@ -63,6 +64,8 @@ export default async function MyPage({ searchParams }: { searchParams: SearchPar
     .select("id", { count: "exact", head: true })
     .eq("shop_id", shop.id)
     .is("deleted_at", null);
+
+  const noticeAccess = await getNoticeAccess(shop.id);
 
   const monthlyAmount = monthlyOrders?.reduce((s, o) => s + (o.total_price ?? 0), 0) ?? 0;
 
@@ -159,6 +162,19 @@ export default async function MyPage({ searchParams }: { searchParams: SearchPar
           </div>
         )}
       </section>
+
+      {noticeAccess.enabled && (
+        <Link
+          href="/notifications/settings"
+          className="flex items-center justify-between gap-3 card p-4 hover:bg-slate-50 transition"
+        >
+          <div>
+            <p className="font-semibold">🔔 お知らせの受け取り設定</p>
+            <p className="text-xs text-slate-500 mt-0.5">新商品のお知らせを受け取るタイトル（ポケモン・ワンピース・ヴァイス など）と、新商品メールの受け取りを設定できます</p>
+          </div>
+          <span className="text-sm text-brand-600 whitespace-nowrap">設定する →</span>
+        </Link>
+      )}
 
       {(legacyCount ?? 0) > 0 && (
         <Link

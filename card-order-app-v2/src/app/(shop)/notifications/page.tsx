@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatJST } from "@/lib/dates";
 import { sanitizeHtml } from "@/lib/sanitize";
-import { fetchBetaFlag, shopNoticesEnabled } from "@/lib/feature-flags";
+import { getNoticeAccess, laterOf } from "@/lib/feature-flags";
 import { formatReleaseDate } from "@/lib/price-display";
 import {
   getGeneralFeed, getSeenAt, getUnreadCounts, markSeen, NEW_PRODUCT_WINDOW_DAYS, type NoticeTab,
@@ -39,17 +39,19 @@ export default async function NotificationsPage({ searchParams }: { searchParams
       </div>
     );
   }
-  if (!shopNoticesEnabled({ is_beta_tester: await fetchBetaFlag(supabase, shop.id) })) return <NotificationHistory shopId={shop.id} searchParams={searchParams} />;
+  const access = await getNoticeAccess(shop.id);
+  if (!access.enabled || !access.startAt) return <NotificationHistory shopId={shop.id} searchParams={searchParams} />;
+  const startAt = access.startAt;
 
   const admin = createAdminClient();
-  const [counts, seen] = await Promise.all([getUnreadCounts(admin, shop), getSeenAt(admin, shop)]);
+  const [counts, seen] = await Promise.all([getUnreadCounts(admin, shop, startAt), getSeenAt(admin, shop)]);
   const tab: NoticeTab =
     searchParams.tab === "personal" || searchParams.tab === "general"
       ? searchParams.tab
       : counts.general === 0 && counts.personal > 0 ? "personal" : "general";
 
   const page = Math.max(1, parseInt(searchParams.page ?? "1", 10) || 1);
-  const general = tab === "general" ? await getGeneralFeed(admin, shop) : [];
+  const general = tab === "general" ? await getGeneralFeed(admin, shop, startAt) : [];
   const personalRes = tab === "personal"
     ? await supabase
         .from("notifications")
@@ -64,7 +66,7 @@ export default async function NotificationsPage({ searchParams }: { searchParams
 
   // 開いたタブを既読にする (「NEW」表示は開く前の既読位置で判定)
   await markSeen(admin, shop.id, tab);
-  const seenBefore = seen[tab];
+  const seenBefore = laterOf(seen[tab], startAt);
 
   const tabLink = (t: NoticeTab, label: string, n: number) => (
     <Link

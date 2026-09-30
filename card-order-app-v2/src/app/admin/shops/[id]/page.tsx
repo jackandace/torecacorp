@@ -9,6 +9,8 @@ import { OathUpload } from "./OathUpload";
 import { BusinessDocUpload } from "./BusinessDocUpload";
 import { LegacyInvoiceUpload } from "./LegacyInvoiceUpload";
 import { BetaToggle } from "./BetaToggle";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { listTesterShops } from "@/lib/feature-flags";
 import { BUSINESS_TYPE_LABEL } from "@/constants/business";
 import { shopRefundAccount } from "@/lib/refund-account";
 
@@ -90,7 +92,7 @@ export default async function ShopDetailPage({ params }: { params: { id: string 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <ShopEditForm shop={shop} />
-          <BetaToggle shopId={shop.id} initial={!!shop.is_beta_tester} />
+          <BetaToggle shopId={shop.id} initial={!!shop.is_beta_tester} autoStaff={(await listTesterShops(createAdminClient())).get(shop.id) === "staff"} />
 
           <section className="card p-5">
             <h2 className="font-semibold mb-3">ランク変動履歴</h2>

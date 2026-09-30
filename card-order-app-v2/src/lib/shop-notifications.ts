@@ -10,6 +10,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, RankCode } from "@/types/database";
 import { filterProductsForShop } from "@/lib/product-visibility";
 import { getNoticePrefs, matchesTitlePref } from "@/lib/notice-prefs";
+import { laterOf } from "@/lib/feature-flags";
 
 export type NoticeTab = "general" | "personal";
 export const NEW_PRODUCT_WINDOW_DAYS = 30;
@@ -78,14 +79,18 @@ async function visibleNewProducts(admin: Sb, shop: ShopLite, since: string) {
   return visible.filter((p) => matchesTitlePref(prefs, p.title_group_id));
 }
 
-/** 全体へのお知らせ一覧 (新着商品 + 管理者のお知らせ、新しい順) */
-export async function getGeneralFeed(admin: Sb, shop: ShopLite): Promise<GeneralItem[]> {
-  const since = windowStart();
+/**
+ * 全体へのお知らせ一覧 (新着商品 + 管理者のお知らせ、新しい順)。
+ * startAt (お知らせ開始時刻) より前に公開された商品・投稿されたお知らせは一切出さない。
+ */
+export async function getGeneralFeed(admin: Sb, shop: ShopLite, startAt: string): Promise<GeneralItem[]> {
+  const since = laterOf(windowStart(), startAt);
   const [products, { data: anns }] = await Promise.all([
     visibleNewProducts(admin, shop, since),
     admin.from("announcements")
       .select("id, title, body, link_url, created_at")
       .is("deleted_at", null)
+      .gte("created_at", startAt)
       .order("created_at", { ascending: false })
       .limit(50),
   ]);
@@ -112,10 +117,11 @@ export async function getGeneralFeed(admin: Sb, shop: ShopLite): Promise<General
   return items.sort((a, b) => b.at.localeCompare(a.at));
 }
 
-/** タブ別の未読件数 */
-export async function getUnreadCounts(admin: Sb, shop: ShopLite): Promise<Record<NoticeTab, number>> {
-  const seen = await getSeenAt(admin, shop);
-  const generalSince = seen.general > windowStart() ? seen.general : windowStart();
+/** タブ別の未読件数 (開始時刻より前のものは数えない) */
+export async function getUnreadCounts(admin: Sb, shop: ShopLite, startAt: string): Promise<Record<NoticeTab, number>> {
+  const raw = await getSeenAt(admin, shop);
+  const seen = { general: laterOf(raw.general, startAt), personal: laterOf(raw.personal, startAt) };
+  const generalSince = laterOf(windowStart(), seen.general);
   const [products, { count: annCount }, { count: personalCount }] = await Promise.all([
     visibleNewProducts(admin, shop, generalSince),
     admin.from("announcements").select("id", { count: "exact", head: true })

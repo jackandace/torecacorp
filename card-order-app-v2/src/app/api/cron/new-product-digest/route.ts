@@ -3,7 +3,8 @@
 // 前回の対象時刻 (shop_notice_prefs.last_digest_at、初回は24時間前) 以降に公開された
 // 受付中の商品を、ショップごとに「見られる商品 (ランク・個別指名)」かつ「希望タイトル」で絞り、
 // 1通にまとめて送る。新商品が無いショップには送らない。
-// お知らせ機能の先行公開中は、テストユーザー (is_beta_tester) にだけ送る。
+// お知らせ機能の先行公開中は、テストユーザー (手動指定 + スタッフ別名) にだけ送る。
+// 【過去分は送らない】お知らせ開始時刻 (feature-flags) より前に公開された商品は、どのショップにも送らない。
 //
 // 認証: Vercel Cron (Authorization: Bearer CRON_SECRET) または管理者ログイン。
 // 管理者は ?shop=<id> で1社だけ、?dry=1 で送信せず内容だけ確認できる (動作確認用)。
@@ -12,7 +13,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { isAdmin } from "@/lib/auth";
 import { sendEmail } from "@/lib/email/resend";
-import { shopNoticesEnabled } from "@/lib/feature-flags";
+import { accessFor, laterOf, listTesterShops } from "@/lib/feature-flags";
 import { DEFAULT_PREFS, matchesTitlePref } from "@/lib/notice-prefs";
 import { isVisibleForShop, loadAccessIndex } from "@/lib/product-visibility";
 import { buildDigestEmail, type DigestProduct } from "@/lib/new-product-digest";
@@ -58,7 +59,13 @@ async function run(request: NextRequest) {
       .not("email", "is", null);
     if (onlyShop) shopQuery = shopQuery.eq("id", onlyShop);
     const { data: shopRows } = await shopQuery;
-    const shops = (shopRows ?? []).filter((s) => shopNoticesEnabled(s));
+    const testers = await listTesterShops(admin);
+    const startOf = new Map<string, string>();
+    for (const s of shopRows ?? []) {
+      const access = accessFor(testers.has(s.id));
+      if (access.enabled && access.startAt) startOf.set(s.id, access.startAt);
+    }
+    const shops = (shopRows ?? []).filter((s) => startOf.has(s.id));
 
     const { data: prefRows } = shops.length
       ? await admin.from("shop_notice_prefs").select("*").in("shop_id", shops.map((s) => s.id))
@@ -66,7 +73,8 @@ async function run(request: NextRequest) {
     const prefsBy = new Map((prefRows ?? []).map((p) => [p.shop_id, p]));
 
     // 全ショップ中で最も古い起点以降の公開商品をまとめて取得
-    const sinceOf = (shopId: string) => prefsBy.get(shopId)?.last_digest_at ?? dayAgo;
+    // 起点 = 前回の対象時刻 (初回は24時間前)。ただしお知らせ開始時刻より前には絶対に戻さない
+    const sinceOf = (shopId: string) => laterOf(prefsBy.get(shopId)?.last_digest_at ?? dayAgo, startOf.get(shopId));
     const earliest = shops.reduce((min, s) => (sinceOf(s.id) < min ? sinceOf(s.id) : min), dayAgo);
     const { data: productRows } = shops.length
       ? await admin
