@@ -9,6 +9,8 @@ import { getListedRate, formatRate, formatYen } from "@/lib/rebate";
 import { validateOrderQty, calcCartSubtotal } from "@/lib/orders";
 import { orderCutoffDate } from "@/lib/dates";
 import { DEPOSIT_RATE } from "@/lib/deposit";
+import { loadCart, saveCart, CART_EVENT, type StoredCartLine } from "@/lib/cart-storage";
+import { formatReleaseDate, retailPriceTaxIncluded } from "@/lib/price-display";
 
 interface CartItem {
   product: Product;
@@ -25,7 +27,7 @@ interface Props {
 }
 
 type CategoryFilter = "all" | ProductCategory;
-type SortKey = "deadline" | "price_asc" | "price_desc" | "newest";
+type SortKey = "deadline" | "release" | "price_asc" | "price_desc" | "newest";
 
 const CATEGORY_LABEL: Record<ProductCategory, string> = {
   pokemon:  "ポケモン",
@@ -35,6 +37,10 @@ const CATEGORY_LABEL: Record<ProductCategory, string> = {
 
 export function OrderForm({ products: initialProducts, shop, pendingByProduct = {} }: Props) {
   const [cart, setCart] = useState<CartItem[]>([]);
+  // 受付終了・在庫なし等で復元できなかったカート行 (理由を見せて削除してもらう)
+  const [unavailable, setUnavailable] = useState<{ line: StoredCartLine; reason: string }[]>([]);
+  const [cartLoaded, setCartLoaded] = useState(false);
+  const shopId = shop?.id ?? null;
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -100,6 +106,45 @@ export function OrderForm({ products: initialProducts, shop, pendingByProduct = 
     };
   }, []);
 
+  // 保存済みカートの復元: 最新の商品データと突き合わせ、数量チェックも通ったものだけ戻す
+  const restoreCart = () => {
+    if (!shopId) { setCartLoaded(true); return; }
+    const restored: CartItem[] = [];
+    const ng: { line: StoredCartLine; reason: string }[] = [];
+    for (const line of loadCart(shopId)) {
+      const product = products.find((p) => p.id === line.productId);
+      if (!product) { ng.push({ line, reason: "受付を終了したため発注できません" }); continue; }
+      const result = validateOrderQty({ product, orderUnit: line.unit, qty: line.qty, shopPendingBox: pendingByProduct[product.id] ?? 0 });
+      if (!result.ok) { ng.push({ line, reason: result.error ?? "数量を確認してください" }); continue; }
+      restored.push({ product, unit: line.unit, qty: line.qty, qtyInBox: result.qtyInBox });
+    }
+    setCart(restored);
+    setUnavailable(ng);
+    setCartLoaded(true);
+  };
+  useEffect(() => {
+    restoreCart();
+    // 詳細ページや別タブでカートが変わったら反映する
+    const onChange = () => restoreCart();
+    const onStorage = (e: StorageEvent) => { if (e.key?.startsWith("trecacorp_cart_v1:")) restoreCart(); };
+    window.addEventListener(CART_EVENT, onChange);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener(CART_EVENT, onChange);
+      window.removeEventListener("storage", onStorage);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shopId]);
+
+  // カートの変更を保存 (復元前に空で上書きしないよう cartLoaded 後のみ)
+  const persist = (items: CartItem[], ng = unavailable) => {
+    if (!shopId) return;
+    saveCart(shopId, [
+      ...items.map((c) => ({ productId: c.product.id, unit: c.unit, qty: c.qty, title: c.product.title })),
+      ...ng.map((u) => u.line),
+    ]);
+  };
+
   const subtotal = useMemo(
     () =>
       calcCartSubtotal(
@@ -156,6 +201,16 @@ export function OrderForm({ products: initialProducts, shop, pendingByProduct = 
           return cmp !== 0 ? cmp : a.title.localeCompare(b.title, "ja");
         });
         break;
+      case "release":
+        // 発売日の昇順 (未定は最後)。同日は商品名順
+        sorted.sort((a, b) => {
+          if (!a.release_date && !b.release_date) return a.title.localeCompare(b.title, "ja");
+          if (!a.release_date) return 1;
+          if (!b.release_date) return -1;
+          const cmp = a.release_date.localeCompare(b.release_date);
+          return cmp !== 0 ? cmp : a.title.localeCompare(b.title, "ja");
+        });
+        break;
       case "price_asc":
         sorted.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
         break;
@@ -196,14 +251,27 @@ export function OrderForm({ products: initialProducts, shop, pendingByProduct = 
       return;
     }
     setMessage(null);
-    setCart((prev) => [
-      ...prev.filter((c) => c.product.id !== product.id),
+    const next = [
+      ...cart.filter((c) => c.product.id !== product.id),
       { product, unit, qty: qtyRaw, qtyInBox: result.qtyInBox },
-    ]);
+    ];
+    const ng = unavailable.filter((u) => u.line.productId !== product.id);
+    setCart(next);
+    setUnavailable(ng);
+    if (cartLoaded) persist(next, ng);
   };
 
-  const removeItem = (productId: string) =>
-    setCart((prev) => prev.filter((c) => c.product.id !== productId));
+  const removeItem = (productId: string) => {
+    const next = cart.filter((c) => c.product.id !== productId);
+    setCart(next);
+    if (cartLoaded) persist(next);
+  };
+
+  const removeUnavailable = (productId: string) => {
+    const ng = unavailable.filter((u) => u.line.productId !== productId);
+    setUnavailable(ng);
+    persist(cart, ng);
+  };
 
   const handleSubmit = async () => {
     if (!consent) {
@@ -230,6 +298,8 @@ export function OrderForm({ products: initialProducts, shop, pendingByProduct = 
       });
       if (!res.ok) throw new Error(await res.text());
       setCart([]);
+      setUnavailable([]);
+      if (shopId) saveCart(shopId, []);
       setConsent(false);
       setConfirmOpen(false);
       setCompleteOpen(true); // 送信完了モーダルを表示
@@ -303,9 +373,10 @@ export function OrderForm({ products: initialProducts, shop, pendingByProduct = 
                 onChange={(e) => setSort(e.target.value as SortKey)}
               >
                 <option value="deadline">発注締切が近い順</option>
+                <option value="release">発売日が早い順</option>
                 <option value="newest">掲載が新しい順</option>
-                <option value="price_asc">定価が安い順</option>
-                <option value="price_desc">定価が高い順</option>
+                <option value="price_asc">価格が安い順</option>
+                <option value="price_desc">価格が高い順</option>
               </select>
             </div>
           </div>
@@ -343,8 +414,21 @@ export function OrderForm({ products: initialProducts, shop, pendingByProduct = 
       </div>
 
       {/* カート */}
-      <aside className="card p-5 h-fit lg:sticky lg:top-4 space-y-4">
+      <aside id="cart" className="card p-5 h-fit lg:sticky lg:top-4 space-y-4 scroll-mt-20">
         <h2 className="font-semibold">カート ({cart.length})</h2>
+        {unavailable.length > 0 && (
+          <ul className="space-y-2">
+            {unavailable.map((u) => (
+              <li key={u.line.productId} className="text-xs rounded border border-amber-300 bg-amber-50 px-2 py-1.5">
+                <div className="font-medium text-slate-700">{u.line.title}（{u.line.qty}{u.line.unit}）</div>
+                <div className="flex justify-between items-center gap-2 mt-0.5">
+                  <span className="text-amber-800">⚠ {u.reason}</span>
+                  <button type="button" className="text-red-600 hover:underline shrink-0" onClick={() => removeUnavailable(u.line.productId)}>削除</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
         {cart.length === 0 ? (
           <p className="text-sm text-slate-500">カートは空です</p>
         ) : (
@@ -603,7 +687,12 @@ function ProductCard({
             <p className="text-xs text-slate-500 mt-1">型番: {product.model_number}</p>
           )}
           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm">
-            <span>定価 <span className="font-medium">{formatYen(product.price ?? 0)}</span></span>
+            <span>
+              <span className="text-slate-500 text-xs">メーカー希望小売価格 </span>
+              <span className="font-medium">{retailPriceTaxIncluded(product.price) != null ? `${formatYen(retailPriceTaxIncluded(product.price)!)}(税込)` : "—"}</span>
+              {product.price ? <span className="text-xs text-slate-500">（税抜 {formatYen(product.price)}）</span> : null}
+            </span>
+            <span className="text-slate-600 text-xs self-center">発売日 {formatReleaseDate(product.release_date) ?? "未定"}</span>
             <span className="text-brand-700">案内掛け率 <span className="font-bold">{formatRate(listedRate)}</span></span>
           </div>
           {isCut ? (

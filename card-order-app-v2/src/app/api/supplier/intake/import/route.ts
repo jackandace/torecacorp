@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
     min_order_box: r.minOrderBox,
     flow_type: r.flowType,
     order_deadline: r.deadline,
-    ...(r.releaseDate ? { release_info: `発売日: ${r.releaseDate}` } : {}),
+    ...(r.releaseDate ? { release_info: `発売日: ${r.releaseDate}`, release_date: r.releaseDate } : {}),
     intake_note: r.note,
     supplier_id: ctx.supplierId,
     is_visible: false,

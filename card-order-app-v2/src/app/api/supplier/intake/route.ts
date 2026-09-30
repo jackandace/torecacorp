@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
       flow_type: body.flowType ?? "haibun",
       order_deadline: body.orderDeadline ?? null,
       ...(releaseInfo ? { release_info: releaseInfo } : {}),
+      ...(body.releaseDate ? { release_date: body.releaseDate } : {}),
       intake_note: body.note || null,
       supplier_id: ctx.supplierId,
       is_visible: false,

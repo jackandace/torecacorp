@@ -8,6 +8,7 @@ import { ShopEditForm } from "./ShopEditForm";
 import { OathUpload } from "./OathUpload";
 import { BusinessDocUpload } from "./BusinessDocUpload";
 import { LegacyInvoiceUpload } from "./LegacyInvoiceUpload";
+import { BetaToggle } from "./BetaToggle";
 import { BUSINESS_TYPE_LABEL } from "@/constants/business";
 import { shopRefundAccount } from "@/lib/refund-account";
 
@@ -89,6 +90,7 @@ export default async function ShopDetailPage({ params }: { params: { id: string 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <ShopEditForm shop={shop} />
+          <BetaToggle shopId={shop.id} initial={!!shop.is_beta_tester} />
 
           <section className="card p-5">
             <h2 className="font-semibold mb-3">ランク変動履歴</h2>

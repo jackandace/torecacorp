@@ -24,6 +24,10 @@ type OrderWithProduct = Order & {
   products?: { title?: string | null; model_number?: string | null; image_url?: string | null } | null;
 };
 
+// 発注時点の商品名を優先 (商品が非公開・削除されると products の join は空になるため)
+const titleOf = (o: OrderWithProduct) => o.product_title ?? o.products?.title ?? "—";
+const modelOf = (o: OrderWithProduct) => o.product_model_number ?? o.products?.model_number ?? null;
+
 interface Props {
   orders: OrderWithProduct[];
   ordCount: number;
@@ -88,7 +92,7 @@ export function MyPageDataView(props: Props) {
           {props.orders.map((o) => (
             <button key={o.id} type="button" onClick={() => setOpenOrder(o)} className="card p-3 w-full text-left flex justify-between gap-3">
               <div className="min-w-0">
-                <div className="font-medium text-sm truncate">{o.products?.title ?? "—"}</div>
+                <div className="font-medium text-sm truncate">{titleOf(o)}</div>
                 <div className="text-xs text-slate-500 mt-0.5">{formatJST(o.created_at)} ・ {o.requested_qty}{o.order_unit}</div>
                 <div className="flex flex-wrap gap-1 mt-1"><OrderStatusBadge status={o.status} /><ShippingStatusBadge status={o.shipping_status} /></div>
               </div>
@@ -124,9 +128,9 @@ export function MyPageDataView(props: Props) {
                 <tr key={o.id} className="border-t border-slate-100 hover:bg-slate-50 cursor-pointer" onClick={() => setOpenOrder(o)}>
                   <td className="px-3 py-2 text-xs whitespace-nowrap">{formatJST(o.created_at)}</td>
                   <td className="px-3 py-2">
-                    <div>{o.products?.title ?? "—"}</div>
-                    {o.products?.model_number && (
-                      <div className="text-xs text-slate-500">{o.products.model_number}</div>
+                    <div>{titleOf(o)}</div>
+                    {modelOf(o) && (
+                      <div className="text-xs text-slate-500">{modelOf(o)}</div>
                     )}
                   </td>
                   <td className="px-3 py-2 text-right whitespace-nowrap">{o.requested_qty}{o.order_unit}</td>
@@ -307,7 +311,7 @@ function OrderDetail({ order }: { order: OrderWithProduct }) {
       </div>
       <dl className="grid grid-cols-3 gap-y-2 text-sm">
         <dt className="text-slate-500">商品</dt>
-        <dd className="col-span-2">{order.products?.title ?? "—"}{order.products?.model_number ? ` (${order.products.model_number})` : ""}</dd>
+        <dd className="col-span-2">{titleOf(order)}{modelOf(order) ? ` (${modelOf(order)})` : ""}</dd>
         <dt className="text-slate-500">発注日時</dt>
         <dd className="col-span-2">{formatJST(order.created_at)}</dd>
         <dt className="text-slate-500">希望数量</dt>

@@ -31,6 +31,7 @@ export function ProductEditForm({ product, suppliers }: { product: Product; supp
   const [minRank, setMinRank] = useState<RankCode | "">(product.min_rank ?? "");
   const [janCode, setJanCode] = useState(product.jan_code ?? "");
   const [releaseInfo, setReleaseInfo] = useState(product.release_info ?? "");
+  const [releaseDate, setReleaseDate] = useState(product.release_date ?? "");
   const [cartonDelivery, setCartonDelivery] = useState(product.carton_delivery ?? false);
   const [masterCartonBox, setMasterCartonBox] = useState(product.master_carton_box ?? 0);
   const [notes, setNotes] = useState(product.notes ?? "");
@@ -96,6 +97,8 @@ export function ProductEditForm({ product, suppliers }: { product: Product; supp
           minRank: minRank || null,
           janCode: janCode || null,
           releaseInfo: releaseInfo || null,
+          // 発売日は変更したときだけ送る (未設定のまま保存しても他の項目の保存に影響させない)
+          ...(releaseDate !== (product.release_date ?? "") ? { releaseDate: releaseDate || null } : {}),
           cartonDelivery,
           masterCartonBox: masterCartonBox > 0 ? masterCartonBox : null,
           notes: notes || null,
@@ -297,6 +300,10 @@ export function ProductEditForm({ product, suppliers }: { product: Product; supp
             value={orderDeadline}
             onChange={(e) => setOrderDeadline(e.target.value)}
           />
+        </div>
+        <div>
+          <label className="block text-xs text-slate-600 mb-1">発売日 (ショップに表示・空欄は「未定」)</label>
+          <input className="input" type="date" value={releaseDate} onChange={(e) => setReleaseDate(e.target.value)} />
         </div>
         <div>
           <label className="block text-xs text-slate-600 mb-1">最低表示ランク (再配分品の限定公開)</label>

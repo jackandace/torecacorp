@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LogoutButton } from "@/components/LogoutButton";
+import { CART_EVENT, loadCart } from "@/lib/cart-storage";
 
 /** アイコン (24px, currentColor) */
 const I = {
@@ -24,32 +25,72 @@ const I = {
   ),
 };
 
-// PC 上部ナビ / ドロワー共通のリンク
-const LINKS = [
-  { href: "/order", label: "発注" },
-  { href: "/mypage", label: "マイページ" },
-  { href: "/inquiries", label: "お問い合わせ" },
-  { href: "/faq", label: "FAQ" },
-  { href: "/notifications", label: "通知" },
-  { href: "/manual", label: "マニュアル" },
-  { href: "/profile", label: "プロフィール" },
-];
+// PC 上部ナビ / ドロワー共通のリンク (お知らせ機能の公開状況で「通知」の表記を切り替える)
+function linksFor(noticesEnabled: boolean) {
+  return [
+    { href: "/order", label: "発注" },
+    { href: "/mypage", label: "マイページ" },
+    { href: "/inquiries", label: "お問い合わせ" },
+    { href: "/faq", label: "FAQ" },
+    { href: "/notifications", label: noticesEnabled ? "お知らせ" : "通知" },
+    { href: "/manual", label: "マニュアル" },
+    { href: "/profile", label: "プロフィール" },
+  ];
+}
 
 // モバイル下部の固定タブ (よく使う4つ)
-const TABS = [
-  { href: "/order", label: "発注", icon: I.cart },
-  { href: "/mypage", label: "マイページ", icon: I.user },
-  { href: "/inquiries", label: "お問い合わせ", icon: I.chat },
-  { href: "/notifications", label: "通知", icon: I.bell },
-];
+function tabsFor(noticesEnabled: boolean) {
+  return [
+    { href: "/order", label: "発注", icon: I.cart },
+    { href: "/mypage", label: "マイページ", icon: I.user },
+    { href: "/inquiries", label: "お問い合わせ", icon: I.chat },
+    { href: "/notifications", label: noticesEnabled ? "お知らせ" : "通知", icon: I.bell },
+  ];
+}
+
+function Badge({ n }: { n: number }) {
+  if (n <= 0) return null;
+  return (
+    <span className="absolute -top-1.5 -right-2.5 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] leading-[18px] text-center font-bold">
+      {n > 99 ? "99+" : n}
+    </span>
+  );
+}
+
+/** ブラウザに保存されたカートの件数 (発注ページ・商品詳細・別タブの変更に追従) */
+function useCartCount(shopId: string | null): number {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!shopId) return;
+    const update = () => setCount(loadCart(shopId).length);
+    update();
+    window.addEventListener(CART_EVENT, update);
+    window.addEventListener("storage", update);
+    return () => {
+      window.removeEventListener(CART_EVENT, update);
+      window.removeEventListener("storage", update);
+    };
+  }, [shopId]);
+  return count;
+}
 
 function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function ShopNav() {
+export function ShopNav({ shopId = null, noticesEnabled = false, unreadNotices = 0 }: {
+  shopId?: string | null;
+  noticesEnabled?: boolean;
+  unreadNotices?: number;
+}) {
   const pathname = usePathname() ?? "";
   const [open, setOpen] = useState(false);
+  const cartCount = useCartCount(shopId);
+  const LINKS = linksFor(noticesEnabled);
+  const TABS = tabsFor(noticesEnabled);
+  // お知らせを開いている間は既読になるためバッジを出さない
+  const unread = noticesEnabled && !pathname.startsWith("/notifications") ? unreadNotices : 0;
+  const badgeFor = (href: string) => (href === "/notifications" ? unread : 0);
 
   // ページ遷移でドロワーを閉じる
   useEffect(() => { setOpen(false); }, [pathname]);
@@ -63,14 +104,24 @@ export function ShopNav() {
           {/* PC: 横並びナビ */}
           <nav className="hidden md:flex items-center gap-5 text-sm">
             {LINKS.map((l) => (
-              <Link key={l.href} href={l.href} className={`hover:text-brand-600 ${isActive(pathname, l.href) ? "text-brand-600 font-semibold" : ""}`}>
+              <Link key={l.href} href={l.href} className={`relative hover:text-brand-600 ${isActive(pathname, l.href) ? "text-brand-600 font-semibold" : ""}`}>
                 {l.label}
+                <Badge n={badgeFor(l.href)} />
               </Link>
             ))}
+            <Link href="/order#cart" className="relative p-1 hover:text-brand-600" aria-label={`カート (${cartCount}件)`}>
+              {I.cart}
+              <Badge n={cartCount} />
+            </Link>
             <LogoutButton />
           </nav>
 
-          {/* モバイル: ハンバーガー */}
+          {/* モバイル: カート + ハンバーガー */}
+          <div className="md:hidden flex items-center gap-1">
+          <Link href="/order#cart" className="relative p-2 rounded hover:bg-slate-100" aria-label={`カート (${cartCount}件)`}>
+            {I.cart}
+            <Badge n={cartCount} />
+          </Link>
           <button
             type="button"
             className="md:hidden p-2 -mr-2 rounded hover:bg-slate-100"
@@ -80,6 +131,7 @@ export function ShopNav() {
           >
             {I.menu}
           </button>
+          </div>
         </div>
       </header>
 
@@ -119,7 +171,7 @@ export function ShopNav() {
             const active = isActive(pathname, t.href);
             return (
               <Link key={t.href} href={t.href} className={`flex flex-col items-center gap-0.5 py-2 text-[10px] ${active ? "text-brand-600" : "text-slate-500"}`}>
-                {t.icon}
+                <span className="relative">{t.icon}<Badge n={badgeFor(t.href)} /></span>
                 <span className="leading-none">{t.label}</span>
               </Link>
             );

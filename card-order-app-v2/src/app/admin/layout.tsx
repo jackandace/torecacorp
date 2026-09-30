@@ -14,6 +14,7 @@ const NAV = [
   { href: "/admin/billing",          label: "請求・入金" },
   { href: "/admin/rebate",           label: "リベート管理", superOnly: true },
   { href: "/admin/notifications",    label: "通知センター" },
+  { href: "/admin/notices",          label: "お知らせ管理" },
   { href: "/admin/surveys",          label: "販売店調査" },
   { href: "/admin/reports",          label: "レポート" },
   { href: "/admin/forecast",         label: "売上予測" },

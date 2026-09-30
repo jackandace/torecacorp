@@ -29,8 +29,8 @@ export async function GET(_request: NextRequest) {
     const p = (o as { products?: { title?: string | null; model_number?: string | null } | null }).products;
     return {
       created_at: o.created_at,
-      product_title: p?.title ?? "",
-      model_number: p?.model_number ?? "",
+      product_title: o.product_title ?? p?.title ?? "",
+      model_number: o.product_model_number ?? p?.model_number ?? "",
       order_unit: o.order_unit,
       requested_qty: o.requested_qty,
       requested_qty_box: o.requested_qty_box ?? "",

@@ -65,6 +65,8 @@ export type Shop = {
   refund_account_number: string | null;
   refund_account_holder: string | null;
   refund_account_updated_at: string | null;
+  // 035: 先行公開機能 (お知らせ) を見せるテストユーザー
+  is_beta_tester: boolean;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -89,6 +91,47 @@ export type ShopChangeRequest = {
 };
 
 // ショップ登録の審査申込み (033・公開フォーム /apply 経由)
+/** 全体向けのお知らせ (管理者が投稿・全ショップに表示) */
+export type Announcement = {
+  id: string;
+  title: string;
+  body: string | null;
+  link_url: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+};
+
+/** タイトル (ポケモン / ワンピース / ヴァイス …) の括り。キーワードで series を分類 */
+export type ProductTitle = {
+  id: string;
+  name: string;
+  keywords: string[];
+  sort_order: number;
+  auto_created: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+/** お知らせの受け取り設定 (新商品メール・希望タイトル) */
+export type ShopNoticePrefs = {
+  shop_id: string;
+  email_enabled: boolean;
+  title_mode: "all" | "selected";
+  title_ids: string[];
+  last_digest_at: string | null;
+  updated_at: string;
+};
+
+/** ショップごとのお知らせ既読位置 (タブ別) */
+export type ShopNotificationRead = {
+  shop_id: string;
+  general_seen_at: string;
+  personal_seen_at: string;
+  updated_at: string;
+};
+
 export type LegacyPurchaseShipmentStatus = "shipped" | "unshipped";
 /** 卸アプリ運用以前の購入履歴 (参照専用。ランク・請求・累計額の計算には使わない) */
 export type LegacyPurchase = {
@@ -198,6 +241,9 @@ export type Product = {
   // 商品詳細 (022)
   jan_code: string | null;          // JANコード
   release_info: string | null;      // メーカー発売情報の詳細
+  release_date: string | null;      // 035: 発売日 (YYYY-MM-DD)
+  published_at: string | null;      // 035: 初めてショップに公開された日時 (新着判定)
+  title_group_id: string | null;    // 035: タイトル (ポケモン / ワンピース …) の括り
   carton_delivery: boolean;         // カートン単位で届くか
   master_carton_box: number | null; // マスターカートンあたりのBOX数
   // 問屋紐付け (026)
@@ -285,6 +331,9 @@ export type Order = {
   received_at: string | null;               // ショップ受領確認日
   receipt_token: string | null;
   receipt_token_expires_at: string | null;
+  // 035: 発注時点の商品名・型番 (商品を非公開にしても履歴に残す)
+  product_title: string | null;
+  product_model_number: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -551,6 +600,14 @@ export type Database = {
       ]>;
       faqs:                   TableDef<Faq>;
       registration_invites:   TableDef<RegistrationInvite>;
+      announcements:          TableDef<Announcement>;
+      product_titles:         TableDef<ProductTitle>;
+      shop_notice_prefs:      TableDef<ShopNoticePrefs, [
+        FK<"shop_notice_prefs_shop_id_fkey", ["shop_id"], "shops", ["id"]>,
+      ]>;
+      shop_notification_reads: TableDef<ShopNotificationRead, [
+        FK<"shop_notification_reads_shop_id_fkey", ["shop_id"], "shops", ["id"]>,
+      ]>;
       legacy_purchases:       TableDef<LegacyPurchase, [
         FK<"legacy_purchases_shop_id_fkey", ["shop_id"], "shops", ["id"]>,
         FK<"legacy_purchases_legacy_invoice_id_fkey", ["legacy_invoice_id"], "invoices", ["id"]>,
@@ -576,6 +633,10 @@ export type Database = {
       archive_old_data: {
         Args: { months_old?: number };
         Returns: Record<string, unknown>;
+      };
+      reassign_product_titles: {
+        Args: Record<string, never>;
+        Returns: number;
       };
     };
     Enums: { [_ in never]: never };

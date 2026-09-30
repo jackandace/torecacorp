@@ -9,6 +9,8 @@ import { orderCutoffDate, todayISOInJST } from "@/lib/dates";
 import { DEPOSIT_RATE } from "@/lib/deposit";
 import type { Shop } from "@/types/database";
 import { ProductOrderPanel } from "./ProductOrderPanel";
+import { fetchShopPendingBox } from "@/lib/pending-orders";
+import { formatReleaseDate, retailPriceTaxIncluded } from "@/lib/price-display";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +39,7 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
   }
 
   const listedRate = getListedRate(product, (shop as Shop) ?? null);
+  const pendingMap = shop ? await fetchShopPendingBox(supabase, shop.id, [product.id]) : new Map<string, number>();
   const isCut = product.flow_type === "cut";
   const available = (product.planned_qty ?? 0) - product.ordered_qty;
   const soldOut = !isCut && available <= 0;
@@ -69,8 +72,21 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
             <p className="text-sm text-slate-500">{product.full_name}</p>
           )}
 
+          <dl className="rounded-lg border border-rose-200 bg-rose-50/40 px-3 py-2 text-sm space-y-1">
+            <div className="flex items-center gap-2">
+              <dt className="text-[11px] font-semibold text-white bg-slate-700 rounded px-1.5 py-0.5 shrink-0">発売日</dt>
+              <dd className="font-semibold">{formatReleaseDate(product.release_date) ?? "未定"}</dd>
+            </div>
+            <div className="flex items-center gap-2">
+              <dt className="text-[11px] font-semibold text-white bg-slate-700 rounded px-1.5 py-0.5 shrink-0">メーカー希望小売価格</dt>
+              <dd>
+                <span className="font-semibold">{retailPriceTaxIncluded(product.price) != null ? `${formatYen(retailPriceTaxIncluded(product.price)!)}(税込)` : "—"}</span>
+                {product.price ? <span className="text-xs text-slate-500 ml-1">税抜 {formatYen(product.price)}</span> : null}
+              </dd>
+            </div>
+          </dl>
+
           <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm pt-1">
-            <span>定価 <span className="font-semibold">{formatYen(product.price ?? 0)}</span></span>
             <span className="text-brand-700">案内掛け率 <span className="font-bold">{formatRate(listedRate)}</span></span>
           </div>
 
@@ -85,11 +101,11 @@ export default async function ProductDetailPage({ params }: { params: { id: stri
           )}
 
           <ProductOrderPanel
-            productId={product.id}
+            product={product}
+            shopId={shop?.id ?? null}
+            shopPendingBox={pendingMap.get(product.id) ?? 0}
             unitPrice={product.price ?? 0}
             listedRate={listedRate}
-            minOrderBox={product.min_order_box}
-            ctToBox={product.ct_to_box}
             orderable={orderable}
             disabledReason={
               expired ? "受付を終了しました" : soldOut ? "在庫切れです" : product.status !== "受付中" ? "現在受付を停止しています" : null

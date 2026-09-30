@@ -1,76 +1,54 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import type { OrderUnit } from "@/types/database";
+import Link from "next/link";
+import type { OrderUnit, Product } from "@/types/database";
 import { formatYen } from "@/lib/rebate";
+import { validateOrderQty } from "@/lib/orders";
+import { upsertCartLine } from "@/lib/cart-storage";
 
+type PanelProduct = Pick<Product, "id" | "title" | "min_order_box" | "ct_to_box" | "planned_qty" | "ordered_qty" | "status" | "flow_type">;
+
+/** 商品詳細ページの発注パネル: 発注ページと共通のカートに追加する */
 export function ProductOrderPanel({
-  productId,
+  product,
+  shopId,
+  shopPendingBox,
   unitPrice,
   listedRate,
-  minOrderBox,
-  ctToBox,
   orderable,
   disabledReason,
 }: {
-  productId: string;
+  product: PanelProduct;
+  shopId: string | null;
+  shopPendingBox: number;
   unitPrice: number;
   listedRate: number;
-  minOrderBox: number;
-  ctToBox: number;
   orderable: boolean;
   disabledReason: string | null;
 }) {
-  const router = useRouter();
-  const defaultBox = Math.max(minOrderBox, ctToBox);
+  const defaultBox = Math.max(product.min_order_box, product.ct_to_box);
   const [unit, setUnit] = useState<OrderUnit>("BOX");
   const [qty, setQty] = useState<number>(defaultBox);
-  const [agree, setAgree] = useState(false);
-  const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+  const [added, setAdded] = useState<number | null>(null); // 追加後のカート件数
 
   const changeUnit = (u: OrderUnit) => {
     setUnit(u);
     setQty(u === "CT" ? 1 : defaultBox);
+    setAdded(null);
   };
 
-  const qtyInBox = unit === "CT" ? qty * ctToBox : qty;
+  const qtyInBox = unit === "CT" ? qty * product.ct_to_box : qty;
   const subtotal = Math.floor(unitPrice * qtyInBox * listedRate);
 
-  const submit = async () => {
-    if (!agree) { setMessage("免責事項・キャンセル不可への同意が必要です"); return; }
-    setBusy(true); setMessage(null);
-    try {
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: [{ productId, unit, qty }],
-          consentAgreedAt: new Date().toISOString(),
-        }),
-      });
-      const json = await res.json();
-      if (!res.ok || (json.created?.length ?? 0) === 0) {
-        throw new Error(json.errors?.[0]?.error ?? json.error ?? "発注に失敗しました");
-      }
-      setDone(true);
-      router.refresh();
-    } catch (e) {
-      setMessage(`失敗: ${e instanceof Error ? e.message : "不明"}`);
-    } finally { setBusy(false); }
+  const addToCart = () => {
+    setMessage(null);
+    if (!shopId) { setMessage("ショップ情報が見つかりません"); return; }
+    const result = validateOrderQty({ product, orderUnit: unit, qty, shopPendingBox });
+    if (!result.ok) { setMessage(result.error ?? "数量を確認してください"); return; }
+    setAdded(upsertCartLine(shopId, { productId: product.id, unit, qty, title: product.title }));
   };
-
-  if (done) {
-    return (
-      <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-        <p className="font-semibold">発注リクエストを受け付けました。</p>
-        <p className="mt-1">担当より追ってご連絡いたします。</p>
-        <a href="/mypage" className="btn-secondary text-xs mt-3 inline-flex">マイページで確認</a>
-      </div>
-    );
-  }
 
   if (!orderable) {
     return (
@@ -100,7 +78,7 @@ export function ProductOrderPanel({
           min={1}
           className="input w-24 text-right"
           value={qty}
-          onChange={(e) => setQty(parseInt(e.target.value || "0", 10))}
+          onChange={(e) => { setQty(parseInt(e.target.value || "0", 10)); setAdded(null); }}
         />
         <span className="text-sm text-slate-500">= {qtyInBox} BOX</span>
       </div>
@@ -109,15 +87,20 @@ export function ProductOrderPanel({
         概算小計（税抜・リベート前） <span className="font-semibold text-slate-900">{formatYen(subtotal)}</span>
       </div>
 
-      <label className="flex items-start gap-2 text-xs text-slate-600">
-        <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="mt-0.5" />
-        <span>発注内容・免責事項に同意します（発注後のキャンセルはできません）</span>
-      </label>
-
-      <button type="button" className="btn-primary w-full" disabled={busy || !agree} onClick={submit}>
-        {busy ? "送信中…" : "この商品を発注する"}
+      <button type="button" className="btn-primary w-full" onClick={addToCart}>
+        カートに追加
       </button>
       {message && <p className="text-xs text-rose-600">{message}</p>}
+      {added !== null && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800 space-y-2">
+          <p className="font-semibold">カートに追加しました（カート {added} 件）</p>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/order#cart" className="btn-primary text-xs">カートを見て発注する</Link>
+            <Link href="/order" className="btn-secondary text-xs">ほかの商品を見る</Link>
+          </div>
+          <p className="text-xs text-emerald-700">発注の確定（同意・送信）は発注ページのカートから行います。</p>
+        </div>
+      )}
     </div>
   );
 }

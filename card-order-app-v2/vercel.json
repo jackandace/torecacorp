@@ -1,5 +1,7 @@
 {
-  "regions": ["hnd1"],
+  "regions": [
+    "hnd1"
+  ],
   "crons": [
     {
       "path": "/api/cron/rank-update",
@@ -20,6 +22,10 @@
     {
       "path": "/api/cron/forecast-snapshot",
       "schedule": "5 0 1 * *"
+    },
+    {
+      "path": "/api/cron/new-product-digest",
+      "schedule": "0 1 * * *"
     }
   ]
 }
