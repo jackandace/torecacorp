@@ -23,7 +23,7 @@ export interface SendInput {
 
 export async function sendEmail(input: SendInput) {
   const from = process.env.RESEND_FROM_EMAIL ?? "noreply@torecacorp.jp";
-  return getClient().emails.send({
+  const result = await getClient().emails.send({
     from,
     to: input.to,
     subject: input.subject,
@@ -31,4 +31,10 @@ export async function sendEmail(input: SendInput) {
     text: input.text,
     replyTo: input.replyTo,
   });
+  // Resend は送信失敗 (宛先不正・レート制限・認証エラー等) でも例外を投げず { error } を返す。
+  // 呼び出し側の try/catch で「失敗」として記録・再送判定できるよう、ここで例外にする。
+  if (result.error) {
+    throw new Error(`メール送信に失敗しました (${result.error.name}): ${result.error.message}`);
+  }
+  return result;
 }
